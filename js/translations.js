@@ -60,12 +60,7 @@ const translations = {
                 period: "2022 - Presente",
                 description: "Colaboración en el desarrollo de soluciones web completas. Implementación de frontend con Angular y backend con Java. Integración de sistemas y APIs de terceros."
             },
-            skyblue: {
-                title: "Software Developer",
-                company: "Skyblue Project",
-                period: "2021 - Presente",
-                description: "Desarrollo y mantenimiento de la plataforma Skyblue. Implementación de nuevas funcionalidades y optimización de rendimiento. Colaboración en el diseño de la arquitectura del sistema."
-            }
+
         },
         
         // Skills Section
@@ -88,12 +83,7 @@ const translations = {
                 description: "Plataforma integral de gestión empresarial desarrollada con Spring Boot y Angular. Incluye módulos de CRM, inventario y reportes en tiempo real.",
                 link: "Ver Proyecto"
             },
-            skyblue: {
-                title: "Skyblue Platform",
-                type: "Aplicación Cloud",
-                description: "Sistema web completo desplegado en Heroku. Desarrollo de backend con Java y frontend interactivo. Arquitectura escalable y responsive.",
-                link: "Ver Demo"
-            },
+
             quarkus: {
                 title: "Quarkus Microservices",
                 type: "Arquitectura de Microservicios",

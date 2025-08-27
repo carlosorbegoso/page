@@ -1,0 +1,138 @@
+/* ===== VARIABLES CSS ===== */
+:root {
+    /* Colores del tema claro */
+    --primary-color: #2C5AA0;
+    --secondary-color: #FF6B35;
+    --accent-color: #4285F4;
+    --text-color: #2C3E50;
+    --bg-color: #F8F9FA;
+    --white: #FFFFFF;
+    --card-bg: #FFFFFF;
+    --border-color: #E0E0E0;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --java-red: #ED8B00;
+    --spring-green: #6DB33F;
+    
+    /* Transiciones suaves */
+    --transition: all 0.3s ease;
+}
+
+/* ===== TEMA OSCURO ===== */
+[data-theme="dark"] {
+    --primary-color: #64B5F6;
+    --secondary-color: #FF8A65;
+    --accent-color: #81C784;
+    --text-color: #E0E0E0;
+    --bg-color: #121212;
+    --white: #1E1E1E;
+    --card-bg: #2D2D2D;
+    --border-color: #404040;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --gradient: linear-gradient(135deg, #424242 0%, #616161 100%);
+}
+
+/* ===== MEJORAS DE LEGIBILIDAD PARA TEMA OSCURO ===== */
+[data-theme="dark"] body {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .section-title {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .category-title {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .job-title {
+    color: var(--primary-color);
+}
+
+[data-theme="dark"] .company {
+    color: var(--secondary-color);
+}
+
+[data-theme="dark"] .project-title {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .project-type {
+    color: var(--secondary-color);
+}
+
+[data-theme="dark"] .about-text h3 {
+    color: var(--primary-color);
+}
+
+[data-theme="dark"] .highlight-text {
+    color: var(--secondary-color);
+}
+
+[data-theme="dark"] .stat-number {
+    color: var(--primary-color);
+}
+
+[data-theme="dark"] .stat-label {
+    color: #B0B0B0;
+}
+
+[data-theme="dark"] .job-period {
+    color: #B0B0B0;
+}
+
+/* ===== RESET Y ESTILOS BASE ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background: var(--bg-color);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s ease;
+}
+
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ===== SECCIONES GENERALES ===== */
+section {
+    padding: 5rem 0;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 3rem;
+    color: var(--text-color);
+}

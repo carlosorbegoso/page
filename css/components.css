@@ -11,6 +11,28 @@ header {
     transition: var(--transition);
 }
 
+/* ===== BOTÓN DE CAMBIO DE IDIOMA ===== */
+.language-toggle {
+    background: var(--accent-color);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-right: 1rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.language-toggle:hover {
+    background: var(--secondary-color);
+    transform: scale(1.1);
+}
+
 /* ===== BOTÓN DE CAMBIO DE TEMA ===== */
 .theme-toggle {
     background: var(--primary-color);

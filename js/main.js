@@ -1,5 +1,9 @@
 // ===== FUNCIONALIDAD PRINCIPAL DEL PORTFOLIO =====
 
+// Importar módulos
+import i18n from './i18n.js';
+import UIEnhancements from './enhancements.js';
+
 // Theme toggle functionality
 const themeToggle = document.getElementById('themeToggle');
 const themeIcon = document.getElementById('themeIcon');
@@ -30,6 +34,13 @@ function updateThemeIcon(theme) {
         themeToggle.title = 'Cambiar a tema oscuro';
     }
 }
+
+// Language toggle functionality
+const languageToggle = document.getElementById('languageToggle');
+
+languageToggle.addEventListener('click', () => {
+    i18n.toggleLanguage();
+});
 
 // Mobile menu toggle
 const menuToggle = document.getElementById('menuToggle');

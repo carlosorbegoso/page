@@ -81,6 +81,35 @@
     color: #B0B0B0;
 }
 
+/* ===== MEJORAS ESPECÍFICAS PARA CONTACTO EN TEMA OSCURO ===== */
+[data-theme="dark"] .contact {
+    background: var(--primary-color);
+}
+
+[data-theme="dark"] .contact::before {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    opacity: 0.95;
+}
+
+[data-theme="dark"] .contact-item {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+[data-theme="dark"] .contact-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .social-links a {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+[data-theme="dark"] .social-links a:hover {
+    background: rgba(255, 255, 255, 0.35);
+    border-color: var(--secondary-color);
+}
+
 /* ===== RESET Y ESTILOS BASE ===== */
 * {
     margin: 0;

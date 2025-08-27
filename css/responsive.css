@@ -117,6 +117,27 @@
         flex-wrap: wrap;
         gap: 1rem;
     }
+
+    /* Contact section responsive */
+    .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .contact-item {
+        padding: 1rem;
+    }
+
+    .contact-item i {
+        font-size: 2rem;
+    }
+
+    .social-links a {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+        padding: 0.8rem;
+    }
 }
 
 /* Móviles pequeños */

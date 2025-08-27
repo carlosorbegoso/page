@@ -1,4 +1,4 @@
-/* ===== ESTILOS PARA EFECTOS 3D ===== */
+/* ===== ESTILOS PARA EFECTOS 3D SIMPLIFICADOS ===== */
 
 /* ===== CURSOR 3D PERSONALIZADO ===== */
 .cursor-3d {
@@ -53,20 +53,18 @@
     opacity: 0.8;
 }
 
-/* ===== CARDS 3D ===== */
+/* ===== CARDS 3D SIMPLIFICADAS ===== */
 .project-card,
 .skill-category,
 .timeline-item {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    transform-style: preserve-3d;
-    perspective: 1000px;
 }
 
 .project-card:hover,
 .skill-category:hover,
 .timeline-item:hover {
-    transform: translateY(-10px) rotateX(5deg) rotateY(5deg);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
 /* ===== EFECTOS DE PARTÍCULAS ===== */
@@ -85,165 +83,30 @@
     z-index: 1;
 }
 
-/* ===== ANIMACIONES 3D ===== */
-@keyframes float3D {
-    0%, 100% {
-        transform: translateY(0px) rotateX(0deg) rotateY(0deg);
+/* ===== ANIMACIONES SIMPLES ===== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
     }
-    33% {
-        transform: translateY(-10px) rotateX(5deg) rotateY(5deg);
-    }
-    66% {
-        transform: translateY(5px) rotateX(-3deg) rotateY(-3deg);
-    }
-}
-
-@keyframes rotate3D {
-    0% {
-        transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
-    }
-    100% {
-        transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg);
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
-@keyframes pulse3D {
-    0%, 100% {
-        transform: scale3d(1, 1, 1);
-    }
-    50% {
-        transform: scale3d(1.05, 1.05, 1.05);
-    }
-}
-
-/* ===== EFECTOS ESPECIALES ===== */
 .hero-content {
     position: relative;
     z-index: 2;
-    animation: float3D 6s ease-in-out infinite;
+    animation: fadeInUp 1s ease;
 }
 
-.tech-badge {
-    animation: pulse3D 2s ease-in-out infinite;
-    animation-delay: calc(var(--i, 0) * 0.2s);
-}
-
-.tech-badge:nth-child(1) { --i: 0; }
-.tech-badge:nth-child(2) { --i: 1; }
-.tech-badge:nth-child(3) { --i: 2; }
-.tech-badge:nth-child(4) { --i: 3; }
-
-/* ===== EFECTOS DE PROFUNDIDAD ===== */
-.profile-card {
-    transform-style: preserve-3d;
-    transition: transform 0.5s ease;
-}
-
-.profile-card:hover {
-    transform: rotateY(15deg) rotateX(5deg);
-}
-
-.profile-image {
-    transform: translateZ(20px);
-}
-
-.profile-stats {
-    transform: translateZ(10px);
-}
-
-/* ===== EFECTOS DE TIMELINE 3D ===== */
-.timeline-item {
-    transform-style: preserve-3d;
-    transition: all 0.4s ease;
-}
-
-.timeline-item::before {
-    transform: translateZ(10px);
-}
-
-.timeline-item::after {
-    transform: translateZ(5px);
-}
-
-.timeline-item:hover {
-    transform: translateX(10px) translateZ(20px);
-}
-
-/* ===== EFECTOS DE SKILLS 3D ===== */
-.skill-category {
-    transform-style: preserve-3d;
-    transition: all 0.4s ease;
-}
-
-.skill-category:hover {
-    transform: translateY(-5px) rotateY(10deg);
-}
-
-.category-title {
-    transform: translateZ(15px);
-}
-
-.skill-list {
-    transform: translateZ(10px);
-}
-
-/* ===== EFECTOS DE PROYECTOS 3D ===== */
-.project-card {
-    transform-style: preserve-3d;
-}
-
-.project-header {
-    transform: translateZ(25px);
-}
-
-.project-content {
-    transform: translateZ(15px);
-}
-
-.project-tech {
-    transform: translateZ(10px);
-}
-
-/* ===== EFECTOS DE CONTACTO 3D ===== */
-.contact-item {
-    transform-style: preserve-3d;
-    transition: all 0.4s ease;
-}
-
-.contact-item:hover {
-    transform: translateY(-5px) rotateX(10deg);
-}
-
-.contact-item i {
-    transform: translateZ(20px);
-}
-
-.contact-item h3 {
-    transform: translateZ(15px);
-}
-
-.contact-item p {
-    transform: translateZ(10px);
-}
-
-/* ===== RESPONSIVE PARA EFECTOS 3D ===== */
+/* ===== RESPONSIVE SIMPLIFICADO ===== */
 @media (max-width: 768px) {
     .cursor-3d {
         display: none; /* Ocultar en móviles */
     }
     
-    .project-card:hover,
-    .skill-category:hover,
-    .timeline-item:hover {
-        transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
-    }
-    
-    .hero-content {
-        animation: none; /* Desactivar animaciones complejas en móviles */
-    }
-}
-
-@media (max-width: 480px) {
     .project-card:hover,
     .skill-category:hover,
     .timeline-item:hover {
@@ -260,23 +123,10 @@
     border-color: var(--secondary-color);
 }
 
-[data-theme="dark"] .project-card:hover,
-[data-theme="dark"] .skill-category:hover,
-[data-theme="dark"] .timeline-item:hover {
-    box-shadow: 0 20px 40px rgba(255, 255, 255, 0.1);
-}
-
 /* ===== EFECTOS DE REDUCCIÓN DE MOVIMIENTO ===== */
 @media (prefers-reduced-motion: reduce) {
-    .hero-content,
-    .tech-badge,
-    .project-card,
-    .skill-category,
-    .timeline-item,
-    .contact-item {
+    .hero-content {
         animation: none;
-        transition: none;
-        transform: none;
     }
     
     .cursor-3d {
@@ -284,30 +134,10 @@
     }
 }
 
-/* ===== EFECTOS DE ALTO CONTRASTE ===== */
-@media (prefers-contrast: high) {
-    .cursor-dot {
-        background: #ffffff;
-        border: 2px solid #000000;
-    }
-    
-    .cursor-trail {
-        border-color: #ffffff;
-        background: rgba(0, 0, 0, 0.8);
-    }
-}
-
-/* ===== EFECTOS DE IMPRESIÓN ===== */
+/* ===== IMPRESIÓN ===== */
 @media print {
     .cursor-3d,
     .hero canvas {
         display: none;
-    }
-    
-    .project-card,
-    .skill-category,
-    .timeline-item {
-        transform: none;
-        box-shadow: none;
     }
 }

@@ -5,6 +5,9 @@ import i18n from './i18n.js';
 import UIEnhancements from './enhancements.js';
 import ThreeEffects from './three-effects.js';
 import ScrollIndicator from './scroll-indicator.js';
+import StarParticles from './star-particles.js';
+import AnimatedGradients from './animated-gradients.js';
+import SectionTransitions from './section-transitions.js';
 
 // Theme toggle functionality
 const themeToggle = document.getElementById('themeToggle');
@@ -253,15 +256,45 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Three.js effects could not be initialized:', error);
         }
         
-        // Initialize scroll indicator
+                // Initialize scroll indicator
         try {
             const scrollIndicator = new ScrollIndicator();
             console.log('Scroll indicator initialized successfully! 📍');
         } catch (error) {
             console.log('Scroll indicator could not be initialized:', error);
         }
-    
-    console.log('Portfolio loaded successfully! 🚀');
+        
+        // Initialize professional animations
+        try {
+            // Star particles system
+            const starCanvas = document.createElement('canvas');
+            starCanvas.className = 'hero-background-canvas';
+            const heroSection = document.querySelector('.hero');
+            if (heroSection) {
+                heroSection.appendChild(starCanvas);
+                const starParticles = new StarParticles(starCanvas);
+                console.log('Star particles system initialized successfully! ⭐');
+            }
+            
+            // Animated gradients system
+            const gradientCanvas = document.createElement('canvas');
+            gradientCanvas.className = 'hero-background-canvas';
+            gradientCanvas.style.zIndex = '0';
+            if (heroSection) {
+                heroSection.insertBefore(gradientCanvas, heroSection.firstChild);
+                const animatedGradients = new AnimatedGradients(gradientCanvas);
+                console.log('Animated gradients system initialized successfully! 🎨');
+            }
+            
+            // Section transitions system
+            const sectionTransitions = new SectionTransitions();
+            console.log('Section transitions system initialized successfully! ✨');
+            
+        } catch (error) {
+            console.log('Professional animations could not be initialized:', error);
+        }
+        
+        console.log('Portfolio loaded successfully! 🚀');
 });
 
 // ===== MEJORAS DE ACCESIBILIDAD =====

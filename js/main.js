@@ -3,6 +3,7 @@
 // Importar módulos
 import i18n from './i18n.js';
 import UIEnhancements from './enhancements.js';
+import ThreeEffects from './three-effects.js';
 
 // Theme toggle functionality
 const themeToggle = document.getElementById('themeToggle');
@@ -234,6 +235,21 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initial reveal check
     revealOnScroll();
+    
+    // Initialize 3D effects
+    try {
+        const threeEffects = new ThreeEffects();
+        console.log('Three.js effects initialized successfully! 🎨');
+        
+        // Activar efectos adicionales después de un delay
+        setTimeout(() => {
+            threeEffects.createCursorEffect();
+            threeEffects.create3DCards();
+            threeEffects.createWaveEffect();
+        }, 1000);
+    } catch (error) {
+        console.log('Three.js effects could not be initialized:', error);
+    }
     
     console.log('Portfolio loaded successfully! 🚀');
 });

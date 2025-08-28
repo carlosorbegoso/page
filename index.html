@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/utilities.css">
     <link rel="stylesheet" href="css/sections.css">
+    <link rel="stylesheet" href="css/progress-bar.css">
     
     <!-- Three.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -93,44 +94,45 @@
         <!-- About Section -->
         <section id="about" class="about section section-bg">
             <div class="container">
-                <h2 class="section-title fade-in">Sobre mí</h2>
+                <h2 class="section-title fade-in">About Me</h2>
                 <div class="about-content">
                     <div class="fade-in">
                         <div class="profile-card card card-hover">
                             <div class="profile-image">
-                                <span>CO</span>
+                                <img src="assets/images/profile.jpeg" alt="Carlos Orbegoso - Backend Developer" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <span style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; color: white; font-size: 4rem; font-weight: bold;">CO</span>
                             </div>
                             <h3>Carlos Orbegoso</h3>
-                            <p>Backend Developer apasionado por Java y tecnologías modernas</p>
+                            <p>Backend Developer passionate about Java and modern technologies</p>
                             
                             <div class="profile-stats">
                                 <div class="stat-item">
                                     <div class="stat-number" data-target="5">0</div>
-                                    <div class="stat-label">Años de Experiencia</div>
+                                    <div class="stat-label">Years of Experience</div>
                                 </div>
                                 <div class="stat-item">
                                     <div class="stat-number" data-target="50">0</div>
-                                    <div class="stat-label">Proyectos Completados</div>
+                                    <div class="stat-label">Projects Completed</div>
                                 </div>
                                 <div class="stat-item">
                                     <div class="stat-number" data-target="15">0</div>
-                                    <div class="stat-label">Tecnologías Dominadas</div>
+                                    <div class="stat-label">Technologies Mastered</div>
                                 </div>
                                 <div class="stat-item">
                                     <div class="stat-number" data-target="100">0</div>
-                                    <div class="stat-label">% Satisfacción Cliente</div>
+                                    <div class="stat-label">Client Satisfaction</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
                     <div class="about-text fade-in">
-                        <h3>Desarrollador Backend Especializado</h3>
-                        <p>Soy un desarrollador backend con más de 5 años de experiencia en el desarrollo de aplicaciones empresariales robustas y escalables. Mi pasión por Java y las tecnologías modernas me ha llevado a especializarme en Spring Boot, Quarkus y arquitecturas de microservicios.</p>
+                        <h3>Backend Developer Specialized</h3>
+                        <p>I am a backend developer with more than 5 years of experience in developing robust and scalable enterprise applications. My passion for Java and modern technologies has led me to specialize in Spring Boot, Quarkus and microservice architectures.</p>
                         
-                        <p>He trabajado en proyectos de alta complejidad para empresas líderes como Tata Consultancy Services, donde he desarrollado soluciones que manejan millones de transacciones diarias. Mi experiencia incluye la implementación de patrones de diseño, testing automatizado y despliegue en entornos cloud.</p>
+                        <p>I have worked on high-complexity projects for leading companies like Tata Consultancy Services, where I have developed solutions that handle millions of daily transactions. My experience includes implementing design patterns, automated testing and deployment in cloud environments.</p>
                         
-                        <p>Me mantengo constantemente actualizado con las últimas tendencias en desarrollo backend, participando en conferencias técnicas y contribuyendo a proyectos open source. Mi objetivo es crear código limpio, mantenible y que genere valor real para los usuarios finales.</p>
+                        <p>I constantly keep myself updated with the latest trends in backend development, participating in technical conferences and contributing to open source projects. My goal is to create clean, maintainable code that generates real value for end users.</p>
                     </div>
                 </div>
             </div>
@@ -139,13 +141,13 @@
         <!-- Experience Section -->
         <section id="experience" class="experience section section-bg">
             <div class="container">
-                <h2 class="section-title fade-in">Experiencia Profesional</h2>
+                <h2 class="section-title fade-in">Professional Experience</h2>
                 <div class="experience-timeline">
                     <div class="timeline-item fade-in">
                         <div class="job-title">Backend Developer</div>
                         <div class="company">Tata Consultancy Services</div>
-                        <div class="job-period">2020 - Presente</div>
-                        <p>Desarrollo de aplicaciones empresariales utilizando Java, Spring Boot y Quarkus. Implementación de arquitecturas de microservicios en entornos cloud. Colaboración en proyectos de migración legacy a tecnologías modernas.</p>
+                        <div class="job-period">2020 - Present</div>
+                        <p>Development of enterprise applications using Java, Spring Boot and Quarkus. Implementation of microservice architectures in cloud environments. Collaboration in legacy migration projects to modern technologies.</p>
                         <div class="project-tech">
                             <span class="tech-tag">Java 11/17</span>
                             <span class="tech-tag">Spring Boot</span>
@@ -160,7 +162,7 @@
                         <div class="job-title">Java Developer</div>
                         <div class="company">Baufest</div>
                         <div class="job-period">2018 - 2020</div>
-                        <p>Desarrollo de aplicaciones Java empresariales utilizando Spring Framework y tecnologías web. Participación en proyectos de desarrollo full-stack y mantenimiento de sistemas legacy. Colaboración en equipos ágiles para entrega de soluciones de calidad.</p>
+                        <p>Development of Java enterprise applications using Spring Framework and web technologies. Participation in full-stack development projects and legacy system maintenance. Collaboration in agile teams for quality solution delivery.</p>
                         <div class="project-tech">
                             <span class="tech-tag">Java 8</span>
                             <span class="tech-tag">Spring Framework</span>
@@ -173,9 +175,9 @@
                     
                     <div class="timeline-item fade-in">
                         <div class="job-title">Full Stack Developer</div>
-                        <div class="company">Sysarp (Colaboración)</div>
-                        <div class="job-period">2022 - Presente</div>
-                        <p>Colaboración en el desarrollo de soluciones web completas. Implementación de frontend con Angular y backend con Java. Integración de sistemas y APIs de terceros.</p>
+                        <div class="company">Sysarp (Collaboration)</div>
+                        <div class="job-period">2022 - Present</div>
+                        <p>Collaboration in the development of complete web solutions. Frontend implementation with Angular and backend with Java. Integration of third-party systems and APIs.</p>
                         <div class="project-tech">
                             <span class="tech-tag">Angular</span>
                             <span class="tech-tag">Java</span>
@@ -191,10 +193,10 @@
         <!-- Skills Section -->
         <section id="skills" class="skills section section-bg">
             <div class="container">
-                <h2 class="section-title fade-in">Habilidades Técnicas</h2>
+                <h2 class="section-title fade-in">Technical Skills</h2>
                 <div class="skills-grid">
                     <div class="skill-category card card-hover fade-in">
-                        <h3 class="category-title">Lenguajes de Programación</h3>
+                        <h3 class="category-title">Programming Languages</h3>
                         <div class="skill-item">
                             <span class="skill-name">Java</span>
                             <div class="skill-level">
@@ -222,7 +224,7 @@
                     </div>
                     
                     <div class="skill-category card card-hover fade-in">
-                        <h3 class="category-title">Frameworks & Librerías</h3>
+                        <h3 class="category-title">Frameworks & Libraries</h3>
                         <div class="skill-item">
                             <span class="skill-name">Spring Boot</span>
                             <div class="skill-level">
@@ -250,7 +252,7 @@
                     </div>
                     
                     <div class="skill-category card card-hover fade-in">
-                        <h3 class="category-title">Herramientas & DevOps</h3>
+                        <h3 class="category-title">Tools & DevOps</h3>
                         <div class="skill-item">
                             <span class="skill-name">Docker</span>
                             <div class="skill-level">
@@ -278,7 +280,7 @@
                     </div>
                     
                     <div class="skill-category card card-hover fade-in">
-                        <h3 class="category-title">Bases de Datos</h3>
+                        <h3 class="category-title">Databases</h3>
                         <div class="skill-item">
                             <span class="skill-name">PostgreSQL</span>
                             <div class="skill-level">
@@ -311,16 +313,16 @@
         <!-- Projects Section -->
         <section id="projects" class="projects section section-bg">
             <div class="container">
-                <h2 class="section-title fade-in">Proyectos Destacados</h2>
+                <h2 class="section-title fade-in">Featured Projects</h2>
                 <div class="projects-grid">
                     <div class="project-card card card-hover fade-in">
                         <div class="project-image">
                             <i class="fas fa-chart-line"></i>
                         </div>
                         <div class="project-content">
-                            <h3 class="project-title">Sistema de Trading Automatizado</h3>
+                            <h3 class="project-title">Automated Trading System</h3>
                             <div class="project-type">Backend - Java</div>
-                            <p>Desarrollo de un sistema de trading automatizado utilizando Java, Spring Boot y algoritmos de machine learning. Integración con APIs de exchanges y análisis de datos en tiempo real.</p>
+                            <p>Development of an automated trading system using Java, Spring Boot and machine learning algorithms. Integration with cryptocurrency exchanges and real-time data analysis.</p>
                             <div class="project-tech">
                                 <span class="tech-tag">Java 17</span>
                                 <span class="tech-tag">Spring Boot</span>
@@ -336,9 +338,9 @@
                             <i class="fas fa-shopping-cart"></i>
                         </div>
                         <div class="project-content">
-                            <h3 class="project-title">E-commerce Microservicios</h3>
+                            <h3 class="project-title">E-commerce Microservices</h3>
                             <div class="project-type">Full Stack - Java + Angular</div>
-                            <p>Arquitectura de microservicios para plataforma de e-commerce. Implementación de servicios de usuario, catálogo, carrito y pagos con Spring Boot y Angular.</p>
+                            <p>Microservices architecture for e-commerce platform. Implementation of user, catalog, cart, and payment services with Spring Boot and Angular.</p>
                             <div class="project-tech">
                                 <span class="tech-tag">Java 11</span>
                                 <span class="tech-tag">Spring Cloud</span>
@@ -354,9 +356,9 @@
                             <i class="fas fa-hospital"></i>
                         </div>
                         <div class="project-content">
-                            <h3 class="project-title">Sistema de Gestión Hospitalaria</h3>
+                            <h3 class="project-title">Hospital Management System</h3>
                             <div class="project-type">Backend - Quarkus</div>
-                            <p>Sistema integral de gestión hospitalaria con Quarkus. Módulos de pacientes, médicos, citas y farmacia. API REST con documentación OpenAPI y testing automatizado.</p>
+                            <p>Comprehensive hospital management system with Quarkus. Modules for patients, doctors, appointments, and pharmacy. REST API with OpenAPI documentation and automated testing.</p>
                             <div class="project-tech">
                                 <span class="tech-tag">Quarkus</span>
                                 <span class="tech-tag">PostgreSQL</span>
@@ -373,8 +375,8 @@
         <!-- Contact Section -->
         <section id="contact" class="contact section section-bg">
             <div class="container">
-                <h2 class="section-title fade-in">¡Conectemos!</h2>
-                <p class="fade-in">¿Tienes un proyecto backend desafiante? ¿Quieres colaborar en Java o Quarkus? ¡Me encantaría conversar contigo!</p>
+                <h2 class="section-title fade-in">Let's Connect!</h2>
+                <p class="fade-in">Are you looking for a challenging backend project? Do you want to collaborate on Java or Quarkus? I'd love to chat with you!</p>
                 
                 <div class="contact-grid">
                     <div class="contact-item card card-hover fade-in">
@@ -423,7 +425,7 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 Carlos Orbegoso. Todos los derechos reservados.</p>
+            <p>&copy; 2024 Carlos Orbegoso. All rights reserved.</p>
         </div>
     </footer>
 

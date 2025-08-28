@@ -519,3 +519,72 @@ a:hover {
         box-shadow: none;
     }
 }
+
+/* ===== BOTÓN DE CAMBIO DE IDIOMA ===== */
+.language-toggle {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary); /* Changed from --text-color to --text-primary */
+    padding: 0.5rem;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.language-toggle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 50%;
+}
+
+.language-toggle:hover::before {
+    opacity: 0.1;
+}
+
+.language-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 5px 15px rgba(100, 181, 246, 0.3);
+    border-color: var(--primary-color);
+}
+
+.language-toggle:active {
+    transform: scale(0.95);
+}
+
+.language-toggle i {
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    transition: all 0.3s ease;
+    z-index: 2;
+    position: relative;
+}
+
+.language-toggle:hover i {
+    color: var(--secondary-color);
+    transform: rotate(15deg);
+}
+
+/* Animación de cambio de idioma */
+.language-toggle.changing {
+    animation: languageChange 0.6s ease;
+}
+
+@keyframes languageChange {
+    0% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.2) rotate(180deg); }
+    100% { transform: scale(1) rotate(360deg); }
+}

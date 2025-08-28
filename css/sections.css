@@ -106,6 +106,7 @@
     text-align: center;
 }
 
+/* ===== FOTO DE PERFIL RESTAURADA ===== */
 .profile-image {
     width: 160px;
     height: 160px;
@@ -165,6 +166,12 @@
     object-fit: cover;
     border-radius: 50%;
     transition: all 0.3s ease;
+    z-index: 2;
+    position: relative;
+}
+
+.profile-image img:hover {
+    transform: scale(1.05);
 }
 
 .profile-image span {
@@ -180,6 +187,7 @@
     font-size: 3.5rem;
     font-weight: bold;
     color: white;
+    z-index: 1;
 }
 
 .profile-card h3 {
@@ -264,95 +272,111 @@
     line-height: 1.8;
 }
 
-/* ===== EXPERIENCE TIMELINE ===== */
+/* ===== EXPERIENCE TIMELINE - DISEÑO LIMPIO Y ELEGANTE ===== */
 .experience-timeline {
     position: relative;
-    padding-left: 3rem;
+    padding-left: 0;
     z-index: 150;
-}
-
-.experience-timeline::before {
-    content: '';
-    position: absolute;
-    left: 1.5rem;
-    top: 0;
-    width: 4px;
-    height: 100%;
-    background: linear-gradient(180deg, 
-        var(--accent-color) 0%, 
-        var(--primary-color) 50%, 
-        var(--secondary-color) 100%);
-    border-radius: 2px;
-    z-index: 1;
-    box-shadow: 
-        0 0 20px var(--accent-color),
-        0 0 40px rgba(255, 107, 53, 0.3);
-    animation: timelineGlow 3s ease-in-out infinite;
-}
-
-@keyframes timelineGlow {
-    0%, 100% { 
-        box-shadow: 
-            0 0 20px var(--accent-color),
-            0 0 40px rgba(255, 107, 53, 0.3);
-    }
-    50% { 
-        box-shadow: 
-            0 0 30px var(--primary-color),
-            0 0 60px rgba(44, 90, 160, 0.5);
-    }
 }
 
 .timeline-item {
     position: relative;
-    margin-bottom: 4rem;
-    padding: 3rem;
+    margin-bottom: 3rem;
+    padding: 2.5rem;
+    background: linear-gradient(135deg, 
+        var(--card-bg) 0%, 
+        rgba(255, 255, 255, 0.02) 100%);
+    border-radius: 20px;
+    border: 1px solid rgba(100, 181, 246, 0.1);
+    box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.1),
+        0 5px 15px rgba(100, 181, 246, 0.1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
 }
 
 .timeline-item::before {
     content: '';
     position: absolute;
-    left: -3.5rem;
-    top: 2.5rem;
-    width: 1.8rem;
-    height: 1.8rem;
-    background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
-    border-radius: 50%;
-    border: 6px solid var(--card-bg);
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    transform: scaleX(0);
+    transition: transform 0.6s ease;
+}
+
+.timeline-item:hover::before {
+    transform: scaleX(1);
+}
+
+.timeline-item:hover {
+    transform: translateY(-8px);
     box-shadow: 
-        0 0 0 10px var(--bg-color),
-        0 0 30px var(--accent-color);
-    z-index: 2;
+        0 20px 40px rgba(0, 0, 0, 0.15),
+        0 10px 25px rgba(100, 181, 246, 0.2);
+    border-color: var(--primary-color);
+}
+
+.job-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--text-primary), var(--primary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.company {
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.job-period {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    padding: 0.3rem 1rem;
+    background: rgba(100, 181, 246, 0.1);
+    border-radius: 15px;
+    display: inline-block;
+    border: 1px solid rgba(100, 181, 246, 0.2);
+}
+
+.timeline-item p {
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+    font-size: 1.05rem;
+}
+
+.project-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+}
+
+.tech-tag {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 0.5rem 1.2rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
     transition: all 0.3s ease;
-    animation: timelinePulse 2s ease-in-out infinite;
+    box-shadow: 0 4px 15px rgba(100, 181, 246, 0.3);
+    border: none;
 }
 
-@keyframes timelinePulse {
-    0%, 100% { 
-        box-shadow: 
-            0 0 0 10px var(--bg-color),
-            0 0 30px var(--accent-color);
-        transform: scale(1);
-    }
-    50% { 
-        box-shadow: 
-            0 0 0 12px var(--bg-color),
-            0 0 50px var(--primary-color);
-        transform: scale(1.2);
-    }
-}
-
-.timeline-item::after {
-    content: '';
-    position: absolute;
-    left: -3.5rem;
-    top: 4.3rem;
-    width: 4px;
-    height: calc(100% + 2rem);
-    background: linear-gradient(180deg, 
-        var(--accent-color) 0%, 
-        rgba(255, 107, 53, 0.4) 100%);
-    z-index: 1;
+.tech-tag:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(100, 181, 246, 0.4);
 }
 
 /* ===== SKILLS ===== */

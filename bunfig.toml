@@ -1,0 +1,13 @@
+[dev]
+port = 3000
+hostname = "localhost"
+entrypoints = ["src/scripts/main.js"]
+
+[build]
+target = "browser"
+outdir = "dist"
+entrypoints = ["src/scripts/main.js"]
+
+[serve]
+public_dir = "."
+entrypoint = "src/scripts/main.js"

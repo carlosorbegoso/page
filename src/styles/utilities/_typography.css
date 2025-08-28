@@ -1,0 +1,214 @@
+/* ===== ESTILOS DE TIPOGRAFÍA ===== */
+
+/* ===== TIPOGRAFÍA PREMIUM ===== */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', 'Poppins', serif;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+}
+
+h1 { 
+    font-size: 4rem; 
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary-color) 50%, var(--secondary-color) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+h2 { 
+    font-size: 3rem; 
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+h3 { 
+    font-size: 2.4rem; 
+    font-weight: 600;
+}
+
+h4 { 
+    font-size: 1.9rem; 
+    font-weight: 600;
+}
+
+h5 { 
+    font-size: 1.5rem; 
+    font-weight: 500;
+}
+
+h6 { 
+    font-size: 1.3rem; 
+    font-weight: 500;
+}
+
+p {
+    margin-bottom: 1.5rem;
+    line-height: 1.8;
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+}
+
+/* ===== TIPOGRAFÍA ESPECIAL ===== */
+.role {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+}
+
+.company {
+    font-size: 1.2rem;
+    color: var(--accent-color);
+    font-weight: 500;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+}
+
+.job-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.8rem;
+    background: linear-gradient(135deg, var(--text-primary), var(--primary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.01em;
+}
+
+.category-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 2.5rem;
+    text-align: center;
+    color: var(--primary-color);
+    position: relative;
+}
+
+.category-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    border-radius: 2px;
+}
+
+.project-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 1.2rem;
+    color: var(--text-primary);
+    background: linear-gradient(135deg, var(--text-primary), var(--primary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ===== TIPOGRAFÍA DE ESTADÍSTICAS ===== */
+.stat-number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ===== TIPOGRAFÍA DE ENLACES ===== */
+a {
+    color: inherit;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+a:hover {
+    color: var(--primary-color);
+}
+
+/* ===== TIPOGRAFÍA DE LISTAS ===== */
+ul, ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* ===== TIPOGRAFÍA DE CÓDIGO ===== */
+code {
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(100, 181, 246, 0.1);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: var(--primary-color);
+}
+
+pre {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--card-bg);
+    padding: 1rem;
+    border-radius: var(--border-radius-sm);
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+}
+
+/* ===== TIPOGRAFÍA DE CITAS ===== */
+blockquote {
+    font-style: italic;
+    border-left: 4px solid var(--primary-color);
+    padding-left: 1rem;
+    margin: 2rem 0;
+    color: var(--text-secondary);
+}
+
+/* ===== TIPOGRAFÍA RESPONSIVE ===== */
+@media (max-width: 768px) {
+    h1 { font-size: 2.8rem; }
+    h2 { font-size: 2.5rem; }
+    h3 { font-size: 2rem; }
+    h4 { font-size: 1.6rem; }
+    h5 { font-size: 1.3rem; }
+    h6 { font-size: 1.1rem; }
+    
+    .role { font-size: 1.3rem; }
+    .company { font-size: 1.1rem; }
+    .job-title { font-size: 1.5rem; }
+    .category-title { font-size: 1.8rem; }
+    .project-title { font-size: 1.6rem; }
+}
+
+@media (max-width: 480px) {
+    h1 { font-size: 2.2rem; }
+    h2 { font-size: 2rem; }
+    h3 { font-size: 1.8rem; }
+    h4 { font-size: 1.5rem; }
+    h5 { font-size: 1.2rem; }
+    h6 { font-size: 1rem; }
+    
+    .role { font-size: 1.1rem; }
+    .company { font-size: 1rem; }
+    .job-title { font-size: 1.3rem; }
+    .category-title { font-size: 1.6rem; }
+    .project-title { font-size: 1.4rem; }
+}

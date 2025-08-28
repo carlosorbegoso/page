@@ -1,234 +1,161 @@
-# 🚀 Portfolio Profesional con Sistema de Constelaciones Avanzado
+# Carlos Orbegoso - Portfolio
 
-Un portfolio web moderno y profesional con efectos visuales avanzados, sistema de constelaciones interactivo y UI/UX de última generación.
+Portfolio profesional de Carlos Orbegoso - Backend Developer & Java Specialist
 
-## ✨ Características Principales
+## 🚀 Tecnologías
 
-### 🌟 Sistema de Constelaciones Avanzado
-- **Efectos 3D interactivos** con Three.js
-- **Estrellas dinámicas** que responden al movimiento del mouse
-- **Nebulosas y clusters** para ambiente espacial
-- **Ondas de energía** cuando se activan secciones
-- **Animaciones fluidas** y optimizadas para rendimiento
+- **Frontend**: Vanilla JavaScript (ES6+)
+- **Estilos**: CSS3 con arquitectura modular
+- **Runtime**: Bun (JavaScript runtime moderno y rápido)
+- **Efectos**: Three.js para efectos visuales 3D
+- **Responsive**: Mobile-first design
 
-### 🎨 UI/UX Profesional
-- **Diseño moderno** con gradientes y efectos visuales
-- **Animaciones suaves** y transiciones elegantes
-- **Responsive design** para todos los dispositivos
-- **Sistema de temas** claro/oscuro
-- **Indicador de scroll** con colores dinámicos
+## 📋 Requisitos
 
-### 🖱️ Cursor Personalizado Avanzado
-- **Efectos de estrella fugaz** al mover el mouse
-- **Partículas interactivas** y ondas de energía
-- **Animaciones fluidas** y efectos de hover
-- **Optimizado para rendimiento** con WebGL
+- **Bun**: >= 1.0.0
+- **Node.js**: >= 18.0.0 (opcional, para compatibilidad)
 
-### 📱 Secciones del Portfolio
-- **Hero Section** con animaciones de entrada
-- **Sobre Mí** con estadísticas animadas
-- **Experiencia Profesional** con timeline interactivo
-- **Habilidades** con barras de progreso animadas
-- **Proyectos** con cards interactivos
-- **Contacto** con efectos de glassmorphism
+## 🛠️ Instalación
 
-## 🛠️ Tecnologías Utilizadas
+1. **Instalar Bun** (si no lo tienes):
+   ```bash
+   # macOS / Linux
+   curl -fsSL https://bun.sh/install | bash
+   
+   # Windows (con WSL)
+   curl -fsSL https://bun.sh/install | bash
+   
+   # Con npm
+   npm install -g bun
+   ```
 
-- **Frontend**: HTML5, CSS3, JavaScript ES6+
-- **3D Graphics**: Three.js con WebGL
-- **Animaciones**: CSS3 + JavaScript personalizado
-- **Responsive**: CSS Grid, Flexbox, Media Queries
-- **Performance**: Optimización de WebGL, lazy loading
+2. **Clonar el repositorio**:
+   ```bash
+   git clone <tu-repo>
+   cd portafolio/page
+   ```
 
-## 🚀 Instalación y Uso
+3. **Instalar dependencias**:
+   ```bash
+   bun install
+   ```
 
-### Requisitos
-- Navegador moderno con soporte para WebGL
-- Servidor web local (para desarrollo)
+## 🚀 Desarrollo
 
-### Pasos de Instalación
-1. Clona el repositorio
-2. Abre `index.html` en tu navegador
-3. ¡Disfruta del portfolio!
-
-### Desarrollo
+### Iniciar servidor de desarrollo:
 ```bash
-# Instalar dependencias (si las hay)
-npm install
-
-# Ejecutar servidor local
-python -m http.server 8000
+bun run dev
 # o
-npx serve .
+bun run start
+```
+
+El servidor se iniciará en `http://localhost:3000`
+
+### Otros comandos:
+```bash
+# Construir para producción
+bun run build
+
+# Limpiar build
+bun run clean
+
+# Linting
+bun run lint
+bun run lint:fix
+
+# Formatear código
+bun run format
 ```
 
 ## 📁 Estructura del Proyecto
 
 ```
-portfolio/
-├── index.html                 # Página principal
-├── css/                      # Estilos CSS
-│   ├── main.css             # Variables y estilos base
-│   ├── sections.css         # Estilos de secciones
-│   ├── components.css       # Componentes reutilizables
-│   ├── portfolio-ui-ux.css  # UI/UX profesional
-│   ├── responsive.css       # Diseño responsive
-│   └── professional-*.css   # Estilos especializados
-├── js/                      # JavaScript
-│   ├── main.js             # Funcionalidad principal
-│   ├── constellation-system.js    # Sistema de constelaciones
-│   ├── three-cursor-system.js     # Cursor personalizado
-│   ├── scroll-indicator.js        # Indicador de scroll
-│   ├── main-portfolio-system.js   # Sistema principal
-│   └── i18n.js             # Internacionalización
-└── assets/                  # Recursos estáticos
-    └── images/              # Imágenes del portfolio
+src/
+├── scripts/          # JavaScript principal
+│   ├── config/      # Configuración
+│   ├── core/        # Lógica core
+│   ├── engines/     # Motores de efectos
+│   ├── managers/    # Gestores
+│   └── utils/       # Utilidades
+├── styles/          # CSS modular
+│   ├── base/        # Estilos base
+│   ├── components/  # Componentes
+│   ├── layouts/     # Layouts
+│   ├── themes/      # Temas
+│   └── utilities/   # Utilidades
+└── assets/          # Recursos estáticos
 ```
 
-## 🌟 Sistema de Constelaciones
+## 🌟 Características
 
-### Características Técnicas
-- **Renderizado WebGL** optimizado para rendimiento
-- **Partículas dinámicas** con física realista
-- **Efectos de iluminación** y sombras
-- **Animaciones 60fps** con requestAnimationFrame
-- **Gestión de memoria** automática
+- **Diseño Responsive**: Mobile-first approach
+- **Temas**: Claro/Oscuro con persistencia
+- **Idiomas**: Español/Inglés
+- **Efectos Visuales**: Three.js y animaciones CSS
+- **Performance**: Lazy loading y optimizaciones
+- **Accesibilidad**: ARIA labels y navegación por teclado
 
-### Configuración
-```javascript
-// Inicializar sistema de constelaciones
-const constellationSystem = new ConstellationSystem();
+## 🔧 Configuración
 
-// Configurar efectos personalizados
-constellationSystem.setIntensity(0.8);
-constellationSystem.setParticleCount(200);
-```
+El archivo `src/scripts/config/config.js` contiene toda la configuración del portfolio:
 
-## 🎨 Sistema de Temas
-
-### Tema Claro
-- Colores suaves y profesionales
-- Alto contraste para legibilidad
-- Gradientes sutiles
-
-### Tema Oscuro
-- Colores oscuros elegantes
-- Efectos de neón y brillo
-- Transiciones suaves
+- Breakpoints responsive
+- Configuración de temas
+- Idiomas soportados
+- Características habilitadas/deshabilitadas
 
 ## 📱 Responsive Design
 
-### Breakpoints
 - **Mobile**: < 768px
-- **Tablet**: 768px - 1024px
+- **Tablet**: 768px - 1024px  
 - **Desktop**: > 1024px
 
-### Características
-- Layout adaptativo con CSS Grid
-- Navegación móvil optimizada
-- Imágenes responsivas
-- Touch gestures para móviles
+## 🎨 Temas
 
-## ⚡ Optimización de Rendimiento
+- **Claro**: Colores claros y legibles
+- **Oscuro**: Modo oscuro para reducir fatiga visual
 
-### WebGL
-- LOD (Level of Detail) dinámico
-- Frustum culling para objetos fuera de vista
-- Batch rendering para partículas
-- Compresión de texturas
+## 🌍 Idiomas
 
-### CSS/JavaScript
-- Animaciones optimizadas con transform3d
-- Lazy loading de imágenes
-- Debouncing de eventos de scroll
-- CSS containment para mejor rendimiento
+- **Español**: Idioma por defecto
+- **Inglés**: Disponible con toggle
 
-## 🔧 Personalización
+## 🚀 Despliegue
 
-### Variables CSS
-```css
-:root {
-    --primary-color: #2C5AA0;
-    --secondary-color: #4285F4;
-    --accent-color: #FF6B6B;
-    --bg-color: #FFFFFF;
-    --text-primary: #2C3E50;
-}
+### Build de producción:
+```bash
+bun run build
 ```
 
-### Configuración de Constelaciones
-```javascript
-// Personalizar colores de estrellas
-constellationSystem.setStarColors([
-    0x87CEEB,  // Azul cielo
-    0xFFD700,  // Dorado
-    0xFF6B6B,  // Coral
-    0x98FB98   // Verde claro
-]);
+Los archivos se generarán en la carpeta `dist/`
+
+### Servir build:
+```bash
+# Con Bun
+bun run --hot dist/
+
+# Con servidor estático
+npx serve dist/
 ```
 
-## 🐛 Solución de Problemas
+## 🤝 Contribuir
 
-### WebGL No Disponible
-- Verificar soporte del navegador
-- Actualizar drivers de gráficos
-- Usar modo de fallback
-
-### Rendimiento Lento
-- Reducir número de partículas
-- Deshabilitar efectos complejos
-- Verificar uso de GPU
-
-### Errores de Consola
-- Verificar importaciones de módulos
-- Comprobar compatibilidad de navegador
-- Revisar errores de sintaxis
-
-## 📈 Métricas de Rendimiento
-
-### Lighthouse Score
-- **Performance**: 95+
-- **Accessibility**: 98+
-- **Best Practices**: 95+
-- **SEO**: 100
-
-### WebGL Performance
-- **FPS**: 60fps constante
-- **Draw Calls**: < 100 por frame
-- **Memory Usage**: < 50MB
-
-## 🤝 Contribuciones
-
-### Cómo Contribuir
 1. Fork el proyecto
-2. Crea una rama para tu feature
-3. Commit tus cambios
-4. Push a la rama
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abre un Pull Request
-
-### Guías de Estilo
-- Usar ES6+ syntax
-- Seguir convenciones de CSS
-- Documentar funciones complejas
-- Mantener consistencia en naming
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
-
-## 🙏 Agradecimientos
-
-- **Three.js** por el motor 3D
-- **WebGL** por la aceleración por hardware
-- **CSS Grid** por el layout moderno
-- **Intersection Observer API** por las animaciones de scroll
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
 
 ## 📞 Contacto
 
-- **Desarrollador**: Carlos
-- **Email**: [tu-email@ejemplo.com]
-- **GitHub**: [tu-usuario-github]
+- **Email**: carlos.orbegoso@email.com
+- **LinkedIn**: linkedin.com/in/carlosorbegoso
+- **GitHub**: github.com/carlosorbegoso
 
 ---
 
-⭐ **¡Dale una estrella al proyecto si te gusta!** ⭐
+Desarrollado con ❤️ por Carlos Orbegoso

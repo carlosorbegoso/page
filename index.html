@@ -2,435 +2,52 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#64B5F6">
     <title>Carlos Orbegoso - Backend Developer & Java Specialist</title>
     <meta name="description" content="Backend Developer especializado en Java, Spring Boot y Quarkus. Experiencia en microservicios y arquitecturas cloud.">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Google Fonts - Fuentes Premium -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- CSS Files -->
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/utilities.css">
-    <link rel="stylesheet" href="css/sections.css">
-    <link rel="stylesheet" href="css/progress-bar.css">
+    <link rel="stylesheet" href="src/styles/main.css?v=2.0.0">
+    <link rel="stylesheet" href="src/styles/themes/_light.css?v=2.0.0">
+    <link rel="stylesheet" href="src/styles/themes/_dark.css?v=2.0.0">
+    <link rel="stylesheet" href="src/styles/utilities/_animations.css?v=2.0.0">
+    <link rel="stylesheet" href="src/styles/utilities/_typography.css?v=2.0.0">
+    <link rel="stylesheet" href="src/styles/utilities/_utilities.css?v=2.0.0">
+    <link rel="stylesheet" href="src/styles/base/_reset.css?v=2.0.0">
+    <link rel="stylesheet" href="src/styles/base/_variables.css?v=2.0.0">
+    <link rel="stylesheet" href="src/styles/components/_buttons.css?v=2.0.0">
+    <link rel="stylesheet" href="src/styles/components/_cards.css?v=2.0.0">
+    <link rel="stylesheet" href="src/styles/components/_forms.css?v=2.0.0">
+    <link rel="stylesheet" href="src/styles/components/_header.css?v=2.0.0">
+    <link rel="stylesheet" href="src/styles/components/_navigation.css?v=2.0.0">
+    <link rel="stylesheet" href="src/styles/layouts/_container.css?v=2.0.0">
+    <link rel="stylesheet" href="src/styles/layouts/_grid.css?v=2.0.0">
+    <link rel="stylesheet" href="src/styles/layouts/_sections.css?v=2.0.0">
+    <link rel="stylesheet" href="src/styles/responsive/_mobile.css?v=2.0.0">
     
     <!-- Three.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <nav class="navbar">
-            <div class="container">
-                <div class="nav-brand">
-                    <span class="brand-text">CO</span>
-                </div>
-                
-                <div class="nav-links">
-                    <a href="#hero" class="nav-link">Inicio</a>
-                    <a href="#about" class="nav-link">Sobre mí</a>
-                    <a href="#experience" class="nav-link">Experiencia</a>
-                    <a href="#skills" class="nav-link">Habilidades</a>
-                    <a href="#projects" class="nav-link">Proyectos</a>
-                    <a href="#contact" class="nav-link">Contacto</a>
-                </div>
-                
-                <div class="nav-controls">
-                    <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button class="language-toggle" id="language-toggle" aria-label="Cambiar idioma">
-                        <i class="fas fa-globe"></i>
-                    </button>
-                    <button class="menu-toggle" id="menu-toggle" aria-label="Menú móvil">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
-            </div>
-        </nav>
-    </header>
-
+    <!-- Contenedor para efectos visuales Three.js -->
+    <div id="visual-effects-container" class="visual-effects-container"></div>
+    
     <!-- Main Content -->
-    <main>
-        <!-- Hero Section -->
-        <section id="hero" class="hero section section-bg">
-            <div class="container">
-                <div class="hero-content">
-                    <h1 class="fade-in text-glow">Carlos Orbegoso</h1>
-                    <p class="role fade-in typing-effect">Backend Developer & Java Specialist</p>
-                    <p class="company fade-in">@ Tata Consultancy Services</p>
-                    
-                    <div class="tech-stack">
-                        <div class="tech-badge fade-in mouse-follow">
-                            <i class="fab fa-java"></i> Java
-                        </div>
-                        <div class="tech-badge fade-in mouse-follow">
-                            <i class="fas fa-leaf"></i> Spring
-                        </div>
-                        <div class="tech-badge fade-in mouse-follow">
-                            <i class="fas fa-rocket"></i> Quarkus
-                        </div>
-                        <div class="tech-badge fade-in mouse-follow">
-                            <i class="fab fa-angular"></i> Angular
-                        </div>
-                    </div>
-                    
-                    <div class="hero-buttons">
-                        <a href="#about" class="btn btn-primary fade-in mouse-follow">
-                            Conoce más
-                        </a>
-                        <a href="#contact" class="btn btn-secondary fade-in mouse-follow">
-                            Hablemos
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- About Section -->
-        <section id="about" class="about section section-bg">
-            <div class="container">
-                <h2 class="section-title fade-in">About Me</h2>
-                <div class="about-content">
-                    <div class="fade-in">
-                        <div class="profile-card card card-hover">
-                            <div class="profile-image">
-                                <img src="assets/images/profile.jpeg" alt="Carlos Orbegoso - Backend Developer" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                <span style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; color: white; font-size: 4rem; font-weight: bold;">CO</span>
-                            </div>
-                            <h3>Carlos Orbegoso</h3>
-                            <p>Backend Developer passionate about Java and modern technologies</p>
-                            
-                            <div class="profile-stats">
-                                <div class="stat-item">
-                                    <div class="stat-number" data-target="5">0</div>
-                                    <div class="stat-label">Years of Experience</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-number" data-target="50">0</div>
-                                    <div class="stat-label">Projects Completed</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-number" data-target="15">0</div>
-                                    <div class="stat-label">Technologies Mastered</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-number" data-target="100">0</div>
-                                    <div class="stat-label">Client Satisfaction</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="about-text fade-in">
-                        <h3>Backend Developer Specialized</h3>
-                        <p>I am a backend developer with more than 5 years of experience in developing robust and scalable enterprise applications. My passion for Java and modern technologies has led me to specialize in Spring Boot, Quarkus and microservice architectures.</p>
-                        
-                        <p>I have worked on high-complexity projects for leading companies like Tata Consultancy Services, where I have developed solutions that handle millions of daily transactions. My experience includes implementing design patterns, automated testing and deployment in cloud environments.</p>
-                        
-                        <p>I constantly keep myself updated with the latest trends in backend development, participating in technical conferences and contributing to open source projects. My goal is to create clean, maintainable code that generates real value for end users.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Experience Section -->
-        <section id="experience" class="experience section section-bg">
-            <div class="container">
-                <h2 class="section-title fade-in">Professional Experience</h2>
-                <div class="experience-timeline">
-                    <div class="timeline-item fade-in">
-                        <div class="job-title">Backend Developer</div>
-                        <div class="company">Tata Consultancy Services</div>
-                        <div class="job-period">2020 - Present</div>
-                        <p>Development of enterprise applications using Java, Spring Boot and Quarkus. Implementation of microservice architectures in cloud environments. Collaboration in legacy migration projects to modern technologies.</p>
-                        <div class="project-tech">
-                            <span class="tech-tag">Java 11/17</span>
-                            <span class="tech-tag">Spring Boot</span>
-                            <span class="tech-tag">Quarkus</span>
-                            <span class="tech-tag">PostgreSQL</span>
-                            <span class="tech-tag">Docker</span>
-                            <span class="tech-tag">Kubernetes</span>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item fade-in">
-                        <div class="job-title">Java Developer</div>
-                        <div class="company">Baufest</div>
-                        <div class="job-period">2018 - 2020</div>
-                        <p>Development of Java enterprise applications using Spring Framework and web technologies. Participation in full-stack development projects and legacy system maintenance. Collaboration in agile teams for quality solution delivery.</p>
-                        <div class="project-tech">
-                            <span class="tech-tag">Java 8</span>
-                            <span class="tech-tag">Spring Framework</span>
-                            <span class="tech-tag">JavaScript</span>
-                            <span class="tech-tag">MySQL</span>
-                            <span class="tech-tag">REST APIs</span>
-                            <span class="tech-tag">Agile</span>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item fade-in">
-                        <div class="job-title">Full Stack Developer</div>
-                        <div class="company">Sysarp (Collaboration)</div>
-                        <div class="job-period">2022 - Present</div>
-                        <p>Collaboration in the development of complete web solutions. Frontend implementation with Angular and backend with Java. Integration of third-party systems and APIs.</p>
-                        <div class="project-tech">
-                            <span class="tech-tag">Angular</span>
-                            <span class="tech-tag">Java</span>
-                            <span class="tech-tag">Spring Framework</span>
-                            <span class="tech-tag">MySQL</span>
-                            <span class="tech-tag">REST APIs</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Skills Section -->
-        <section id="skills" class="skills section section-bg">
-            <div class="container">
-                <h2 class="section-title fade-in">Technical Skills</h2>
-                <div class="skills-grid">
-                    <div class="skill-category card card-hover fade-in">
-                        <h3 class="category-title">Programming Languages</h3>
-                        <div class="skill-item">
-                            <span class="skill-name">Java</span>
-                            <div class="skill-level">
-                                <div class="skill-progress" style="width: 95%"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <span class="skill-name">JavaScript</span>
-                            <div class="skill-level">
-                                <div class="skill-progress" style="width: 85%"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <span class="skill-name">Python</span>
-                            <div class="skill-level">
-                                <div class="skill-progress" style="width: 75%"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <span class="skill-name">SQL</span>
-                            <div class="skill-level">
-                                <div class="skill-progress" style="width: 90%"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="skill-category card card-hover fade-in">
-                        <h3 class="category-title">Frameworks & Libraries</h3>
-                        <div class="skill-item">
-                            <span class="skill-name">Spring Boot</span>
-                            <div class="skill-level">
-                                <div class="skill-progress" style="width: 90%"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <span class="skill-name">Quarkus</span>
-                            <div class="skill-level">
-                                <div class="skill-progress" style="width: 85%"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <span class="skill-name">Angular</span>
-                            <div class="skill-level">
-                                <div class="skill-progress" style="width: 80%"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <span class="skill-name">React</span>
-                            <div class="skill-level">
-                                <div class="skill-progress" style="width: 70%"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="skill-category card card-hover fade-in">
-                        <h3 class="category-title">Tools & DevOps</h3>
-                        <div class="skill-item">
-                            <span class="skill-name">Docker</span>
-                            <div class="skill-level">
-                                <div class="skill-progress" style="width: 85%"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <span class="skill-name">Kubernetes</span>
-                            <div class="skill-level">
-                                <div class="skill-progress" style="width: 75%"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <span class="skill-name">Git</span>
-                            <div class="skill-level">
-                                <div class="skill-progress" style="width: 90%"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <span class="skill-name">Jenkins</span>
-                            <div class="skill-level">
-                                <div class="skill-progress" style="width: 80%"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="skill-category card card-hover fade-in">
-                        <h3 class="category-title">Databases</h3>
-                        <div class="skill-item">
-                            <span class="skill-name">PostgreSQL</span>
-                            <div class="skill-level">
-                                <div class="skill-progress" style="width: 90%"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <span class="skill-name">MySQL</span>
-                            <div class="skill-level">
-                                <div class="skill-progress" style="width: 85%"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <span class="skill-name">MongoDB</span>
-                            <div class="skill-level">
-                                <div class="skill-progress" style="width: 75%"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <span class="skill-name">Redis</span>
-                            <div class="skill-level">
-                                <div class="skill-progress" style="width: 80%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Projects Section -->
-        <section id="projects" class="projects section section-bg">
-            <div class="container">
-                <h2 class="section-title fade-in">Featured Projects</h2>
-                <div class="projects-grid">
-                    <div class="project-card card card-hover fade-in">
-                        <div class="project-image">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <div class="project-content">
-                            <h3 class="project-title">Automated Trading System</h3>
-                            <div class="project-type">Backend - Java</div>
-                            <p>Development of an automated trading system using Java, Spring Boot and machine learning algorithms. Integration with cryptocurrency exchanges and real-time data analysis.</p>
-                            <div class="project-tech">
-                                <span class="tech-tag">Java 17</span>
-                                <span class="tech-tag">Spring Boot</span>
-                                <span class="tech-tag">PostgreSQL</span>
-                                <span class="tech-tag">Redis</span>
-                                <span class="tech-tag">Docker</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="project-card card card-hover fade-in">
-                        <div class="project-image">
-                            <i class="fas fa-shopping-cart"></i>
-                        </div>
-                        <div class="project-content">
-                            <h3 class="project-title">E-commerce Microservices</h3>
-                            <div class="project-type">Full Stack - Java + Angular</div>
-                            <p>Microservices architecture for e-commerce platform. Implementation of user, catalog, cart, and payment services with Spring Boot and Angular.</p>
-                            <div class="project-tech">
-                                <span class="tech-tag">Java 11</span>
-                                <span class="tech-tag">Spring Cloud</span>
-                                <span class="tech-tag">Angular</span>
-                                <span class="tech-tag">MySQL</span>
-                                <span class="tech-tag">Kubernetes</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="project-card card card-hover fade-in">
-                        <div class="project-image">
-                            <i class="fas fa-hospital"></i>
-                        </div>
-                        <div class="project-content">
-                            <h3 class="project-title">Hospital Management System</h3>
-                            <div class="project-type">Backend - Quarkus</div>
-                            <p>Comprehensive hospital management system with Quarkus. Modules for patients, doctors, appointments, and pharmacy. REST API with OpenAPI documentation and automated testing.</p>
-                            <div class="project-tech">
-                                <span class="tech-tag">Quarkus</span>
-                                <span class="tech-tag">PostgreSQL</span>
-                                <span class="tech-tag">JUnit 5</span>
-                                <span class="tech-tag">Swagger</span>
-                                <span class="tech-tag">Docker</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Contact Section -->
-        <section id="contact" class="contact section section-bg">
-            <div class="container">
-                <h2 class="section-title fade-in">Let's Connect!</h2>
-                <p class="fade-in">Are you looking for a challenging backend project? Do you want to collaborate on Java or Quarkus? I'd love to chat with you!</p>
-                
-                <div class="contact-grid">
-                    <div class="contact-item card card-hover fade-in">
-                        <i class="fas fa-envelope contact-icon"></i>
-                        <div class="contact-info">
-                            <h4>Email</h4>
-                            <p>carlos.orbegoso@email.com</p>
-                        </div>
-                    </div>
-                    
-                    <div class="contact-item card card-hover fade-in">
-                        <i class="fab fa-linkedin contact-icon"></i>
-                        <div class="contact-info">
-                            <h4>LinkedIn</h4>
-                            <p>linkedin.com/in/carlosorbegoso</p>
-                        </div>
-                    </div>
-                    
-                    <div class="contact-item card card-hover fade-in">
-                        <i class="fab fa-github contact-icon"></i>
-                        <div class="contact-info">
-                            <h4>GitHub</h4>
-                            <p>github.com/carlosorbegoso</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="social-links fade-in">
-                    <a href="#" class="social-link" aria-label="LinkedIn">
-                        <i class="fab fa-linkedin"></i>
-                    </a>
-                    <a href="#" class="social-link" aria-label="GitHub">
-                        <i class="fab fa-github"></i>
-                    </a>
-                    <a href="#" class="social-link" aria-label="Twitter">
-                        <i class="fab fa-twitter"></i>
-                    </a>
-                    <a href="#" class="social-link" aria-label="Instagram">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                </div>
-            </div>
-        </section>
+    <main id="main-content">
+        <!-- Los componentes se cargarán dinámicamente aquí -->
     </main>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2024 Carlos Orbegoso. All rights reserved.</p>
-        </div>
-    </footer>
-
     <!-- JavaScript -->
-    <script type="module" src="js/main.js"></script>
-
+    <script type="module" src="src/scripts/main.js?v=2.0.0"></script>
 </body>
 </html>

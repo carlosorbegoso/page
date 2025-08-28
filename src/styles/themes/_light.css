@@ -1,0 +1,51 @@
+/* ===== TEMA CLARO - NATURALEZA ===== */
+
+[data-theme="light"] {
+    --bg-color: #f0f8ff;
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --text-primary: #1a1a1a;
+    --text-secondary: #4a5568;
+    --border-color: rgba(74, 85, 104, 0.2);
+    --shadow-color: rgba(0, 0, 0, 0.08);
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --accent-color: #4CAF50;
+    --accent-light: #8BC34A;
+    --accent-warm: #FFD700;
+}
+
+/* ===== ESTILOS ESPECÍFICOS DEL TEMA CLARO ===== */
+[data-theme="light"] .header {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(74, 85, 104, 0.1);
+}
+
+[data-theme="light"] .card {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(74, 85, 104, 0.15);
+    backdrop-filter: blur(10px);
+}
+
+[data-theme="light"] .btn {
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-light));
+}
+
+[data-theme="light"] .btn:hover {
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+    transform: translateY(-2px);
+}
+
+[data-theme="light"] .tech-badge {
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-light));
+    color: white;
+    border: none;
+}
+
+[data-theme="light"] .section-bg {
+    background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+}
+
+[data-theme="light"] .hero {
+    background: linear-gradient(135deg, #87CEEB 0%, #98D8E8 50%, #B8E6B8 100%);
+}

@@ -1,0 +1,100 @@
+/* ===== ARCHIVO PRINCIPAL DE ESTILOS - PORTFOLIO LIMPIO ===== */
+
+/* ===== IMPORTS ESENCIALES (SOLO AL INICIO) ===== */
+@import url('base/_variables.css');
+@import url('base/_reset.css');
+@import url('components/_header.css');
+@import url('components/_buttons.css');
+@import url('layouts/_container.css');
+@import url('sections/_hero.css');
+@import url('sections/_about.css');
+@import url('sections/_experience.css');
+@import url('themes/_light.css');
+@import url('themes/_dark.css');
+
+/* ===== CONTENEDOR DE EFECTOS VISUALES ===== */
+.visual-effects-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* ===== ESTILOS BASE DEL BODY ===== */
+body {
+    font-family: var(--font-primary);
+    line-height: 1.6;
+    color: var(--text-primary);
+    background: var(--background-primary);
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    transition: var(--transition-normal);
+}
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
+#main-content {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    padding-top: 0; /* Sin padding para que sea fluido */
+}
+
+/* ===== SECCIONES FLUIDAS ===== */
+.section {
+    position: relative;
+    padding: var(--spacing-4xl) 0;
+    overflow: hidden;
+    background: transparent; /* Sin fondo de sección */
+}
+
+.section:not(:last-child) {
+    margin-bottom: 0; /* Sin separación entre secciones */
+}
+
+/* ===== FLUJO CONTINUO ===== */
+.section-bg {
+    background: transparent !important; /* Forzar transparencia */
+}
+
+/* ===== TRANSICIONES SUAVES ENTRE SECCIONES ===== */
+.section {
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== HEADER FIJO ===== */
+/* Los estilos del header están en components/_header.css */
+
+/* ===== SCROLLBAR PERSONALIZADA ===== */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--background-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-color);
+}
+
+/* ===== SELECCIÓN DE TEXTO ===== */
+::selection {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* ===== FOCUS VISIBLE PARA ACCESIBILIDAD ===== */
+*:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}

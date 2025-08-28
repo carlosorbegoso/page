@@ -1,0 +1,47 @@
+{
+  "name": "carlos-orbegoso-portfolio",
+  "version": "2.0.0",
+  "description": "Portfolio profesional de Carlos Orbegoso - Backend Developer & Java Specialist",
+  "main": "src/scripts/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run server.js",
+    "start": "bun run server.js",
+    "build": "bun build src/scripts/main.js --outdir dist --target browser",
+    "preview": "bun run server.js",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix",
+    "format": "prettier --write src/**/*.{js,css,html}",
+    "clean": "rm -rf dist",
+    "serve": "bun run server.js"
+  },
+  "keywords": [
+    "portfolio",
+    "backend",
+    "java",
+    "spring-boot",
+    "quarkus",
+    "threejs",
+    "responsive",
+    "modern"
+  ],
+  "author": "Carlos Orbegoso",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.0"
+  },
+  "dependencies": {
+    "three": "^0.158.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0",
+    "bun": ">=1.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Efectos Visuales - Portfolio</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            background: #f0f8ff;
+            color: #1a1a1a;
+        }
+        
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #4CAF50, #8BC34A);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+        }
+        
+        .theme-toggle.dark {
+            background: linear-gradient(135deg, #4FC3F7, #81D4FA);
+            box-shadow: 0 4px 15px rgba(79, 20, 140, 0.3);
+        }
+        
+        .theme-toggle.dark:hover {
+            box-shadow: 0 8px 25px rgba(79, 20, 140, 0.4);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .effect-description {
+            background: rgba(76, 175, 80, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .effect-description.dark {
+            background: rgba(79, 20, 140, 0.1);
+            border-left-color: #4FC3F7;
+        }
+        
+        .effect-title {
+            font-weight: 600;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+        
+        .effect-title.dark {
+            color: #4FC3F7;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 193, 7, 0.1);
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #FFC107;
+        }
+        
+        .status.success {
+            background: rgba(76, 175, 80, 0.1);
+            border-color: #4CAF50;
+        }
+        
+        .status.error {
+            background: rgba(244, 67, 54, 0.1);
+            border-color: #F44336;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            background: linear-gradient(135deg, #4CAF50, #8BC34A);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .control-btn.dark {
+            background: linear-gradient(135deg, #4FC3F7, #81D4FA);
+        }
+        
+        .control-btn.dark:hover {
+            box-shadow: 0 4px 15px rgba(79, 20, 140, 0.3);
+        }
+        
+        [data-theme="dark"] {
+            background: #0A0A1A;
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .demo-container {
+            background: rgba(26, 26, 40, 0.9);
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .effect-description {
+            background: rgba(79, 20, 140, 0.1);
+        }
+        
+        [data-theme="dark"] .effect-title {
+            color: #4FC3F7;
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <!-- Contenedor para efectos visuales Three.js -->
+    <div id="visual-effects-container" class="visual-effects-container"></div>
+    
+    <!-- Toggle de tema -->
+    <button class="theme-toggle" id="theme-toggle">
+        🌙 Modo Oscuro
+    </button>
+    
+    <div class="demo-container">
+        <h1>🌟 Demo Efectos Visuales</h1>
+        
+        <div class="status" id="status">
+            ⏳ Inicializando motor de efectos visuales...
+        </div>
+        
+        <div class="controls">
+            <button class="control-btn" id="toggle-effects">🎬 Toggle Efectos</button>
+            <button class="control-btn" id="change-theme">🎨 Cambiar Tema</button>
+            <button class="control-btn" id="performance-test">⚡ Test Performance</button>
+        </div>
+        
+        <div class="effect-description">
+            <div class="effect-title">🌞 Tema Claro - Naturaleza</div>
+            <p>En el tema claro, verás efectos de naturaleza como:</p>
+            <ul>
+                <li>🌿 Partículas de naturaleza flotando</li>
+                <li>🦋 Mariposas coloridas volando</li>
+                <li>🍃 Hojas cayendo suavemente</li>
+                <li>☀️ Sol brillante con efecto de resplandor</li>
+            </ul>
+        </div>
+        
+        <div class="effect-description dark">
+            <div class="effect-title">🌙 Tema Oscuro - Noche Estrellada</div>
+            <p>En el tema oscuro, experimentarás:</p>
+            <ul>
+                <li>⭐ 2000 estrellas parpadeando</li>
+                <li>✨ Constelaciones famosas (Osa Mayor, Osa Menor, Casiopea)</li>
+                <li>🌌 Nebulosa púrpura girando</li>
+                <li>🌃 Fondo espacial profundo</li>
+            </ul>
+        </div>
+        
+        <div class="effect-description">
+            <div class="effect-title">🎮 Controles</div>
+            <p>Usa los botones de arriba para:</p>
+            <ul>
+                <li><strong>Toggle Efectos:</strong> Activar/desactivar efectos</li>
+                <li><strong>Cambiar Tema:</strong> Cambiar entre tema claro y oscuro</li>
+                <li><strong>Test Performance:</strong> Verificar rendimiento</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Motor de efectos visuales -->
+    <script type="module">
+        import { VisualEffectsEngine } from './src/scripts/engines/visual-effects-engine.js';
+        
+        let visualEngine = null;
+        let currentTheme = 'light';
+        
+        // Elementos del DOM
+        const statusEl = document.getElementById('status');
+        const themeToggle = document.getElementById('theme-toggle');
+        const toggleEffectsBtn = document.getElementById('toggle-effects');
+        const changeThemeBtn = document.getElementById('change-theme');
+        const performanceTestBtn = document.getElementById('performance-test');
+        
+        // Función para actualizar estado
+        function updateStatus(message, type = 'info') {
+            statusEl.innerHTML = message;
+            statusEl.className = `status ${type}`;
+        }
+        
+        // Función para cambiar tema
+        function changeTheme(theme) {
+            currentTheme = theme;
+            document.body.setAttribute('data-theme', theme);
+            
+            // Actualizar botón de tema
+            if (theme === 'dark') {
+                themeToggle.textContent = '☀️ Modo Claro';
+                themeToggle.classList.add('dark');
+                toggleEffectsBtn.classList.add('dark');
+                changeThemeBtn.classList.add('dark');
+                performanceTestBtn.classList.add('dark');
+            } else {
+                themeToggle.textContent = '🌙 Modo Oscuro';
+                themeToggle.classList.remove('dark');
+                toggleEffectsBtn.classList.remove('dark');
+                changeThemeBtn.classList.remove('dark');
+                performanceTestBtn.classList.remove('dark');
+            }
+            
+            // Actualizar motor visual
+            if (visualEngine) {
+                visualEngine.changeTheme(theme);
+            }
+            
+            updateStatus(`✅ Tema cambiado a: ${theme === 'dark' ? 'Noche Estrellada' : 'Naturaleza'}`, 'success');
+        }
+        
+        // Inicializar motor de efectos visuales
+        async function initVisualEngine() {
+            try {
+                updateStatus('🚀 Inicializando motor de efectos visuales...', 'info');
+                
+                visualEngine = new VisualEffectsEngine();
+                const container = document.getElementById('visual-effects-container');
+                
+                await visualEngine.init(container);
+                updateStatus('✅ Motor de efectos visuales inicializado correctamente', 'success');
+                
+                // Establecer tema inicial
+                changeTheme(currentTheme);
+                
+            } catch (error) {
+                updateStatus(`❌ Error inicializando motor visual: ${error.message}`, 'error');
+                console.error('Error:', error);
+            }
+        }
+        
+        // Event listeners
+        themeToggle.addEventListener('click', () => {
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            changeTheme(newTheme);
+        });
+        
+        toggleEffectsBtn.addEventListener('click', () => {
+            if (visualEngine) {
+                // Aquí podrías agregar lógica para toggle de efectos
+                updateStatus('🎬 Efectos visuales activos', 'success');
+            }
+        });
+        
+        changeThemeBtn.addEventListener('click', () => {
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            changeTheme(newTheme);
+        });
+        
+        performanceTestBtn.addEventListener('click', () => {
+            if (visualEngine) {
+                const startTime = performance.now();
+                
+                // Simular test de performance
+                setTimeout(() => {
+                    const endTime = performance.now();
+                    const duration = (endTime - startTime).toFixed(2);
+                    updateStatus(`⚡ Test de performance completado en ${duration}ms`, 'success');
+                }, 100);
+            }
+        });
+        
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', initVisualEngine);
+    </script>
+</body>
+</html>

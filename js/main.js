@@ -5,11 +5,18 @@ import StyleManager from './style-manager.js';
 import ProgressSystem from './progress-system.js';
 import LanguageSystem from './language-system.js';
 
+// ===== PROTECCIÓN GLOBAL CONTRA SOBRESCRITURA DE TRADUCCIONES =====
+function protectTranslatedContent() {
+    // COMPLETAMENTE DESHABILITADO - NO INTERFIERE CON EL FUNCIONAMIENTO NORMAL
+    return;
+}
+
 // ===== INICIALIZACIÓN PRINCIPAL =====
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Inicializando portfolio...');
-    
     try {
+        // Configurar protección global
+        protectTranslatedContent();
+        
         // Inicializar gestores
         const styleManager = new StyleManager();
         const visualEngine = new VisualEffectsEngine();
@@ -30,9 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupCounters();
         setupInteractiveElements();
         setupPerformanceOptimizations();
-        setupLanguageToggle(); // Llamar a la nueva función
-        
-        console.log('✅ Portfolio inicializado correctamente!');
+        setupLanguageToggle();
         
     } catch (error) {
         console.error('❌ Error inicializando portfolio:', error);
@@ -155,6 +160,12 @@ function setupAnimations() {
 }
 
 function applySpecificAnimations(element) {
+    // Verificar si el elemento ha sido traducido antes de aplicar animaciones
+    if (window.languageSystem && window.languageSystem.getCurrentLanguage() !== 'en') {
+        console.log('⚠️ Elemento traducido detectado, saltando animación:', element);
+        return;
+    }
+    
     // Animaciones para estadísticas
     if (element.classList.contains('stat-number')) {
         animateNumber(element);
@@ -278,22 +289,16 @@ function setupPerformanceOptimizations() {
 
 // ===== FUNCIÓN DE CAMBIO DE IDIOMA =====
 function setupLanguageToggle() {
-    console.log('🔧 Configurando botón de cambio de idioma...');
     const languageToggle = document.getElementById('language-toggle');
-    console.log('🔍 Botón encontrado:', languageToggle);
     
     if (languageToggle) {
-        console.log('✅ Agregando event listener al botón de idioma');
         languageToggle.addEventListener('click', () => {
-            console.log('🖱️ Botón de idioma clickeado!');
             if (window.languageSystem) {
-                console.log('✅ LanguageSystem disponible, cambiando idioma');
                 window.languageSystem.toggleLanguage();
             } else {
                 console.error('❌ LanguageSystem NO disponible!');
             }
         });
-        console.log('✅ Event listener agregado correctamente');
     } else {
         console.error('❌ Botón de idioma NO encontrado!');
     }
@@ -499,5 +504,3 @@ document.addEventListener('keydown', (e) => {
         document.getElementById('theme-toggle')?.click();
     }
 });
-
-console.log('📦 Main.js cargado correctamente con todas las funcionalidades');

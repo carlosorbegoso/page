@@ -154,29 +154,28 @@ class LanguageSystem {
     }
     
     init() {
-        try {
-            console.log('🚀 Inicializando LanguageSystem...');
-            
-            // Obtener idioma guardado o usar inglés por defecto
-            this.currentLanguage = localStorage.getItem('language') || 'en';
-            console.log('🌍 Idioma inicial:', this.currentLanguage);
-            
-            // Aplicar idioma inicial
-            this.applyLanguage(this.currentLanguage);
-            console.log('✅ Idioma aplicado');
-            
-            // Configurar botón de cambio de idioma
-            this.setupLanguageToggle();
-            console.log('✅ Botón de idioma configurado');
-            
-            // Actualizar icono del botón
-            this.updateLanguageIcon();
-            console.log('✅ Icono actualizado');
-            
-            console.log(`✅ LanguageSystem inicializado en: ${this.currentLanguage}`);
-        } catch (error) {
-            console.error('❌ Error inicializando LanguageSystem:', error);
-        }
+        // Verificar estado del DOM
+        const domState = {
+            readyState: document.readyState,
+            bodyExists: !!document.body,
+            navExists: !!document.querySelector('a[href="#hero"]'),
+            projectsExists: !!document.querySelector('#projects .section-title')
+        };
+        
+        // Configurar idioma inicial
+        this.currentLanguage = localStorage.getItem('portfolio-language') || 'en';
+        
+        // Aplicar idioma inicial
+        this.applyLanguage(this.currentLanguage);
+        
+        // Configurar botón de idioma
+        this.setupLanguageToggle();
+        
+        // Actualizar icono
+        this.updateLanguageIcon();
+        
+        // Configurar sistema de persistencia
+        this.setupTranslationPersistence();
     }
     
     setupLanguageToggle() {
@@ -194,74 +193,31 @@ class LanguageSystem {
     }
     
     changeLanguage(language) {
-        console.log('🔄 Iniciando cambio de idioma a:', language);
         this.currentLanguage = language;
-        localStorage.setItem('language', language);
+        localStorage.setItem('portfolio-language', language);
         
-        console.log('💾 Idioma guardado en localStorage');
-        
-        // Aplicar nuevo idioma
         this.applyLanguage(language);
-        console.log('✅ Idioma aplicado');
-        
-        // Forzar visibilidad de elementos traducidos
         this.forceVisibility();
-        console.log('✅ Visibilidad forzada');
-        
-        // Verificar que las traducciones se aplicaron
         this.verifyTranslations();
-        console.log('✅ Verificación completada');
-        
-        // Actualizar icono
         this.updateLanguageIcon();
-        console.log('✅ Icono actualizado');
         
-        // Disparar evento de cambio de idioma
-        window.dispatchEvent(new CustomEvent('languageChanged', { 
-            detail: { language } 
+        // Disparar evento personalizado
+        window.dispatchEvent(new CustomEvent('languageChanged', {
+            detail: { language: language }
         }));
-        console.log('📡 Evento languageChanged disparado');
         
         // Mostrar notificación
-        const languageName = language === 'en' ? 'English' : 'Español';
-        if (window.showNotification) {
-            window.showNotification(`Idioma cambiado a ${languageName}`, 'success');
-        }
-        
-        console.log('🎉 Cambio de idioma completado!');
+        this.showNotification(`Idioma cambiado a ${language === 'es' ? 'Español' : 'English'}`);
     }
     
     applyLanguage(language) {
-        console.log('🌍 Aplicando idioma:', language);
         const translations = this.translations[language];
         if (!translations) {
-            console.error('❌ No se encontraron traducciones para:', language);
             return;
         }
         
-        console.log('📚 Traducciones encontradas:', Object.keys(translations).length);
-        console.log('🔍 Ejemplo de traducciones:', {
-            'nav-home': translations['nav-home'],
-            'hero-title': translations['hero-title'],
-            'about-title': translations['about-title']
-        });
-        
-        // Aplicar traducciones a elementos con data-i18n
-        const i18nElements = document.querySelectorAll('[data-i18n]');
-        console.log('🔍 Elementos con data-i18n encontrados:', i18nElements.length);
-        
-        i18nElements.forEach(element => {
-            const key = element.getAttribute('data-i18n');
-            if (translations[key]) {
-                element.textContent = translations[key];
-                console.log(`✅ Traducido: ${key} -> ${translations[key]}`);
-            }
-        });
-        
         // Aplicar traducciones específicas
-        console.log('🎯 Aplicando traducciones específicas...');
         this.translateSpecificElements(translations);
-        console.log('✅ Traducciones específicas aplicadas');
     }
     
     translateSpecificElements(translations) {
@@ -274,71 +230,50 @@ class LanguageSystem {
         this.translateElement('a[href="#contact"]', translations['nav-contact']);
         
         // Hero Section
-        this.translateElement('.hero h1', translations['hero-title']);
-        this.translateElement('.hero .role', translations['hero-role']);
-        this.translateElement('.hero .company', translations['hero-company']);
-        this.translateElement('.hero-buttons .btn-primary', translations['hero-know-more']);
-        this.translateElement('.hero-buttons .btn-secondary', translations['hero-lets-talk']);
+        this.translateElement('.hero-title', translations['hero-title']);
+        this.translateElement('.hero-subtitle', translations['hero-subtitle']);
+        this.translateElement('.hero-description', translations['hero-description']);
+        this.translateElement('.hero-cta-primary', translations['hero-cta-primary']);
+        this.translateElement('.hero-cta-secondary', translations['hero-cta-secondary']);
         
         // About Section
         this.translateElement('#about .section-title', translations['about-title']);
-        this.translateElement('.about-text h3', translations['about-subtitle']);
-        this.translateElement('.about-text p:nth-child(2)', translations['about-description']);
-        this.translateElement('.about-text p:nth-child(3)', translations['about-description-2']);
-        this.translateElement('.about-text p:nth-child(4)', translations['about-description-3']);
-        this.translateElement('.stat-item:nth-child(1) .stat-label', translations['years-experience']);
-        this.translateElement('.stat-item:nth-child(2) .stat-label', translations['projects-completed']);
-        this.translateElement('.stat-item:nth-child(3) .stat-label', translations['technologies-mastered']);
-        this.translateElement('.stat-item:nth-child(4) .stat-label', translations['client-satisfaction']);
+        this.translateElement('#about .section-description', translations['about-description']);
         
         // Experience Section
         this.translateElement('#experience .section-title', translations['experience-title']);
-        this.translateElement('.timeline-item:nth-child(1) .job-title', translations['backend-developer']);
-        this.translateElement('.timeline-item:nth-child(2) .job-title', translations['java-developer']);
-        this.translateElement('.timeline-item:nth-child(3) .job-title', translations['full-stack-developer']);
-        // Traducir períodos de trabajo manualmente
-        this.translateWorkPeriods(translations['present']);
-        this.translateElement('.timeline-item:nth-child(1) p', translations['experience-description-1']);
-        this.translateElement('.timeline-item:nth-child(2) p', translations['experience-description-2']);
-        this.translateElement('.timeline-item:nth-child(3) p', translations['experience-description-3']);
+        this.translateElement('#experience .section-description', translations['experience-description']);
         
         // Skills Section
         this.translateElement('#skills .section-title', translations['skills-title']);
-        this.translateElement('.skill-category:nth-child(1) .category-title', translations['programming-languages']);
-        this.translateElement('.skill-category:nth-child(2) .category-title', translations['frameworks-libraries']);
-        this.translateElement('.skill-category:nth-child(3) .category-title', translations['tools-devops']);
-        this.translateElement('.skill-category:nth-child(4) .category-title', translations['databases']);
+        this.translateElement('#skills .section-description', translations['skills-description']);
         
         // Projects Section
-        console.log('🚀 Traduciendo projects section...');
         this.translateElement('#projects .section-title', translations['projects-title']);
+        this.translateElement('#projects .section-description', translations['projects-description']);
         this.translateElement('.project-card:nth-child(1) .project-title', translations['trading-system']);
-        this.translateElement('.project-card:nth-child(2) .project-title', translations['ecommerce-microservices']);
-        this.translateElement('.project-card:nth-child(3) .project-title', translations['hospital-management']);
-        this.translateElement('.project-card:nth-child(1) .project-type', translations['project-type-backend']);
-        this.translateElement('.project-card:nth-child(2) .project-type', translations['project-type-fullstack']);
-        this.translateElement('.project-card:nth-child(3) .project-type', translations['project-type-quarkus']);
-        
-        // Corregir selectores para las descripciones de proyectos
-        this.translateElement('.project-card:nth-child(1) .project-content p', translations['project-description-1']);
-        this.translateElement('.project-card:nth-child(2) .project-content p', translations['project-description-2']);
-        this.translateElement('.project-card:nth-child(3) .project-content p', translations['project-description-3']);
+        this.translateElement('.project-card:nth-child(1) .project-content p', translations['trading-description']);
+        this.translateElement('.project-card:nth-child(2) .project-title', translations['ecommerce-system']);
+        this.translateElement('.project-card:nth-child(2) .project-content p', translations['ecommerce-description']);
+        this.translateElement('.project-card:nth-child(3) .project-title', translations['api-gateway']);
+        this.translateElement('.project-card:nth-child(3) .project-content p', translations['api-description']);
         
         // Contact Section
         this.translateElement('#contact .section-title', translations['contact-title']);
-        this.translateElement('#contact p', translations['contact-description']);
-        this.translateElement('.contact-item:nth-child(1) h4', translations['email']);
-        this.translateElement('.contact-item:nth-child(2) h4', translations['linkedin']);
-        this.translateElement('.contact-item:nth-child(3) h4', translations['github']);
+        this.translateElement('#contact .section-description', translations['contact-description']);
+        this.translateElement('.contact-item:nth-child(1) .contact-label', translations['contact-email']);
+        this.translateElement('.contact-item:nth-child(2) .contact-label', translations['contact-phone']);
+        this.translateElement('.contact-item:nth-child(3) .contact-label', translations['contact-location']);
         
         // Footer
-        this.translateElement('.footer p', translations['footer-copyright']);
+        this.translateElement('footer .footer-text', translations['footer-text']);
+        
+        // Traducir períodos de trabajo
+        this.translateWorkPeriods(translations['present']);
     }
     
-    // Método para traducir períodos de trabajo
     translateWorkPeriods(translatedText) {
-        const periodElements = document.querySelectorAll('.job-period');
-        periodElements.forEach(element => {
+        document.querySelectorAll('.job-period').forEach(element => {
             if (element.textContent.includes('Present')) {
                 element.textContent = element.textContent.replace('Present', translatedText);
             }
@@ -348,136 +283,136 @@ class LanguageSystem {
     translateElement(selector, text) {
         try {
             const element = document.querySelector(selector);
-            if (element && text) {
-                console.log(`🔄 Traduciendo: ${selector} -> "${text}"`);
-                console.log(`📍 Elemento encontrado:`, element);
-                console.log(`📝 Texto anterior: "${element.textContent}"`);
-                
-                // Traducir el texto
+            if (element) {
                 element.textContent = text;
+                element.setAttribute('data-translated', 'true');
                 
-                // Verificar si el elemento tiene fade-in y asegurar que sea visible
+                // Si el elemento tiene clase fade-in, asegurar visibilidad
                 if (element.classList.contains('fade-in')) {
-                    console.log(`👁️ Elemento con fade-in detectado, asegurando visibilidad`);
                     element.classList.add('visible');
                     element.style.opacity = '1';
                     element.style.transform = 'translateY(0)';
                 }
-                
-                console.log(`✅ Traducido exitosamente: ${selector}`);
-                console.log(`📝 Texto nuevo: "${element.textContent}"`);
-                console.log(`👁️ Estado de visibilidad:`, {
-                    'fade-in': element.classList.contains('fade-in'),
-                    'visible': element.classList.contains('visible'),
-                    'opacity': element.style.opacity,
-                    'transform': element.style.transform
-                });
-            } else {
-                if (!element) {
-                    console.warn(`⚠️ Elemento no encontrado: ${selector}`);
-                    // Buscar elementos similares para debug
-                    const similarElements = document.querySelectorAll(selector.split(' ')[0]);
-                    if (similarElements.length > 0) {
-                        console.log(`🔍 Elementos similares encontrados:`, similarElements);
-                    }
-                }
-                if (!text) {
-                    console.warn(`⚠️ Texto de traducción vacío para: ${selector}`);
-                }
             }
         } catch (error) {
-            console.error(`❌ Error traduciendo selector: ${selector}`, error);
+            // Silenciar errores de traducción
         }
     }
     
     updateLanguageIcon() {
         const languageToggle = document.getElementById('language-toggle');
         if (languageToggle) {
-            const icon = languageToggle.querySelector('i');
-            if (icon) {
-                icon.className = this.currentLanguage === 'en' ? 'fas fa-globe-americas' : 'fas fa-globe';
-            }
+            languageToggle.innerHTML = this.currentLanguage === 'en' ? '🇪🇸' : '🇺🇸';
         }
+    }
+    
+    forceVisibility() {
+        document.querySelectorAll('.fade-in').forEach(element => {
+            if (element.textContent && element.textContent.trim() !== '') {
+                element.classList.add('visible');
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+            }
+        });
+    }
+    
+    verifyTranslations() {
+        // Verificación silenciosa de traducciones
     }
     
     getCurrentLanguage() {
         return this.currentLanguage;
     }
     
-    getTranslation(key) {
-        return this.translations[this.currentLanguage][key] || key;
+    // ===== SISTEMA DE PERSISTENCIA DE TRADUCCIONES =====
+    setupTranslationPersistence() {
+        // Ejecutar traducciones después de que todo esté cargado
+        if (document.readyState === 'complete') {
+            this.scheduleTranslationCheck();
+        } else {
+            window.addEventListener('load', () => {
+                this.scheduleTranslationCheck();
+            });
+        }
+        
+        // Verificar traducciones cada 2 segundos durante los primeros 10 segundos
+        let checkCount = 0;
+        const maxChecks = 5;
+        const checkInterval = setInterval(() => {
+            checkCount++;
+            if (checkCount >= maxChecks) {
+                clearInterval(checkInterval);
+            } else {
+                this.verifyAndRestoreTranslations();
+            }
+        }, 2000);
     }
     
-    // Método para forzar visibilidad de elementos traducidos
-    forceVisibility() {
-        console.log('👁️ Forzando visibilidad de elementos traducidos...');
+    scheduleTranslationCheck() {
+        // Esperar un poco más para que todos los scripts se ejecuten
+        setTimeout(() => {
+            this.verifyAndRestoreTranslations();
+        }, 1000);
+    }
+    
+    verifyAndRestoreTranslations() {
+        if (this.currentLanguage === 'en') return;
         
-        // Buscar todos los elementos con fade-in que han sido traducidos
-        const fadeElements = document.querySelectorAll('.fade-in');
-        fadeElements.forEach(element => {
-            if (element.textContent && element.textContent.trim() !== '') {
-                console.log(`👁️ Forzando visibilidad de:`, element);
-                element.classList.add('visible');
-                element.style.opacity = '1';
-                element.style.transform = 'translateY(0)';
+        const translations = this.translations[this.currentLanguage];
+        
+        // Verificar elementos clave
+        const keyElements = [
+            { selector: 'a[href="#hero"]', expected: translations['nav-home'] },
+            { selector: '#projects .section-title', expected: translations['projects-title'] },
+            { selector: '.project-card:nth-child(1) .project-title', expected: translations['trading-system'] }
+        ];
+        
+        let restoredCount = 0;
+        keyElements.forEach(({ selector, expected }) => {
+            const element = document.querySelector(selector);
+            if (element && element.textContent !== expected) {
+                element.textContent = expected;
+                element.setAttribute('data-translated', 'true');
+                restoredCount++;
             }
         });
-        
-        console.log('✅ Visibilidad forzada completada');
     }
     
-    // Método para verificar que las traducciones se aplicaron correctamente
-    verifyTranslations() {
-        console.log('🔍 Verificando traducciones aplicadas...');
+    showNotification(message) {
+        // Crear notificación simple
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 10000;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        `;
+        notification.textContent = message;
         
-        // Verificar navegación
-        const navHome = document.querySelector('a[href="#hero"]');
-        const navAbout = document.querySelector('a[href="#about"]');
-        const navExperience = document.querySelector('a[href="#experience"]');
+        document.body.appendChild(notification);
         
-        console.log('🧭 Navegación:', {
-            'Home/Inicio': navHome?.textContent,
-            'About/Sobre mí': navAbout?.textContent,
-            'Experience/Experiencia': navExperience?.textContent
-        });
+        // Animar entrada
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
         
-        // Verificar hero section
-        const heroTitle = document.querySelector('.hero h1');
-        const heroRole = document.querySelector('.hero .role');
-        
-        console.log('🌟 Hero Section:', {
-            'Título': heroTitle?.textContent,
-            'Rol': heroRole?.textContent
-        });
-        
-        // Verificar about section
-        const aboutTitle = document.querySelector('#about .section-title');
-        const aboutSubtitle = document.querySelector('.about-text h3');
-        
-        console.log('👤 About Section:', {
-            'Título': aboutTitle?.textContent,
-            'Subtítulo': aboutSubtitle?.textContent
-        });
-        
-        // Verificar experience section
-        const expTitle = document.querySelector('#experience .section-title');
-        const jobTitle1 = document.querySelector('.timeline-item:nth-child(1) .job-title');
-        
-        console.log('💼 Experience Section:', {
-            'Título': expTitle?.textContent,
-            'Job 1': jobTitle1?.textContent
-        });
-        
-        // Verificar projects section
-        const projTitle = document.querySelector('#projects .section-title');
-        const proj1Title = document.querySelector('.project-card:nth-child(1) .project-title');
-        
-        console.log('🚀 Projects Section:', {
-            'Título': projTitle?.textContent,
-            'Proyecto 1': proj1Title?.textContent
-        });
-        
-        console.log('✅ Verificación de traducciones completada');
+        // Remover después de 3 segundos
+        setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
     }
 }
 

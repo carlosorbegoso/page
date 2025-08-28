@@ -270,9 +270,15 @@ class StyleManager {
     
     // ===== CONTROLADOR DE ANIMACIONES =====
     setupAnimationController() {
+        // Restaurar todas las animaciones que funcionaban
         this.setupHoverEffects();
         this.setupClickEffects();
         this.setupTypingEffects();
+        
+        // Comentar temporalmente métodos que no existen
+        // this.setupFloatingElements();
+        // this.setupRevealAnimations();
+        // this.setupParallaxEffects();
     }
     
     setupHoverEffects() {

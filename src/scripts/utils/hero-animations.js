@@ -1,3 +1,9 @@
+import { HeroThreeEngine } from '../engines/hero-three-engine.js';
+import { TextEffectsEngine } from './text-effects-engine.js';
+import { ButtonParticlesEngine } from '../engines/button-particles-engine.js';
+import { BadgeParticlesEngine } from '../engines/badge-particles-engine.js';
+import { TechBadgesParticlesEngine } from '../engines/tech-badges-particles-engine.js';
+
 /**
  * Hero Animations Manager
  * Maneja todas las animaciones avanzadas del Hero section
@@ -13,6 +19,11 @@ export class HeroAnimations {
         this.floatingElements = [];
         this.isAnimating = false;
         this.observer = null;
+        this.heroThreeEngine = null;
+        this.textEffectsEngine = null;
+        this.buttonParticlesEngine = null;
+        this.badgeParticlesEngine = null;
+        this.techBadgesParticlesEngine = null;
         this.init();
     }
 
@@ -128,6 +139,26 @@ export class HeroAnimations {
         // Animar scroll indicator
         if (this.scrollIndicator) {
             this.animateScrollIndicator();
+        }
+
+        // Inicializar Text Effects Engine si no está inicializado
+        if (!this.textEffectsEngine) {
+            this.initTextEffects();
+        }
+
+        // Inicializar Button Particles Engine si no está inicializado
+        if (!this.buttonParticlesEngine) {
+            this.initButtonParticles();
+        }
+
+        // Inicializar Badge Particles Engine si no está inicializado
+        if (!this.badgeParticlesEngine) {
+            this.initBadgeParticles();
+        }
+
+        // Inicializar Tech Badges Particles Engine si no está inicializado
+        if (!this.techBadgesParticlesEngine) {
+            this.initTechBadgesParticles();
         }
 
         // Iniciar animaciones de Three.js si están disponibles
@@ -271,21 +302,70 @@ export class HeroAnimations {
 
     initThreeJSAnimations() {
         // Verificar si Three.js está disponible
-        if (window.VisualEffectsEngine) {
-            // Integrar con el motor visual existente
-            this.integrateWithThreeJS();
+        if (typeof THREE !== 'undefined') {
+            // Inicializar el motor Three.js específico del hero
+            this.heroThreeEngine = new HeroThreeEngine();
+            this.heroThreeEngine.init('hero-particles').then(success => {
+                if (success) {
+                    console.log('🎭 Hero Three.js Engine integrado correctamente');
+                    this.setupThemeIntegration();
+                }
+            });
+        } else {
+            console.warn('Three.js no está disponible para el hero');
         }
     }
 
-    integrateWithThreeJS() {
-        // Crear partículas específicas para el hero
-        this.createHeroParticles();
-        
-        // Crear constelaciones específicas para el hero
-        this.createHeroConstellations();
-        
-        // Crear estrellas específicas para el hero
-        this.createHeroStars();
+    initTextEffects() {
+        this.textEffectsEngine = new TextEffectsEngine();
+        this.textEffectsEngine.init();
+        console.log('🎨 Text Effects Engine integrado correctamente');
+    }
+
+    initButtonParticles() {
+        this.buttonParticlesEngine = new ButtonParticlesEngine();
+        this.buttonParticlesEngine.init();
+        console.log('🎭 Button Particles Engine integrado correctamente');
+    }
+
+    initBadgeParticles() {
+        try {
+            const badge = this.hero.querySelector('.hero-badge');
+            if (badge) {
+                this.badgeParticlesEngine = new BadgeParticlesEngine(badge);
+                console.log('🎨 Badge Particles Engine inicializado');
+            }
+        } catch (error) {
+            console.warn('❌ Error inicializando Badge Particles Engine:', error);
+        }
+    }
+
+    initTechBadgesParticles() {
+        try {
+            this.techBadgesParticlesEngine = new TechBadgesParticlesEngine();
+            console.log('🚀 Tech Badges Particles Engine inicializado');
+        } catch (error) {
+            console.warn('❌ Error inicializando Tech Badges Particles Engine:', error);
+        }
+    }
+
+    setupThemeIntegration() {
+        // Escuchar cambios de tema
+        const themeObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+                    const newTheme = document.documentElement.getAttribute('data-theme');
+                    if (this.heroThreeEngine) {
+                        this.heroThreeEngine.updateTheme(newTheme);
+                    }
+                }
+            });
+        });
+
+        themeObserver.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme']
+        });
     }
 
     createHeroParticles() {
@@ -359,6 +439,36 @@ export class HeroAnimations {
     destroy() {
         if (this.observer) {
             this.observer.disconnect();
+        }
+        
+        // Limpiar motor Three.js
+        if (this.heroThreeEngine) {
+            this.heroThreeEngine.dispose();
+            this.heroThreeEngine = null;
+        }
+        
+        // Limpiar motor de efectos de texto
+        if (this.textEffectsEngine) {
+            this.textEffectsEngine.dispose();
+            this.textEffectsEngine = null;
+        }
+        
+        // Limpiar motor de partículas de botones
+        if (this.buttonParticlesEngine) {
+            this.buttonParticlesEngine.dispose();
+            this.buttonParticlesEngine = null;
+        }
+
+        // Limpiar motor de partículas del badge
+        if (this.badgeParticlesEngine) {
+            this.badgeParticlesEngine.dispose();
+            this.badgeParticlesEngine = null;
+        }
+
+        // Limpiar motor de partículas de tech-badges
+        if (this.techBadgesParticlesEngine) {
+            this.techBadgesParticlesEngine.dispose();
+            this.techBadgesParticlesEngine = null;
         }
         
         // Remover event listeners

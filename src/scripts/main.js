@@ -8,6 +8,7 @@ import { componentLoader } from './utils/component-loader.js';
 import { getOrderedComponents, getConditionalComponents, getLoadingConfig } from './config/components.js';
 import { DeviceDetector } from './utils/device-detector.js';
 import { MobileMenuManager } from './utils/mobile-menu.js';
+import { HeroAnimations } from './utils/hero-animations.js';
 
 // ===== CLASE PRINCIPAL DEL PORTFOLIO =====
 class Portfolio {
@@ -18,6 +19,7 @@ class Portfolio {
         this.visualEngine = null;
         this.deviceDetector = null;
         this.mobileMenuManager = null;
+        this.heroAnimations = null;
     }
 
     /**
@@ -85,6 +87,10 @@ class Portfolio {
         // Inicializar menú móvil después de cargar componentes
         this.mobileMenuManager = new MobileMenuManager();
         log.info('📱 MobileMenuManager inicializado');
+        
+        // Inicializar animaciones del hero después de cargar componentes
+        this.heroAnimations = new HeroAnimations();
+        log.info('🎭 HeroAnimations inicializado');
         
         // Simular carga de otros módulos
         await this.simulateModuleLoad('StyleManager');

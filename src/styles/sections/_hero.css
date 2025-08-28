@@ -8,7 +8,7 @@
     justify-content: center;
     background: transparent;
     overflow: hidden;
-    padding: var(--spacing-6xl) var(--spacing-lg) var(--spacing-4xl);
+    padding: var(--spacing-4xl) var(--spacing-lg) var(--spacing-2xl);
 }
 
 /* ===== HERO BACKGROUND MEJORADO ===== */
@@ -74,53 +74,66 @@
     width: 100%;
     margin: 0 auto;
     text-align: center;
+    min-height: 85vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .hero-content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--spacing-2xl);
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg) 0;
 }
 
-/* ===== HERO BADGE MEJORADO ===== */
+/* ===== HERO BADGE MEJORADO CON GRADIENTES Y EFECTOS ===== */
 .hero-badge {
     position: relative;
     display: inline-flex;
     align-items: center;
     gap: var(--spacing-sm);
-    padding: var(--spacing-sm) var(--spacing-lg);
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(100, 181, 246, 0.2);
+    padding: var(--spacing-xs) var(--spacing-md);
+    background: linear-gradient(135deg, rgba(100, 181, 246, 0.08) 0%, rgba(255, 255, 255, 0.05) 100%);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(100, 181, 246, 0.15);
     border-radius: var(--border-radius-full);
     color: var(--primary-color);
-    font-size: var(--text-sm);
-    font-weight: 500;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
 }
 
-.hero-badge:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(100, 181, 246, 0.4);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(100, 181, 246, 0.2);
-}
+
 
 .badge-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     font-size: 0.9rem;
+    color: var(--primary-color);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 2;
 }
+
+/* Hover del icono eliminado - el badge es informativo */
 
 .badge-text {
     font-weight: 600;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.2px;
+    color: var(--primary-color);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 2;
+    font-size: 0.85rem;
 }
+
+/* Hover del texto eliminado - el badge es informativo */
 
 .badge-glow {
     position: absolute;
@@ -131,41 +144,287 @@
     background: linear-gradient(
         90deg,
         transparent,
-        rgba(100, 181, 246, 0.2),
+        rgba(100, 181, 246, 0.25),
         transparent
     );
-    transition: left 0.6s ease;
+    transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
 }
 
-.hero-badge:hover .badge-glow {
-    left: 100%;
+/* Hover del glow eliminado - el badge es informativo */
+
+/* Efecto de borde brillante */
+.badge-border-glow {
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(45deg, 
+        var(--primary-color), 
+        var(--accent-color), 
+        var(--primary-color)
+    );
+    border-radius: inherit;
+    opacity: 0;
+    filter: blur(4px);
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: -1;
+    background-size: 200% 200%;
+    animation: badgeBorderFlow 3s linear infinite;
 }
 
-/* ===== HERO TITLE MEJORADO ===== */
+/* Hover del borde brillante eliminado - el badge es informativo */
+
+@keyframes badgeBorderFlow {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 200% 200%; }
+}
+
+/* Animación de ripple eliminada ya que el badge no es clickeable */
+
+/* Contenedor de partículas del badge */
+.badge-particles-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Contenedor de partículas de tech-badges */
+.tech-badge-particles-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Partículas de hover para tech-badges */
+@keyframes hoverParticleFloat {
+    0% {
+        opacity: 0;
+        transform: scale(0) translateY(0);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.5) translateY(-40px);
+    }
+}
+
+.hover-particle {
+    position: absolute;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* ===== HERO TITLE ESPECTACULAR ===== */
 .hero-title {
-    font-size: clamp(2.5rem, 8vw, 5rem);
-    font-weight: 800;
-    line-height: 1.1;
-    color: var(--text-primary);
+    font-size: clamp(3.5rem, 12vw, 7rem);
+    font-weight: 900;
+    line-height: 0;
     margin: 0;
-    text-shadow: 0 0 30px rgba(100, 181, 246, 0.3);
+    letter-spacing: -0.01em;
+    position: relative;
+    z-index: 10;
+}
+
+/* ===== EFECTOS DE TEXTO SUAVES ===== */
+.text-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    transition: all 0.3s ease;
+}
+
+.text-particle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+.text-wave {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    transition: all 0.6s ease;
+}
+
+.subtle-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    transition: all 0.4s ease;
+}
+
+.badge-glow {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: inherit;
+    opacity: 0;
+    pointer-events: none;
+    z-index: -1;
+    transition: all 0.3s ease;
 }
 
 .title-line {
     display: block;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
+    margin-bottom: 0;
+    height: auto;
 }
 
 .title-first {
-    margin-bottom: var(--spacing-sm);
-}
-
-.title-second {
-    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    background: linear-gradient(135deg, var(--primary-color) 0%, #ffffff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    text-shadow: none;
+    filter: none;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    position: relative;
+    /* Fallback para navegadores que no soporten gradientes de texto */
+    color: var(--primary-color);
+}
+
+/* Fallback específico para navegadores que no soporten background-clip */
+@supports not (-webkit-background-clip: text) {
+    .title-first {
+        background: none;
+        -webkit-text-fill-color: initial;
+        color: var(--primary-color);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* Fallback adicional para casos donde el gradiente no funcione */
+.title-first:not([style*="background-clip"]) {
+    background: none !important;
+    -webkit-text-fill-color: initial !important;
+    color: var(--primary-color) !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Versión alternativa que siempre funciona */
+.title-first-alt {
+    background: none !important;
+    -webkit-text-fill-color: initial !important;
+    color: var(--primary-color) !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    position: relative;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.title-first::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    border-radius: 2px;
+    opacity: 0.6;
+    transform: scaleX(0);
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.title-first:hover::after {
+    transform: scaleX(1);
+}
+
+.title-second {
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--primary-color) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    filter: none;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    position: relative;
+    /* Fallback para navegadores que no soporten gradientes de texto */
+    color: var(--accent-color);
+}
+
+/* Fallback específico para navegadores que no soporten background-clip */
+@supports not (-webkit-background-clip: text) {
+    .title-second {
+        background: none;
+        -webkit-text-fill-color: initial;
+        color: var(--accent-color);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* Fallback adicional para casos donde el gradiente no funcione */
+.title-second:not([style*="background-clip"]) {
+    background: none !important;
+    -webkit-text-fill-color: initial !important;
+    color: var(--accent-color) !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Versión alternativa que siempre funciona */
+.title-second-alt {
+    background: none !important;
+    -webkit-text-fill-color: initial !important;
+    color: var(--accent-color) !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    position: relative;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.title-second::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-color), var(--primary-color));
+    border-radius: 2px;
+    opacity: 0.6;
+    transform: scaleX(0);
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.title-second:hover::after {
+    transform: scaleX(1);
 }
 
 .title-char {
@@ -173,6 +432,9 @@
     opacity: 0;
     transform: translateY(30px) rotateX(90deg);
     animation: titleCharIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    line-height: 1.4;
+    height: auto;
+    vertical-align: top;
 }
 
 .title-char:nth-child(1) { animation-delay: 0.1s; }
@@ -188,15 +450,17 @@
     to {
         opacity: 1;
         transform: translateY(0) rotateX(0deg);
+        line-height: 1.4;
+        height: auto;
     }
 }
 
 /* ===== HERO SUBTITLE MEJORADO ===== */
 .hero-subtitle {
-    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    font-size: clamp(1.1rem, 3.5vw, 1.6rem);
     font-weight: 400;
     color: var(--text-secondary);
-    margin: 0;
+    margin: var(--spacing-sm) 0 0 0;
     opacity: 0.9;
 }
 
@@ -228,56 +492,7 @@
     51%, 100% { opacity: 0; }
 }
 
-/* ===== HERO COMPANY MEJORADO ===== */
-.hero-company {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-sm) var(--spacing-lg);
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(100, 181, 246, 0.1);
-    border-radius: var(--border-radius-lg);
-    color: var(--text-secondary);
-    font-size: var(--text-base);
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.hero-company:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(100, 181, 246, 0.2);
-    transform: translateY(-1px);
-}
-
-.company-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    color: var(--primary-color);
-}
-
-.company-text {
-    font-weight: 600;
-}
-
-.company-glow {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(100, 181, 246, 0.1) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.hero-company:hover .company-glow {
-    opacity: 1;
-}
+/* Estilos de hero-company eliminados - ya no se usan */
 
 /* ===== HERO DESCRIPTION ===== */
 .hero-description {
@@ -286,7 +501,7 @@
 }
 
 .hero-description p {
-    font-size: var(--text-lg);
+    font-size: 1.1rem;
     line-height: 1.6;
     color: var(--text-secondary);
     margin: 0;
@@ -303,131 +518,196 @@
 }
 
 .btn-hero {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-md) var(--spacing-xl);
-    font-size: var(--text-base);
-    font-weight: 600;
-    text-decoration: none;
-    border-radius: var(--border-radius-lg);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
-    min-width: 160px;
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: var(--spacing-md) !important;
+    padding: var(--spacing-lg) var(--spacing-2xl) !important;
+    font-size: var(--text-base) !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    border-radius: var(--border-radius-2xl) !important;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    overflow: hidden !important;
+    min-width: 180px !important;
+    min-height: 56px !important;
+    cursor: pointer !important;
+    border: none !important;
 }
 
-/* Botón primario transparente */
-.btn-primary.btn-hero {
-    background: rgba(100, 181, 246, 0.15);
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(100, 181, 246, 0.3);
-    color: var(--primary-color);
-}
-
-.btn-primary.btn-hero:hover {
-    background: rgba(100, 181, 246, 0.25);
-    border-color: rgba(100, 181, 246, 0.5);
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(100, 181, 246, 0.3);
-}
-
-/* Botón outline transparente */
+/* Botones completamente unificados - idénticos en todo */
+.btn-primary.btn-hero,
 .btn-outline.btn-hero {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    color: var(--text-primary);
+    background: linear-gradient(135deg, rgba(100, 181, 246, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
+    backdrop-filter: blur(30px) !important;
+    border: 1px solid rgba(100, 181, 246, 0.08) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500 !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+    position: relative !important;
+    overflow: hidden !important;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transform: none !important;
+    border-radius: var(--border-radius-full) !important;
+    border-style: solid !important;
+    border-width: 1px !important;
+    padding: var(--spacing-md) var(--spacing-lg) !important;
+    min-height: 48px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
 }
 
+.btn-primary.btn-hero::before,
+.btn-outline.btn-hero::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(90deg, transparent, rgba(100, 181, 246, 0.15), transparent) !important;
+    transition: left 1.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.btn-primary.btn-hero:hover,
 .btn-outline.btn-hero:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.4);
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, rgba(100, 181, 246, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%) !important;
+    border-color: rgba(100, 181, 246, 0.12) !important;
+    color: rgba(255, 255, 255, 1) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 20px rgba(100, 181, 246, 0.1) !important;
+}
+
+.btn-primary.btn-hero:hover::before,
+.btn-outline.btn-hero:hover::before {
+    left: 100% !important;
+}
+
+/* Estados active y focus para evitar efectos bruscos */
+.btn-primary.btn-hero:active,
+.btn-outline.btn-hero:active,
+.btn-primary.btn-hero:focus,
+.btn-outline.btn-hero:focus {
+    transform: translateY(0px) !important;
+    transition: all 0.1s ease !important;
+    outline: none !important;
+}
+
+.btn-primary.btn-hero:active .btn-icon,
+.btn-outline.btn-hero:active .btn-icon {
+    transform: scale(0.98) !important;
+    transition: transform 0.1s ease !important;
+}
+
+/* Efectos de partículas unificados para ambos botones */
+.btn-particles {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    pointer-events: none !important;
+    z-index: 1 !important;
+    opacity: 1 !important;
 }
 
 .btn-content {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    z-index: 2;
-    position: relative;
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--spacing-sm) !important;
+    z-index: 2 !important;
+    position: relative !important;
+    width: 100% !important;
+    justify-content: center !important;
 }
 
 .btn-icon {
-    font-size: 1.1rem;
-    transition: transform 0.3s ease;
+    font-size: 1.1rem !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative !important;
+    z-index: 2 !important;
+    color: inherit !important;
+    opacity: 0.9 !important;
+    margin-right: var(--spacing-xs) !important;
 }
 
-.btn-hero:hover .btn-icon {
-    transform: scale(1.1);
+.btn-primary.btn-hero:hover .btn-icon {
+    transform: scale(1.05) rotate(2deg) !important;
+    opacity: 1 !important;
+}
+
+.btn-primary.btn-hero:hover .btn-icon,
+.btn-outline.btn-hero:hover .btn-icon {
+    transform: scale(1.05) rotate(2deg) !important;
+    opacity: 1 !important;
 }
 
 .btn-text {
-    font-weight: 600;
-    letter-spacing: 0.5px;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em !important;
+    font-size: 0.9rem !important;
+    text-transform: none !important;
+    font-family: var(--font-primary) !important;
+    position: relative !important;
+    z-index: 2 !important;
+    color: inherit !important;
+    opacity: 0.9 !important;
+    white-space: nowrap !important;
 }
 
 .btn-glow {
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
+    position: absolute !important;
+    top: 0 !important;
+    left: -100% !important;
+    width: 100% !important;
+    height: 100% !important;
     background: linear-gradient(
         90deg,
         transparent,
-        rgba(255, 255, 255, 0.2),
+        rgba(100, 181, 246, 0.2),
         transparent
-    );
-    transition: left 0.6s ease;
+    ) !important;
+    transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-.btn-hero:hover .btn-glow {
-    left: 100%;
+.btn-primary.btn-hero:hover .btn-glow,
+.btn-outline.btn-hero:hover .btn-glow {
+    left: 100% !important;
 }
 
-.btn-particles {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+/* Estilos de partículas unificados ya definidos arriba */
+
+.btn-primary.btn-hero:hover .btn-particles,
+.btn-outline.btn-hero:hover .btn-particles {
+    opacity: 1 !important;
+    animation: particleGlow 2s ease-in-out infinite !important;
 }
 
-.btn-primary.btn-hero:hover .btn-particles {
-    opacity: 1;
+@keyframes particleGlow {
+    0%, 100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.1); opacity: 0.6; }
 }
 
-.btn-border {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: 2px solid transparent;
-    border-radius: var(--border-radius-lg);
-    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    background-size: 200% 200%;
-    animation: borderFlow 2s linear infinite;
-}
+/* Estilos de btn-border eliminados - ya no se usan */
 
-@keyframes borderFlow {
-    0% { background-position: 0% 0%; }
-    100% { background-position: 200% 200%; }
-}
-
-/* ===== TECH STACK MEJORADO ===== */
+/* ===== TECH STACK MEJORADO CON INTEGRACIÓN THREE.JS ===== */
 .tech-stack {
     display: flex;
     gap: var(--spacing-md);
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
+    position: relative;
+    z-index: 5;
 }
 
 .tech-badge {
@@ -436,44 +716,59 @@
     flex-direction: column;
     align-items: center;
     gap: var(--spacing-xs);
-    padding: var(--spacing-md);
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(100, 181, 246, 0.15);
-    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-sm);
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(100, 181, 246, 0.08);
+    border-radius: var(--border-radius-xl);
     color: var(--text-secondary);
-    font-size: var(--text-sm);
+    font-size: 0.85rem;
     font-weight: 500;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: visible;
+    cursor: pointer;
     min-width: 80px;
+    min-height: 80px;
 }
 
 .tech-badge:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(100, 181, 246, 0.3);
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 8px 25px rgba(100, 181, 246, 0.2);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(100, 181, 246, 0.15);
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 15px rgba(100, 181, 246, 0.1);
 }
 
 .tech-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    font-size: 1.5rem;
+    width: 28px;
+    height: 28px;
+    font-size: 1.3rem;
     color: var(--primary-color);
-    transition: transform 0.3s ease;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 3;
 }
 
 .tech-badge:hover .tech-icon {
-    transform: scale(1.1) rotate(5deg);
+    transform: scale(1.05) rotate(2deg);
+    color: var(--accent-color);
 }
 
 .tech-name {
     font-weight: 600;
     text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 3;
+}
+
+.tech-badge:hover .tech-name {
+    color: var(--text-primary);
+    font-weight: 700;
 }
 
 .tech-glow {
@@ -482,13 +777,14 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle, rgba(100, 181, 246, 0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(100, 181, 246, 0.05) 0%, transparent 70%);
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
 }
 
 .tech-badge:hover .tech-glow {
-    opacity: 1;
+    opacity: 0.8;
 }
 
 /* ===== HERO SCROLL INDICATOR MEJORADO ===== */
@@ -677,6 +973,7 @@
     
     .hero-title {
         font-size: clamp(2rem, 10vw, 3.5rem);
+        line-height: 1.5;
     }
     
     .hero-subtitle {
@@ -690,7 +987,8 @@
     
     .btn-hero {
         min-width: 200px;
-        padding: var(--spacing-md) var(--spacing-lg);
+        padding: var(--spacing-lg) var(--spacing-2xl);
+        font-size: var(--text-base);
     }
     
     .tech-stack {
@@ -716,6 +1014,7 @@
     
     .hero-title {
         font-size: clamp(1.8rem, 12vw, 2.5rem);
+        line-height: 1.6;
     }
     
     .hero-subtitle {
@@ -728,7 +1027,7 @@
     
     .btn-hero {
         min-width: 180px;
-        padding: var(--spacing-sm) var(--spacing-md);
+        padding: var(--spacing-md) var(--spacing-lg);
         font-size: var(--text-sm);
     }
     
@@ -749,5 +1048,142 @@
     
     .tech-name {
         font-size: var(--text-xs);
+    }
+}
+
+/* ===== ANIMACIONES DE THREE.JS Y PARTÍCULAS ===== */
+
+/* Partículas del hero */
+.hero-particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: rgba(100, 181, 246, 0.6);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 2;
+}
+
+@keyframes heroParticleFloat {
+    0%, 100% {
+        transform: translateY(0px) translateX(0px);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translateY(-20px) translateX(10px);
+        opacity: 1;
+    }
+}
+
+/* Constelaciones del hero */
+.hero-constellation {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(100, 181, 246, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 3;
+}
+
+@keyframes heroConstellationGlow {
+    0%, 100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.1);
+    }
+}
+
+/* Estrellas del hero */
+.hero-star {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 4;
+}
+
+@keyframes heroStarTwinkle {
+    0%, 100% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.5);
+    }
+}
+
+/* Efectos de hover para elementos interactivos */
+.hero-particle:hover,
+.hero-constellation:hover,
+.hero-star:hover {
+    transform: scale(1.5);
+    transition: transform 0.3s ease;
+}
+
+/* Animación de fadeInOut para el texto del scroll */
+@keyframes fadeInOut {
+    0%, 100% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Mejoras para el tema oscuro */
+[data-theme="dark"] .hero-particle {
+    background: rgba(79, 195, 247, 0.6);
+}
+
+[data-theme="dark"] .hero-constellation {
+    background: radial-gradient(circle, rgba(79, 195, 247, 0.1) 0%, transparent 70%);
+}
+
+[data-theme="dark"] .hero-star {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+/* Optimizaciones de performance */
+.hero-particle,
+.hero-constellation,
+.hero-star {
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+}
+
+/* Efectos de profundidad para el hero */
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(100, 181, 246, 0.02) 0%,
+        transparent 50%
+    );
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Mejoras para dispositivos de alta densidad */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .hero-particle {
+        width: 1px;
+        height: 1px;
+    }
+    
+    .hero-star {
+        width: 0.5px;
+        height: 0.5px;
     }
 }

@@ -11,7 +11,6 @@ build/
 out/
 .next/
 .nuxt/
-.vuepress/dist/
 
 # ===== ENTORNO =====
 .env

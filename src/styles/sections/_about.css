@@ -1267,9 +1267,6 @@
     animation: techPulse 2.5s ease-in-out infinite;
 }
 
-.webgl-fallback .value-inline-item {
-    /* Animación removida para mejorar legibilidad */
-}
 
 @keyframes cardFloat {
     0%, 100% { transform: translateY(0px); }

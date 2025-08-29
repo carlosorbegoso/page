@@ -202,7 +202,9 @@
 }
 
 /* Forzar transparencia en todos los elementos del footer */
-.footer * {
+.footer *,
+.footer *::before,
+.footer *::after {
     background: transparent !important;
     background-color: transparent !important;
 }

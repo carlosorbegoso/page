@@ -10,7 +10,15 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: 'index.html'
+      },
+      output: {
+        manualChunks: {
+          three: ['three']
+        }
       }
+    },
+    commonjsOptions: {
+      include: [/node_modules/]
     }
   },
   server: {

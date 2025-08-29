@@ -1,70 +1,107 @@
-<!-- ===== ABOUT SECTION MODERNO ===== -->
+<!-- ===== ABOUT SECTION OPTIMIZADO ===== -->
 <section id="about" class="about section">
+    <!-- Fondo Three.js optimizado -->
     <div class="about-background">
         <div class="about-pattern"></div>
+        <div class="about-particles" id="about-particles"></div>
+        <div class="about-gradient"></div>
+        <div class="about-constellations" id="about-constellations"></div>
     </div>
     
     <div class="container">
         <div class="section-header">
-            <div class="section-badge">
-                <i class="fas fa-user"></i>
+            <div class="section-badge animate-fade-in-up" data-delay="0.2s">
+                <i class="fas fa-user" aria-hidden="true"></i>
                 <span>Conóceme</span>
             </div>
-            <h2 class="section-title fade-in">Sobre Mí</h2>
-            <p class="section-subtitle fade-in">Descubre mi historia y pasión por el desarrollo</p>
+            <h2 class="section-title fade-in animate-fade-in-up" data-delay="0.4s">Sobre Mí</h2>
+            <p class="section-subtitle fade-in animate-fade-in-up" data-delay="0.6s">Descubre mi historia y pasión por el desarrollo</p>
         </div>
         
         <div class="about-content">
-            <div class="about-text fade-in">
-                <div class="about-card">
-                    <div class="about-icon">
-                        <i class="fas fa-code"></i>
+            <!-- Lado izquierdo: Foto y estadísticas -->
+            <div class="about-visual fade-in animate-fade-in-up" data-delay="0.8s">
+                <div class="about-image-container">
+                    <div class="avatar-container">
+                        <img src="src/assets/images/profile.jpeg" alt="Carlos Orbegoso - Backend Developer" class="avatar-image">
+                        <div class="avatar-ring"></div>
+                        <div class="avatar-glow"></div>
+                        <div class="avatar-particles-container" id="avatar-particles"></div>
                     </div>
-                    <h3>Desarrollo Backend</h3>
-                    <p>Backend Developer con más de <strong>5 años de experiencia</strong> en desarrollo de aplicaciones empresariales robustas y escalables. Especializado en <strong>Java</strong>, <strong>Spring Boot</strong> y <strong>Quarkus</strong>.</p>
                 </div>
                 
-                <div class="about-card">
-                    <div class="about-icon">
-                        <i class="fas fa-architecture"></i>
+                <!-- Estadísticas principales -->
+                <div class="about-stats-main">
+                    <div class="stat-main-item animate-fade-in-up" data-delay="1.0s">
+                        <div class="stat-main-number">5+</div>
+                        <div class="stat-main-label">Años de Experiencia</div>
                     </div>
-                    <h3>Arquitectura & Microservicios</h3>
-                    <p>Apasionado por la <strong>arquitectura de microservicios</strong>, la <strong>optimización de performance</strong> y las <strong>mejores prácticas de desarrollo</strong>. Experiencia en diseño de sistemas distribuidos.</p>
-                </div>
-                
-                <div class="about-card">
-                    <div class="about-icon">
-                        <i class="fas fa-rocket"></i>
+                    <div class="stat-main-item animate-fade-in-up" data-delay="1.2s">
+                        <div class="stat-main-number">50+</div>
+                        <div class="stat-main-label">Proyectos Completados</div>
                     </div>
-                    <h3>Innovación & Aprendizaje</h3>
-                    <p>Constantemente aprendiendo nuevas tecnologías y metodologías. Comprometido con la <strong>excelencia técnica</strong> y la <strong>calidad del código</strong>.</p>
+                    <div class="stat-main-item animate-fade-in-up" data-delay="1.4s">
+                        <div class="stat-main-number">100%</div>
+                        <div class="stat-main-label">Compromiso</div>
+                    </div>
                 </div>
             </div>
             
-            <div class="about-visual fade-in">
-                <div class="about-image-container">
-                    <div class="avatar-container">
-                        <img src="src/assets/images/profile.jpeg" alt="Carlos Orbegoso" class="avatar-image">
-                        <div class="avatar-ring"></div>
-                        <div class="avatar-glow"></div>
+            <!-- Lado derecho: Información fluida y transparente -->
+            <div class="about-text fade-in animate-fade-in-up" data-delay="1.0s">
+                <!-- Resumen personal -->
+                <div class="about-summary animate-fade-in-up" data-delay="1.2s">
+                    <h3 class="summary-title">Backend Developer & Java Specialist</h3>
+                    <p class="summary-description">Desarrollador backend con más de <strong>5 años de experiencia</strong> en aplicaciones empresariales. Especializado en <strong>Java</strong>, <strong>Spring Boot</strong> y <strong>Quarkus</strong>.</p>
+                </div>
+                
+                <!-- Especialidades en línea -->
+                <div class="about-specialties-inline animate-fade-in-up" data-delay="1.4s">
+                    <div class="specialty-inline-item">
+                        <i class="fas fa-code specialty-icon-inline" aria-hidden="true"></i>
+                        <span>Desarrollo Backend</span>
+                    </div>
+                    <div class="specialty-inline-item">
+                        <i class="fas fa-architecture specialty-icon-inline" aria-hidden="true"></i>
+                        <span>Arquitectura</span>
+                    </div>
+                    <div class="specialty-inline-item">
+                        <i class="fas fa-rocket specialty-icon-inline" aria-hidden="true"></i>
+                        <span>Performance</span>
                     </div>
                 </div>
                 
-                <div class="about-stats">
-                    <div class="stat-item">
-                        <div class="stat-number">5+</div>
-                        <div class="stat-label">Años de Experiencia</div>
+                <!-- Stack tecnológico compacto -->
+                <div class="about-tech-compact animate-fade-in-up" data-delay="1.6s">
+                    <h4 class="tech-compact-title">Stack Tecnológico</h4>
+                    <div class="tech-tags-compact">
+                        <span class="tech-tag-compact">Java</span>
+                        <span class="tech-tag-compact">Spring Boot</span>
+                        <span class="tech-tag-compact">Quarkus</span>
+                        <span class="tech-tag-compact">Angular</span>
+                        <span class="tech-tag-compact">Docker</span>
+                        <span class="tech-tag-compact">Kubernetes</span>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-number">50+</div>
-                        <div class="stat-label">Proyectos Completados</div>
+                </div>
+                
+                <!-- Valores en línea -->
+                <div class="about-values-inline animate-fade-in-up" data-delay="1.8s">
+                    <div class="value-inline-item">
+                        <i class="fas fa-star value-icon-inline" aria-hidden="true"></i>
+                        <span>Excelencia Técnica</span>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-number">100%</div>
-                        <div class="stat-label">Compromiso</div>
+                    <div class="value-inline-item">
+                        <i class="fas fa-graduation-cap value-icon-inline" aria-hidden="true"></i>
+                        <span>Aprendizaje Continuo</span>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+    
+    <!-- Contenedores Three.js adicionales -->
+    <div class="about-threejs-containers">
+        <div class="about-ambient-particles" id="about-ambient-particles"></div>
+        <div class="about-interactive-elements" id="about-interactive-elements"></div>
     </div>
 </section>

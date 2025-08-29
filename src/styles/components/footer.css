@@ -2,7 +2,7 @@
 
 .footer {
     position: relative;
-    background: rgba(0, 0, 0, 0.8);
+    background: transparent;
     backdrop-filter: blur(20px);
     border-top: 1px solid rgba(100, 181, 246, 0.1);
     padding: var(--spacing-4xl) 0 var(--spacing-2xl) 0;
@@ -28,15 +28,16 @@
     background-image: 
         radial-gradient(circle at 20% 80%, rgba(100, 181, 246, 0.03) 0%, transparent 50%),
         radial-gradient(circle at 80% 20%, rgba(255, 107, 53, 0.03) 0%, transparent 50%);
-    opacity: 0.5;
+    opacity: 0.3;
 }
 
 /* Contenido principal del footer */
 .footer-content {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: var(--spacing-3xl);
     margin-bottom: var(--spacing-3xl);
+    background: transparent;
 }
 
 /* Sección principal */
@@ -44,6 +45,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);
+    background: transparent;
 }
 
 .footer-brand h3 {
@@ -63,65 +65,6 @@
     font-weight: 500;
 }
 
-.footer-description p {
-    color: var(--text-secondary);
-    line-height: 1.6;
-    max-width: 400px;
-}
-
-/* Enlaces rápidos */
-.footer-links h4 {
-    font-size: var(--text-lg);
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-lg);
-}
-
-.footer-links ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.footer-links li {
-    margin-bottom: var(--spacing-sm);
-}
-
-.footer-links a {
-    color: var(--text-secondary);
-    text-decoration: none;
-    transition: color 0.3s ease;
-    font-size: var(--text-sm);
-}
-
-.footer-links a:hover {
-    color: var(--primary-color);
-}
-
-/* Tecnologías */
-.footer-tech h4 {
-    font-size: var(--text-lg);
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-lg);
-}
-
-.tech-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-sm);
-}
-
-.tech-tags span {
-    background: rgba(100, 181, 246, 0.1);
-    border: 1px solid rgba(100, 181, 246, 0.2);
-    border-radius: var(--border-radius-full);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: var(--text-xs);
-    color: var(--primary-color);
-    font-weight: 500;
-}
-
 /* Línea divisoria */
 .footer-divider {
     height: 1px;
@@ -129,13 +72,14 @@
     margin: var(--spacing-2xl) 0;
 }
 
-/* Footer inferior */
+/* Copyright y redes sociales */
 .footer-bottom {
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: var(--spacing-lg);
+    background: transparent;
 }
 
 .footer-copyright p {
@@ -147,6 +91,7 @@
 .footer-social {
     display: flex;
     gap: var(--spacing-md);
+    background: transparent;
 }
 
 .footer-social a {
@@ -165,7 +110,7 @@
 
 .footer-social a:hover {
     background: rgba(100, 181, 246, 0.1);
-    border-color: rgba(100, 181, 246, 0.4);
+    border-color: rgba(100, 181, 246, 0.6);
     color: var(--primary-color);
     transform: translateY(-2px);
 }
@@ -178,10 +123,6 @@
         text-align: center;
     }
     
-    .footer-description p {
-        max-width: 100%;
-    }
-    
     .footer-bottom {
         flex-direction: column;
         text-align: center;
@@ -189,15 +130,5 @@
     
     .footer {
         padding: var(--spacing-3xl) 0 var(--spacing-xl) 0;
-    }
-}
-
-@media (max-width: 480px) {
-    .tech-tags {
-        justify-content: center;
-    }
-    
-    .footer-social {
-        justify-content: center;
     }
 }

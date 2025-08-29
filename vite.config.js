@@ -3,6 +3,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   root: '.',
   publicDir: 'assets',
+  base: './', // Esto asegura que las rutas sean relativas
   build: {
     outDir: 'dist',
     assetsDir: 'assets',

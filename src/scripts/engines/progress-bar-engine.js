@@ -1,24 +1,51 @@
-/* ===== PROGRESS BAR THREE.JS ENGINE COMPLETAMENTE ÉPICO ===== */
+// Importaciones modernas de Three.js 0.158.0+ con Vite
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { RGBShiftShader } from 'three/addons/shaders/RGBShiftShader.js';
 
-class CosmicProgressEngine {
+/*
+ * EPIC PROGRESS BAR ENGINE - Versión Revolucionaria
+ * 
+ * Esta versión usa Three.js 0.158.0+ con módulos ES6 modernos
+ * Los efectos avanzados de post-procesamiento están habilitados por defecto
+ */
+
+class EpicProgressEngine {
     constructor() {
         this.scene = null;
         this.camera = null;
         this.renderer = null;
+        this.composer = null;
         this.particles = [];
-        this.constellationLines = [];
-        this.galaxies = [];
-        this.cosmicDust = [];
         this.progressElements = [];
         this.progress = 0;
         this.isInitialized = false;
+        this.clock = new THREE.Clock();
+        this.uniforms = {};
+        this.audioContext = null;
+        this.analyser = null;
+        
+        // Configuración épica y nocturna
+        this.config = {
+            particleCount: 2000, // Reducido para mejor rendimiento
+            maxParticles: 3000,
+            particleSize: 0.008, // Partículas más pequeñas y elegantes
+            animationSpeed: 1.2, // Movimiento más suave
+            bloomIntensity: 2.0,
+            chromaticAberration: 0.003,
+            enableAudio: true,
+            enableHologram: true,
+            enableQuantum: true
+        };
         
         this.init();
     }
     
     init() {
         try {
-            // Agregar clase loading al contenedor
             const container = document.getElementById('progress-container');
             if (container) {
                 container.classList.add('loading');
@@ -27,605 +54,995 @@ class CosmicProgressEngine {
             this.setupScene();
             this.setupCamera();
             this.setupRenderer();
-            this.createCosmicElements();
-            this.createProgressCounter();
+            this.setupPostProcessing();
+            this.setupAudio();
+            this.createQuantumParticleSystem();
+            this.createHolographicProgress();
+            this.createCosmicEffects();
+            this.createNeuralNetworks();
             
             this.isInitialized = true;
             this.animate();
         } catch (error) {
-            console.error('Error inicializando ProgressBar:', error);
+            console.error('Error inicializando EpicProgressEngine:', error);
         }
     }
     
     setupScene() {
         this.scene = new THREE.Scene();
-        this.scene.fog = new THREE.Fog(0x000000, 15, 50);
+        
+        // Niebla nocturna más densa y misteriosa
+        this.scene.fog = new THREE.FogExp2(0x000011, 0.025);
+        
+        // Sistema de iluminación nocturno
+        this.setupNocturnalLighting();
+        
+        // Background nocturno profundo
+        this.scene.background = new THREE.Color(0x000011);
+    }
+    
+    setupNocturnalLighting() {
+        // Luz lunar principal (más suave y azulada)
+        const moonlight = new THREE.DirectionalLight(0x1E3A8A, 1.2);
+        moonlight.position.set(15, 15, 10);
+        moonlight.castShadow = true;
+        moonlight.shadow.mapSize.width = 2048;
+        moonlight.shadow.mapSize.height = 2048;
+        moonlight.shadow.camera.near = 0.1;
+        moonlight.shadow.camera.far = 100;
+        this.scene.add(moonlight);
+        
+        // Luces estelares (más tenues y elegantes)
+        const starlight1 = new THREE.PointLight(0x3B82F6, 1.5, 25);
+        starlight1.position.set(-8, 5, 3);
+        this.scene.add(starlight1);
+        
+        const starlight2 = new THREE.PointLight(0x8B5CF6, 1.2, 22);
+        starlight2.position.set(8, -3, 4);
+        this.scene.add(starlight2);
+        
+        // Luz de energía cuántica (más sutil)
+        const energyLight = new THREE.SpotLight(0x0EA5E9, 2.5, 30, Math.PI / 8, 0.3);
+        energyLight.position.set(0, 10, 5);
+        energyLight.target.position.set(0, 0, 0);
+        this.scene.add(energyLight);
+        this.scene.add(energyLight.target);
     }
     
     setupCamera() {
         this.camera = new THREE.PerspectiveCamera(
             75,
             window.innerWidth / window.innerHeight,
-            0.1,
+            0.01,
             1000
         );
-        this.camera.position.z = 8;
+        this.camera.position.set(0, 0, 20);
+        this.camera.lookAt(0, 0, 0);
     }
     
     setupRenderer() {
-        const canvas = document.getElementById('progress-canvas');
-        
+        // Crear canvas si no existe
+        let canvas = document.getElementById('progress-canvas');
         if (!canvas) {
-            console.error('No se encontró el canvas progress-canvas');
-            return;
+            canvas = document.createElement('canvas');
+            canvas.id = 'progress-canvas';
+            canvas.style.position = 'fixed';
+            canvas.style.top = '0';
+            canvas.style.left = '0';
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            canvas.style.zIndex = '1000';
+            document.body.appendChild(canvas);
         }
         
         this.renderer = new THREE.WebGLRenderer({ 
             canvas: canvas,
             antialias: true,
-            alpha: true 
+            alpha: true,
+            powerPreference: "high-performance"
         });
         
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        this.renderer.toneMappingExposure = 1.5;
+        this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+        this.renderer.useLegacyLights = false;
     }
     
-        createCosmicElements() {
-        this.createVirgoConstellation();
-        this.createMiniGalaxies();
-        this.createFloatingParticles();
-        this.createEnergyRings();
-    }
-    
-    createProgressCounter() {
+    setupPostProcessing() {
         try {
-            this.createCentralPulse();
-            this.createProgressRing();
-            this.createFloatingParticles();
+            // Configuración moderna del EffectComposer
+            this.composer = new EffectComposer(this.renderer);
+            
+            // Render pass básico
+            const renderPass = new RenderPass(this.scene, this.camera);
+            this.composer.addPass(renderPass);
+            
+            // Bloom pass con configuración moderna
+            const bloomPass = new UnrealBloomPass(
+                new THREE.Vector2(window.innerWidth, window.innerHeight),
+                0.8,  // strength
+                0.5,  // radius
+                0.85  // threshold
+            );
+            this.composer.addPass(bloomPass);
+            
+            // Aberración cromática avanzada usando RGBShift
+            const chromaticPass = new ShaderPass(RGBShiftShader);
+            chromaticPass.uniforms.amount.value = this.config.chromaticAberration;
+            this.composer.addPass(chromaticPass);
+            
+    
+            
         } catch (error) {
-            console.error('Error creando ProgressCounter:', error);
+            console.error('Error en post-procesamiento, usando renderizado básico:', error);
+            this.composer = null;
         }
     }
     
-    createCentralPulse() {
+
+    
+    setupAudio() {
+        if (!this.config.enableAudio) return;
+        
         try {
-            // Círculo central con borde neón elegante
-            const outerGeometry = new THREE.RingGeometry(1.2, 1.4, 128);
-            const outerMaterial = new THREE.MeshBasicMaterial({
-                color: 0x00D4FF,
-                transparent: true,
-                opacity: 0.8,
-                side: THREE.DoubleSide
-            });
-            
-            const outer = new THREE.Mesh(outerGeometry, outerMaterial);
-            outer.position.z = 2;
-            outer.userData = { 
-                type: 'outerRing', 
-                pulseSpeed: 0.02,
-                pulseScale: 1,
-                originalScale: 1
-            };
-            this.scene.add(outer);
-            
-            // Círculo interior sólido
-            const innerGeometry = new THREE.CircleGeometry(1.0, 128);
-            const innerMaterial = new THREE.MeshBasicMaterial({
-                color: 0x1A1A2E,
-                transparent: true,
-                opacity: 0.9,
-                side: THREE.DoubleSide
-            });
-            
-            const inner = new THREE.Mesh(innerGeometry, innerMaterial);
-            inner.position.z = 2.1;
-            this.scene.add(inner);
-            
-            this.progressElements.push(outer);
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            this.analyser = this.audioContext.createAnalyser();
+            this.analyser.fftSize = 256;
+            this.audioData = new Uint8Array(this.analyser.frequencyBinCount);
         } catch (error) {
-            console.error('Error creando pulso central:', error);
+            console.log('Audio no disponible:', error);
         }
     }
     
-    createProgressRing() {
-        try {
-            // Anillo de progreso exterior (fondo) muy sutil
-            const ringGeometry = new THREE.RingGeometry(2.8, 3.2, 128);
-            const ringMaterial = new THREE.MeshBasicMaterial({
-                color: 0x16213E,
-                transparent: true,
-                opacity: 0.3,
-                side: THREE.DoubleSide
-            });
-            
-            const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-            ring.position.z = 1;
-            this.scene.add(ring);
-            
-            // Anillo de progreso que se llena con gradiente
-            const progressGeometry = new THREE.RingGeometry(2.8, 3.2, 128);
-            const progressMaterial = new THREE.MeshBasicMaterial({
-                color: 0x00D4FF,
-                transparent: true,
-                opacity: 0.9,
-                side: THREE.DoubleSide
-            });
-            
-            const progressRing = new THREE.Mesh(progressGeometry, progressMaterial);
-            progressRing.position.z = 1.1;
-            progressRing.userData = { type: 'progressRing', progress: 0 };
-            this.scene.add(progressRing);
-            
-            this.progressElements.push(progressRing);
-        } catch (error) {
-            console.error('Error creando anillo de progreso:', error);
-        }
-    }
-    
-    createProgressStars() {
-        try {
-            // Crear 5 estrellas de progreso en posiciones específicas
-            const starPositions = [
-                { x: 0, y: 4, z: 0, progress: 20 },
-                { x: 3, y: 2.5, z: 0, progress: 40 },
-                { x: 4, y: 0, z: 0, progress: 60 },
-                { x: 3, y: -2.5, z: 0, progress: 80 },
-                { x: 0, y: -4, z: 0, progress: 100 }
-            ];
-            
-            starPositions.forEach((pos, index) => {
-                try {
-                    const starGeometry = this.createStarGeometry(0.3);
-                    const starMaterial = new THREE.MeshBasicMaterial({
-                        color: 0xFFD700,
-                        transparent: true,
-                        opacity: 0,
-                        side: THREE.DoubleSide
-                    });
-                    
-                    const star = new THREE.Mesh(starGeometry, starMaterial);
-                    star.position.set(pos.x, pos.y, pos.z);
-                    star.userData = { 
-                        type: 'progressStar', 
-                        progress: pos.progress,
-                        active: false,
-                        originalScale: 1
-                    };
-                    
-                    this.scene.add(star);
-                    this.progressElements.push(star);
-                } catch (starError) {
-                    console.error('Error creando estrella', index, ':', starError);
-                }
-            });
-        } catch (error) {
-            console.error('Error creando ProgressStars:', error);
-        }
-    }
-    
-    createStarGeometry(size) {
+    createQuantumParticleSystem() {
         const geometry = new THREE.BufferGeometry();
-        const vertices = [];
+        const positions = new Float32Array(this.config.particleCount * 3);
+        const velocities = new Float32Array(this.config.particleCount * 3);
+        const colors = new Float32Array(this.config.particleCount * 3);
+        const sizes = new Float32Array(this.config.particleCount);
         
-        // Crear forma de estrella de 5 puntas
-        for (let i = 0; i < 5; i++) {
-            const angle = (i / 5) * Math.PI * 2;
-            const outerRadius = size;
-            const innerRadius = size * 0.4;
+        for (let i = 0; i < this.config.particleCount; i++) {
+            const i3 = i * 3;
             
-            // Punto exterior
-            vertices.push(
-                Math.cos(angle) * outerRadius,
-                Math.sin(angle) * outerRadius,
-                0
-            );
+            // Distribución cuántica en múltiples dimensiones
+            const angle = (i / this.config.particleCount) * Math.PI * 12;
+            const radius = Math.random() * 30 + 5;
+            const height = (Math.random() - 0.5) * 15;
+            const spiral = Math.sin(i * 0.1) * 3;
             
-            // Punto interior
-            const innerAngle = angle + Math.PI / 5;
-            vertices.push(
-                Math.cos(innerAngle) * innerRadius,
-                Math.sin(innerAngle) * innerRadius,
-                0
-            );
+            positions[i3] = Math.cos(angle) * (radius + spiral);
+            positions[i3 + 1] = height + Math.sin(angle * 2) * 2;
+            positions[i3 + 2] = Math.sin(angle) * (radius + spiral);
+            
+            // Velocidades cuánticas
+            velocities[i3] = -Math.sin(angle) * 0.03;
+            velocities[i3 + 1] = (Math.random() - 0.5) * 0.02;
+            velocities[i3 + 2] = Math.cos(angle) * 0.03;
+            
+            // Colores cuánticos
+            const hue = (i / this.config.particleCount) + Math.sin(i * 0.1) * 0.3;
+            const color = new THREE.Color().setHSL(hue, 0.9, 0.7);
+            colors[i3] = color.r;
+            colors[i3 + 1] = color.g;
+            colors[i3 + 2] = color.b;
+            
+            sizes[i] = Math.random() * this.config.particleSize + 0.008;
         }
         
-        // Crear caras triangulares
-        const indices = [];
-        for (let i = 0; i < 10; i += 2) {
-            const next = (i + 2) % 10;
-            indices.push(i, i + 1, next);
-            indices.push(i + 1, next + 1, next);
-        }
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
         
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-        geometry.setIndex(indices);
-        geometry.computeVertexNormals();
+        // Material de partículas nocturnas más elegante
+        const particleMaterial = new THREE.PointsMaterial({
+            size: 0.012, // Partículas más pequeñas
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.6, // Más sutil
+            sizeAttenuation: true,
+            map: this.createQuantumParticleTexture(),
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
         
-        return geometry;
+        const particleSystem = new THREE.Points(geometry, particleMaterial);
+        particleSystem.userData = {
+            type: 'quantumParticleSystem',
+            velocities: velocities,
+            originalPositions: positions.slice()
+        };
+        
+        this.scene.add(particleSystem);
+        this.progressElements.push(particleSystem);
     }
     
-    createVisualCounter() {
-        try {
-            // Crear contenedor para el número
-            const counterContainer = new THREE.Group();
-            counterContainer.position.z = 3;
-            
-            // Crear fondo circular para el número
-            const backgroundGeometry = new THREE.CircleGeometry(0.8, 32);
-            const backgroundMaterial = new THREE.MeshBasicMaterial({
-                color: 0x000000,
-                transparent: true,
-                opacity: 0.7
-            });
-            
-            const background = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
-            counterContainer.add(background);
-            
-            // Crear el número central (placeholder - se actualizará dinámicamente)
-            const numberGeometry = new THREE.PlaneGeometry(1.2, 0.8);
-            const numberMaterial = new THREE.MeshBasicMaterial({
-                color: 0xFFD700,
-                transparent: true,
-                opacity: 0.9
-            });
-            
-            const numberDisplay = new THREE.Mesh(numberGeometry, numberMaterial);
-            numberDisplay.userData = { type: 'numberDisplay', value: 0 };
-            counterContainer.add(numberDisplay);
-            
-            this.scene.add(counterContainer);
-            this.progressElements.push(numberDisplay);
-            
-        } catch (error) {
-            console.error('Error creando contador visual:', error);
-        }
+    createHolographicProgress() {
+        // Anillo holográfico principal
+        this.createHolographicRing();
+        
+        // Indicadores cuánticos
+        this.createQuantumIndicators();
+        
+        // Contador holográfico
+        this.createHolographicCounter();
+        
+        // Efectos de energía cuántica
+        this.createQuantumEnergyEffects();
     }
     
-    createVirgoConstellation() {
-        // Posiciones de las estrellas principales de Virgo
-        const virgoStars = [
-            { x: -3, y: 2, z: 0, size: 0.3, color: 0xFFD700 },    // Spica
-            { x: -1, y: 1.5, z: 0, size: 0.25, color: 0x00BFFF }, // Porrima
-            { x: 1, y: 0.5, z: 0, size: 0.2, color: 0x8A2BE2 },   // Vindemiatrix
-            { x: 2, y: -0.5, z: 0, size: 0.18, color: 0xFFD700 },  // Auva
-            { x: 0, y: -1, z: 0, size: 0.22, color: 0x00BFFF },    // Heze
-            { x: -2, y: -1.5, z: 0, size: 0.2, color: 0x8A2BE2 }   // Zavijava
-        ];
+    createHolographicRing() {
+        const ringGroup = new THREE.Group();
         
-        // Crear estrellas
-        virgoStars.forEach((star, index) => {
-            const geometry = new THREE.SphereGeometry(star.size, 16, 16);
-            const material = new THREE.MeshBasicMaterial({ 
-                color: star.color,
+        // Anillo base holográfico (más pequeño y elegante)
+        const baseRingGeometry = new THREE.RingGeometry(2.5, 2.6, 128);
+        const baseRingMaterial = new THREE.MeshBasicMaterial({
+            color: 0x000822,
+            transparent: true,
+            opacity: 0.3,
+            side: THREE.DoubleSide
+        });
+        
+        const baseRing = new THREE.Mesh(baseRingGeometry, baseRingMaterial);
+        ringGroup.add(baseRing);
+        
+        // Anillo de progreso holográfico (más fino)
+        const progressRingGeometry = new THREE.RingGeometry(2.5, 2.6, 128);
+        const progressRingMaterial = new THREE.MeshBasicMaterial({
+            color: 0x0EA5E9,
+            transparent: true,
+            opacity: 0.8,
+            side: THREE.DoubleSide
+        });
+        
+        const progressRing = new THREE.Mesh(progressRingGeometry, progressRingMaterial);
+        progressRing.userData = { type: 'holographicProgressRing', progress: 0 };
+        ringGroup.add(progressRing);
+        
+        // Efectos holográficos
+        this.createHolographicEffects(ringGroup);
+        
+        this.scene.add(ringGroup);
+        this.progressElements.push(progressRing);
+    }
+    
+    createHolographicEffects(ringGroup) {
+        // Líneas holográficas (más finas y elegantes)
+        for (let i = 0; i < 12; i++) { // Más líneas para mejor distribución
+            const angle = (i / 12) * Math.PI * 2;
+            const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(
+                    Math.cos(angle) * 4, // Radio más pequeño
+                    Math.sin(angle) * 4,
+                    0
+                )
+            ]);
+            
+            const lineMaterial = new THREE.LineBasicMaterial({
+                color: 0x0EA5E9,
                 transparent: true,
-                opacity: 0
+                opacity: 0.4, // Más sutil
+                linewidth: 1 // Líneas más finas
             });
             
-            const starMesh = new THREE.Mesh(geometry, material);
-            starMesh.position.set(star.x, star.y, star.z);
-            starMesh.userData = { 
-                originalColor: star.color,
-                targetOpacity: 1,
-                delay: index * 0.3
+            const line = new THREE.Line(lineGeometry, lineMaterial);
+            line.userData = { type: 'holographicLine', angle: angle };
+            ringGroup.add(line);
+            this.progressElements.push(line);
+        }
+        
+        // Partículas holográficas orbitales (más pequeñas)
+        const hologramParticles = new THREE.Group();
+        for (let i = 0; i < 24; i++) { // Menos partículas pero más elegantes
+            const angle = (i / 24) * Math.PI * 2;
+            const radius = 3.2; // Radio más pequeño
+            
+            const particleGeometry = new THREE.SphereGeometry(0.005, 6, 6); // Ultra pequeñas
+            const particleMaterial = new THREE.MeshBasicMaterial({
+                color: 0x8B5CF6, // Color más nocturno
+                transparent: true,
+                opacity: 0.4 // Más sutil
+            });
+            
+            const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+            particle.position.x = Math.cos(angle) * radius;
+            particle.position.y = Math.sin(angle) * radius;
+            particle.position.z = 0.1;
+            
+            particle.userData = {
+                angle: angle,
+                radius: radius,
+                speed: 1.5 + Math.random() * 2, // Movimiento más suave
+                pulsePhase: Math.random() * Math.PI * 2
             };
             
-            this.scene.add(starMesh);
-            this.particles.push(starMesh);
-        });
+            hologramParticles.add(particle);
+        }
         
-        // Crear líneas de conexión entre estrellas
-        const connections = [
-            [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0],
-            [1, 3], [2, 4], [0, 4]
-        ];
-        
-        connections.forEach((connection, index) => {
-            const start = virgoStars[connection[0]];
-            const end = virgoStars[connection[1]];
-            
-            const points = [
-                new THREE.Vector3(start.x, start.y, start.z),
-                new THREE.Vector3(end.x, end.y, end.z)
-            ];
-            
-            const geometry = new THREE.BufferGeometry().setFromPoints(points);
-            const material = new THREE.LineBasicMaterial({ 
-                color: 0x00BFFF,
-                transparent: true,
-                opacity: 0
-            });
-            
-            const line = new THREE.Line(geometry, material);
-            line.userData = { delay: index * 0.2 };
-            this.scene.add(line);
-            this.constellationLines.push(line);
-        });
+        ringGroup.add(hologramParticles);
+        hologramParticles.userData = { type: 'hologramParticles' };
+        this.progressElements.push(hologramParticles);
     }
     
-    createMiniGalaxies() {
-        // Crear 3 galaxias en miniatura que giran
-        for (let i = 0; i < 3; i++) {
-            const galaxy = new THREE.Group();
+    createQuantumIndicators() {
+        const indicatorCount = 16; // Más indicadores para mejor distribución
+        const indicators = new THREE.Group();
+        
+        for (let i = 0; i < indicatorCount; i++) {
+            const angle = (i / indicatorCount) * Math.PI * 2;
+            const radius = 5; // Radio más pequeño
             
-            // Posición aleatoria
-            const angle = (i / 3) * Math.PI * 2;
-            const radius = 4 + Math.random() * 2;
-            galaxy.position.set(
-                Math.cos(angle) * radius,
-                Math.sin(angle) * radius,
-                -2 + Math.random() * 4
-            );
-            
-            // Crear partículas de la galaxia
-            const particleCount = 50;
-            const geometry = new THREE.BufferGeometry();
-            const positions = new Float32Array(particleCount * 3);
-            const colors = new Float32Array(particleCount * 3);
-            
-            for (let j = 0; j < particleCount; j++) {
-                const angle = (j / particleCount) * Math.PI * 2;
-                const radius = Math.random() * 2;
-                
-                positions[j * 3] = Math.cos(angle) * radius;
-                positions[j * 3 + 1] = Math.sin(angle) * radius;
-                positions[j * 3 + 2] = (Math.random() - 0.5) * 0.5;
-                
-                const color = new THREE.Color();
-                color.setHSL(0.6 + Math.random() * 0.3, 0.8, 0.6);
-                colors[j * 3] = color.r;
-                colors[j * 3 + 1] = color.g;
-                colors[j * 3 + 2] = color.b;
-            }
-            
-            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-            
-            const material = new THREE.PointsMaterial({
-                size: 0.05,
-                vertexColors: true,
+            // Geometría cuántica ultra pequeña y elegante
+            const quantumGeometry = new THREE.OctahedronGeometry(0.06); // Mucho más pequeño
+            const quantumMaterial = new THREE.MeshStandardMaterial({
+                color: 0x0EA5E9, // Color más nocturno
                 transparent: true,
-                opacity: 0
+                opacity: 0,
+                emissive: 0x1E3A8A, // Emisión más sutil
+                emissiveIntensity: 0.3
             });
             
-            const points = new THREE.Points(geometry, material);
-            galaxy.add(points);
-            galaxy.userData = { 
-                rotationSpeed: 0.01 + Math.random() * 0.02,
-                delay: i * 0.5,
-                targetOpacity: 0.8
+            const quantum = new THREE.Mesh(quantumGeometry, quantumMaterial);
+            quantum.position.x = Math.cos(angle) * radius;
+            quantum.position.y = Math.sin(angle) * radius;
+            quantum.position.z = 0.6;
+            
+            quantum.userData = {
+                type: 'quantumIndicator',
+                angle: angle,
+                radius: radius,
+                progress: (i / indicatorCount) * 100,
+                active: false,
+                pulsePhase: Math.random() * Math.PI * 2
             };
             
-            this.scene.add(galaxy);
-            this.galaxies.push(galaxy);
+            indicators.add(quantum);
         }
+        
+        this.scene.add(indicators);
+        indicators.userData = { type: 'quantumIndicators' };
+        this.progressElements.push(indicators);
     }
     
-    createFloatingParticles() {
-        try {
-            // Crear partículas sutiles y elegantes
-            const particleCount = 16;
-            const geometry = new THREE.BufferGeometry();
-            const positions = new Float32Array(particleCount * 3);
-            const colors = new Float32Array(particleCount * 3);
-            
-            for (let i = 0; i < particleCount; i++) {
-                // Posición en círculo perfecto
-                const angle = (i / particleCount) * Math.PI * 2;
-                const radius = 4.0;
-                
-                positions[i * 3] = Math.cos(angle) * radius;
-                positions[i * 3 + 1] = Math.sin(angle) * radius;
-                positions[i * 3 + 2] = 0;
-                
-                // Solo color azul neón sutil
-                const color = new THREE.Color(0x00D4FF);
-                colors[i * 3] = color.r;
-                colors[i * 3 + 1] = color.g;
-                colors[i * 3 + 2] = color.b;
-            }
-            
-            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-            
-            const material = new THREE.PointsMaterial({
-                size: 0.04,
-                vertexColors: true,
+    createHolographicCounter() {
+        const counterGroup = new THREE.Group();
+        
+        // Fondo holográfico (más pequeño y transparente)
+        const backgroundGeometry = new THREE.CircleGeometry(1.2, 32); // Más pequeño y menos detallado
+        const backgroundMaterial = new THREE.MeshBasicMaterial({
+            color: 0x000822, // Color más nocturno
+            transparent: true,
+            opacity: 0.15 // Mucho más transparente
+        });
+        
+        const background = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
+        counterGroup.add(background);
+        
+        // Borde holográfico (más fino y sutil)
+        const borderGeometry = new THREE.RingGeometry(1.15, 1.25, 32); // Más fino
+        const borderMaterial = new THREE.MeshBasicMaterial({
+            color: 0x0EA5E9, // Color más nocturno
+            transparent: true,
+            opacity: 0.3 // Mucho más sutil
+        });
+        
+        const border = new THREE.Mesh(borderGeometry, borderMaterial);
+        counterGroup.add(border);
+        
+        // Texto holográfico (más pequeño y transparente)
+        const textGeometry = new THREE.PlaneGeometry(1.8, 0.9); // Más pequeño
+        const textMaterial = new THREE.MeshBasicMaterial({
+            color: 0xE2E8F0, // Color más suave
+            transparent: true,
+            opacity: 0.4 // Mucho más transparente
+        });
+        
+        const textDisplay = new THREE.Mesh(textGeometry, textMaterial);
+        textDisplay.userData = { type: 'holographicText', value: 0 };
+        counterGroup.add(textDisplay);
+        
+        this.scene.add(counterGroup);
+        this.progressElements.push(textDisplay);
+    }
+    
+    createQuantumEnergyEffects() {
+        // Efectos de energía cuántica (ondas ultra finas y elegantes)
+        for (let i = 0; i < 10; i++) { // Más ondas para mejor efecto
+            const waveGeometry = new THREE.RingGeometry(1.5 + i * 0.6, 1.52 + i * 0.6, 32); // Ultra finas
+            const waveMaterial = new THREE.MeshBasicMaterial({
+                color: 0x0EA5E9, // Color más nocturno
                 transparent: true,
-                opacity: 0.5,
-                sizeAttenuation: true
+                opacity: 0.05, // Ultra sutil
+                side: THREE.DoubleSide
             });
             
-            const particles = new THREE.Points(geometry, material);
-            particles.userData = { 
-                type: 'orbitingParticles',
-                rotationSpeed: 0.008
+            const wave = new THREE.Mesh(waveGeometry, waveMaterial);
+            wave.position.z = i * 0.15; // Más cercanas
+            wave.userData = {
+                type: 'quantumEnergyWave',
+                index: i,
+                speed: 0.5 + i * 0.25, // Movimiento más suave
+                scale: 1
             };
-            this.scene.add(particles);
-            this.progressElements.push(particles);
             
-        } catch (error) {
-            console.error('Error creando partículas orbitales:', error);
+            this.scene.add(wave);
+            this.progressElements.push(wave);
         }
     }
     
-    createEnergyRings() {
-        try {
-            // Crear anillos de energía que giran y pulsan
-            for (let i = 0; i < 4; i++) {
-                const ringGeometry = new THREE.RingGeometry(1.8 + i * 0.4, 1.9 + i * 0.4, 32);
-                const ringMaterial = new THREE.MeshBasicMaterial({
-                    color: 0x8A2BE2,
-                    transparent: true,
-                    opacity: 0.3,
-                    side: THREE.DoubleSide
-                });
-                
-                const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-                ring.position.z = 0.8 + i * 0.3;
-                ring.userData = { 
-                    type: 'energyRing',
-                    rotationSpeed: 0.015 + i * 0.01,
-                    pulseSpeed: 0.02 + i * 0.005,
-                    pulseScale: 1,
-                    originalScale: 1 + i * 0.1
-                };
-                
-                this.scene.add(ring);
-                this.progressElements.push(ring);
-            }
-        } catch (error) {
-            console.error('Error creando anillos de energía:', error);
-        }
+    createCosmicEffects() {
+        // Efectos cósmicos adicionales
+        this.createNebulaEffect();
+        this.createWormholeEffect();
     }
     
-    updateProgress(newProgress) {
-        this.progress = newProgress;
-        
-        // Actualizar elementos de progreso
-        this.updateProgressElements(newProgress);
-        
-        // Actualizar opacidad de estrellas según progreso
-        this.particles.forEach((star, index) => {
-            const targetOpacity = Math.min(1, (newProgress / 100) * (index + 1) * 0.3);
-            star.material.opacity = Math.min(star.material.opacity + 0.02, targetOpacity);
+    createNebulaEffect() {
+        // Efecto de nebulosa nocturna más sutil
+        const nebulaGeometry = new THREE.SphereGeometry(20, 32, 32); // Más pequeña y menos detallada
+        const nebulaMaterial = new THREE.MeshBasicMaterial({
+            color: 0x0F172A, // Color más nocturno y profundo
+            transparent: true,
+            opacity: 0.06, // Mucho más sutil
+            side: THREE.BackSide
         });
         
-        // Actualizar líneas de constelación
-        this.constellationLines.forEach((line, index) => {
-            const targetOpacity = Math.min(1, (newProgress / 100) * (index + 1) * 0.2);
-            line.material.opacity = Math.min(line.material.opacity + 0.015, targetOpacity);
+        const nebula = new THREE.Mesh(nebulaGeometry, nebulaMaterial);
+        nebula.userData = { type: 'nebula', rotationSpeed: 0.0005 }; // Rotación más lenta
+        this.scene.add(nebula);
+        this.progressElements.push(nebula);
+    }
+    
+    createWormholeEffect() {
+        // Efecto de agujero de gusano nocturno más elegante
+        const wormholeGeometry = new THREE.CylinderGeometry(0.3, 6, 16, 24, 1, true); // Más pequeño y fino
+        const wormholeMaterial = new THREE.MeshBasicMaterial({
+            color: 0x7C3AED, // Color más nocturno
+            transparent: true,
+            opacity: 0.15, // Más sutil
+            side: THREE.DoubleSide
         });
         
-        // Actualizar galaxias
-        this.galaxies.forEach((galaxy, index) => {
-            const targetOpacity = Math.min(0.8, (newProgress / 100) * (index + 1) * 0.3);
-            galaxy.children[0].material.opacity = Math.min(
-                galaxy.children[0].material.opacity + 0.01, 
-                targetOpacity
+        const wormhole = new THREE.Mesh(wormholeGeometry, wormholeMaterial);
+        wormhole.position.z = -8; // Más cercano
+        wormhole.userData = { type: 'wormhole', rotationSpeed: 0.015 }; // Rotación más suave
+        this.scene.add(wormhole);
+        this.progressElements.push(wormhole);
+    }
+    
+    createNeuralNetworks() {
+        // Redes neuronales cuánticas nocturnas más elegantes
+        const neuralCount = 6; // Un nodo más para mejor distribución
+        for (let i = 0; i < neuralCount; i++) {
+            const neuralGeometry = new THREE.SphereGeometry(0.04, 8, 8); // Ultra pequeño y menos detallado
+            const neuralMaterial = new THREE.MeshBasicMaterial({
+                color: 0x8B5CF6, // Color más nocturno
+                transparent: true,
+                opacity: 0.3 // Ultra sutil
+            });
+            
+            const neural = new THREE.Mesh(neuralGeometry, neuralMaterial);
+            neural.position.set(
+                (Math.random() - 0.5) * 15, // Distribución más compacta
+                (Math.random() - 0.5) * 15,
+                (Math.random() - 0.5) * 15
             );
-        });
+            
+            neural.userData = {
+                type: 'neuralNode',
+                connections: [],
+                pulsePhase: Math.random() * Math.PI * 2
+            };
+            
+            this.scene.add(neural);
+            this.progressElements.push(neural);
+        }
         
-        // Si el progreso está completo, ocultar el ProgressBar
-        if (newProgress >= 100) {
+        // Crear conexiones entre nodos
+        this.createNeuralConnections();
+    }
+    
+    createNeuralConnections() {
+        const neuralNodes = this.progressElements.filter(el => el.userData.type === 'neuralNode');
+        
+        neuralNodes.forEach((node, index) => {
+            const nextNode = neuralNodes[(index + 1) % neuralNodes.length];
+            
+            const connectionGeometry = new THREE.BufferGeometry().setFromPoints([
+                node.position,
+                nextNode.position
+            ]);
+            
+            const connectionMaterial = new THREE.LineBasicMaterial({
+                color: 0x8B5CF6, // Color más nocturno
+                transparent: true,
+                opacity: 0.25, // Más sutil
+                linewidth: 1 // Líneas más finas
+            });
+            
+            const connection = new THREE.Line(connectionGeometry, connectionMaterial);
+            connection.userData = { type: 'neuralConnection' };
+            this.scene.add(connection);
+            this.progressElements.push(connection);
+        });
+    }
+    
+    createQuantumParticleTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 128;
+        canvas.height = 128;
+        const ctx = canvas.getContext('2d');
+        
+        // Textura cuántica nocturna más sutil
+        const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+        gradient.addColorStop(0.3, 'rgba(14, 165, 233, 0.7)'); // Azul nocturno
+        gradient.addColorStop(0.6, 'rgba(139, 92, 246, 0.4)'); // Púrpura sutil
+        gradient.addColorStop(0.9, 'rgba(30, 58, 138, 0.1)'); // Azul profundo
+        gradient.addColorStop(1, 'rgba(15, 23, 42, 0)'); // Negro profundo
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 128, 128);
+        
+        // Patrón cuántico nocturno más sutil
+        ctx.strokeStyle = 'rgba(14, 165, 233, 0.2)'; // Azul más sutil
+        ctx.lineWidth = 0.5; // Líneas más finas
+        for (let i = 0; i < 6; i++) { // Menos líneas
+            const angle = (i / 6) * Math.PI * 2;
+            ctx.beginPath();
+            ctx.moveTo(64, 64);
+            ctx.lineTo(
+                64 + Math.cos(angle) * 48, // Radio más pequeño
+                64 + Math.sin(angle) * 48
+            );
+            ctx.stroke();
+        }
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.needsUpdate = true;
+        return texture;
+    }
+    
+    updateProgress(progress) {
+        if (!this.isInitialized) return;
+        
+        this.currentProgress = Math.min(100, Math.max(0, progress));
+        
+        // Actualizar contador holográfico
+        this.updateHolographicCounter(this.currentProgress);
+        
+        // Actualizar indicadores cuánticos
+        this.updateQuantumIndicators(this.currentProgress);
+        
+        // Actualizar todos los elementos de progreso
+        this.updateProgressElements(this.currentProgress);
+        
+        // Verificar si el progreso está completo
+        if (this.currentProgress >= 100) {
+        
             setTimeout(() => {
                 this.hideProgressBar();
-            }, 2000);
+            }, 1000); // Esperar 1 segundo para mostrar el 100%
         }
     }
     
     updateProgressElements(progress) {
-        this.progressElements.forEach(element => {
-            // Validar que el elemento existe y tiene userData
-            if (!element || !element.userData || !element.userData.type) {
-                return; // Saltar este elemento si no tiene userData.type
-            }
+        const time = this.clock.getElapsedTime();
+        
+        // Sistema de audio disponible para futuras implementaciones
+        if (this.analyser && this.audioData) {
+            this.analyser.getByteFrequencyData(this.audioData);
+            // Los datos de audio están disponibles para efectos futuros
+        }
+        
+        // Actualizar uniformes de tiempo (sin distorsión cuántica por compatibilidad)
+        
+        this.progressElements.forEach((element) => {
+            if (!element || !element.userData) return;
             
-            if (element.userData.type === 'progressRing') {
-                // Actualizar anillo de progreso
-                const progressAngle = (progress / 100) * Math.PI * 2;
-                
-                // Crear nueva geometría con el progreso
-                const newGeometry = new THREE.RingGeometry(2.8, 3.2, 128, 0, progressAngle);
-                element.geometry.dispose();
-                element.geometry = newGeometry;
-            }
-            
-            if (element.userData.type === 'outerRing') {
-                // Efecto de pulso suave en el anillo exterior
-                element.userData.pulseScale += element.userData.pulseSpeed;
-                if (element.userData.pulseScale > 1.05 || element.userData.pulseScale < 0.95) {
-                    element.userData.pulseSpeed *= -1;
-                }
-                
-                element.scale.setScalar(element.userData.originalScale * element.userData.pulseScale);
-            }
-            
-            if (element.userData.type === 'orbitingParticles') {
-                // Rotar partículas orbitales
-                element.rotation.z += element.userData.rotationSpeed;
-                
-                // Hacer que brillen más según el progreso
-                const intensity = progress / 100;
-                element.material.opacity = 0.4 + (intensity * 0.4);
+            switch (element.userData.type) {
+                case 'quantumParticleSystem':
+                    this.updateQuantumParticleSystem(element, time, progress);
+                    break;
+                    
+                case 'holographicProgressRing':
+                    this.updateHolographicProgressRing(element, progress);
+                    break;
+                    
+                case 'hologramParticles':
+                    this.updateHologramParticles(element, time);
+                    break;
+                    
+                case 'quantumIndicator':
+                    this.updateQuantumIndicator(element, progress);
+                    break;
+                    
+                case 'quantumEnergyWave':
+                    this.updateQuantumEnergyWaves(element, time);
+                    break;
+                    
+                case 'nebula':
+                    this.updateNebula(element, time);
+                    break;
+                    
+                case 'wormhole':
+                    this.updateWormhole(element, time);
+                    break;
+                    
+                case 'neuralNode':
+                    this.updateNeuralNodes(element, time);
+                    break;
             }
         });
     }
     
+    updateQuantumParticleSystem(particleSystem, time, progress) {
+        const positions = particleSystem.geometry.attributes.position.array;
+        const velocities = particleSystem.userData.velocities;
+        const originalPositions = particleSystem.userData.originalPositions;
+        
+        for (let i = 0; i < this.config.particleCount; i++) {
+            const i3 = i * 3;
+            
+            // Movimiento cuántico avanzado
+            positions[i3] += velocities[i3] * this.config.animationSpeed;
+            positions[i3 + 1] += velocities[i3 + 1] * this.config.animationSpeed;
+            positions[i3 + 2] += velocities[i3 + 2] * this.config.animationSpeed;
+        }
+        
+        // Efectos cuánticos en el material
+        const quantumEffect = Math.sin(time * 0.5) * 0.1;
+        const progressInfluence = progress / 100;
+        
+        // Opacidad dinámica
+        particleSystem.material.opacity = 0.3 + progressInfluence * 0.7 + quantumEffect;
+        
+        // Tamaño dinámico
+        particleSystem.material.size = 0.012 * (1 + progressInfluence * 0.5 + quantumEffect * 0.3);
+        
+        particleSystem.geometry.attributes.position.needsUpdate = true;
+        
+        // Rotación cuántica
+        particleSystem.rotation.y = time * 0.15;
+        particleSystem.rotation.z = time * 0.08;
+        particleSystem.rotation.x = Math.sin(time * 0.1) * 0.1;
+    }
+    
+    updateHolographicProgressRing(element, progress) {
+        const progressValue = progress / 100;
+        element.material.opacity = 0.4 + progressValue * 0.5;
+        
+        // Efecto holográfico pulsante
+        const pulse = Math.sin(this.clock.getElapsedTime() * 6) * 0.1;
+        element.scale.setScalar(1 + pulse);
+        
+        // Cambio de color holográfico nocturno
+        const hue = (progressValue * 0.2) + 0.6; // Rango más sutil
+        const saturation = 0.8; // Menos saturado
+        const lightness = 0.5; // Más oscuro
+        const color = new THREE.Color().setHSL(hue, saturation, lightness);
+        element.material.color = color;
+    }
+    
+    updateHologramParticles(particles, time) {
+        particles.children.forEach((particle, index) => {
+            const data = particle.userData;
+            
+            // Movimiento orbital holográfico
+            const angle = data.angle + time * data.speed;
+            particle.position.x = Math.cos(angle) * data.radius;
+            particle.position.y = Math.sin(angle) * data.radius;
+            
+            // Efecto holográfico
+            const hologram = Math.sin(time * 4 + data.pulsePhase) * 0.5 + 0.5;
+            particle.material.opacity = 0.6 + hologram * 0.4;
+            
+            // Escala holográfica
+            const scale = 1 + hologram * 0.3;
+            particle.scale.setScalar(scale);
+            
+            // Rotación holográfica
+            particle.rotation.z += 0.05;
+        });
+    }
+    
+    updateQuantumIndicators(element, progress) {
+        const data = element.userData;
+        const shouldBeActive = progress >= data.progress;
+        
+        if (shouldBeActive && !data.active) {
+            data.active = true;
+            element.material.opacity = 0.9;
+            element.material.emissive.setHex(0x008844);
+        }
+        
+        if (data.active) {
+            // Efectos cuánticos activos
+            const quantumPulse = Math.sin(this.clock.getElapsedTime() * 5 + data.pulsePhase) * 0.4;
+            element.material.opacity = 0.7 + quantumPulse;
+            
+            // Rotación cuántica
+            element.rotation.y += 0.03;
+            element.rotation.z += 0.02;
+            element.rotation.x += 0.01;
+            
+            // Escala cuántica
+            const scale = 1 + quantumPulse * 0.2;
+            element.scale.setScalar(scale);
+        }
+    }
+    
+    updateQuantumEnergyWaves(wave, time) {
+        const data = wave.userData;
+        
+        // Escala cuántica
+        const scale = 1 + Math.sin(time * data.speed) * 0.3;
+        wave.scale.setScalar(scale);
+        
+        // Opacidad cuántica
+        const opacity = 0.1 + Math.sin(time * data.speed * 2) * 0.15;
+        wave.material.opacity = opacity;
+        
+        // Rotación cuántica
+        wave.rotation.z += 0.015 * data.speed;
+        wave.rotation.y += 0.01 * data.speed;
+    }
+    
+    updateNebula(element, time) {
+        element.rotation.y += element.userData.rotationSpeed;
+        element.rotation.z += element.userData.rotationSpeed * 0.5;
+        
+        // Efecto de pulso nebuloso
+        const nebulaPulse = Math.sin(time * 0.2) * 0.05;
+        element.material.opacity = 0.1 + nebulaPulse;
+    }
+    
+    updateWormhole(element, time) {
+        element.rotation.z += element.userData.rotationSpeed;
+        
+        // Efecto de agujero de gusano
+        const wormholeEffect = Math.sin(time * 0.3) * 0.2;
+        element.material.opacity = 0.3 + wormholeEffect;
+        
+        // Escala dinámica
+        const scale = 1 + Math.sin(time * 0.5) * 0.1;
+        element.scale.setScalar(scale);
+    }
+    
+    updateNeuralNodes(element, time) {
+        const data = element.userData;
+        
+        // Pulso neural
+        const neuralPulse = Math.sin(time * 3 + data.pulsePhase) * 0.3;
+        element.material.opacity = 0.5 + neuralPulse;
+        
+        // Rotación neural
+        element.rotation.y += 0.02;
+        element.rotation.z += 0.015;
+        
+        // Escala neural
+        const scale = 1 + neuralPulse * 0.2;
+        element.scale.setScalar(scale);
+    }
+    
+    updateHolographicCounter(progress) {
+        // Buscar el contador holográfico en la escena
+        this.scene.traverse((child) => {
+            if (child.userData && child.userData.type === 'holographicText') {
+                // Actualizar el valor del progreso
+                child.userData.value = Math.round(progress);
+                
+                // Efecto de pulso cuando cambia
+                child.material.opacity = 0.6 + Math.sin(this.clock.getElapsedTime() * 3) * 0.2;
+            }
+        });
+    }
+    
+    updateQuantumIndicators(progress) {
+        // Buscar los indicadores cuánticos en la escena
+        this.scene.traverse((child) => {
+            if (child.userData && child.userData.type === 'quantumIndicator') {
+                this.updateQuantumIndicator(child, progress);
+            }
+        });
+    }
+    
+    updateQuantumIndicator(element, progress) {
+        const data = element.userData;
+        const shouldBeActive = progress >= data.progress;
+        
+        if (shouldBeActive && !data.active) {
+            data.active = true;
+            element.material.opacity = 0.9;
+            if (element.material.emissive) {
+                element.material.emissive.setHex(0x008844);
+            }
+        }
+        
+        if (data.active) {
+            // Efectos cuánticos activos
+            const quantumPulse = Math.sin(this.clock.getElapsedTime() * 5 + data.pulsePhase) * 0.4;
+            element.material.opacity = 0.7 + quantumPulse;
+            
+            // Rotación cuántica
+            element.rotation.y += 0.03;
+            element.rotation.z += 0.02;
+            element.rotation.x += 0.01;
+            
+            // Escala cuántica
+            const scale = 1 + quantumPulse * 0.2;
+            element.scale.setScalar(scale);
+        }
+    }
+    
     hideProgressBar() {
+       
         const container = document.getElementById('progress-container');
         if (container) {
-            // Remover clase loading para quitar el blur
+        
             container.classList.remove('loading');
             container.classList.add('hidden');
             
             setTimeout(() => {
                 container.style.display = 'none';
-                
-                // Mostrar el contenido principal cuando se complete el ProgressBar
+               
                 const mainContent = document.getElementById('main-content');
                 if (mainContent) {
                     mainContent.style.display = 'block';
                     mainContent.style.opacity = '0';
                     
-                    // Fade in del contenido principal
                     let opacity = 0;
                     const fadeIn = setInterval(() => {
-                        opacity += 0.05;
+                        opacity += 0.03;
                         mainContent.style.opacity = opacity;
                         
                         if (opacity >= 1) {
                             clearInterval(fadeIn);
+                        
+                            
+                            // Ejecutar main.js después de que el fade-in esté completo
+                            this.executeMainScript();
                         }
-                    }, 50);
+                    }, 30);
+                } else {
+                    console.error('No se encontró main-content');
                 }
-            }, 1200);
+            }, 1500);
+        } else {
+            console.error('No se encontró progress-container');
         }
+    }
+    
+    executeMainScript() {
+        try {
+    
+            
+            // Crear y ejecutar el script main.js
+            const script = document.createElement('script');
+            script.type = 'module';
+            script.src = 'src/scripts/main.js';
+            
+            script.onload = () => {
+         
+                
+                // Ahora necesitamos ejecutar el main.js manualmente
+                // Como es un módulo ES6, necesitamos importarlo y ejecutarlo
+                this.executeMainModule();
+            };
+            
+            script.onerror = (error) => {
+                console.error('❌ Error cargando main.js:', error);
+            };
+            
+            document.head.appendChild(script);
+            
+        } catch (error) {
+            console.error('Error ejecutando main.js:', error);
+        }
+    }
+    
+    async executeMainModule() {
+        try {
+            // Los estilos ya están cargados en index.html
+            // Esperar un poco para asegurar que el CSS esté completamente procesado
+            await this.delay(300);
+            
+            // Cargar componentes del portfolio
+            await this.loadPortfolioComponents();
+        } catch (error) {
+            console.error('❌ Error en executeMainModule:', error);
+        }
+    }
+
+    async loadPortfolioComponents() {
+        try {
+            // Lista de componentes a cargar
+            const components = [
+                { name: 'Hero', target: '#main-content' },
+                { name: 'About', target: '#main-content' },
+                { name: 'Experience', target: '#main-content' },
+                { name: 'Skills', target: '#main-content' },
+                { name: 'Projects', target: '#main-content' },
+                { name: 'Contact', target: '#main-content' },
+                { name: 'Footer', target: '#main-content' }
+            ];
+
+            // Cargar cada componente secuencialmente
+            for (const component of components) {
+                await this.loadComponent(component.name, component.target);
+                await this.delay(100);
+            }
+
+        } catch (error) {
+            console.error('❌ Error cargando componentes:', error);
+        }
+    }
+
+    async loadComponent(componentName, targetSelector) {
+        try {
+            // Cargar el archivo HTML del componente
+            const response = await fetch(`src/components/${componentName}.html`);
+            if (!response.ok) {
+                throw new Error(`Error cargando ${componentName}: ${response.status}`);
+            }
+
+            const html = await response.text();
+
+            // Crear elemento temporal para procesar el HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html.trim();
+
+            // Obtener el primer elemento hijo
+            const component = tempDiv.firstElementChild;
+            if (!component) {
+                throw new Error(`${componentName} no tiene elementos hijos`);
+            }
+
+            // Insertar en el target
+            const target = document.querySelector(targetSelector);
+            if (target) {
+                target.appendChild(component);
+            } else {
+                throw new Error(`Target no encontrado: ${targetSelector}`);
+            }
+
+        } catch (error) {
+            console.error(`❌ Error cargando ${componentName}:`, error);
+        }
+    }
+    
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
     
     animate() {
         if (!this.isInitialized) return;
         
-        if (!this.renderer || !this.scene || !this.camera) return;
-        
         requestAnimationFrame(() => this.animate());
         
-        const time = Date.now() * 0.001;
+        const time = this.clock.getElapsedTime();
         
-        // Rotar galaxias
-        this.galaxies.forEach(galaxy => {
-            galaxy.rotation.z += galaxy.userData.rotationSpeed;
-            galaxy.rotation.y += galaxy.userData.rotationSpeed * 0.5;
-        });
-        
-        // Animar partículas orbitales
+        // Actualizar uniformes de tiempo
         this.progressElements.forEach(element => {
-            if (element.userData && element.userData.type === 'orbitingParticles') {
-                // Las partículas ya rotan en updateProgressElements
-                // Aquí solo agregamos un sutil movimiento ondulante
-                const positions = element.geometry.attributes.position.array;
-                const timeOffset = time * 0.3;
-                
-                for (let i = 0; i < positions.length; i += 3) {
-                    // Movimiento ondulante muy sutil
-                    positions[i] += Math.sin(timeOffset + i * 0.2) * 0.0005;
-                    positions[i + 1] += Math.cos(timeOffset + i * 0.2) * 0.0005;
+            if (element.material && element.material.uniforms) {
+                if (element.material.uniforms.time) {
+                    element.material.uniforms.time.value = time;
                 }
-                
-                element.geometry.attributes.position.needsUpdate = true;
+                if (element.material.uniforms.sizeMultiplier) {
+                    element.material.uniforms.sizeMultiplier.value = 1.0 + Math.sin(time * 0.5) * 0.1;
+                }
             }
         });
         
-        // Rotar cámara suavemente
-        this.camera.position.x = Math.sin(time * 0.1) * 2;
-        this.camera.position.y = Math.cos(time * 0.15) * 1;
-        this.camera.lookAt(0, 0, 0);
-        
-        try {
+        // Renderizar con o sin post-procesamiento
+        if (this.composer) {
+            this.composer.render();
+        } else {
             this.renderer.render(this.scene, this.camera);
-        } catch (error) {
-            console.error('Error renderizando:', error);
         }
     }
     
@@ -634,12 +1051,19 @@ class CosmicProgressEngine {
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
+            
+            if (this.composer) {
+                this.composer.setSize(window.innerWidth, window.innerHeight);
+            }
         }
     }
     
     destroy() {
         if (this.renderer) {
             this.renderer.dispose();
+        }
+        if (this.composer) {
+            this.composer.dispose();
         }
         if (this.scene) {
             this.scene.clear();
@@ -648,61 +1072,109 @@ class CosmicProgressEngine {
     }
 }
 
-// Inicializar el motor cuando se carga la página
-let cosmicEngine = null;
+// Inicialización épica
+let epicEngine = null;
 
-// El ProgressBar se ejecuta automáticamente desde index.html
-
-// ProgressBar simple como fallback
-function initSimpleProgressBar() {
-    const container = document.getElementById('progress-container');
-    if (!container) {
-        console.error('No se encontró el contenedor del ProgressBar');
-        return;
+function initEpicProgressBar() {
+    try {
+        epicEngine = new EpicProgressEngine();
+        
+        // Inicializar progress bar
+        let currentProgress = 0;
+        const progressInterval = setInterval(() => {
+            currentProgress += Math.random() * 15;
+            if (currentProgress >= 100) {
+                currentProgress = 100;
+                clearInterval(progressInterval);
+                epicEngine.updateProgress(currentProgress);
+            } else {
+                epicEngine.updateProgress(currentProgress);
+            }
+        }, 200);
+        
+        // Manejar redimensionamiento
+        window.addEventListener('resize', () => {
+            if (epicEngine) {
+                epicEngine.onWindowResize();
+            }
+        });
+    } catch (error) {
+        console.error('Error iniciando EpicProgressEngine:', error);
     }
+}
+
+// Fallback épico
+function initEpicSimpleProgressBar() {
+    const container = document.getElementById('progress-container');
+    if (!container) return;
     
-    // Agregar clase loading
     container.classList.add('loading');
     
-    // Crear barra de progreso simple
-    const progressBar = document.createElement('div');
-    progressBar.style.cssText = `
-        width: 300px;
-        height: 8px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 4px;
+    // Barra de progreso épica
+    const progressContainer = document.createElement('div');
+    progressContainer.style.cssText = `
+        width: 500px;
+        height: 15px;
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 8px;
         overflow: hidden;
-        margin: 20px 0;
+        margin: 40px 0;
+        border: 2px solid rgba(0, 255, 255, 0.5);
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        position: relative;
     `;
     
     const progressFill = document.createElement('div');
     progressFill.style.cssText = `
         width: 0%;
         height: 100%;
-        background: linear-gradient(90deg, #FFD700, #00BFFF);
-        border-radius: 4px;
-        transition: width 0.3s ease;
+        background: linear-gradient(90deg, #00FFFF, #FF00FF, #00FF88, #FF8800);
+        border-radius: 8px;
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+        position: relative;
     `;
     
-    progressBar.appendChild(progressFill);
-    container.appendChild(progressBar);
+    // Efecto de brillo
+    const shine = document.createElement('div');
+    shine.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        animation: shine 2s infinite;
+    `;
     
-    // Simular progreso
+    progressFill.appendChild(shine);
+    progressContainer.appendChild(progressFill);
+    container.appendChild(progressContainer);
+    
+    // Animación de brillo
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Progreso épico
     let progress = 0;
     const interval = setInterval(() => {
-        progress += Math.random() * 15;
+        progress += Math.random() * 8 + 2;
         if (progress >= 100) {
             progress = 100;
             clearInterval(interval);
             
-            // Ocultar ProgressBar
             setTimeout(() => {
                 container.classList.remove('loading');
                 container.classList.add('hidden');
                 setTimeout(() => {
                     container.style.display = 'none';
                     
-                    // Mostrar contenido principal
                     const mainContent = document.getElementById('main-content');
                     if (mainContent) {
                         mainContent.style.display = 'block';
@@ -710,57 +1182,35 @@ function initSimpleProgressBar() {
                         
                         let opacity = 0;
                         const fadeIn = setInterval(() => {
-                            opacity += 0.05;
+                            opacity += 0.02;
                             mainContent.style.opacity = opacity;
                             if (opacity >= 1) {
                                 clearInterval(fadeIn);
                             }
-                        }, 50);
+                        }, 25);
                     }
-                }, 1200);
-            }, 1000);
+                }, 1500);
+            }, 1500);
         }
         
         progressFill.style.width = progress + '%';
     }, 200);
 }
 
-// Función principal para inicializar el ProgressBar
+// Función principal épica
 function initProgressBar() {
-    // Verificar que Three.js esté disponible
     if (typeof THREE === 'undefined') {
-        console.error('Three.js no está disponible, usando ProgressBar simple');
-        initSimpleProgressBar();
+        initEpicSimpleProgressBar();
         return;
     }
     
-    try {
-        cosmicEngine = new CosmicProgressEngine();
-        
-        // Simular progreso de carga
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += Math.random() * 12;
-            if (progress >= 100) {
-                progress = 100;
-                clearInterval(interval);
-            }
-            cosmicEngine.updateProgress(progress);
-        }, 300);
-        
-        // Manejar redimensionamiento de ventana
-        window.addEventListener('resize', () => {
-            if (cosmicEngine) {
-                cosmicEngine.onWindowResize();
-            }
-        });
-    } catch (error) {
-        console.error('Error iniciando ProgressBar Three.js, usando versión simple:', error);
-        initSimpleProgressBar();
-    }
+    initEpicProgressBar();
 }
 
-// Exportar para uso global
-window.CosmicProgressEngine = CosmicProgressEngine;
+// Exportar para uso global épico
+window.EpicProgressEngine = EpicProgressEngine;
 window.initProgressBar = initProgressBar;
-window.initSimpleProgressBar = initSimpleProgressBar;
+window.initEpicSimpleProgressBar = initEpicSimpleProgressBar;
+
+// Exportaciones del módulo ES6
+export { EpicProgressEngine, initProgressBar, initEpicSimpleProgressBar };

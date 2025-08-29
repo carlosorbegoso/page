@@ -301,18 +301,16 @@ export class HeroAnimations {
     }
 
     initThreeJSAnimations() {
-        // Verificar si Three.js está disponible
-        if (typeof THREE !== 'undefined') {
+        try {
             // Inicializar el motor Three.js específico del hero
             this.heroThreeEngine = new HeroThreeEngine();
             this.heroThreeEngine.init('hero-particles').then(success => {
                 if (success) {
-                
                     this.setupThemeIntegration();
                 }
             });
-        } else {
-            console.warn('Three.js no está disponible para el hero');
+        } catch (error) {
+            console.warn('Three.js no está disponible para el hero:', error);
         }
     }
 

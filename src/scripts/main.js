@@ -29,21 +29,10 @@ class Portfolio {
      */
     async init() {
         try {
-            // Inicializar logger primero
-            initLogger({
-                appName: CONFIG.APP_NAME,
-                logLevel: DEBUG.LOG_LEVEL
-            });
-            
-            log.info('🚀 Inicializando portfolio...');
-            
-            // Verificar configuración
-            this.validateConfiguration();
-            
             // Inicializar módulos básicos
             await this.initializeBasicModules();
             
-            // Configurar funcionalidades
+            // Configurar funcionalidades básicas
             this.setupBasicFeatures();
             
             // Inicializar módulos avanzados
@@ -52,14 +41,10 @@ class Portfolio {
             // Configurar eventos globales
             this.setupGlobalEvents();
             
-            // Marcar como inicializado
-            this.isInitialized = true;
-            
-            log.info('✅ Portfolio inicializado correctamente');
+            // Portfolio completamente inicializado
             
         } catch (error) {
-            log.error('❌ Error inicializando portfolio:', error);
-            this.showFallbackMessage();
+            console.error('❌ Error inicializando portfolio:', error);
         }
     }
 
@@ -161,10 +146,8 @@ class Portfolio {
                 await componentLoader.loadComponents(conditionalComponents);
             }
             
-            log.info('✅ Todos los componentes cargados correctamente');
-            
         } catch (error) {
-            log.error('❌ Error cargando componentes:', error);
+            console.error('❌ Error cargando componentes:', error);
         }
     }
 

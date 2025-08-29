@@ -10,8 +10,8 @@ const PORT = process.env.PORT || 3000;
 const MIME_TYPES = {
     '.html': 'text/html',
     '.css': 'text/css',
-    '.js': 'application/javascript',
-    '.mjs': 'application/javascript',
+    '.js': 'text/javascript',
+    '.mjs': 'text/javascript',
     '.json': 'application/json',
     '.png': 'image/png',
     '.jpg': 'image/jpeg',
@@ -62,24 +62,41 @@ serve({
       
       if (content) {
         const mimeType = getMimeType(filePath);
-                return new Response(content, {
-            headers: {
-                'Content-Type': mimeType,
-                'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
-                'Pragma': 'no-cache',
-                'Expires': '0',
-                'Access-Control-Allow-Origin': '*'
-            }
+        
+        // Log para debugging
+        console.log(`📁 Sirviendo: ${path} (${mimeType})`);
+        
+        return new Response(content, {
+          headers: {
+            'Content-Type': mimeType,
+            'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            'Access-Control-Allow-Origin': '*'
+          }
         });
       } else {
-        // Si no se encuentra el archivo, intentar con index.html
-        if (path.endsWith('.html')) {
-          return new Response('Archivo no encontrado', { status: 404 });
+        // Si no se encuentra el archivo
+        if (path.endsWith('.js') || path.endsWith('.mjs')) {
+          // Para archivos JavaScript, devolver 404 en lugar de index.html
+          console.log(`❌ Archivo JavaScript no encontrado: ${path}`);
+          return new Response('Archivo JavaScript no encontrado', { 
+            status: 404,
+            headers: { 'Content-Type': 'text/plain' }
+          });
         }
         
-        // Para rutas de SPA, servir index.html
+        if (path.endsWith('.html')) {
+          return new Response('Archivo HTML no encontrado', { 
+            status: 404,
+            headers: { 'Content-Type': 'text/plain' }
+          });
+        }
+        
+        // Para rutas de SPA (solo HTML), servir index.html
         const indexContent = await readFileContent(join(process.cwd(), 'index.html'));
         if (indexContent) {
+          console.log(`🔄 SPA fallback para: ${path}`);
           return new Response(indexContent, {
             headers: {
               'Content-Type': 'text/html',
@@ -88,11 +105,17 @@ serve({
           });
         }
         
-        return new Response('Archivo no encontrado', { status: 404 });
+        return new Response('Archivo no encontrado', { 
+          status: 404,
+          headers: { 'Content-Type': 'text/plain' }
+        });
       }
     } catch (error) {
       console.error('Error sirviendo archivo:', error);
-      return new Response('Error interno del servidor', { status: 500 });
+      return new Response('Error interno del servidor', { 
+        status: 500,
+        headers: { 'Content-Type': 'text/plain' }
+      });
     }
   }
 });

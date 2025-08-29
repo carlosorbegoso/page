@@ -35,8 +35,7 @@
     <link rel="stylesheet" href="src/styles/layouts/_sections.css?v=2.0.0">
     <link rel="stylesheet" href="src/styles/responsive/_mobile.css?v=2.0.0">
     
-    <!-- Three.js CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Three.js se carga desde node_modules via bun -->
     
     <!-- ProgressBar CSS - Cargado inmediatamente -->
     <link rel="stylesheet" href="src/styles/components/_progress-bar.css?v=2.0.0">
@@ -79,7 +78,7 @@
     </main>
 
     <!-- ProgressBar Engine - Se ejecuta inmediatamente -->
-    <script src="src/scripts/engines/progress-bar-engine.js?v=2.0.0"></script>
+    <script type="module" src="src/scripts/engines/progress-bar-engine.js?v=2.0.0"></script>
     
     <!-- JavaScript -->
     <script type="module" src="src/scripts/main.js?v=2.0.0"></script>

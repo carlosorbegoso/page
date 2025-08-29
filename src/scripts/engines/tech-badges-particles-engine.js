@@ -3,6 +3,9 @@
  * Crea efectos sutiles y elegantes alrededor de cada badge de tecnología
  */
 
+// Importar Three.js como módulo ES6 con Vite
+import * as THREE from 'three';
+
 class TechBadgesParticlesEngine {
     constructor() {
         this.techBadges = [];

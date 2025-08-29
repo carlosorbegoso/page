@@ -3,6 +3,9 @@
  * Motor específico para efectos visuales avanzados del Hero section
  */
 
+// Importar Three.js como módulo ES6 con Vite
+import * as THREE from 'three';
+
 export class HeroThreeEngine {
     constructor() {
         this.scene = null;

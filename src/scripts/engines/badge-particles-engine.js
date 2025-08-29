@@ -3,6 +3,9 @@
  * Crea efectos sutiles y elegantes alrededor del badge
  */
 
+// Importar Three.js como módulo ES6 con Vite
+import * as THREE from 'three';
+
 class BadgeParticlesEngine {
     constructor(badgeElement) {
         this.badgeElement = badgeElement;

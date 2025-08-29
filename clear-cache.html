@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Clear Cache</title>
+    <script>
+        // Limpiar caché del service worker si existe
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+        }
+        
+        // Limpiar caché del navegador
+        if ('caches' in window) {
+            caches.keys().then(function(names) {
+                for (let name of names) {
+                    caches.delete(name);
+                }
+            });
+        }
+        
+        // Forzar recarga después de 2 segundos
+        setTimeout(() => {
+            window.location.href = '/index.html?cache-clear=' + Date.now();
+        }, 2000);
+    </script>
+</head>
+<body>
+    <h1>Limpiando caché...</h1>
+    <p>Redirigiendo en 2 segundos...</p>
+</body>
+</html>

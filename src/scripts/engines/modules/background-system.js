@@ -1,6 +1,7 @@
 // ===== SISTEMA DE FONDO MODULAR =====
 
-const THREE = window.THREE;
+// Importar Three.js como módulo ES6 con Vite
+import * as THREE from 'three';
 
 export class BackgroundSystem {
     constructor(scene) {

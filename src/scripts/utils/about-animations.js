@@ -76,12 +76,6 @@ class AboutAnimations {
     
     initThreeJSAnimations() {
         try {
-            // Verificar que Three.js esté disponible
-            if (typeof THREE === 'undefined') {
-                console.warn('⚠️ Three.js no está disponible, usando animaciones CSS alternativas');
-                return;
-            }
-            
             // Verificar que el módulo AboutThreeEngine esté disponible
             if (typeof AboutThreeEngine === 'undefined') {
                 console.warn('⚠️ AboutThreeEngine no está disponible, usando animaciones CSS alternativas');

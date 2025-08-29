@@ -1,7 +1,7 @@
 // ===== MOTOR PRINCIPAL DE EFECTOS VISUALES - ORQUESTADOR =====
 
-// Three.js está disponible globalmente desde el CDN
-const THREE = window.THREE;
+// Importar Three.js como módulo ES6 con Vite
+import * as THREE from 'three';
 
 // Importar módulos especializados
 import { ParticleSystem } from './modules/particle-system.js';

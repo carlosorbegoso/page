@@ -1,6 +1,10 @@
 /**
  * About Three.js Engine - Efectos visuales profesionales para la sección About
  */
+
+// Importar Three.js como módulo ES6 con Vite
+import * as THREE from 'three';
+
 class AboutThreeEngine {
     constructor() {
         this.scene = null;

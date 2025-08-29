@@ -15,15 +15,11 @@ export class ComponentLoader {
      */
     async loadComponent(componentName, targetSelector, data = {}) {
         try {
-            // Verificar si ya está cargado
-            if (this.loadedComponents.has(componentName)) {
-                return this.components.get(componentName);
-            }
-
-            // Cargar el archivo del componente
-            const response = await fetch(`src/components/${componentName}.html`);
+            const componentPath = `src/components/${componentName}.html`;
+            
+            const response = await fetch(componentPath);
             if (!response.ok) {
-                throw new Error(`Error cargando componente: ${componentName}`);
+                throw new Error(`Error cargando componente: ${componentName} - Status: ${response.status}`);
             }
 
             const html = await response.text();
@@ -32,8 +28,25 @@ export class ComponentLoader {
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = html.trim();
             
-            // Obtener el primer elemento hijo
-            const component = tempDiv.firstElementChild;
+            // Buscar el primer elemento que no sea un comentario o script
+            let component = null;
+            for (let child of tempDiv.children) {
+                if (child.nodeType === Node.ELEMENT_NODE && 
+                    child.tagName !== 'SCRIPT' && 
+                    child.tagName !== 'STYLE') {
+                    component = child;
+                    break;
+                }
+            }
+            
+            // Si no encontramos un elemento válido, usar el primero
+            if (!component) {
+                component = tempDiv.firstElementChild;
+            }
+            
+            if (!component) {
+                throw new Error(`Componente ${componentName} no tiene elementos hijos válidos`);
+            }
             
             // Procesar datos del componente
             this.processComponentData(component, data);
@@ -42,13 +55,14 @@ export class ComponentLoader {
             const target = document.querySelector(targetSelector);
             if (target) {
                 target.appendChild(component);
+            } else {
+                throw new Error(`Target no encontrado: ${targetSelector}`);
             }
             
             // Guardar referencia
             this.components.set(componentName, component);
             this.loadedComponents.add(componentName);
             
-         
             return component;
             
         } catch (error) {

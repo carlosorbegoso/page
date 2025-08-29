@@ -5,15 +5,15 @@
   "main": "src/scripts/main.js",
   "type": "module",
   "scripts": {
-    "dev": "bun run server.js",
-    "start": "bun run server.js",
-    "build": "bun build src/scripts/main.js --outdir dist --target browser",
-    "preview": "bun run server.js",
+    "dev": "bun run vite",
+    "start": "bun run vite",
+    "build": "bun run vite build",
+    "preview": "bun run vite preview",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
     "format": "prettier --write src/**/*.{js,css,html}",
     "clean": "rm -rf dist",
-    "serve": "bun run server.js"
+    "serve": "bun run vite"
   },
   "keywords": [
     "portfolio",
@@ -29,7 +29,8 @@
   "license": "MIT",
   "devDependencies": {
     "eslint": "^8.55.0",
-    "prettier": "^3.1.0"
+    "prettier": "^3.1.0",
+    "vite": "^7.1.3"
   },
   "dependencies": {
     "three": "^0.158.0"

@@ -110,14 +110,7 @@ export const COMPONENTS_CONFIG = {
             },
             order: 7
         },
-        {
-            name: 'Footer',
-            target: 'body',
-            data: {
-                copyright: '© 2024 Carlos Orbegoso. All rights reserved.'
-            },
-            order: 8
-        }
+
     ],
 
     // Componentes opcionales

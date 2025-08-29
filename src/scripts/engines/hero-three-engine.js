@@ -54,7 +54,7 @@ export class HeroThreeEngine {
             this.animate();
             
             this.isInitialized = true;
-            console.log('🎭 Hero Three.js Engine inicializado');
+        
             return true;
         } catch (error) {
             console.error('❌ Error inicializando Hero Three.js Engine:', error);

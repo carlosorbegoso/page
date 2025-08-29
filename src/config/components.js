@@ -122,13 +122,7 @@ export const COMPONENTS_CONFIG = {
 
     // Componentes opcionales
     optional: [
-        {
-            name: 'ProgressBar',
-            target: '#main-content',
-            data: {},
-            order: 9,
-            condition: () => window.innerWidth > 768 // Solo en desktop
-        }
+        // ProgressBar se ejecuta automáticamente desde index.html
     ],
 
     // Configuración de carga

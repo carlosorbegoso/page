@@ -23,7 +23,6 @@ class SimpleLogger {
     
     info(message, data = null) {
         const formattedMessage = this.formatMessage('info', message);
-        console.info(formattedMessage, data);
     }
     
     debug(message, data = null) {
@@ -33,17 +32,17 @@ class SimpleLogger {
     
     performance(label, duration) {
         const formattedMessage = this.formatMessage('perf', `${label}: ${duration.toFixed(2)}ms`);
-        console.log(formattedMessage);
+    
     }
     
     animation(message, data = null) {
         const formattedMessage = this.formatMessage('anim', message);
-        console.log(formattedMessage, data);
+      
     }
     
     threejs(message, data = null) {
         const formattedMessage = this.formatMessage('three', message);
-        console.log(formattedMessage, data);
+       
     }
 }
 

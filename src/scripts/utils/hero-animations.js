@@ -307,7 +307,7 @@ export class HeroAnimations {
             this.heroThreeEngine = new HeroThreeEngine();
             this.heroThreeEngine.init('hero-particles').then(success => {
                 if (success) {
-                    console.log('🎭 Hero Three.js Engine integrado correctamente');
+                
                     this.setupThemeIntegration();
                 }
             });
@@ -319,13 +319,13 @@ export class HeroAnimations {
     initTextEffects() {
         this.textEffectsEngine = new TextEffectsEngine();
         this.textEffectsEngine.init();
-        console.log('🎨 Text Effects Engine integrado correctamente');
+    
     }
 
     initButtonParticles() {
         this.buttonParticlesEngine = new ButtonParticlesEngine();
         this.buttonParticlesEngine.init();
-        console.log('🎭 Button Particles Engine integrado correctamente');
+       
     }
 
     initBadgeParticles() {
@@ -333,7 +333,7 @@ export class HeroAnimations {
             const badge = this.hero.querySelector('.hero-badge');
             if (badge) {
                 this.badgeParticlesEngine = new BadgeParticlesEngine(badge);
-                console.log('🎨 Badge Particles Engine inicializado');
+                
             }
         } catch (error) {
             console.warn('❌ Error inicializando Badge Particles Engine:', error);
@@ -343,7 +343,7 @@ export class HeroAnimations {
     initTechBadgesParticles() {
         try {
             this.techBadgesParticlesEngine = new TechBadgesParticlesEngine();
-            console.log('🚀 Tech Badges Particles Engine inicializado');
+    
         } catch (error) {
             console.warn('❌ Error inicializando Tech Badges Particles Engine:', error);
         }

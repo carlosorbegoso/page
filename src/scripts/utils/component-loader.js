@@ -48,7 +48,7 @@ export class ComponentLoader {
             this.components.set(componentName, component);
             this.loadedComponents.add(componentName);
             
-            console.log(`✅ Componente ${componentName} cargado correctamente`);
+         
             return component;
             
         } catch (error) {

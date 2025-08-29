@@ -163,7 +163,7 @@ export const Performance = {
         const end = performance.now();
         
         if (CONFIG.DEBUG) {
-            console.log(`${label}: ${(end - start).toFixed(2)}ms`);
+        
         }
         
         return result;

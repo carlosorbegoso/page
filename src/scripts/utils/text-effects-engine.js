@@ -42,7 +42,7 @@ export class TextEffectsEngine {
         this.animate();
         
         this.isInitialized = true;
-        console.log('🎨 Text Effects Engine inicializado');
+    
     }
 
     setupEventListeners() {

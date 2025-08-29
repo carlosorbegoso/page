@@ -27,7 +27,7 @@ export class MobileMenuManager {
             
             if (this.menuToggle && this.navLinks) {
                 this.setupEventListeners();
-                console.log('🚀 MobileMenuManager inicializado');
+               
             } else {
                 attempts++;
                 if (attempts < maxAttempts) {
@@ -85,7 +85,7 @@ export class MobileMenuManager {
         this.navLinks.classList.add('active');
         document.body.style.overflow = 'hidden';
         
-        console.log('📱 Menú móvil abierto');
+
     }
     
     closeMenu() {
@@ -94,7 +94,7 @@ export class MobileMenuManager {
         this.navLinks.classList.remove('active');
         document.body.style.overflow = '';
         
-        console.log('📱 Menú móvil cerrado');
+ 
     }
     
     // Método público para cerrar el menú desde otros componentes

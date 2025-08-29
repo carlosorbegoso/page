@@ -43,7 +43,6 @@ export class DeviceDetector {
         header.style.boxShadow = config.shadow;
         
         // Log para debugging
-        console.log(`🎨 Header adaptado para ${this.deviceType} (${document.documentElement.getAttribute('data-theme') || 'light'}):`, config);
     }
     
     updateThemeTransparency(theme) {
@@ -60,7 +59,6 @@ export class DeviceDetector {
             this.isTablet = this.deviceType === 'tablet';
             this.isDesktop = this.deviceType === 'desktop';
             
-            console.log(`📱 Dispositivo cambiado a: ${this.deviceType}`);
             this.updateHeaderTransparency();
         }
     }
@@ -98,7 +96,6 @@ export class DeviceDetector {
             attributeFilter: ['data-theme']
         });
         
-        console.log(`🚀 DeviceDetector inicializado para: ${this.deviceType}`);
     }
     
     // Método público para forzar actualización

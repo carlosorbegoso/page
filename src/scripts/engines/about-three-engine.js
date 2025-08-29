@@ -72,7 +72,7 @@ class AboutThreeEngine {
                 return false;
             }
             
-            console.log('✅ WebGL es compatible');
+       
             return true;
         } catch (error) {
             console.warn('⚠️ Error verificando compatibilidad WebGL:', error);
@@ -109,8 +109,7 @@ class AboutThreeEngine {
             // Marcar que estamos en modo CSS
             this.isActive = false;
             this.cssMode = true;
-            
-            console.log('🔄 Modo CSS activado como fallback - Three.js deshabilitado');
+            ß
         } catch (error) {
             console.warn('⚠️ Error activando modo CSS:', error);
             // Fallback más básico
@@ -127,7 +126,7 @@ class AboutThreeEngine {
                 element.classList.add('animate-fade-in-up');
             });
             
-            console.log('✅ Animaciones CSS básicas activadas');
+        
         } catch (error) {
             console.warn('⚠️ Error activando animaciones CSS básicas:', error);
         }
@@ -149,7 +148,7 @@ class AboutThreeEngine {
             // Activar efectos especiales CSS
             this.activateSpecialCSSEffects();
             
-            console.log('✅ Animaciones CSS activadas exitosamente');
+        
         } catch (error) {
             console.warn('⚠️ Error activando animaciones CSS:', error);
         }
@@ -224,10 +223,10 @@ class AboutThreeEngine {
             this.animate();
             this.isActive = true;
             
-            console.log('🚀 About Three.js Engine inicializado correctamente');
+        
         } catch (error) {
             console.error('❌ Error inicializando About Three.js Engine:', error);
-            console.log('🔄 Cambiando a modo CSS como fallback');
+    
             this.fallbackToCSS();
         }
     }
@@ -279,7 +278,7 @@ class AboutThreeEngine {
             while (!renderer && rendererIndex < rendererOptions.length) {
                 try {
                     renderer = new THREE.WebGLRenderer(rendererOptions[rendererIndex]);
-                    console.log(`✅ Renderer creado con configuración ${rendererIndex + 1}`);
+                    
                 } catch (error) {
                     console.warn(`⚠️ Configuración ${rendererIndex + 1} falló:`, error);
                     rendererIndex++;
@@ -303,7 +302,7 @@ class AboutThreeEngine {
             });
             
             this.renderer.domElement.addEventListener('webglcontextrestored', () => {
-                console.log('✅ WebGL Context Restored');
+               
                 this.handleContextRestored();
             });
             
@@ -321,7 +320,7 @@ class AboutThreeEngine {
                 container.appendChild(this.renderer.domElement);
             }
             
-            console.log('✅ Three.js configurado exitosamente');
+       
         } catch (error) {
             console.error('❌ Error en setupThreeJS:', error);
             throw error;
@@ -879,8 +878,7 @@ class AboutThreeEngine {
         
         this.isRetrying = true;
         const delay = this.retryDelay * this.contextLostCount; // Delay progresivo
-        
-        console.log(`🔄 Reintentando en ${delay}ms...`);
+
         
         setTimeout(() => {
             this.isRetrying = false;
@@ -890,7 +888,7 @@ class AboutThreeEngine {
     
     attemptRecovery() {
         try {
-            console.log('🔄 Intentando recuperar WebGL...');
+        
             
             // Verificar si WebGL está disponible
             if (!this.checkWebGLCompatibility()) {
@@ -913,7 +911,7 @@ class AboutThreeEngine {
             this.isActive = true;
             this.animate();
             
-            console.log('✅ WebGL recuperado exitosamente');
+    
             this.contextLostCount = 0; // Reset contador
             
         } catch (error) {
@@ -942,7 +940,7 @@ class AboutThreeEngine {
             this.isActive = true;
             this.animate();
             
-            console.log('✅ WebGL Context Restored - Sistema reactivado');
+         
         } catch (error) {
             console.error('❌ Error restaurando WebGL Context:', error);
         }
@@ -1052,7 +1050,7 @@ class AboutThreeEngine {
                 break;
         }
         
-        console.log(`🎯 Performance mode cambiado a: ${mode}`);
+    
     }
     
     dispose() {
@@ -1104,7 +1102,7 @@ class AboutThreeEngine {
             this.contextLostCount = 0;
             this.isRetrying = false;
             
-            console.log('🧹 About Three.js Engine limpiado completamente');
+        
         } catch (error) {
             console.error('❌ Error limpiando About Three.js Engine:', error);
         }

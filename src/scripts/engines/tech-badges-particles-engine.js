@@ -32,7 +32,7 @@ class TechBadgesParticlesEngine {
             this.createParticlesEngines();
             this.setupEventListeners();
             this.isActive = true;
-            console.log('✅ Tech Badges Particles Engine inicializado');
+            
         } catch (error) {
             console.warn('❌ Error inicializando Tech Badges Particles Engine:', error);
         }
@@ -40,7 +40,7 @@ class TechBadgesParticlesEngine {
     
     findTechBadges() {
         this.techBadges = document.querySelectorAll('.tech-badge');
-        console.log(`📱 Encontrados ${this.techBadges.length} tech-badges`);
+    
     }
     
     createParticlesEngines() {

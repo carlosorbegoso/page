@@ -18,7 +18,7 @@ class AboutAnimations {
             this.setupIntersectionObserver();
             this.setupScrollAnimations();
             this.setupHoverEffects();
-            console.log('🎬 About Animations inicializado correctamente');
+         
         } catch (error) {
             console.error('❌ Error inicializando About Animations:', error);
         }
@@ -49,7 +49,7 @@ class AboutAnimations {
     onAboutVisible(target) {
         if (this.isInitialized) return;
         
-        console.log('🌟 Sección About visible - Inicializando efectos');
+  
         this.isInitialized = true;
         
         // Inicializar Three.js Engine
@@ -63,7 +63,7 @@ class AboutAnimations {
     }
     
     onAboutHidden(target) {
-        console.log('🌙 Sección About oculta');
+       
         
         // Limpiar Three.js Engine
         if (this.aboutThreeEngine) {
@@ -89,10 +89,10 @@ class AboutAnimations {
             }
             
             this.aboutThreeEngine = new AboutThreeEngine();
-            console.log('🚀 About Three.js Engine inicializado');
+            
         } catch (error) {
             console.error('❌ Error inicializando About Three.js Engine:', error);
-            console.log('🔄 Continuando con animaciones CSS alternativas');
+            
         }
     }
     
@@ -655,7 +655,7 @@ class AboutAnimations {
             this.aboutThreeEngine.dispose();
         }
         
-        console.log('🧹 About Animations limpiado');
+
     }
 }
 

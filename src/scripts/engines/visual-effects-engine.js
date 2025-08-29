@@ -50,7 +50,7 @@ class VisualEffectsEngine {
             this.animate();
             
             this.isInitialized = true;
-            console.log('✅ Motor de efectos visuales inicializado');
+        
             
         } catch (error) {
             console.error('❌ Error inicializando motor visual:', error);

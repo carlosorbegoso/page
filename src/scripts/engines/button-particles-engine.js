@@ -49,7 +49,7 @@ export class ButtonParticlesEngine {
             this.animate();
             
             this.isInitialized = true;
-            console.log('🎭 Button Particles Engine inicializado');
+        
             return true;
         } catch (error) {
             console.error('❌ Error inicializando Button Particles Engine:', error);
@@ -100,7 +100,7 @@ export class ButtonParticlesEngine {
 
     findButtons() {
         this.buttons = document.querySelectorAll('.btn-hero');
-        console.log(`🎯 Encontrados ${this.buttons.length} botones para partículas`);
+
     }
 
     createButtonParticles() {

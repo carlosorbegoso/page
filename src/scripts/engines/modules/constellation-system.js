@@ -1,6 +1,4 @@
 // ===== SISTEMA DE CONSTELACIONES MODULAR =====
-
-// Importar Three.js como módulo ES6 con Vite
 import * as THREE from 'three';
 
 export class ConstellationSystem {

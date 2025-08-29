@@ -42,6 +42,8 @@ class Portfolio {
             this.setupGlobalEvents();
             
             // Portfolio completamente inicializado
+            this.isInitialized = true;
+            log.info('✅ Portfolio completamente inicializado');
             
         } catch (error) {
             console.error('❌ Error inicializando portfolio:', error);
@@ -97,6 +99,9 @@ class Portfolio {
             log.info('⚠️ Three.js deshabilitado en configuración');
             return;
         }
+
+        // Three.js se carga como módulo ES6, no como variable global
+        // Los motores Three.js manejarán sus propias importaciones
 
         log.info('🌟 Inicializando módulos avanzados...');
         
@@ -183,6 +188,31 @@ class Portfolio {
         this.setupLanguageToggle();
         this.setupMobileOptimizations();
         this.setupTouchInteractions();
+        
+        // Configurar logging dinámico para desarrollo
+        this.setupDynamicLogging();
+    }
+    
+    /**
+     * Configura logging dinámico para desarrollo
+     */
+    setupDynamicLogging() {
+        // Solo en desarrollo, permitir cambiar nivel de logging con teclas
+        if (CONFIG.DEBUG) {
+            document.addEventListener('keydown', (e) => {
+                // Ctrl + Shift + L para cambiar nivel de logging
+                if (e.ctrlKey && e.shiftKey && e.key === 'L') {
+                    log.setLogLevel('info');
+                    log.info('🔍 Logging detallado habilitado. Presiona Ctrl+Shift+L nuevamente para deshabilitar.');
+                    
+                    // Deshabilitar después de 5 segundos
+                    setTimeout(() => {
+                        log.setLogLevel('warn');
+                        log.warn('🔇 Logging detallado deshabilitado automáticamente.');
+                    }, 5000);
+                }
+            });
+        }
     }
 
     /**
@@ -532,7 +562,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.portfolio = portfolio;
         
     } catch (error) {
-        log.error('❌ Error fatal inicializando portfolio:', error);
+        console.error('❌ Error fatal inicializando portfolio:', error);
     }
 });
 

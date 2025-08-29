@@ -1,6 +1,5 @@
 // ===== SISTEMA DE CURSOR MODULAR =====
 
-// Importar Three.js como módulo ES6 con Vite
 import * as THREE from 'three';
 
 export class CursorSystem {

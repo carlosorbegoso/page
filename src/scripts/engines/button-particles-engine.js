@@ -3,7 +3,7 @@
  * Motor de partículas Three.js para los botones del Hero
  */
 
-// Importar Three.js como módulo ES6 con Vite
+// Importar Three.js como módulo ES6
 import * as THREE from 'three';
 
 export class ButtonParticlesEngine {

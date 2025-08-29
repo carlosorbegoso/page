@@ -31,7 +31,7 @@ class VisualEffectsEngine {
     }
 
     // ===== INICIALIZACIÓN =====
-    init() {
+    async init() {
         try {
             this.createScene();
             this.createCamera();
@@ -40,7 +40,14 @@ class VisualEffectsEngine {
             // Inicializar sistemas modulares
             this.backgroundSystem = new BackgroundSystem(this.scene);
             this.particleSystem = new ParticleSystem(this.scene);
-            this.constellationSystem = new ConstellationSystem(this.scene);
+            
+            // Inicializar constellation system de forma asíncrona para asegurar que THREE esté listo
+            try {
+                await this.initializeConstellationSystem();
+            } catch (error) {
+                console.error('❌ Error inicializando ConstellationSystem:', error);
+            }
+            
             this.cursorSystem = new CursorSystem(this.scene, this.camera);
             
             // Configurar eventos
@@ -55,6 +62,14 @@ class VisualEffectsEngine {
         } catch (error) {
             console.error('❌ Error inicializando motor visual:', error);
         }
+    }
+    
+    // ===== INICIALIZACIÓN ASÍNCRONA DEL SISTEMA DE CONSTELACIONES =====
+    async initializeConstellationSystem() {
+        // Esperar un poco para asegurar que THREE esté completamente cargado
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
+        this.constellationSystem = new ConstellationSystem(this.scene);
     }
 
     // ===== CONFIGURACIÓN DE ESCENA =====

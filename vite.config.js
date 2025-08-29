@@ -17,6 +17,15 @@ export default defineConfig({
     open: true
   },
   optimizeDeps: {
-    include: ['three']
+    include: ['three'],
+    exclude: []
+  },
+  resolve: {
+    alias: {
+      'three': 'three'
+    }
+  },
+  define: {
+    global: 'globalThis'
   }
 });

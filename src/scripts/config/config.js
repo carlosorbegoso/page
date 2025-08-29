@@ -6,6 +6,14 @@ export const CONFIG = {
     VERSION: '2.0.0',
     DEBUG: false,
     
+    // ===== CONFIGURACIÓN DE LOGGING =====
+    LOGGING: {
+        LEVEL: 'warn', // 'error', 'warn', 'info', 'debug'
+        SHOW_TIMESTAMPS: true,
+        SHOW_PREFIX: true,
+        CONSOLE_OUTPUT: true
+    },
+    
     // ===== CONFIGURACIÓN DE ANIMACIONES =====
     ANIMATIONS: {
         ENABLED: true,

@@ -6,7 +6,6 @@ import{V as w,M as C,S as x,a as T,C as v,B as S,L as R,b as $,c as G,d as f,P a
                 varying float vOpacity;
                 varying vec3 vColor;
                 
-                
                 void main() {
                     vOpacity = opacity;
                     vColor = color;

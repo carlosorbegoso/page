@@ -95,8 +95,7 @@ class Portfolio {
      * Inicializa módulos avanzados
      */
     async initializeAdvancedModules() {
-        if (!FEATURES.THREE_JS) {
-            log.info('⚠️ Three.js deshabilitado en configuración');
+        if (this.advancedModulesInitialized) {
             return;
         }
 
@@ -114,6 +113,9 @@ class Portfolio {
             const currentTheme = localStorage.getItem('theme') || CONFIG.THEMES.DEFAULT;
             this.visualEngine.updateTheme(currentTheme);
             
+            // Inicializar efectos para todas las secciones
+            this.initializeSectionEffects();
+            
         } catch (error) {
             log.error('❌ Error inicializando motor visual:', error);
         }
@@ -123,6 +125,144 @@ class Portfolio {
         await this.simulateModuleLoad('NotificationSystem');
         await this.simulateModuleLoad('InteractiveParticlesSystem');
         await this.simulateModuleLoad('ScrollEffectsEngine');
+    }
+
+    /**
+     * Inicializa efectos visuales para todas las secciones
+     */
+    initializeSectionEffects() {
+        try {
+            if (!this.visualEngine) {
+                log.warn('⚠️ Motor visual no disponible para inicializar efectos de sección');
+                return;
+            }
+
+            log.info('🎨 Inicializando efectos visuales para todas las secciones...');
+
+            // Inicializar efectos para cada sección
+            const sections = [
+                { name: 'Hero', containerId: 'hero-effects' },
+                { name: 'About', containerId: 'about-effects' },
+                { name: 'Experience', containerId: 'experience-effects' },
+                { name: 'Skills', containerId: 'skills-effects' },
+                { name: 'Projects', containerId: 'projects-effects' },
+                { name: 'Contact', containerId: 'contact-effects' }
+            ];
+
+            sections.forEach(section => {
+                try {
+                    // Verificar si la sección existe en el DOM
+                    const sectionElement = document.getElementById(section.name.toLowerCase());
+                    if (sectionElement) {
+                        // Inicializar efectos para la sección
+                        const effects = this.visualEngine.initSectionEffects(
+                            section.name, 
+                            section.containerId
+                        );
+                        
+                        if (effects) {
+                            log.info(`✅ Efectos inicializados para ${section.name}`);
+                        } else {
+                            log.warn(`⚠️ No se pudieron inicializar efectos para ${section.name}`);
+                        }
+                    } else {
+                        log.debug(`🔍 Sección ${section.name} no encontrada en el DOM`);
+                    }
+                } catch (error) {
+                    log.error(`❌ Error inicializando efectos para ${section.name}:`, error);
+                }
+            });
+
+            // Configurar observador de intersección para activar/desactivar efectos
+            this.setupSectionEffectsObserver();
+
+        } catch (error) {
+            log.error('❌ Error inicializando efectos de sección:', error);
+        }
+    }
+
+    /**
+     * Configura observador de intersección para activar/desactivar efectos
+     */
+    setupSectionEffectsObserver() {
+        try {
+            const sections = ['hero', 'about', 'experience', 'skills', 'projects', 'contact'];
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const sectionName = entry.target.id;
+                    const isVisible = entry.isIntersecting;
+                    
+                    if (isVisible) {
+                        // Activar efectos cuando la sección es visible
+                        this.activateSectionEffects(sectionName);
+                    } else {
+                        // Desactivar efectos cuando la sección no es visible (opcional)
+                        // this.deactivateSectionEffects(sectionName);
+                    }
+                });
+            }, {
+                threshold: 0.1, // Activar cuando 10% de la sección sea visible
+                rootMargin: '0px 0px -100px 0px' // Margen inferior para activar antes
+            });
+
+            // Observar todas las secciones
+            sections.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    observer.observe(section);
+                }
+            });
+
+            log.info('👁️ Observador de efectos de sección configurado');
+
+        } catch (error) {
+            log.error('❌ Error configurando observador de efectos:', error);
+        }
+    }
+
+    /**
+     * Activa efectos para una sección específica
+     */
+    activateSectionEffects(sectionName) {
+        try {
+            if (!this.visualEngine) return;
+
+            const effects = this.visualEngine.sectionEffects.get(sectionName);
+            if (effects) {
+                // Activar animaciones CSS
+                const section = document.getElementById(sectionName);
+                if (section) {
+                    section.classList.add('section-effects-active');
+                }
+
+                log.debug(`🎬 Efectos activados para ${sectionName}`);
+            }
+        } catch (error) {
+            log.error(`❌ Error activando efectos para ${sectionName}:`, error);
+        }
+    }
+
+    /**
+     * Desactiva efectos para una sección específica
+     */
+    deactivateSectionEffects(sectionName) {
+        try {
+            if (!this.visualEngine) return;
+
+            const effects = this.visualEngine.sectionEffects.get(sectionName);
+            if (effects) {
+                // Desactivar animaciones CSS
+                const section = document.getElementById(sectionName);
+                if (section) {
+                    section.classList.remove('section-effects-active');
+                }
+
+                log.debug(`⏸️ Efectos desactivados para ${sectionName}`);
+            }
+        } catch (error) {
+            log.error(`❌ Error desactivando efectos para ${sectionName}:`, error);
+        }
     }
 
     /**

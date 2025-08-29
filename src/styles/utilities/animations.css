@@ -94,34 +94,13 @@
     }
 }
 
-/* ===== CLASES DE ANIMACIÓN ===== */
-.fade-in {
-    animation: fadeIn 0.6s ease-out forwards;
-}
-
+/* ===== ANIMACIONES DE ENTRADA ESCALONADAS ===== */
 .animate-fade-in-up {
     opacity: 0;
     transform: translateY(30px);
     animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-.slide-in-left {
-    animation: slideInLeft 0.6s ease-out forwards;
-}
-
-.slide-in-right {
-    animation: slideInRight 0.6s ease-out forwards;
-}
-
-.slide-in-up {
-    animation: slideInUp 0.6s ease-out forwards;
-}
-
-.scale-in {
-    animation: scaleIn 0.6s ease-out forwards;
-}
-
-/* ===== DELAYS DE ANIMACIÓN ===== */
 .animate-fade-in-up[data-delay="0.1s"] { animation-delay: 0.1s; }
 .animate-fade-in-up[data-delay="0.2s"] { animation-delay: 0.2s; }
 .animate-fade-in-up[data-delay="0.3s"] { animation-delay: 0.3s; }
@@ -142,6 +121,54 @@
 .animate-fade-in-up[data-delay="1.8s"] { animation-delay: 1.8s; }
 .animate-fade-in-up[data-delay="1.9s"] { animation-delay: 1.9s; }
 .animate-fade-in-up[data-delay="2.0s"] { animation-delay: 2.0s; }
+
+/* ===== ANIMACIONES DE EFECTOS DE SECCIONES (CREADAS DINÁMICAMENTE) ===== */
+
+/* Partículas de sección */
+@keyframes sectionParticleFloat {
+    0%, 100% {
+        transform: translateY(0px) translateX(0px);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translateY(-25px) translateX(15px);
+        opacity: 1;
+    }
+}
+
+/* Constelaciones de sección */
+@keyframes sectionConstellationGlow {
+    0%, 100% {
+        opacity: 0.4;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.15);
+    }
+}
+
+/* Estrellas de sección */
+@keyframes sectionStarTwinkle {
+    0%, 100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.8);
+    }
+}
+
+/* Elementos flotantes de sección */
+@keyframes sectionFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(0);
+    }
+    50% {
+        transform: translateY(-25px) rotate(180deg);
+    }
+}
 
 /* ===== ANIMACIONES DE HOVER ===== */
 .hover-lift {
@@ -168,20 +195,19 @@
     transform: rotate(5deg);
 }
 
-/* ===== ANIMACIONES DE LOADING ===== */
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
+/* ===== ANIMACIONES DE ESTADO ===== */
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
 }
 
 @keyframes bounce {
     0%, 20%, 53%, 80%, 100% {
-        transform: translate3d(0, 0, 0);
+        transform: translateZ(0);
     }
     40%, 43% {
         transform: translate3d(0, -30px, 0);
@@ -195,12 +221,18 @@
 }
 
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
-    20%, 40%, 60%, 80% { transform: translateX(10px); }
+    0%, 100% {
+        transform: translate(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+        transform: translate(-10px);
+    }
+    20%, 40%, 60%, 80% {
+        transform: translate(10px);
+    }
 }
 
-/* ===== CLASES DE LOADING ===== */
+/* ===== CLASES DE ANIMACIÓN ===== */
 .spin {
     animation: spin 1s linear infinite;
 }
@@ -217,15 +249,23 @@
     animation: shake 0.5s ease-in-out;
 }
 
-/* ===== ANIMACIONES DE TEXTO ===== */
+/* ===== ANIMACIONES DE CURSOR ===== */
 @keyframes blink {
-    0%, 50% { border-color: transparent; }
-    51%, 100% { border-color: var(--primary-color); }
+    0%, 50% {
+        border-color: transparent;
+    }
+    51%, 100% {
+        border-color: var(--primary-color);
+    }
 }
 
 @keyframes typewriter {
-    from { width: 0; }
-    to { width: 100%; }
+    0% {
+        width: 0;
+    }
+    100% {
+        width: 100%;
+    }
 }
 
 .typing-effect {
@@ -239,15 +279,23 @@
     animation: typewriter 3s steps(40, end);
 }
 
-/* ===== ANIMACIONES DE PARTÍCULAS ===== */
+/* ===== ANIMACIONES DE FLOTACIÓN ===== */
 @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
 }
 
 @keyframes glow {
-    0%, 100% { box-shadow: 0 0 5px var(--primary-color); }
-    50% { box-shadow: 0 0 20px var(--primary-color), 0 0 30px var(--primary-color); }
+    0%, 100% {
+        box-shadow: 0 0 5px var(--primary-color);
+    }
+    50% {
+        box-shadow: 0 0 20px var(--primary-color), 0 0 30px var(--primary-color);
+    }
 }
 
 .float {
@@ -258,25 +306,17 @@
     animation: glow 2s ease-in-out infinite;
 }
 
-/* ===== ANIMACIONES RESPONSIVE ===== */
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+/* ===== ANIMACIONES DE ROTACIÓN ===== */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
     }
 }
 
-/* ===== ANIMACIONES DE ENTRADA ESCALONADA ===== */
-.stagger-1 { animation-delay: 0.1s; }
-.stagger-2 { animation-delay: 0.2s; }
-.stagger-3 { animation-delay: 0.3s; }
-.stagger-4 { animation-delay: 0.4s; }
-.stagger-5 { animation-delay: 0.5s; }
-
-/* ===== ANIMACIONES DE SALIDA ===== */
+/* ===== ANIMACIONES DE ENTRADA Y SALIDA ===== */
 .fade-out {
     animation: fadeIn 0.6s ease-out reverse forwards;
 }
@@ -295,4 +335,22 @@
 
 .scale-out {
     animation: scaleIn 0.6s ease-out reverse forwards;
+}
+
+/* ===== ANIMACIONES ESCALONADAS ===== */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+/* ===== ANIMACIONES DE REDUCCIÓN DE MOVIMIENTO ===== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }

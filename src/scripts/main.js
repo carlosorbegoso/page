@@ -654,6 +654,29 @@ class Portfolio {
     }
 
     /**
+     * Cambia el tema de la aplicación
+     */
+    changeTheme(theme) {
+        try {
+            // Cambiar tema en el DOM
+            document.documentElement.setAttribute('data-theme', theme);
+            
+            // Actualizar tema en el motor visual
+            if (this.visualEngine) {
+                this.visualEngine.applyThemeEffects(theme);
+            }
+            
+            // Guardar preferencia
+            localStorage.setItem('theme', theme);
+            
+            log.info(`🎨 Tema cambiado a: ${theme}`);
+            
+        } catch (error) {
+            log.error('❌ Error cambiando tema:', error);
+        }
+    }
+
+    /**
      * Muestra mensaje de fallback
      */
     showFallbackMessage() {

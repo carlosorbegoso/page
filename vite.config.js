@@ -19,7 +19,9 @@ export default defineConfig({
     },
     commonjsOptions: {
       include: [/node_modules/]
-    }
+    },
+    target: 'es2015',
+    sourcemap: false
   },
   server: {
     port: 3000,

@@ -37,37 +37,10 @@
     
     <!-- Three.js se carga desde node_modules via bun -->
     
-    <!-- ProgressBar CSS - Cargado inmediatamente -->
-    <link rel="stylesheet" href="src/styles/components/_progress-bar.css?v=2.0.0">
-    
-    <!-- ProgressBar Script - Se ejecuta inmediatamente -->
-    <script>
-        // Bloquear el contenido hasta que se complete la carga
-        document.addEventListener('DOMContentLoaded', function() {
-            // Ocultar el contenido principal hasta que se complete el ProgressBar
-            const mainContent = document.getElementById('main-content');
-            if (mainContent) {
-                mainContent.style.display = 'none';
-            }
-            
-            // Ejecutar ProgressBar inmediatamente
-            if (typeof initProgressBar === 'function') {
-                initProgressBar();
-            }
-        });
-    </script>
+
 </head>
 <body>
-    <!-- ProgressBar - Se ejecuta ANTES que todo -->
-    <div class="progress-bar-container" id="progress-container">
-        <!-- Canvas Three.js para efectos cósmicos -->
-        <canvas id="progress-canvas" class="progress-canvas"></canvas>
-        
-        <!-- Todo renderizado en Three.js -->
-        <div class="progress-indicator">
-            <!-- El contador y efectos se renderizan en el canvas -->
-        </div>
-    </div>
+
     
     <!-- Contenedor para efectos visuales Three.js -->
     <div id="visual-effects-container" class="visual-effects-container"></div>
@@ -77,8 +50,7 @@
         <!-- Los componentes se cargarán dinámicamente aquí -->
     </main>
 
-    <!-- ProgressBar Engine - Se ejecuta inmediatamente -->
-    <script type="module" src="src/scripts/engines/progress-bar-engine.js?v=2.0.0"></script>
+
     
     <!-- JavaScript -->
     <script type="module" src="src/scripts/main.js?v=2.0.0"></script>

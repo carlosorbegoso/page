@@ -122,7 +122,7 @@ export const COMPONENTS_CONFIG = {
 
     // Componentes opcionales
     optional: [
-        // ProgressBar se ejecuta automáticamente desde index.html
+    
     ],
 
     // Configuración de carga

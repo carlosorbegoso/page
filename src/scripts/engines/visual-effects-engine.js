@@ -215,6 +215,26 @@ class VisualEffectsEngine {
                 config.floatingElements.count = 4;
                 break;
                 
+            case 'footer':
+                // Footer: Efectos muy sutiles y elegantes
+                config.particles.count = 25; // Menos partículas
+                config.particles.size = { min: 0.5, max: 1.2 }; // Más pequeñas
+                config.particles.opacity = { min: 0.08, max: 0.25 }; // Muy transparentes
+                config.particles.colors = ['#64B5F6', '#4FC3F7', '#81D4FA']; // Azules suaves
+                config.particles.speed = { min: 0.05, max: 0.15 }; // Más lentas
+                
+                config.constellations.count = 2; // Solo 2 constelaciones
+                config.constellations.connectionOpacity = 0.15; // Muy transparentes
+                config.constellations.glowIntensity = 0.3; // Glow sutil
+                
+                config.stars.count = 80; // Menos estrellas
+                config.stars.size = { min: 0.3, max: 1 }; // Más pequeñas
+                config.stars.twinkleSpeed = { min: 3, max: 6 }; // Más lentas
+                
+                config.floatingElements.count = 2; // Pocos elementos flotantes
+                config.floatingElements.size = { min: 1, max: 2.5 }; // Más pequeños
+                break;
+                
             default:
                 // Usar configuración por defecto
                 break;

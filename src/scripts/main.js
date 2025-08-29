@@ -186,7 +186,7 @@ class Portfolio {
      */
     setupSectionEffectsObserver() {
         try {
-            const sections = ['hero', 'about', 'experience', 'skills', 'projects', 'contact'];
+            const sections = ['hero', 'about', 'experience', 'skills', 'projects', 'contact', 'footer'];
             
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {

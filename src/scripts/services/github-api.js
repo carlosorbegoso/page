@@ -282,7 +282,7 @@ export async function getGitHubStats() {
                 totalStars,
                 totalForks,
                 followers: profile.followers,
-                contributions: streak.totalContributions,
+                totalCommits: streak.totalContributions,
                 currentStreak: streak.currentStreak
             },
             languages,

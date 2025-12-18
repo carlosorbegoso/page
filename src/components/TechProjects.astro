@@ -3,41 +3,13 @@
 ---
 
 <section id="tech" class="tech-section section section-bg">
-    <!-- Holographic Background -->
+    <!-- Background -->
     <div class="tech-bg">
         <div class="tech-grid-pattern"></div>
-        <div class="tech-glow-orb orb-1"></div>
-        <div class="tech-glow-orb orb-2"></div>
-        <div class="tech-glow-orb orb-3"></div>
-        <div class="tech-particles">
-            <span class="t-particle" style="--x: 10%; --y: 20%; --d: 0s;"></span>
-            <span class="t-particle" style="--x: 85%; --y: 15%; --d: 1s;"></span>
-            <span class="t-particle" style="--x: 25%; --y: 80%; --d: 2s;"></span>
-            <span class="t-particle" style="--x: 70%; --y: 75%; --d: 3s;"></span>
-            <span class="t-particle" style="--x: 50%; --y: 40%; --d: 1.5s;"></span>
-            <span class="t-particle" style="--x: 90%; --y: 60%; --d: 2.5s;"></span>
-        </div>
+        <div class="tech-glow-orb"></div>
     </div>
 
     <div class="container">
-        <!-- Header -->
-        <div class="section-header">
-            <div class="section-badge animate-item" data-delay="0">
-                <div class="badge-icon">
-                    <i class="fas fa-terminal"></i>
-                </div>
-                <span>Tech & Projects</span>
-                <div class="badge-pulse"></div>
-            </div>
-            <h2 class="section-title animate-item" data-delay="100">
-                <span class="title-line">What I</span>
-                <span class="title-gradient">Build</span>
-            </h2>
-            <p class="section-subtitle animate-item" data-delay="200">
-                Technologies I master and projects I've crafted
-            </p>
-        </div>
-
         <!-- Loading State -->
         <div id="tech-loading" class="loading-state">
             <div class="loading-cube">
@@ -54,118 +26,232 @@
         <!-- Main Content -->
         <div id="tech-content" class="tech-content" style="display: none;">
 
-            <!-- Stats Row - Premium Cards -->
+            <!-- Stats Row - Ultra Premium Holographic Cards -->
             <div class="stats-row animate-item" data-delay="300">
-                <div class="stat-card" data-stat="repos">
+                <div class="stat-card stat-repos" data-stat="repos">
+                    <div class="stat-hologram"></div>
+                    <div class="stat-scanline"></div>
                     <div class="stat-icon-wrapper">
-                        <div class="stat-icon-bg"></div>
-                        <i class="fas fa-folder-open"></i>
+                        <div class="stat-icon-ring"></div>
+                        <div class="stat-icon-core">
+                            <i class="fas fa-folder-open"></i>
+                        </div>
+                        <div class="stat-icon-particles"></div>
                     </div>
                     <div class="stat-info">
                         <span class="stat-value" id="stat-repos">0</span>
                         <span class="stat-label">Repositories</span>
+                        <div class="stat-progress">
+                            <div class="stat-progress-bar" style="--progress: 100%"></div>
+                        </div>
                     </div>
-                    <div class="stat-glow"></div>
+                    <div class="stat-corner stat-corner-tl"></div>
+                    <div class="stat-corner stat-corner-tr"></div>
+                    <div class="stat-corner stat-corner-bl"></div>
+                    <div class="stat-corner stat-corner-br"></div>
                 </div>
-                <div class="stat-card" data-stat="stars">
+                <div class="stat-card stat-stars" data-stat="stars">
+                    <div class="stat-hologram"></div>
+                    <div class="stat-scanline"></div>
                     <div class="stat-icon-wrapper">
-                        <div class="stat-icon-bg"></div>
-                        <i class="fas fa-star"></i>
+                        <div class="stat-icon-ring"></div>
+                        <div class="stat-icon-core">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="stat-icon-particles"></div>
                     </div>
                     <div class="stat-info">
                         <span class="stat-value" id="stat-stars">0</span>
-                        <span class="stat-label">Stars</span>
+                        <span class="stat-label">Stars Earned</span>
+                        <div class="stat-progress">
+                            <div class="stat-progress-bar" style="--progress: 40%"></div>
+                        </div>
                     </div>
-                    <div class="stat-glow"></div>
+                    <div class="stat-corner stat-corner-tl"></div>
+                    <div class="stat-corner stat-corner-tr"></div>
+                    <div class="stat-corner stat-corner-bl"></div>
+                    <div class="stat-corner stat-corner-br"></div>
                 </div>
-                <div class="stat-card" data-stat="followers">
+                <div class="stat-card stat-followers" data-stat="followers">
+                    <div class="stat-hologram"></div>
+                    <div class="stat-scanline"></div>
                     <div class="stat-icon-wrapper">
-                        <div class="stat-icon-bg"></div>
-                        <i class="fas fa-users"></i>
+                        <div class="stat-icon-ring"></div>
+                        <div class="stat-icon-core">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-icon-particles"></div>
                     </div>
                     <div class="stat-info">
                         <span class="stat-value" id="stat-followers">0</span>
                         <span class="stat-label">Followers</span>
+                        <div class="stat-progress">
+                            <div class="stat-progress-bar" style="--progress: 60%"></div>
+                        </div>
                     </div>
-                    <div class="stat-glow"></div>
+                    <div class="stat-corner stat-corner-tl"></div>
+                    <div class="stat-corner stat-corner-tr"></div>
+                    <div class="stat-corner stat-corner-bl"></div>
+                    <div class="stat-corner stat-corner-br"></div>
                 </div>
-                <div class="stat-card" data-stat="years">
+                <div class="stat-card stat-commits" data-stat="commits">
+                    <div class="stat-hologram"></div>
+                    <div class="stat-scanline"></div>
                     <div class="stat-icon-wrapper">
-                        <div class="stat-icon-bg"></div>
-                        <i class="fas fa-calendar-check"></i>
+                        <div class="stat-icon-ring"></div>
+                        <div class="stat-icon-core">
+                            <i class="fas fa-code-commit"></i>
+                        </div>
+                        <div class="stat-icon-particles"></div>
                     </div>
                     <div class="stat-info">
-                        <span class="stat-value" id="stat-years">0</span>
-                        <span class="stat-label">Years on GitHub</span>
+                        <span class="stat-value" id="stat-commits">0</span>
+                        <span class="stat-label">Total Commits</span>
+                        <div class="stat-progress">
+                            <div class="stat-progress-bar" style="--progress: 75%"></div>
+                        </div>
                     </div>
-                    <div class="stat-glow"></div>
+                    <div class="stat-corner stat-corner-tl"></div>
+                    <div class="stat-corner stat-corner-tr"></div>
+                    <div class="stat-corner stat-corner-bl"></div>
+                    <div class="stat-corner stat-corner-br"></div>
                 </div>
             </div>
 
-            <!-- Two Column Layout -->
+            <!-- Two Column Layout - Premium Design -->
             <div class="two-columns animate-item" data-delay="400">
-                <!-- Languages Card -->
+                <!-- Languages Card - Enhanced -->
                 <div class="column-card languages-card">
+                    <div class="card-hologram"></div>
                     <div class="card-header">
-                        <div class="card-icon">
-                            <i class="fas fa-chart-pie"></i>
+                        <div class="card-icon-3d">
+                            <div class="icon-cube">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <div class="icon-orbit"></div>
                         </div>
-                        <h3 class="card-title">Top Languages</h3>
-                        <div class="card-decoration"></div>
+                        <div class="card-title-wrapper">
+                            <h3 class="card-title">Top Languages</h3>
+                            <span class="card-subtitle">Code distribution across projects</span>
+                        </div>
                     </div>
                     <div id="languages-list" class="languages-list"></div>
                     <div class="languages-bar-container">
                         <div id="languages-bar" class="languages-bar"></div>
-                        <div class="bar-glow"></div>
+                        <div class="bar-reflection"></div>
                     </div>
+                    <div class="card-decoration-line"></div>
                 </div>
 
-                <!-- Tech Stack Card -->
+                <!-- Tech Stack Card - Enhanced -->
                 <div class="column-card stack-card">
+                    <div class="card-hologram"></div>
                     <div class="card-header">
-                        <div class="card-icon">
-                            <i class="fas fa-layer-group"></i>
+                        <div class="card-icon-3d">
+                            <div class="icon-cube">
+                                <i class="fas fa-layer-group"></i>
+                            </div>
+                            <div class="icon-orbit"></div>
                         </div>
-                        <h3 class="card-title">Tech Stack</h3>
-                        <div class="card-decoration"></div>
+                        <div class="card-title-wrapper">
+                            <h3 class="card-title">Tech Stack</h3>
+                            <span class="card-subtitle">Technologies & tools I work with</span>
+                        </div>
                     </div>
                     <div class="tech-stack">
-                        <div class="tech-category">
+                        <div class="tech-category" data-category="backend">
                             <div class="category-header">
-                                <span class="category-icon"><i class="fas fa-server"></i></span>
+                                <div class="category-icon-wrapper">
+                                    <span class="category-icon"><i class="fas fa-server"></i></span>
+                                    <span class="category-pulse"></span>
+                                </div>
                                 <span class="category-label">Backend</span>
+                                <span class="category-count">4</span>
                             </div>
                             <div class="tech-tags">
-                                <span class="tech-tag" data-tech="java"><i class="fab fa-java"></i>Java 17+</span>
-                                <span class="tech-tag" data-tech="spring"><i class="fas fa-leaf"></i>Spring Boot</span>
-                                <span class="tech-tag" data-tech="quarkus"><i class="fas fa-bolt"></i>Quarkus</span>
-                                <span class="tech-tag" data-tech="micro"><i class="fas fa-cubes"></i>Microservices</span>
+                                <div class="tech-tag" data-tech="java">
+                                    <span class="tech-tag-icon"><i class="fab fa-java"></i></span>
+                                    <span class="tech-tag-name">Java 17+</span>
+                                    <span class="tech-tag-glow"></span>
+                                </div>
+                                <div class="tech-tag" data-tech="spring">
+                                    <span class="tech-tag-icon"><i class="fas fa-leaf"></i></span>
+                                    <span class="tech-tag-name">Spring Boot</span>
+                                    <span class="tech-tag-glow"></span>
+                                </div>
+                                <div class="tech-tag" data-tech="quarkus">
+                                    <span class="tech-tag-icon"><i class="fas fa-bolt"></i></span>
+                                    <span class="tech-tag-name">Quarkus</span>
+                                    <span class="tech-tag-glow"></span>
+                                </div>
+                                <div class="tech-tag" data-tech="micro">
+                                    <span class="tech-tag-icon"><i class="fas fa-cubes"></i></span>
+                                    <span class="tech-tag-name">Microservices</span>
+                                    <span class="tech-tag-glow"></span>
+                                </div>
                             </div>
                         </div>
-                        <div class="tech-category">
+                        <div class="tech-category" data-category="devops">
                             <div class="category-header">
-                                <span class="category-icon"><i class="fas fa-cloud"></i></span>
-                                <span class="category-label">DevOps</span>
+                                <div class="category-icon-wrapper">
+                                    <span class="category-icon"><i class="fas fa-cloud"></i></span>
+                                    <span class="category-pulse"></span>
+                                </div>
+                                <span class="category-label">DevOps & Cloud</span>
+                                <span class="category-count">4</span>
                             </div>
                             <div class="tech-tags">
-                                <span class="tech-tag" data-tech="docker"><i class="fab fa-docker"></i>Docker</span>
-                                <span class="tech-tag" data-tech="k8s"><i class="fas fa-dharmachakra"></i>Kubernetes</span>
-                                <span class="tech-tag" data-tech="aws"><i class="fab fa-aws"></i>AWS</span>
-                                <span class="tech-tag" data-tech="cicd"><i class="fas fa-sync-alt"></i>CI/CD</span>
+                                <div class="tech-tag" data-tech="docker">
+                                    <span class="tech-tag-icon"><i class="fab fa-docker"></i></span>
+                                    <span class="tech-tag-name">Docker</span>
+                                    <span class="tech-tag-glow"></span>
+                                </div>
+                                <div class="tech-tag" data-tech="k8s">
+                                    <span class="tech-tag-icon"><i class="fas fa-dharmachakra"></i></span>
+                                    <span class="tech-tag-name">Kubernetes</span>
+                                    <span class="tech-tag-glow"></span>
+                                </div>
+                                <div class="tech-tag" data-tech="aws">
+                                    <span class="tech-tag-icon"><i class="fab fa-aws"></i></span>
+                                    <span class="tech-tag-name">AWS</span>
+                                    <span class="tech-tag-glow"></span>
+                                </div>
+                                <div class="tech-tag" data-tech="cicd">
+                                    <span class="tech-tag-icon"><i class="fas fa-sync-alt"></i></span>
+                                    <span class="tech-tag-name">CI/CD</span>
+                                    <span class="tech-tag-glow"></span>
+                                </div>
                             </div>
                         </div>
-                        <div class="tech-category">
+                        <div class="tech-category" data-category="database">
                             <div class="category-header">
-                                <span class="category-icon"><i class="fas fa-database"></i></span>
+                                <div class="category-icon-wrapper">
+                                    <span class="category-icon"><i class="fas fa-database"></i></span>
+                                    <span class="category-pulse"></span>
+                                </div>
                                 <span class="category-label">Database</span>
+                                <span class="category-count">3</span>
                             </div>
                             <div class="tech-tags">
-                                <span class="tech-tag" data-tech="postgres"><i class="fas fa-database"></i>PostgreSQL</span>
-                                <span class="tech-tag" data-tech="mongo"><i class="fas fa-leaf"></i>MongoDB</span>
-                                <span class="tech-tag" data-tech="redis"><i class="fas fa-bolt"></i>Redis</span>
+                                <div class="tech-tag" data-tech="postgres">
+                                    <span class="tech-tag-icon"><i class="fas fa-database"></i></span>
+                                    <span class="tech-tag-name">PostgreSQL</span>
+                                    <span class="tech-tag-glow"></span>
+                                </div>
+                                <div class="tech-tag" data-tech="mongo">
+                                    <span class="tech-tag-icon"><i class="fas fa-leaf"></i></span>
+                                    <span class="tech-tag-name">MongoDB</span>
+                                    <span class="tech-tag-glow"></span>
+                                </div>
+                                <div class="tech-tag" data-tech="redis">
+                                    <span class="tech-tag-icon"><i class="fas fa-bolt"></i></span>
+                                    <span class="tech-tag-name">Redis</span>
+                                    <span class="tech-tag-glow"></span>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <div class="card-decoration-line"></div>
                 </div>
             </div>
 
@@ -228,7 +314,7 @@
         overflow: hidden;
     }
 
-    /* Background Effects */
+    /* Background */
     .tech-bg {
         position: absolute;
         inset: 0;
@@ -248,160 +334,15 @@
 
     .tech-glow-orb {
         position: absolute;
-        border-radius: 50%;
-        filter: blur(80px);
-        opacity: 0.4;
-        animation: orb-float 20s ease-in-out infinite;
-    }
-
-    .orb-1 {
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(circle, rgba(0, 255, 255, 0.3) 0%, transparent 70%);
-        top: -10%;
-        left: -5%;
-        animation-delay: 0s;
-    }
-
-    .orb-2 {
-        width: 300px;
-        height: 300px;
-        background: radial-gradient(circle, rgba(255, 0, 255, 0.25) 0%, transparent 70%);
-        bottom: 10%;
-        right: -5%;
-        animation-delay: -7s;
-    }
-
-    .orb-3 {
-        width: 250px;
-        height: 250px;
-        background: radial-gradient(circle, rgba(0, 255, 255, 0.2) 0%, transparent 70%);
-        top: 50%;
+        width: 500px;
+        height: 500px;
+        top: 10%;
         left: 50%;
-        transform: translate(-50%, -50%);
-        animation-delay: -14s;
-    }
-
-    @keyframes orb-float {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        25% { transform: translate(30px, -30px) scale(1.1); }
-        50% { transform: translate(-20px, 20px) scale(0.95); }
-        75% { transform: translate(20px, 30px) scale(1.05); }
-    }
-
-    .tech-particles {
-        position: absolute;
-        inset: 0;
-    }
-
-    .t-particle {
-        position: absolute;
-        left: var(--x);
-        top: var(--y);
-        width: 4px;
-        height: 4px;
-        background: #00ffff;
+        transform: translateX(-50%);
         border-radius: 50%;
-        box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
-        animation: particle-pulse 4s ease-in-out infinite;
-        animation-delay: var(--d);
-    }
-
-    @keyframes particle-pulse {
-        0%, 100% { opacity: 0.3; transform: scale(1); }
-        50% { opacity: 0.8; transform: scale(1.5); }
-    }
-
-    /* Header */
-    .section-header {
-        text-align: center;
-        margin-bottom: 4rem;
-        position: relative;
-        z-index: 1;
-    }
-
-    .section-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.6rem 1.25rem;
-        background: rgba(0, 0, 0, 0.4);
-        border: 1px solid rgba(0, 255, 255, 0.3);
-        border-radius: 50px;
-        margin-bottom: 1.5rem;
-        font-size: 0.9rem;
-        color: #00ffff;
-        position: relative;
-        overflow: hidden;
-        backdrop-filter: blur(10px);
-    }
-
-    .badge-icon {
-        width: 28px;
-        height: 28px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.1));
-        border-radius: 50%;
-    }
-
-    .badge-icon i {
-        font-size: 0.8rem;
-        color: #00ffff;
-        text-shadow: 0 0 10px #00ffff;
-    }
-
-    .badge-pulse {
-        position: absolute;
-        inset: -2px;
-        border-radius: 50px;
-        border: 2px solid rgba(0, 255, 255, 0.5);
-        animation: badge-pulse-anim 2s ease-out infinite;
-    }
-
-    @keyframes badge-pulse-anim {
-        0% { transform: scale(1); opacity: 1; }
-        100% { transform: scale(1.2); opacity: 0; }
-    }
-
-    .section-title {
-        font-size: clamp(2.5rem, 6vw, 4rem);
-        font-weight: 800;
-        margin-bottom: 1rem;
-        line-height: 1.1;
-    }
-
-    .title-line {
-        display: block;
-        color: var(--text-primary);
-        font-weight: 300;
-        font-size: 0.5em;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        margin-bottom: 0.25rem;
-    }
-
-    .title-gradient {
-        background: linear-gradient(135deg, #00ffff 0%, #ff00ff 50%, #00ffff 100%);
-        background-size: 200% auto;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        animation: gradient-flow 3s linear infinite;
-        filter: drop-shadow(0 0 30px rgba(0, 255, 255, 0.5));
-    }
-
-    @keyframes gradient-flow {
-        0% { background-position: 0% center; }
-        100% { background-position: 200% center; }
-    }
-
-    .section-subtitle {
-        color: var(--text-secondary);
-        font-size: 1.15rem;
-        max-width: 500px;
-        margin: 0 auto;
+        background: radial-gradient(circle, rgba(0, 255, 255, 0.15) 0%, transparent 70%);
+        filter: blur(100px);
+        opacity: 0.3;
     }
 
     /* Loading */
@@ -470,7 +411,7 @@
         z-index: 1;
     }
 
-    /* Stats Row */
+    /* Stats Row - Ultra Premium */
     .stats-row {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -482,21 +423,23 @@
     }
 
     @media (max-width: 480px) {
-        .stats-row { grid-template-columns: 1fr; }
+        .stats-row { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
     }
 
     .stat-card {
         position: relative;
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 1rem;
-        padding: 1.5rem;
-        background: rgba(0, 0, 0, 0.3);
+        gap: 0.75rem;
+        padding: 1.5rem 1rem;
+        background: linear-gradient(145deg, rgba(0, 20, 30, 0.9), rgba(0, 10, 20, 0.95));
         border-radius: 1rem;
         overflow: hidden;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: default;
-        backdrop-filter: blur(10px);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(0, 255, 255, 0.15);
     }
 
     .stat-card::before {
@@ -505,86 +448,271 @@
         inset: 0;
         border-radius: 1rem;
         padding: 1px;
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.5), rgba(255, 0, 255, 0.3));
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.6), transparent 50%, rgba(0, 255, 255, 0.3));
         -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
         mask-composite: exclude;
         pointer-events: none;
+        opacity: 0.5;
+        transition: opacity 0.3s ease;
+    }
+
+    .stat-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+        transition: left 0.6s ease;
     }
 
     .stat-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(0, 255, 255, 0.2);
+        transform: translateY(-10px) scale(1.03);
+        box-shadow:
+            0 25px 50px rgba(0, 0, 0, 0.5),
+            0 0 60px rgba(0, 255, 255, 0.15),
+            inset 0 0 30px rgba(0, 255, 255, 0.05);
+        border-color: rgba(0, 255, 255, 0.4);
     }
 
     .stat-card:hover::before {
-        background: linear-gradient(135deg, #00ffff, #ff00ff);
+        opacity: 1;
     }
 
+    .stat-card:hover::after {
+        left: 100%;
+    }
+
+    /* Hologram effect */
+    .stat-hologram {
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(180deg, transparent 0%, rgba(0, 255, 255, 0.02) 50%, transparent 100%),
+            repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.03) 2px, rgba(0, 255, 255, 0.03) 4px);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .stat-card:hover .stat-hologram {
+        opacity: 1;
+    }
+
+    /* Scanline effect */
+    .stat-scanline {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #00ffff, transparent);
+        opacity: 0;
+        animation: scanline 2s linear infinite;
+        pointer-events: none;
+    }
+
+    .stat-card:hover .stat-scanline {
+        opacity: 0.6;
+    }
+
+    @keyframes scanline {
+        0% { top: 0; }
+        100% { top: 100%; }
+    }
+
+    /* Corner decorations */
+    .stat-corner {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        border: 2px solid rgba(0, 255, 255, 0.4);
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .stat-corner-tl { top: 6px; left: 6px; border-right: none; border-bottom: none; }
+    .stat-corner-tr { top: 6px; right: 6px; border-left: none; border-bottom: none; }
+    .stat-corner-bl { bottom: 6px; left: 6px; border-right: none; border-top: none; }
+    .stat-corner-br { bottom: 6px; right: 6px; border-left: none; border-top: none; }
+
+    .stat-card:hover .stat-corner {
+        opacity: 1;
+        border-color: #00ffff;
+    }
+
+    /* Icon wrapper - 3D effect */
     .stat-icon-wrapper {
         position: relative;
-        width: 50px;
-        height: 50px;
+        width: 60px;
+        height: 60px;
         display: flex;
         align-items: center;
         justify-content: center;
     }
 
-    .stat-icon-bg {
+    .stat-icon-ring {
         position: absolute;
         inset: 0;
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(255, 0, 255, 0.1));
-        border-radius: 12px;
-        transform: rotate(45deg);
+        border: 2px solid rgba(0, 255, 255, 0.3);
+        border-radius: 50%;
+        animation: ring-pulse 3s ease-in-out infinite;
     }
 
-    .stat-icon-wrapper i {
+    @keyframes ring-pulse {
+        0%, 100% { transform: scale(1); opacity: 0.3; }
+        50% { transform: scale(1.1); opacity: 0.6; }
+    }
+
+    .stat-icon-core {
         position: relative;
-        font-size: 1.25rem;
-        color: #00ffff;
-        text-shadow: 0 0 15px #00ffff;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(145deg, rgba(0, 255, 255, 0.15), rgba(0, 255, 255, 0.05));
+        border-radius: 50%;
+        border: 1px solid rgba(0, 255, 255, 0.3);
         z-index: 1;
     }
+
+    .stat-icon-core i {
+        font-size: 1.3rem;
+        color: #00ffff;
+        text-shadow: 0 0 20px #00ffff;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover .stat-icon-core i {
+        transform: scale(1.15);
+        text-shadow: 0 0 30px #00ffff, 0 0 60px #00ffff;
+    }
+
+    /* Particle effect on icon */
+    .stat-icon-particles {
+        position: absolute;
+        inset: -10px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(0, 255, 255, 0.2) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .stat-card:hover .stat-icon-particles {
+        opacity: 1;
+        animation: particle-glow 1.5s ease-in-out infinite;
+    }
+
+    @keyframes particle-glow {
+        0%, 100% { transform: scale(1); opacity: 0.5; }
+        50% { transform: scale(1.2); opacity: 0.8; }
+    }
+
+    /* Stat specific colors */
+    .stat-repos .stat-icon-core { border-color: rgba(0, 255, 255, 0.4); }
+    .stat-repos .stat-icon-core i { color: #00ffff; }
+
+    .stat-stars .stat-icon-core { border-color: rgba(255, 215, 0, 0.4); }
+    .stat-stars .stat-icon-core i { color: #ffd700; text-shadow: 0 0 20px #ffd700; }
+    .stat-stars .stat-icon-ring { border-color: rgba(255, 215, 0, 0.3); }
+    .stat-stars:hover { border-color: rgba(255, 215, 0, 0.4); }
+    .stat-stars::before { background: linear-gradient(135deg, rgba(255, 215, 0, 0.5), transparent 50%, rgba(255, 215, 0, 0.2)); }
+
+    .stat-followers .stat-icon-core { border-color: rgba(168, 85, 247, 0.4); }
+    .stat-followers .stat-icon-core i { color: #a855f7; text-shadow: 0 0 20px #a855f7; }
+    .stat-followers .stat-icon-ring { border-color: rgba(168, 85, 247, 0.3); }
+    .stat-followers:hover { border-color: rgba(168, 85, 247, 0.4); }
+    .stat-followers::before { background: linear-gradient(135deg, rgba(168, 85, 247, 0.5), transparent 50%, rgba(168, 85, 247, 0.2)); }
+
+    .stat-commits .stat-icon-core { border-color: rgba(34, 197, 94, 0.4); }
+    .stat-commits .stat-icon-core i { color: #22c55e; text-shadow: 0 0 20px #22c55e; }
+    .stat-commits .stat-icon-ring { border-color: rgba(34, 197, 94, 0.3); }
+    .stat-commits:hover { border-color: rgba(34, 197, 94, 0.4); }
+    .stat-commits::before { background: linear-gradient(135deg, rgba(34, 197, 94, 0.5), transparent 50%, rgba(34, 197, 94, 0.2)); }
 
     .stat-info {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        align-items: center;
+        gap: 0.35rem;
+        width: 100%;
     }
 
     .stat-value {
-        font-size: 2rem;
+        font-size: 2.25rem;
         font-weight: 800;
         background: linear-gradient(135deg, #fff 0%, #00ffff 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
         line-height: 1;
+        letter-spacing: -0.02em;
+    }
+
+    .stat-stars .stat-value {
+        background: linear-gradient(135deg, #fff 0%, #ffd700 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+    }
+
+    .stat-followers .stat-value {
+        background: linear-gradient(135deg, #fff 0%, #a855f7 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+    }
+
+    .stat-commits .stat-value {
+        background: linear-gradient(135deg, #fff 0%, #22c55e 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
     }
 
     .stat-label {
-        font-size: 0.75rem;
-        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.5);
         text-transform: uppercase;
-        letter-spacing: 0.1em;
+        letter-spacing: 0.12em;
+        font-weight: 600;
     }
 
-    .stat-glow {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 100px;
-        height: 100px;
-        background: radial-gradient(circle, rgba(0, 255, 255, 0.3) 0%, transparent 70%);
-        transform: translate(-50%, -50%);
-        opacity: 0;
-        transition: opacity 0.3s ease;
+    /* Progress bar under stat */
+    .stat-progress {
+        width: 80%;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 0.5rem;
     }
 
-    .stat-card:hover .stat-glow {
-        opacity: 1;
+    .stat-progress-bar {
+        height: 100%;
+        width: var(--progress, 50%);
+        background: linear-gradient(90deg, #00ffff, rgba(0, 255, 255, 0.5));
+        border-radius: 3px;
+        animation: progress-pulse 2s ease-in-out infinite;
     }
 
-    /* Two Columns */
+    .stat-stars .stat-progress-bar {
+        background: linear-gradient(90deg, #ffd700, rgba(255, 215, 0, 0.5));
+    }
+
+    .stat-followers .stat-progress-bar {
+        background: linear-gradient(90deg, #a855f7, rgba(168, 85, 247, 0.5));
+    }
+
+    .stat-commits .stat-progress-bar {
+        background: linear-gradient(90deg, #22c55e, rgba(34, 197, 94, 0.5));
+    }
+
+    @keyframes progress-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+
+    /* Two Columns - Premium Design */
     .two-columns {
         display: grid;
         grid-template-columns: 1fr 1.2fr;
@@ -598,11 +726,12 @@
     .column-card {
         position: relative;
         padding: 1.75rem;
-        background: rgba(0, 0, 0, 0.3);
+        background: linear-gradient(145deg, rgba(0, 20, 30, 0.9), rgba(0, 10, 20, 0.95));
         border-radius: 1.25rem;
         overflow: hidden;
-        backdrop-filter: blur(10px);
-        transition: all 0.4s ease;
+        backdrop-filter: blur(20px);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0, 255, 255, 0.15);
     }
 
     .column-card::before {
@@ -611,80 +740,161 @@
         inset: 0;
         border-radius: 1.25rem;
         padding: 1px;
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.4), rgba(255, 0, 255, 0.2));
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.5), transparent 40%, transparent 60%, rgba(0, 255, 255, 0.3));
         -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
         mask-composite: exclude;
         pointer-events: none;
-        transition: all 0.3s ease;
+        transition: all 0.4s ease;
     }
 
     .column-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 255, 255, 0.1);
+        transform: translateY(-8px);
+        box-shadow:
+            0 30px 60px rgba(0, 0, 0, 0.4),
+            0 0 80px rgba(0, 255, 255, 0.1);
+        border-color: rgba(0, 255, 255, 0.3);
     }
 
     .column-card:hover::before {
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.7), rgba(255, 0, 255, 0.4));
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.8), transparent 40%, transparent 60%, rgba(0, 255, 255, 0.5));
+    }
+
+    /* Card hologram background */
+    .card-hologram {
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(ellipse at 20% 0%, rgba(0, 255, 255, 0.08) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 100%, rgba(0, 255, 255, 0.05) 0%, transparent 50%);
+        pointer-events: none;
+        opacity: 0.5;
+        transition: opacity 0.3s ease;
+    }
+
+    .column-card:hover .card-hologram {
+        opacity: 1;
+    }
+
+    /* Card decoration line at bottom */
+    .card-decoration-line {
+        position: absolute;
+        bottom: 0;
+        left: 1.5rem;
+        right: 1.5rem;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.5), transparent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .column-card:hover .card-decoration-line {
+        opacity: 1;
     }
 
     .card-header {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 1.5rem;
+        gap: 1rem;
+        margin-bottom: 1.75rem;
         position: relative;
     }
 
-    .card-icon {
-        width: 36px;
-        height: 36px;
+    /* 3D Icon */
+    .card-icon-3d {
+        position: relative;
+        width: 50px;
+        height: 50px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.1));
-        border-radius: 10px;
-        border: 1px solid rgba(0, 255, 255, 0.3);
     }
 
-    .card-icon i {
+    .icon-cube {
+        position: relative;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(145deg, rgba(0, 255, 255, 0.2), rgba(0, 255, 255, 0.05));
+        border-radius: 12px;
+        border: 1px solid rgba(0, 255, 255, 0.4);
+        transform: perspective(200px) rotateX(10deg) rotateY(-10deg);
+        transition: all 0.4s ease;
+        z-index: 1;
+    }
+
+    .column-card:hover .icon-cube {
+        transform: perspective(200px) rotateX(0deg) rotateY(0deg);
+        box-shadow: 0 10px 30px rgba(0, 255, 255, 0.3);
+    }
+
+    .icon-cube i {
+        font-size: 1.2rem;
         color: #00ffff;
-        text-shadow: 0 0 10px #00ffff;
+        text-shadow: 0 0 15px #00ffff;
+        transition: all 0.3s ease;
     }
 
-    .card-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: var(--text-primary);
+    .column-card:hover .icon-cube i {
+        transform: scale(1.1);
+        text-shadow: 0 0 25px #00ffff, 0 0 50px #00ffff;
+    }
+
+    .icon-orbit {
+        position: absolute;
+        inset: -5px;
+        border: 1px dashed rgba(0, 255, 255, 0.3);
+        border-radius: 50%;
+        animation: orbit-spin 10s linear infinite;
+    }
+
+    @keyframes orbit-spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .card-title-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
         flex: 1;
     }
 
-    .card-decoration {
-        width: 40px;
-        height: 2px;
-        background: linear-gradient(90deg, #00ffff, transparent);
-        position: absolute;
-        bottom: -8px;
-        left: 0;
+    .card-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #fff 0%, rgba(0, 255, 255, 0.8) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
-    /* Languages */
+    .card-subtitle {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.4);
+        letter-spacing: 0.02em;
+    }
+
+    /* Languages - Enhanced */
     .languages-list {
         display: flex;
         flex-direction: column;
-        gap: 0.6rem;
-        margin-bottom: 1.25rem;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
     }
 
     .language-item {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
-        padding: 0.6rem 0.8rem;
-        background: rgba(0, 255, 255, 0.03);
-        border-radius: 0.6rem;
-        transition: all 0.3s ease;
+        gap: 1rem;
+        padding: 0.75rem 1rem;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.05), rgba(0, 255, 255, 0.02));
+        border-radius: 0.75rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
         overflow: hidden;
+        border: 1px solid transparent;
     }
 
     .language-item::before {
@@ -693,151 +903,295 @@
         left: 0;
         top: 0;
         height: 100%;
-        width: 3px;
+        width: 4px;
         background: var(--lang-color, #00ffff);
-        border-radius: 3px;
+        border-radius: 4px;
+        box-shadow: 0 0 15px var(--lang-color, #00ffff);
+    }
+
+    .language-item::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, var(--lang-color, rgba(0, 255, 255, 0.15)), transparent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
     }
 
     .language-item:hover {
-        background: rgba(0, 255, 255, 0.08);
-        transform: translateX(5px);
-        box-shadow: -3px 0 15px rgba(0, 255, 255, 0.2);
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 255, 255, 0.04));
+        transform: translateX(8px);
+        border-color: rgba(0, 255, 255, 0.2);
+        box-shadow:
+            -5px 0 20px rgba(0, 255, 255, 0.15),
+            0 5px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .language-item:hover::after {
+        opacity: 0.15;
     }
 
     .lang-dot {
-        width: 12px;
-        height: 12px;
+        position: relative;
+        width: 14px;
+        height: 14px;
         border-radius: 50%;
-        box-shadow: 0 0 10px currentColor;
+        box-shadow: 0 0 12px currentColor;
         flex-shrink: 0;
+        z-index: 1;
+    }
+
+    .lang-dot::after {
+        content: '';
+        position: absolute;
+        inset: -4px;
+        border-radius: 50%;
+        border: 1px solid currentColor;
+        opacity: 0.3;
     }
 
     .lang-name {
         flex: 1;
         font-size: 0.9rem;
         color: var(--text-primary);
-        font-weight: 500;
+        font-weight: 600;
+        z-index: 1;
     }
 
     .lang-percent {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         color: #00ffff;
-        font-weight: 700;
+        font-weight: 800;
         font-family: 'JetBrains Mono', monospace;
+        z-index: 1;
+        text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
     }
 
     .languages-bar-container {
         position: relative;
+        padding: 0.5rem 0;
     }
 
     .languages-bar {
         display: flex;
-        height: 8px;
-        border-radius: 4px;
+        height: 10px;
+        border-radius: 10px;
         overflow: hidden;
         background: rgba(255, 255, 255, 0.05);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     .lang-bar-segment {
         height: 100%;
-        transition: all 0.3s ease;
+        transition: all 0.4s ease;
+        position: relative;
+    }
+
+    .lang-bar-segment:first-child {
+        border-radius: 10px 0 0 10px;
+    }
+
+    .lang-bar-segment:last-child {
+        border-radius: 0 10px 10px 0;
     }
 
     .lang-bar-segment:hover {
-        filter: brightness(1.3);
-        box-shadow: 0 0 15px currentColor;
+        filter: brightness(1.4);
+        box-shadow: 0 0 20px currentColor;
+        transform: scaleY(1.3);
+        z-index: 1;
     }
 
-    .bar-glow {
+    .bar-reflection {
         position: absolute;
-        bottom: -5px;
-        left: 0;
-        right: 0;
-        height: 10px;
-        background: linear-gradient(90deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.15), rgba(0, 255, 255, 0.2));
-        filter: blur(8px);
-        opacity: 0.6;
+        top: 2px;
+        left: 5%;
+        right: 5%;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        border-radius: 3px;
+        pointer-events: none;
     }
 
-    /* Tech Stack */
+    /* Tech Stack - Enhanced */
     .tech-stack {
         display: flex;
         flex-direction: column;
-        gap: 1.25rem;
+        gap: 1.5rem;
     }
 
     .tech-category {
         display: flex;
         flex-direction: column;
-        gap: 0.6rem;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: rgba(0, 255, 255, 0.02);
+        border-radius: 0.75rem;
+        border: 1px solid rgba(0, 255, 255, 0.08);
+        transition: all 0.3s ease;
+    }
+
+    .tech-category:hover {
+        background: rgba(0, 255, 255, 0.04);
+        border-color: rgba(0, 255, 255, 0.15);
     }
 
     .category-header {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
     }
 
-    .category-icon {
-        width: 24px;
-        height: 24px;
+    .category-icon-wrapper {
+        position: relative;
+        width: 32px;
+        height: 32px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(255, 0, 255, 0.15);
-        border-radius: 6px;
+    }
+
+    .category-icon {
+        position: relative;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 255, 255, 0.05));
+        border-radius: 8px;
+        border: 1px solid rgba(0, 255, 255, 0.3);
+        z-index: 1;
     }
 
     .category-icon i {
-        font-size: 0.7rem;
-        color: #ff00ff;
+        font-size: 0.75rem;
+        color: #00ffff;
+        text-shadow: 0 0 10px #00ffff;
+    }
+
+    .category-pulse {
+        position: absolute;
+        inset: 0;
+        border-radius: 8px;
+        border: 1px solid rgba(0, 255, 255, 0.3);
+        animation: category-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes category-pulse {
+        0%, 100% { transform: scale(1); opacity: 0.5; }
+        50% { transform: scale(1.2); opacity: 0; }
     }
 
     .category-label {
-        font-size: 0.7rem;
-        color: #ff00ff;
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.7);
         text-transform: uppercase;
-        letter-spacing: 0.15em;
+        letter-spacing: 0.12em;
+        font-weight: 700;
+        flex: 1;
+    }
+
+    .category-count {
+        font-size: 0.7rem;
+        color: #00ffff;
+        background: rgba(0, 255, 255, 0.1);
+        padding: 0.2rem 0.5rem;
+        border-radius: 20px;
         font-weight: 600;
     }
 
     .tech-tags {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.5rem;
+        gap: 0.6rem;
     }
 
     .tech-tag {
+        position: relative;
         display: inline-flex;
         align-items: center;
-        gap: 0.4rem;
-        padding: 0.5rem 1rem;
-        background: rgba(0, 255, 255, 0.05);
-        border: 1px solid rgba(0, 255, 255, 0.25);
-        border-radius: 50px;
+        gap: 0.5rem;
+        padding: 0.6rem 1rem;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.08), rgba(0, 255, 255, 0.03));
+        border: 1px solid rgba(0, 255, 255, 0.2);
+        border-radius: 12px;
         font-size: 0.8rem;
-        color: #00ffff;
+        color: rgba(255, 255, 255, 0.9);
         font-weight: 500;
-        transition: all 0.3s ease;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: default;
+        overflow: hidden;
     }
 
-    .tech-tag i {
-        font-size: 0.85rem;
-        opacity: 0.7;
+    .tech-tag-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        background: rgba(0, 255, 255, 0.1);
+        border-radius: 6px;
+    }
+
+    .tech-tag-icon i {
+        font-size: 0.8rem;
+        color: #00ffff;
+        transition: all 0.3s ease;
+    }
+
+    .tech-tag-name {
+        position: relative;
+        z-index: 1;
+    }
+
+    .tech-tag-glow {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at center, rgba(0, 255, 255, 0.15) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
     }
 
     .tech-tag:hover {
-        background: rgba(0, 255, 255, 0.15);
-        border-color: #00ffff;
-        box-shadow: 0 0 20px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1);
-        transform: translateY(-3px) scale(1.05);
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 255, 255, 0.05));
+        border-color: rgba(0, 255, 255, 0.5);
+        box-shadow:
+            0 0 25px rgba(0, 255, 255, 0.2),
+            inset 0 0 15px rgba(0, 255, 255, 0.05);
+        transform: translateY(-4px) scale(1.03);
     }
 
-    .tech-tag:hover i {
+    .tech-tag:hover .tech-tag-glow {
         opacity: 1;
-        text-shadow: 0 0 10px #00ffff;
     }
+
+    .tech-tag:hover .tech-tag-icon {
+        background: rgba(0, 255, 255, 0.2);
+    }
+
+    .tech-tag:hover .tech-tag-icon i {
+        text-shadow: 0 0 15px #00ffff;
+        transform: scale(1.1);
+    }
+
+    /* Category-specific colors */
+    [data-category="backend"] .category-icon { border-color: rgba(0, 255, 255, 0.4); }
+    [data-category="backend"] .category-icon i { color: #00ffff; }
+
+    [data-category="devops"] .category-icon { border-color: rgba(168, 85, 247, 0.4); }
+    [data-category="devops"] .category-icon i { color: #a855f7; text-shadow: 0 0 10px #a855f7; }
+    [data-category="devops"] .category-pulse { border-color: rgba(168, 85, 247, 0.3); }
+    [data-category="devops"] .category-count { color: #a855f7; background: rgba(168, 85, 247, 0.1); }
+    [data-category="devops"] .tech-tag:hover { border-color: rgba(168, 85, 247, 0.5); box-shadow: 0 0 25px rgba(168, 85, 247, 0.2); }
+    [data-category="devops"] .tech-tag-icon i { color: #a855f7; }
+
+    [data-category="database"] .category-icon { border-color: rgba(34, 197, 94, 0.4); }
+    [data-category="database"] .category-icon i { color: #22c55e; text-shadow: 0 0 10px #22c55e; }
+    [data-category="database"] .category-pulse { border-color: rgba(34, 197, 94, 0.3); }
+    [data-category="database"] .category-count { color: #22c55e; background: rgba(34, 197, 94, 0.1); }
+    [data-category="database"] .tech-tag:hover { border-color: rgba(34, 197, 94, 0.5); box-shadow: 0 0 25px rgba(34, 197, 94, 0.2); }
+    [data-category="database"] .tech-tag-icon i { color: #22c55e; }
 
     /* Projects */
     .projects-section {
@@ -871,8 +1225,8 @@
     }
 
     .section-header-small h3 i {
-        color: #ff00ff;
-        text-shadow: 0 0 10px #ff00ff;
+        color: #00ffff;
+        text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
     }
 
     .projects-grid {
@@ -883,12 +1237,12 @@
 
     .project-card {
         position: relative;
-        background: rgba(0, 0, 0, 0.4);
-        border-radius: 1.25rem;
+        background: var(--card-bg-glass);
+        border-radius: var(--card-radius);
         text-decoration: none;
         overflow: hidden;
         transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        backdrop-filter: blur(15px);
+        backdrop-filter: var(--card-backdrop);
         display: flex;
         flex-direction: column;
     }
@@ -897,9 +1251,9 @@
         content: '';
         position: absolute;
         inset: 0;
-        border-radius: 1.25rem;
+        border-radius: var(--card-radius);
         padding: 1px;
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.4), rgba(255, 0, 255, 0.2), rgba(0, 255, 255, 0.1));
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.4), rgba(0, 255, 255, 0.15), rgba(0, 255, 255, 0.1));
         -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
         mask-composite: exclude;
         pointer-events: none;
@@ -911,18 +1265,18 @@
         box-shadow:
             0 35px 70px rgba(0, 0, 0, 0.5),
             0 0 50px rgba(0, 255, 255, 0.2),
-            0 0 100px rgba(255, 0, 255, 0.1);
+            0 0 100px rgba(0, 255, 255, 0.08);
     }
 
     .project-card:hover::before {
-        background: linear-gradient(135deg, #00ffff, #ff00ff, #00ffff);
+        background: linear-gradient(135deg, #00ffff, #00ffff, #00ffff);
     }
 
     /* Project Preview Header */
     .project-preview {
         position: relative;
         height: 140px;
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.08) 0%, rgba(255, 0, 255, 0.05) 50%, rgba(0, 0, 0, 0.3) 100%);
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.08) 0%, rgba(0, 255, 255, 0.05) 50%, rgba(0, 0, 0, 0.3) 100%);
         overflow: hidden;
     }
 
@@ -932,7 +1286,7 @@
         inset: 0;
         background:
             radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.1) 0%, transparent 50%);
+            radial-gradient(circle at 80% 50%, rgba(0, 255, 255, 0.08) 0%, transparent 50%);
     }
 
     .project-preview-pattern {
@@ -977,11 +1331,11 @@
         left: 1rem;
         padding: 0.4rem 0.9rem;
         background: rgba(0, 0, 0, 0.6);
-        border: 1px solid rgba(255, 0, 255, 0.4);
+        border: 1px solid rgba(0, 255, 255, 0.3);
         border-radius: 50px;
         font-size: 0.65rem;
         font-weight: 700;
-        color: #ff00ff;
+        color: rgba(0, 255, 255, 0.9);
         text-transform: uppercase;
         letter-spacing: 0.1em;
         backdrop-filter: blur(5px);
@@ -989,8 +1343,8 @@
     }
 
     .project-card:hover .project-type-badge {
-        background: rgba(255, 0, 255, 0.2);
-        box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+        background: rgba(0, 255, 255, 0.15);
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
     }
 
     .project-links {
@@ -1022,6 +1376,39 @@
         color: #00ffff;
         transform: translateY(-3px);
         box-shadow: 0 5px 20px rgba(0, 255, 255, 0.3);
+    }
+
+    /* Live Demo Button */
+    .project-live-btn {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 200, 0.1));
+        border: 1px solid rgba(0, 255, 136, 0.4);
+        border-radius: 50px;
+        color: #00ff88;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(5px);
+    }
+
+    .project-live-btn i {
+        font-size: 0.65rem;
+    }
+
+    .project-live-btn:hover {
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.3), rgba(0, 255, 200, 0.2));
+        border-color: #00ff88;
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+        transform: translateY(-2px);
     }
 
     /* Project Content */
@@ -1086,6 +1473,12 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
         flex: 1;
+    }
+
+    /* Auto-generated descriptions - slightly styled different */
+    .project-desc.auto-desc {
+        font-style: italic;
+        opacity: 0.85;
     }
 
     /* Project Tech Tags */
@@ -1203,7 +1596,7 @@
     .btn-bg {
         position: absolute;
         inset: 0;
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.05));
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 255, 255, 0.05));
         border: 1px solid rgba(0, 255, 255, 0.4);
         border-radius: 50px;
         transition: all 0.3s ease;
@@ -1225,7 +1618,7 @@
     }
 
     .view-all-btn:hover .btn-bg {
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.1));
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 255, 255, 0.08));
         border-color: #00ffff;
         box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
     }
@@ -1234,14 +1627,15 @@
         transform: translateX(5px);
     }
 
-    /* Contributions */
+    /* Contributions - Enhanced */
     .contributions-section {
         position: relative;
         padding: 1.75rem;
-        background: rgba(0, 0, 0, 0.3);
+        background: linear-gradient(145deg, rgba(0, 20, 30, 0.9), rgba(0, 10, 20, 0.95));
         border-radius: 1.25rem;
         overflow: hidden;
-        backdrop-filter: blur(10px);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(0, 255, 255, 0.15);
     }
 
     .contributions-section::before {
@@ -1250,9 +1644,22 @@
         inset: 0;
         border-radius: 1.25rem;
         padding: 1px;
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.4), rgba(255, 0, 255, 0.2));
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.5), transparent 40%, transparent 60%, rgba(0, 255, 255, 0.3));
         -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
         mask-composite: exclude;
+        pointer-events: none;
+    }
+
+    .contributions-section::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 100%;
+        background:
+            radial-gradient(ellipse at 50% 0%, rgba(0, 255, 255, 0.08) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 80%, rgba(0, 255, 255, 0.05) 0%, transparent 40%);
         pointer-events: none;
     }
 
@@ -1260,55 +1667,70 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1.25rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        z-index: 1;
     }
 
     .contributions-header h3 {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: var(--text-primary);
+        gap: 0.75rem;
+        font-size: 1.15rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #fff 0%, rgba(0, 255, 255, 0.8) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
     .contributions-header h3 i {
         color: #ff6b35;
-        text-shadow: 0 0 10px #ff6b35;
+        text-shadow: 0 0 15px rgba(255, 107, 53, 0.7);
+        -webkit-text-fill-color: initial;
     }
 
     .streak-badge {
         display: flex;
         align-items: center;
-        gap: 0.4rem;
-        padding: 0.5rem 1rem;
-        background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(255, 50, 50, 0.1));
+        gap: 0.5rem;
+        padding: 0.6rem 1.25rem;
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(255, 107, 53, 0.05));
         border: 1px solid rgba(255, 107, 53, 0.4);
         border-radius: 50px;
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         color: #ff6b35;
-        font-weight: 700;
+        font-weight: 800;
+        box-shadow: 0 0 20px rgba(255, 107, 53, 0.15);
     }
 
     .streak-fire {
+        font-size: 1.1rem;
         animation: fire-dance 0.5s ease-in-out infinite alternate;
     }
 
     @keyframes fire-dance {
-        0% { transform: scale(1) rotate(-5deg); }
-        100% { transform: scale(1.1) rotate(5deg); }
+        0% { transform: scale(1) rotate(-5deg); filter: brightness(1); }
+        100% { transform: scale(1.15) rotate(5deg); filter: brightness(1.2); }
     }
 
     .streak-label {
-        font-weight: 400;
-        opacity: 0.8;
+        font-weight: 500;
+        opacity: 0.9;
+        font-size: 0.8rem;
     }
 
     .contribution-graph {
         display: grid;
         grid-template-columns: repeat(52, 1fr);
         gap: 3px;
-        margin-bottom: 1rem;
+        margin-bottom: 1.25rem;
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 0.75rem;
+        border: 1px solid rgba(0, 255, 255, 0.08);
+        position: relative;
+        z-index: 1;
     }
 
     .contribution-week {
@@ -1321,47 +1743,102 @@
         width: 100%;
         aspect-ratio: 1;
         border-radius: 3px;
-        transition: all 0.2s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer;
+        position: relative;
+    }
+
+    .contribution-day::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: 4px;
+        background: inherit;
+        opacity: 0;
+        filter: blur(4px);
+        transition: opacity 0.3s ease;
     }
 
     .contribution-day:hover {
-        transform: scale(2);
+        transform: scale(2.5);
         z-index: 10;
-        box-shadow: 0 0 15px currentColor;
+        border-radius: 4px;
     }
 
-    .contribution-day.level-0 { background: rgba(0, 255, 255, 0.05); }
-    .contribution-day.level-1 { background: rgba(0, 255, 255, 0.2); box-shadow: 0 0 3px rgba(0, 255, 255, 0.3); }
-    .contribution-day.level-2 { background: rgba(0, 255, 255, 0.4); box-shadow: 0 0 5px rgba(0, 255, 255, 0.4); }
-    .contribution-day.level-3 { background: rgba(0, 255, 255, 0.65); box-shadow: 0 0 8px rgba(0, 255, 255, 0.5); }
-    .contribution-day.level-4 { background: #00ffff; box-shadow: 0 0 12px #00ffff; }
+    .contribution-day:hover::before {
+        opacity: 0.8;
+    }
+
+    .contribution-day.level-0 {
+        background: rgba(0, 255, 255, 0.03);
+        border: 1px solid rgba(0, 255, 255, 0.05);
+    }
+    .contribution-day.level-1 {
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.25), rgba(0, 255, 255, 0.15));
+        box-shadow: 0 0 4px rgba(0, 255, 255, 0.3);
+    }
+    .contribution-day.level-2 {
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.45), rgba(0, 255, 255, 0.3));
+        box-shadow: 0 0 6px rgba(0, 255, 255, 0.4);
+    }
+    .contribution-day.level-3 {
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.7), rgba(0, 255, 255, 0.5));
+        box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    }
+    .contribution-day.level-4 {
+        background: linear-gradient(135deg, #00ffff, #00cccc);
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+    }
+
+    .contribution-day:hover.level-1 { box-shadow: 0 0 20px rgba(0, 255, 255, 0.5); }
+    .contribution-day:hover.level-2 { box-shadow: 0 0 25px rgba(0, 255, 255, 0.6); }
+    .contribution-day:hover.level-3 { box-shadow: 0 0 30px rgba(0, 255, 255, 0.7); }
+    .contribution-day:hover.level-4 { box-shadow: 0 0 35px #00ffff; }
 
     .contribution-legend {
         display: flex;
         align-items: center;
         justify-content: flex-end;
-        gap: 0.5rem;
-        font-size: 0.7rem;
-        color: var(--text-secondary);
+        gap: 0.6rem;
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.5);
+        position: relative;
+        z-index: 1;
     }
 
     .legend-squares {
         display: flex;
-        gap: 4px;
+        gap: 5px;
     }
 
     .legend-square {
-        width: 12px;
-        height: 12px;
+        width: 14px;
+        height: 14px;
         border-radius: 3px;
+        transition: all 0.3s ease;
     }
 
-    .legend-square.level-0 { background: rgba(0, 255, 255, 0.05); }
-    .legend-square.level-1 { background: rgba(0, 255, 255, 0.2); }
-    .legend-square.level-2 { background: rgba(0, 255, 255, 0.4); }
-    .legend-square.level-3 { background: rgba(0, 255, 255, 0.65); }
-    .legend-square.level-4 { background: #00ffff; box-shadow: 0 0 5px #00ffff; }
+    .legend-square:hover {
+        transform: scale(1.3);
+    }
+
+    .legend-square.level-0 {
+        background: rgba(0, 255, 255, 0.03);
+        border: 1px solid rgba(0, 255, 255, 0.1);
+    }
+    .legend-square.level-1 {
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.25), rgba(0, 255, 255, 0.15));
+    }
+    .legend-square.level-2 {
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.45), rgba(0, 255, 255, 0.3));
+    }
+    .legend-square.level-3 {
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.7), rgba(0, 255, 255, 0.5));
+    }
+    .legend-square.level-4 {
+        background: linear-gradient(135deg, #00ffff, #00cccc);
+        box-shadow: 0 0 8px #00ffff;
+    }
 
     /* Animations */
     .animate-item {
@@ -1411,21 +1888,35 @@
         }
 
         .stat-card {
-            padding: 1.25rem;
-            gap: 0.75rem;
+            padding: 1.25rem 1rem;
+            gap: 0.5rem;
         }
 
         .stat-icon-wrapper {
-            width: 45px;
-            height: 45px;
+            width: 50px;
+            height: 50px;
         }
 
-        .stat-icon-wrapper i {
+        .stat-icon-core {
+            width: 40px;
+            height: 40px;
+        }
+
+        .stat-icon-core i {
             font-size: 1.1rem;
         }
 
         .stat-value {
             font-size: 1.75rem;
+        }
+
+        .stat-progress {
+            width: 90%;
+        }
+
+        .stat-corner {
+            width: 10px;
+            height: 10px;
         }
 
         .two-columns {
@@ -1437,9 +1928,28 @@
             padding: 1.5rem;
         }
 
+        .card-icon-3d {
+            width: 44px;
+            height: 44px;
+        }
+
+        .icon-cube {
+            width: 38px;
+            height: 38px;
+        }
+
+        .card-subtitle {
+            font-size: 0.7rem;
+        }
+
+        .tech-category {
+            padding: 0.75rem;
+        }
+
         .contribution-graph {
             grid-template-columns: repeat(26, 1fr);
             gap: 2px;
+            padding: 0.75rem;
         }
 
         .projects-grid {
@@ -1509,16 +2019,9 @@
 
         /* Reduce background effects */
         .tech-glow-orb {
-            opacity: 0.25;
-        }
-
-        .orb-1 {
             width: 250px;
             height: 250px;
-        }
-
-        .orb-2, .orb-3 {
-            display: none;
+            opacity: 0.2;
         }
 
         .tech-grid-pattern {
@@ -1534,16 +2037,6 @@
 
         .section-header {
             margin-bottom: 2rem;
-        }
-
-        .section-badge {
-            padding: 0.5rem 1rem;
-            font-size: 0.8rem;
-        }
-
-        .badge-icon {
-            width: 24px;
-            height: 24px;
         }
 
         .section-title {
@@ -1569,35 +2062,46 @@
         }
 
         .stat-card {
-            padding: 1rem;
-            flex-direction: column;
-            text-align: center;
-            gap: 0.5rem;
+            padding: 1rem 0.75rem;
+            gap: 0.4rem;
         }
 
         .stat-icon-wrapper {
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
         }
 
-        .stat-icon-bg {
-            border-radius: 10px;
+        .stat-icon-core {
+            width: 36px;
+            height: 36px;
         }
 
-        .stat-icon-wrapper i {
+        .stat-icon-ring {
+            display: none;
+        }
+
+        .stat-icon-core i {
             font-size: 1rem;
         }
 
-        .stat-info {
-            align-items: center;
-        }
-
         .stat-value {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
         }
 
         .stat-label {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
+        }
+
+        .stat-progress {
+            display: none;
+        }
+
+        .stat-corner {
+            display: none;
+        }
+
+        .stat-hologram, .stat-scanline {
+            display: none;
         }
 
         .column-card {
@@ -1607,15 +2111,30 @@
 
         .card-header {
             margin-bottom: 1.25rem;
+            gap: 0.75rem;
         }
 
-        .card-icon {
-            width: 32px;
-            height: 32px;
+        .card-icon-3d {
+            width: 40px;
+            height: 40px;
+        }
+
+        .icon-cube {
+            width: 34px;
+            height: 34px;
+            transform: none;
+        }
+
+        .icon-orbit {
+            display: none;
         }
 
         .card-title {
             font-size: 1rem;
+        }
+
+        .card-subtitle {
+            font-size: 0.65rem;
         }
 
         .languages-list {
@@ -1623,7 +2142,8 @@
         }
 
         .language-item {
-            padding: 0.5rem 0.6rem;
+            padding: 0.6rem 0.75rem;
+            gap: 0.75rem;
         }
 
         .lang-dot {
@@ -1631,16 +2151,20 @@
             height: 10px;
         }
 
-        .lang-name {
-            font-size: 0.85rem;
+        .lang-dot::after {
+            display: none;
         }
 
-        .lang-percent {
+        .lang-name {
             font-size: 0.8rem;
         }
 
+        .lang-percent {
+            font-size: 0.75rem;
+        }
+
         .languages-bar {
-            height: 6px;
+            height: 8px;
         }
 
         .tech-stack {
@@ -1649,15 +2173,30 @@
 
         .tech-category {
             gap: 0.5rem;
+            padding: 0.75rem;
+        }
+
+        .category-icon-wrapper {
+            width: 28px;
+            height: 28px;
         }
 
         .category-icon {
-            width: 22px;
-            height: 22px;
+            width: 24px;
+            height: 24px;
+        }
+
+        .category-pulse {
+            display: none;
         }
 
         .category-label {
             font-size: 0.65rem;
+        }
+
+        .category-count {
+            font-size: 0.6rem;
+            padding: 0.15rem 0.4rem;
         }
 
         .tech-tags {
@@ -1665,12 +2204,22 @@
         }
 
         .tech-tag {
-            padding: 0.4rem 0.8rem;
-            font-size: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.7rem;
+            border-radius: 8px;
         }
 
-        .tech-tag i {
-            font-size: 0.75rem;
+        .tech-tag-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .tech-tag-icon i {
+            font-size: 0.7rem;
+        }
+
+        .tech-tag-glow {
+            display: none;
         }
 
         .section-header-small {
@@ -1790,23 +2339,46 @@
             padding: 1.25rem;
         }
 
+        .contributions-section::after {
+            display: none;
+        }
+
+        .contributions-header {
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+
         .contributions-header h3 {
             font-size: 1rem;
         }
 
         .streak-badge {
             padding: 0.4rem 0.75rem;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
+        }
+
+        .streak-fire {
+            font-size: 0.9rem;
         }
 
         .contribution-graph {
             grid-template-columns: repeat(13, 1fr);
             gap: 2px;
             margin-bottom: 0.75rem;
+            padding: 0.5rem;
         }
 
         .contribution-day {
             border-radius: 2px;
+        }
+
+        .contribution-day::before {
+            display: none;
+        }
+
+        .contribution-day:hover {
+            transform: scale(1.8);
         }
 
         .contribution-legend {
@@ -1820,11 +2392,14 @@
 
         /* Disable heavy animations on mobile */
         .tech-glow-orb {
-            animation: none;
-            opacity: 0.2;
+            opacity: 0.15;
         }
 
-        .t-particle {
+        .card-hologram {
+            display: none;
+        }
+
+        .card-decoration-line {
             display: none;
         }
 
@@ -1987,6 +2562,43 @@
         return `${Math.floor(diffDays / 365)}y ago`;
     }
 
+    // Generate smart description based on repo characteristics
+    function getSmartDescription(repo: RepoData): string {
+        if (repo.description) return repo.description;
+
+        const lang = repo.language?.toLowerCase() || '';
+        const name = repo.name.toLowerCase();
+        const topics = (repo.topics || []).map(t => t.toLowerCase());
+
+        // Generate context-aware descriptions
+        if (name.includes('poc') || topics.includes('poc')) {
+            return `Proof of concept exploring ${lang || 'new technologies'} capabilities and patterns.`;
+        }
+        if (name.includes('template') || topics.includes('template')) {
+            return `Reusable template for ${lang || 'development'} projects with best practices.`;
+        }
+        if (name.includes('workflow') || topics.includes('ci-cd')) {
+            return `Automation workflows and CI/CD pipeline configurations.`;
+        }
+        if (topics.includes('api') || name.includes('api')) {
+            return `RESTful API service built with ${lang || 'modern'} technologies.`;
+        }
+        if (lang === 'java' || lang === 'kotlin') {
+            return `Enterprise-grade ${lang} application with modern architecture.`;
+        }
+        if (lang === 'javascript' || lang === 'typescript') {
+            return `Modern web application built with ${lang}.`;
+        }
+        if (lang === 'shell') {
+            return `Shell scripts and automation utilities for DevOps workflows.`;
+        }
+        if (name.includes('page') || name.includes('portfolio')) {
+            return `Personal portfolio showcasing projects and skills.`;
+        }
+
+        return `A ${lang || 'software'} project exploring new concepts and patterns.`;
+    }
+
     function renderProjects(repos: Array<RepoData>): void {
         const grid = document.getElementById('projects-grid');
         if (!grid) return;
@@ -1997,9 +2609,19 @@
             const type = getProjectType(repo);
             const timeAgo = formatTimeAgo(repo.updatedAt);
             const topics = repo.topics || [];
+            const description = getSmartDescription(repo);
+            const hasDescription = !!repo.description;
+
+            // Format project name for display
+            const displayName = repo.name
+                .replace(/-/g, ' ')
+                .replace(/_/g, ' ')
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
 
             return `
-                <div class="project-card">
+                <a href="${repo.url}" target="_blank" rel="noopener noreferrer" class="project-card">
                     <div class="shimmer"></div>
                     <div class="project-preview">
                         <div class="project-preview-pattern"></div>
@@ -2007,20 +2629,16 @@
                             <i class="${icon}"></i>
                         </div>
                         <span class="project-type-badge">${type}</span>
-                        <div class="project-links">
-                            <a href="${repo.url}" target="_blank" rel="noopener noreferrer" class="project-link-btn" title="View on GitHub">
-                                <i class="fab fa-github"></i>
+                        ${repo.homepage ? `
+                            <a href="${repo.homepage}" target="_blank" rel="noopener noreferrer" class="project-live-btn" title="Live Demo" onclick="event.stopPropagation()">
+                                <i class="fas fa-external-link-alt"></i>
+                                <span>Live</span>
                             </a>
-                            ${repo.homepage ? `
-                                <a href="${repo.homepage}" target="_blank" rel="noopener noreferrer" class="project-link-btn" title="Live Demo">
-                                    <i class="fas fa-external-link-alt"></i>
-                                </a>
-                            ` : ''}
-                        </div>
+                        ` : ''}
                     </div>
                     <div class="project-content">
                         <div class="project-header">
-                            <span class="project-name">${repo.name}</span>
+                            <span class="project-name">${displayName}</span>
                             ${repo.language ? `
                                 <span class="project-lang-badge">
                                     <span class="lang-dot" style="background: ${langColor}; color: ${langColor}"></span>
@@ -2028,7 +2646,7 @@
                                 </span>
                             ` : ''}
                         </div>
-                        <p class="project-desc">${repo.description || 'No description available'}</p>
+                        <p class="project-desc ${!hasDescription ? 'auto-desc' : ''}">${description}</p>
                         ${topics.length > 0 ? `
                             <div class="project-tech-tags">
                                 ${topics.slice(0, 4).map(topic => `
@@ -2053,7 +2671,7 @@
                             ` : ''}
                         </div>
                     </div>
-                </div>
+                </a>
             `;
         }).join('');
     }
@@ -2090,7 +2708,7 @@
             animateNumber(document.getElementById('stat-repos'), data.stats.totalRepos);
             animateNumber(document.getElementById('stat-stars'), data.stats.totalStars);
             animateNumber(document.getElementById('stat-followers'), data.stats.followers);
-            animateNumber(document.getElementById('stat-years'), data.profile.yearsOnGitHub);
+            animateNumber(document.getElementById('stat-commits'), data.stats.totalCommits || 0);
 
             // Update streak
             const streakEl = document.getElementById('current-streak');

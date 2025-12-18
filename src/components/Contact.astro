@@ -370,8 +370,8 @@
         display: flex;
         align-items: center;
         gap: 1rem;
-        padding: 1.25rem;
-        border-radius: 1rem;
+        padding: var(--card-padding-compact);
+        border-radius: var(--card-radius);
         text-decoration: none;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
@@ -396,8 +396,8 @@
 
     .contact-item:hover {
         transform: translateX(5px);
-        border-color: rgba(100, 181, 246, 0.3);
-        box-shadow: 0 10px 30px rgba(100, 181, 246, 0.15);
+        border: var(--card-border-hover);
+        box-shadow: var(--card-shadow-hover);
     }
 
     .contact-icon-wrapper {

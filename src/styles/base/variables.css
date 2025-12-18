@@ -91,6 +91,30 @@
     --border-radius-lg: 35px;
     --border-radius-xl: 50px;
     --border-radius-full: 9999px;
+
+    /* ===== UNIFIED DESIGN SYSTEM ===== */
+    /* Cards */
+    --card-radius: 1.25rem;
+    --card-padding: 1.5rem;
+    --card-padding-compact: 1.25rem;
+    --card-border: 1px solid rgba(100, 181, 246, 0.15);
+    --card-border-hover: 1px solid rgba(100, 181, 246, 0.3);
+    --card-bg-glass: rgba(15, 15, 24, 0.6);
+    --card-backdrop: blur(10px);
+
+    /* Card Shadows */
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    --card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(100, 181, 246, 0.15);
+    --card-shadow-glow: 0 25px 50px rgba(100, 181, 246, 0.2);
+
+    /* Section Padding */
+    --section-padding-y: 6rem;
+    --section-padding-y-mobile: 4rem;
+    --section-padding-y-small: 3rem;
+
+    /* Section Header */
+    --section-header-margin: 4rem;
+    --section-header-margin-mobile: 2.5rem;
     
     /* ===== TRANSICIONES ===== */
     --transition-fast: 0.2s ease;

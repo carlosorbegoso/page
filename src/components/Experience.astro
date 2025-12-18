@@ -373,14 +373,14 @@
     }
 
     .experience-content {
-        padding: 1.5rem;
-        border-radius: 1rem;
+        padding: var(--card-padding);
+        border-radius: var(--card-radius);
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .experience-content:hover {
         transform: translateY(-5px) scale(1.02);
-        box-shadow: 0 25px 50px rgba(100, 181, 246, 0.2);
+        box-shadow: var(--card-shadow-glow);
     }
 
     .experience-header {
@@ -505,12 +505,12 @@
 
     /* Glass card override for experience */
     .experience-content.glass-card {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(100, 181, 246, 0.1);
+        background: var(--card-bg-glass);
+        border: var(--card-border);
     }
 
     [data-theme="dark"] .experience-content.glass-card {
-        background: rgba(26, 26, 46, 0.5);
+        background: rgba(20, 20, 35, 0.6);
     }
 
     /* Animation observer styles */
@@ -801,8 +801,8 @@
         }
     });
 
-    // Initialize Three.js holographic engine - DISABLED: floating squares looked out of place
-    // import('../scripts/engines/experience-three-engine.js').then(module => {
-    //     new module.ExperienceThreeEngine('experience-three-container');
-    // }).catch(() => {});
+    // Initialize Three.js holographic engine
+    import('../scripts/engines/experience-three-engine.js').then(module => {
+        new module.ExperienceThreeEngine('experience-three-container');
+    }).catch(() => {});
 </script>

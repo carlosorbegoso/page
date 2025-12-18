@@ -1,9 +1,8 @@
 /**
- * Hero Three.js Engine
- * Motor específico para efectos visuales avanzados del Hero section
+ * Hero Three.js Engine - Premium Edition
+ * Elegant flowing particles with aurora effect
  */
 
-// Importar Three.js como módulo ES6 con Vite
 import * as THREE from 'three';
 
 export class HeroThreeEngine {
@@ -11,47 +10,42 @@ export class HeroThreeEngine {
         this.scene = null;
         this.camera = null;
         this.renderer = null;
-        this.particles = [];
-        this.constellations = [];
-        this.stars = [];
-        this.titleParticles = null;
-        this.titleGlow = null;
+        this.flowingParticles = null;
+        this.auroraWaves = [];
+        this.floatingOrbs = [];
+        this.nebulaClouds = null;
+        this.ambientStars = null;
         this.animationId = null;
         this.isInitialized = false;
-        this.currentTheme = 'light';
+        this.currentTheme = 'dark';
+        this.time = 0;
+        this.mouse = new THREE.Vector2(0, 0);
+        this.targetMouse = new THREE.Vector2(0, 0);
 
-        // Detectar dispositivo móvil
+        // Device detection
         this.isMobile = window.innerWidth <= 768;
         this.isLowPower = window.innerWidth <= 480 ||
             (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
 
-        // Configuración de efectos - reducida en mobile para mejor performance
-        const mobileMultiplier = this.isLowPower ? 0.3 : (this.isMobile ? 0.5 : 1);
+        const quality = this.isLowPower ? 0.3 : (this.isMobile ? 0.5 : 1);
 
         this.config = {
-            particles: {
-                count: Math.floor(80 * mobileMultiplier),
-                size: { min: 0.3, max: 0.8 },
-                speed: { min: 0.1, max: 0.3 },
-                opacity: { min: 0.2, max: 0.5 }
+            flowingParticles: {
+                count: Math.floor(300 * quality),
+                layers: 3
             },
-            constellations: {
-                count: Math.floor(12 * mobileMultiplier),
-                starsPerConstellation: { min: 3, max: this.isMobile ? 4 : 5 },
-                starSize: 0.15,
-                connectionOpacity: 0.12,
-                connectionWidth: 1
+            aurora: {
+                waves: this.isMobile ? 2 : 3,
+                segments: Math.floor(80 * quality)
+            },
+            orbs: {
+                count: Math.floor(6 * quality)
+            },
+            nebula: {
+                count: Math.floor(40 * quality)
             },
             stars: {
-                count: Math.floor(100 * mobileMultiplier),
-                size: { min: 0.2, max: 0.6 },
-                twinkleSpeed: { min: 2, max: 5 }
-            },
-            titleEffect: {
-                particleCount: Math.floor(150 * mobileMultiplier),
-                orbitRadius: 25,
-                orbitSpeed: 0.3,
-                particleSize: { min: 0.15, max: 0.5 }
+                count: Math.floor(150 * quality)
             }
         };
     }
@@ -59,461 +53,121 @@ export class HeroThreeEngine {
     async init(containerId = 'hero-particles') {
         try {
             if (typeof THREE === 'undefined') {
-                console.warn('Three.js no está disponible');
+                console.warn('Three.js not available');
                 return false;
             }
 
             this.setupScene();
             this.setupCamera();
             this.setupRenderer(containerId);
-            this.createParticleSystem();
-            this.createConstellationSystem();
-            this.createStarSystem();
-            this.createTitleEffect();
+
+            // Create premium effects
+            this.createAmbientStars();
+            this.createFlowingParticles();
+            this.createAuroraWaves();
+            this.createFloatingOrbs();
+            this.createNebulaClouds();
+
             this.setupEventListeners();
             this.animate();
-            
+
             this.isInitialized = true;
-        
             return true;
         } catch (error) {
-            console.error('❌ Error inicializando Hero Three.js Engine:', error);
+            console.error('Error initializing Hero Three.js Engine:', error);
             return false;
         }
     }
 
     setupScene() {
         this.scene = new THREE.Scene();
-        this.scene.fog = new THREE.Fog(0x000000, 50, 200);
     }
 
     setupCamera() {
         this.camera = new THREE.PerspectiveCamera(
-            75,
+            60,
             window.innerWidth / window.innerHeight,
             0.1,
             1000
         );
         this.camera.position.z = 50;
-        this.camera.position.y = 0;
     }
 
     setupRenderer(containerId) {
         const container = document.getElementById(containerId);
         if (!container) {
-            console.warn(`Contenedor ${containerId} no encontrado`);
+            console.warn(`Container ${containerId} not found`);
             return;
         }
 
         this.renderer = new THREE.WebGLRenderer({
-            antialias: true,
+            antialias: !this.isMobile,
             alpha: true,
-            powerPreference: "high-performance"
+            powerPreference: this.isMobile ? 'low-power' : 'high-performance'
         });
 
         this.renderer.setSize(container.offsetWidth, container.offsetHeight);
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.isMobile ? 1.5 : 2));
         this.renderer.setClearColor(0x000000, 0);
-        this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
         container.appendChild(this.renderer.domElement);
         this.renderer.domElement.style.position = 'absolute';
         this.renderer.domElement.style.top = '0';
         this.renderer.domElement.style.left = '0';
         this.renderer.domElement.style.zIndex = '1';
+        this.renderer.domElement.style.pointerEvents = 'none';
+
+        this.container = container;
     }
 
-    createParticleSystem() {
-        const particleGeometry = new THREE.BufferGeometry();
-        const particleCount = this.config.particles.count;
-        
-        const positions = new Float32Array(particleCount * 3);
-        const colors = new Float32Array(particleCount * 3);
-        const sizes = new Float32Array(particleCount);
-        const speeds = new Float32Array(particleCount);
-        const opacities = new Float32Array(particleCount);
-
-        for (let i = 0; i < particleCount; i++) {
-            // Posiciones aleatorias distribuidas en el espacio
-            positions[i * 3] = (Math.random() - 0.5) * 100;
-            positions[i * 3 + 1] = (Math.random() - 0.5) * 60;
-            positions[i * 3 + 2] = (Math.random() - 0.5) * 50 - 20;
-
-            // Colores basados en el tema
-            const color = this.currentTheme === 'dark' 
-                ? new THREE.Color(0x4FC3F7) 
-                : new THREE.Color(0x64B5F6);
-            
-            colors[i * 3] = color.r;
-            colors[i * 3 + 1] = color.g;
-            colors[i * 3 + 2] = color.b;
-
-            sizes[i] = Math.random() * 
-                (this.config.particles.size.max - this.config.particles.size.min) + 
-                this.config.particles.size.min;
-            
-            speeds[i] = Math.random() * 
-                (this.config.particles.speed.max - this.config.particles.speed.min) + 
-                this.config.particles.speed.min;
-            
-            opacities[i] = Math.random() * 
-                (this.config.particles.opacity.max - this.config.particles.opacity.min) + 
-                this.config.particles.opacity.min;
-        }
-
-        particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-        particleGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-        particleGeometry.setAttribute('speed', new THREE.BufferAttribute(speeds, 1));
-        particleGeometry.setAttribute('opacity', new THREE.BufferAttribute(opacities, 1));
-
-        const particleMaterial = new THREE.ShaderMaterial({
-            uniforms: {
-                time: { value: 0 },
-                theme: { value: this.currentTheme === 'dark' ? 1.0 : 0.0 }
-            },
-            vertexShader: `
-                attribute vec3 color;
-                attribute float size;
-                attribute float speed;
-                attribute float opacity;
-                varying float vOpacity;
-                varying vec3 vColor;
-                
-                void main() {
-                    vOpacity = opacity;
-                    vColor = color;
-                    
-                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-                    gl_PointSize = size * (300.0 / -mvPosition.z);
-                    gl_Position = projectionMatrix * mvPosition;
-                }
-            `,
-            fragmentShader: `
-                uniform float time;
-                uniform float theme;
-                varying float vOpacity;
-                varying vec3 vColor;
-
-                void main() {
-                    // Crear forma circular suave
-                    float dist = length(gl_PointCoord - vec2(0.5));
-                    if (dist > 0.5) discard;
-
-                    // Brillo suave con efecto de twinkle lento
-                    float twinkle = 0.7 + 0.3 * sin(time * 1.5);
-                    float alpha = vOpacity * twinkle;
-                    alpha *= smoothstep(0.5, 0.0, dist);
-                    vec3 finalColor = mix(vColor, vec3(1.0, 1.0, 1.0), 0.2);
-                    gl_FragColor = vec4(finalColor, alpha);
-                }
-            `,
-            transparent: true,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false
-        });
-
-        this.particleSystem = new THREE.Points(particleGeometry, particleMaterial);
-        this.scene.add(this.particleSystem);
-    }
-
-    createConstellationSystem() {
-        const constellationCount = this.config.constellations.count;
-        
-        for (let i = 0; i < constellationCount; i++) {
-            const constellation = this.createConstellation(i, constellationCount);
-            this.constellations.push(constellation);
-            this.scene.add(constellation);
-        }
-    }
-
-    createConstellation(index, constellationCount) {
-        const group = new THREE.Group();
-        const starCount = Math.floor(Math.random() *
-            (this.config.constellations.starsPerConstellation.max -
-             this.config.constellations.starsPerConstellation.min) +
-            this.config.constellations.starsPerConstellation.min);
-
-        const positions = [];
-        const starSize = this.config.constellations.starSize;
-
-        // Crear estrellas pequeñas y delicadas
-        for (let i = 0; i < starCount; i++) {
-            const star = this.createStar(starSize, 0.6);
-
-            // Distribución más compacta para constelación más pequeña
-            const angle = (i / starCount) * Math.PI * 2 + Math.random() * 0.5;
-            const radius = 2 + Math.random() * 2;
-            const x = Math.cos(angle) * radius;
-            const y = Math.sin(angle) * radius;
-            const z = (Math.random() - 0.5) * 1;
-
-            star.position.set(x, y, z);
-            positions.push(new THREE.Vector3(x, y, z));
-            group.add(star);
-        }
-
-        // Crear conexiones finas entre estrellas
-        for (let i = 0; i < starCount; i++) {
-            for (let j = i + 1; j < starCount; j++) {
-                if (Math.random() > 0.3) {
-                    const connection = this.createConnection(positions[i], positions[j]);
-                    group.add(connection);
-                }
-            }
-        }
-
-        // Posición inicial - distribuida ampliamente
-        group.position.set(
-            (Math.random() - 0.5) * 120,
-            (Math.random() - 0.5) * 70,
-            -15 + Math.random() * 10
-        );
-
-        // Velocidades claras para movimiento visible
-        const velX = (0.08 + Math.random() * 0.12) * (Math.random() > 0.5 ? 1 : -1);
-        const velY = (0.04 + Math.random() * 0.08) * (Math.random() > 0.5 ? 1 : -1);
-
-        group.userData = {
-            velocity: { x: velX, y: velY, z: 0 },
-            rotationSpeed: (Math.random() - 0.5) * 0.003,
-            pulsePhase: Math.random() * Math.PI * 2,
-            originalScale: 1.0
-        };
-
-        return group;
-    }
-
-    createStar(size, intensity) {
-        // Estrellas muy pequeñas y delicadas
-        const geometry = new THREE.SphereGeometry(size, 6, 4);
-        const material = new THREE.MeshBasicMaterial({
-            color: 0xFFFFFF,
-            transparent: true,
-            opacity: intensity * 0.8
-        });
-
-        const star = new THREE.Mesh(geometry, material);
-
-        star.userData = {
-            originalIntensity: intensity * 0.8,
-            twinkleSpeed: Math.random() * 2 + 1
-        };
-
-        return star;
-    }
-
-    createConnection(start, end) {
-        const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
-        const material = new THREE.LineBasicMaterial({
-            color: 0x88CCFF,
-            transparent: true,
-            opacity: this.config.constellations.connectionOpacity
-        });
-
-        const line = new THREE.Line(geometry, material);
-        line.userData = { baseOpacity: this.config.constellations.connectionOpacity };
-        return line;
-    }
-
-    createTitleEffect() {
-        // Crear partículas que orbitan alrededor del área del título
-        const particleCount = this.config.titleEffect.particleCount;
+    createAmbientStars() {
+        const count = this.config.stars.count;
         const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(count * 3);
+        const sizes = new Float32Array(count);
+        const twinklePhases = new Float32Array(count);
 
-        const positions = new Float32Array(particleCount * 3);
-        const colors = new Float32Array(particleCount * 3);
-        const sizes = new Float32Array(particleCount);
-        const phases = new Float32Array(particleCount);
-        const speeds = new Float32Array(particleCount);
-        const radiuses = new Float32Array(particleCount);
+        for (let i = 0; i < count; i++) {
+            positions[i * 3] = (Math.random() - 0.5) * 200;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 120;
+            positions[i * 3 + 2] = -50 - Math.random() * 50;
 
-        for (let i = 0; i < particleCount; i++) {
-            // Distribuir en un toroide alrededor del centro
-            const angle = (i / particleCount) * Math.PI * 2 * 3; // 3 vueltas
-            const radius = this.config.titleEffect.orbitRadius + (Math.random() - 0.5) * 15;
-            const height = (Math.random() - 0.5) * 12;
-
-            positions[i * 3] = Math.cos(angle) * radius;
-            positions[i * 3 + 1] = height;
-            positions[i * 3 + 2] = Math.sin(angle) * radius * 0.3; // Más plano en Z
-
-            // Colores cyan/azul
-            const hue = 0.52 + Math.random() * 0.08;
-            const color = new THREE.Color();
-            color.setHSL(hue, 1, 0.6 + Math.random() * 0.2);
-
-            colors[i * 3] = color.r;
-            colors[i * 3 + 1] = color.g;
-            colors[i * 3 + 2] = color.b;
-
-            sizes[i] = Math.random() *
-                (this.config.titleEffect.particleSize.max - this.config.titleEffect.particleSize.min) +
-                this.config.titleEffect.particleSize.min;
-
-            phases[i] = Math.random() * Math.PI * 2;
-            speeds[i] = 0.2 + Math.random() * 0.4;
-            radiuses[i] = radius;
+            sizes[i] = 0.3 + Math.random() * 0.7;
+            twinklePhases[i] = Math.random() * Math.PI * 2;
         }
 
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
         geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-        geometry.setAttribute('phase', new THREE.BufferAttribute(phases, 1));
-        geometry.setAttribute('speed', new THREE.BufferAttribute(speeds, 1));
-        geometry.setAttribute('radius', new THREE.BufferAttribute(radiuses, 1));
+        geometry.setAttribute('twinklePhase', new THREE.BufferAttribute(twinklePhases, 1));
 
         const material = new THREE.ShaderMaterial({
             uniforms: {
-                time: { value: 0 }
+                time: { value: 0 },
+                pixelRatio: { value: this.renderer.getPixelRatio() }
             },
             vertexShader: `
-                attribute vec3 color;
                 attribute float size;
-                attribute float phase;
-                attribute float speed;
-                attribute float radius;
+                attribute float twinklePhase;
                 uniform float time;
-                varying vec3 vColor;
-                varying float vOpacity;
+                uniform float pixelRatio;
+                varying float vTwinkle;
 
                 void main() {
-                    vColor = color;
+                    vTwinkle = 0.5 + 0.5 * sin(time * 1.5 + twinklePhase);
 
-                    // Orbitar alrededor del centro
-                    float angle = phase + time * speed;
-                    vec3 pos = position;
-                    pos.x = cos(angle) * radius;
-                    pos.z = sin(angle) * radius * 0.3;
-
-                    // Movimiento vertical suave
-                    pos.y += sin(time * 2.0 + phase) * 1.5;
-
-                    // Pulso de opacidad
-                    vOpacity = 0.4 + 0.4 * sin(time * 3.0 + phase);
-
-                    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-                    gl_PointSize = size * (300.0 / -mvPosition.z);
+                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                    gl_PointSize = size * pixelRatio * (100.0 / -mvPosition.z);
                     gl_Position = projectionMatrix * mvPosition;
                 }
             `,
             fragmentShader: `
-                varying vec3 vColor;
-                varying float vOpacity;
+                varying float vTwinkle;
 
                 void main() {
                     float dist = length(gl_PointCoord - vec2(0.5));
                     if (dist > 0.5) discard;
 
-                    float alpha = vOpacity * smoothstep(0.5, 0.0, dist);
-                    vec3 finalColor = mix(vColor, vec3(1.0), 0.3);
-
-                    gl_FragColor = vec4(finalColor, alpha);
-                }
-            `,
-            transparent: true,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false
-        });
-
-        this.titleParticles = new THREE.Points(geometry, material);
-        this.scene.add(this.titleParticles);
-
-        // Crear un glow central
-        const glowGeometry = new THREE.PlaneGeometry(60, 20);
-        const glowMaterial = new THREE.ShaderMaterial({
-            uniforms: {
-                time: { value: 0 }
-            },
-            vertexShader: `
-                varying vec2 vUv;
-                void main() {
-                    vUv = uv;
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-            `,
-            fragmentShader: `
-                uniform float time;
-                varying vec2 vUv;
-
-                void main() {
-                    vec2 center = vUv - 0.5;
-                    float dist = length(center * vec2(1.0, 2.0));
-
-                    // Glow pulsante
-                    float pulse = 0.5 + 0.3 * sin(time * 2.0);
-                    float glow = exp(-dist * 4.0) * pulse;
-
-                    vec3 color = mix(vec3(0.4, 0.7, 1.0), vec3(0.0, 1.0, 1.0), sin(time) * 0.5 + 0.5);
-
-                    gl_FragColor = vec4(color, glow * 0.3);
-                }
-            `,
-            transparent: true,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false,
-            side: THREE.DoubleSide
-        });
-
-        this.titleGlow = new THREE.Mesh(glowGeometry, glowMaterial);
-        this.titleGlow.position.z = -5;
-        this.scene.add(this.titleGlow);
-    }
-
-    createStarSystem() {
-        const starGeometry = new THREE.BufferGeometry();
-        const starCount = this.config.stars.count;
-        
-        const positions = new Float32Array(starCount * 3);
-        const sizes = new Float32Array(starCount);
-        const twinkleSpeeds = new Float32Array(starCount);
-
-        for (let i = 0; i < starCount; i++) {
-            // Distribuir estrellas en el cielo
-            const phi = Math.acos(-1 + (2 * i) / starCount);
-            const theta = Math.sqrt(starCount * Math.PI) * phi;
-            
-            const radius = 80 + Math.random() * 20;
-            positions[i * 3] = radius * Math.cos(theta) * Math.sin(phi);
-            positions[i * 3 + 1] = radius * Math.sin(theta) * Math.sin(phi);
-            positions[i * 3 + 2] = radius * Math.cos(phi);
-
-            sizes[i] = Math.random() * 
-                (this.config.stars.size.max - this.config.stars.size.min) + 
-                this.config.stars.size.min;
-            
-            twinkleSpeeds[i] = Math.random() * 
-                (this.config.stars.twinkleSpeed.max - this.config.stars.twinkleSpeed.min) + 
-                this.config.stars.twinkleSpeed.min;
-        }
-
-        starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        starGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-        starGeometry.setAttribute('twinkleSpeed', new THREE.BufferAttribute(twinkleSpeeds, 1));
-
-        const starMaterial = new THREE.ShaderMaterial({
-            uniforms: {
-                time: { value: 0 }
-            },
-            vertexShader: `
-                attribute float size;
-                varying float vSize;
-                
-                void main() {
-                    vSize = size;
-                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-                    gl_PointSize = size * (300.0 / -mvPosition.z);
-                    gl_Position = projectionMatrix * mvPosition;
-                }
-            `,
-            fragmentShader: `
-                uniform float time;
-                varying float vSize;
-                
-                void main() {
-                    float twinkle = 0.8 + 0.2 * sin(time * 2.0);
-                    float alpha = twinkle * (0.6 + 0.4 * (vSize / 2.0));
+                    float alpha = vTwinkle * smoothstep(0.5, 0.0, dist) * 0.8;
                     gl_FragColor = vec4(1.0, 1.0, 1.0, alpha);
                 }
             `,
@@ -522,102 +176,428 @@ export class HeroThreeEngine {
             depthWrite: false
         });
 
-        this.starSystem = new THREE.Points(starGeometry, starMaterial);
-        this.scene.add(this.starSystem);
+        this.ambientStars = new THREE.Points(geometry, material);
+        this.scene.add(this.ambientStars);
+    }
+
+    createFlowingParticles() {
+        const count = this.config.flowingParticles.count;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(count * 3);
+        const colors = new Float32Array(count * 3);
+        const sizes = new Float32Array(count);
+        const velocities = new Float32Array(count * 3);
+        const phases = new Float32Array(count);
+
+        for (let i = 0; i < count; i++) {
+            // Spread across view with depth variation
+            positions[i * 3] = (Math.random() - 0.5) * 120;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 80;
+            positions[i * 3 + 2] = (Math.random() - 0.5) * 40 - 10;
+
+            // Cyan to blue gradient colors
+            const hue = 0.52 + Math.random() * 0.08;
+            const saturation = 0.7 + Math.random() * 0.3;
+            const lightness = 0.5 + Math.random() * 0.2;
+            const color = new THREE.Color();
+            color.setHSL(hue, saturation, lightness);
+            colors[i * 3] = color.r;
+            colors[i * 3 + 1] = color.g;
+            colors[i * 3 + 2] = color.b;
+
+            sizes[i] = 1 + Math.random() * 2;
+
+            // Flow velocities - gentle upward drift
+            velocities[i * 3] = (Math.random() - 0.5) * 0.02;
+            velocities[i * 3 + 1] = 0.01 + Math.random() * 0.03;
+            velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.01;
+
+            phases[i] = Math.random() * Math.PI * 2;
+        }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        geometry.setAttribute('phase', new THREE.BufferAttribute(phases, 1));
+
+        this.particleVelocities = velocities;
+
+        const material = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 },
+                pixelRatio: { value: this.renderer.getPixelRatio() }
+            },
+            vertexShader: `
+                attribute vec3 color;
+                attribute float size;
+                attribute float phase;
+                uniform float time;
+                uniform float pixelRatio;
+                varying vec3 vColor;
+                varying float vAlpha;
+
+                void main() {
+                    vColor = color;
+
+                    vec3 pos = position;
+                    // Gentle wave motion
+                    pos.x += sin(time * 0.5 + phase + position.y * 0.05) * 3.0;
+                    pos.z += cos(time * 0.3 + phase) * 2.0;
+
+                    // Pulsing alpha
+                    vAlpha = 0.4 + 0.3 * sin(time * 2.0 + phase);
+
+                    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+                    gl_PointSize = size * pixelRatio * (150.0 / -mvPosition.z);
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vColor;
+                varying float vAlpha;
+
+                void main() {
+                    float dist = length(gl_PointCoord - vec2(0.5));
+                    if (dist > 0.5) discard;
+
+                    // Soft glow
+                    float alpha = vAlpha * smoothstep(0.5, 0.1, dist);
+                    vec3 finalColor = vColor + vec3(0.2) * (1.0 - dist * 2.0);
+
+                    gl_FragColor = vec4(finalColor, alpha);
+                }
+            `,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+
+        this.flowingParticles = new THREE.Points(geometry, material);
+        this.scene.add(this.flowingParticles);
+    }
+
+    createAuroraWaves() {
+        const waveCount = this.config.aurora.waves;
+        const segments = this.config.aurora.segments;
+
+        for (let w = 0; w < waveCount; w++) {
+            const geometry = new THREE.PlaneGeometry(140, 30, segments, 1);
+
+            const material = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    waveIndex: { value: w },
+                    totalWaves: { value: waveCount }
+                },
+                vertexShader: `
+                    uniform float time;
+                    uniform float waveIndex;
+                    varying vec2 vUv;
+                    varying float vWave;
+
+                    void main() {
+                        vUv = uv;
+
+                        vec3 pos = position;
+
+                        // Multiple wave layers
+                        float wave1 = sin(uv.x * 6.0 + time * 0.8 + waveIndex * 2.0) * 4.0;
+                        float wave2 = sin(uv.x * 3.0 - time * 0.5 + waveIndex) * 2.0;
+                        float wave3 = cos(uv.x * 8.0 + time * 1.2) * 1.5;
+
+                        pos.y += wave1 + wave2 + wave3;
+                        pos.z += sin(uv.x * 4.0 + time * 0.3) * 3.0;
+
+                        vWave = (wave1 + wave2 + wave3) / 7.5 + 0.5;
+
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float waveIndex;
+                    uniform float totalWaves;
+                    varying vec2 vUv;
+                    varying float vWave;
+
+                    void main() {
+                        // Aurora colors - cyan to purple gradient
+                        vec3 color1 = vec3(0.0, 0.9, 0.8); // Cyan
+                        vec3 color2 = vec3(0.3, 0.5, 1.0); // Blue
+                        vec3 color3 = vec3(0.6, 0.2, 0.8); // Purple
+
+                        float t = vUv.x + sin(time * 0.5) * 0.2;
+                        vec3 color = mix(color1, color2, smoothstep(0.0, 0.5, t));
+                        color = mix(color, color3, smoothstep(0.5, 1.0, t));
+
+                        // Vertical fade
+                        float verticalFade = smoothstep(0.0, 0.3, vUv.y) * smoothstep(1.0, 0.7, vUv.y);
+
+                        // Wave intensity
+                        float intensity = vWave * 0.5 + 0.5;
+
+                        // Edge fade
+                        float edgeFade = smoothstep(0.0, 0.2, vUv.x) * smoothstep(1.0, 0.8, vUv.x);
+
+                        float alpha = verticalFade * intensity * edgeFade * 0.15;
+                        alpha *= 1.0 - (waveIndex / totalWaves) * 0.3;
+
+                        gl_FragColor = vec4(color, alpha);
+                    }
+                `,
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false,
+                side: THREE.DoubleSide
+            });
+
+            const wave = new THREE.Mesh(geometry, material);
+            wave.position.set(0, 20 - w * 8, -30 - w * 5);
+            wave.rotation.x = -0.3;
+
+            this.auroraWaves.push(wave);
+            this.scene.add(wave);
+        }
+    }
+
+    createFloatingOrbs() {
+        const count = this.config.orbs.count;
+
+        for (let i = 0; i < count; i++) {
+            const size = 3 + Math.random() * 4;
+            const geometry = new THREE.SphereGeometry(size, 32, 32);
+
+            const hue = 0.5 + Math.random() * 0.15;
+            const color = new THREE.Color();
+            color.setHSL(hue, 0.8, 0.5);
+
+            const material = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    color: { value: color },
+                    phase: { value: Math.random() * Math.PI * 2 }
+                },
+                vertexShader: `
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+
+                    void main() {
+                        vNormal = normalize(normalMatrix * normal);
+                        vPosition = position;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform vec3 color;
+                    uniform float phase;
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+
+                    void main() {
+                        // Fresnel effect for glow
+                        float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 3.0);
+
+                        // Pulsing
+                        float pulse = 0.5 + 0.3 * sin(time * 1.5 + phase);
+
+                        // Inner glow
+                        float innerGlow = exp(-length(vPosition) * 0.2) * 0.5;
+
+                        float alpha = (fresnel * 0.6 + innerGlow) * pulse;
+
+                        gl_FragColor = vec4(color, alpha * 0.4);
+                    }
+                `,
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false,
+                side: THREE.BackSide
+            });
+
+            const orb = new THREE.Mesh(geometry, material);
+            orb.position.set(
+                (Math.random() - 0.5) * 100,
+                (Math.random() - 0.5) * 60,
+                (Math.random() - 0.5) * 30 - 20
+            );
+
+            orb.userData = {
+                originalPos: orb.position.clone(),
+                floatPhase: Math.random() * Math.PI * 2,
+                floatSpeed: 0.3 + Math.random() * 0.3,
+                floatAmplitude: 5 + Math.random() * 5
+            };
+
+            this.floatingOrbs.push(orb);
+            this.scene.add(orb);
+        }
+    }
+
+    createNebulaClouds() {
+        const count = this.config.nebula.count;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(count * 3);
+        const colors = new Float32Array(count * 3);
+        const sizes = new Float32Array(count);
+
+        for (let i = 0; i < count; i++) {
+            positions[i * 3] = (Math.random() - 0.5) * 150;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 100;
+            positions[i * 3 + 2] = -60 - Math.random() * 40;
+
+            // Soft purple/blue colors
+            const hue = 0.6 + Math.random() * 0.2;
+            const color = new THREE.Color();
+            color.setHSL(hue, 0.5, 0.3);
+            colors[i * 3] = color.r;
+            colors[i * 3 + 1] = color.g;
+            colors[i * 3 + 2] = color.b;
+
+            sizes[i] = 20 + Math.random() * 40;
+        }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+        const material = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 },
+                pixelRatio: { value: this.renderer.getPixelRatio() }
+            },
+            vertexShader: `
+                attribute vec3 color;
+                attribute float size;
+                uniform float time;
+                uniform float pixelRatio;
+                varying vec3 vColor;
+                varying float vAlpha;
+
+                void main() {
+                    vColor = color;
+                    vAlpha = 0.1 + 0.05 * sin(time * 0.5 + position.x * 0.1);
+
+                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                    gl_PointSize = size * pixelRatio * (100.0 / -mvPosition.z);
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vColor;
+                varying float vAlpha;
+
+                void main() {
+                    float dist = length(gl_PointCoord - vec2(0.5));
+                    if (dist > 0.5) discard;
+
+                    // Very soft cloud effect
+                    float alpha = vAlpha * smoothstep(0.5, 0.0, dist);
+
+                    gl_FragColor = vec4(vColor, alpha);
+                }
+            `,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+
+        this.nebulaClouds = new THREE.Points(geometry, material);
+        this.scene.add(this.nebulaClouds);
     }
 
     setupEventListeners() {
         window.addEventListener('resize', () => this.onWindowResize());
-        
-        // Mouse move para efecto parallax
+
+        // Mouse parallax
         document.addEventListener('mousemove', (event) => {
-            if (!this.isInitialized) return;
-            
-            const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-            const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-            
-            this.camera.position.x = mouseX * 5;
-            this.camera.position.y = mouseY * 3;
-            this.camera.lookAt(0, 0, 0);
+            this.targetMouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            this.targetMouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
         });
 
-        // Scroll para efecto parallax
-        window.addEventListener('scroll', () => {
-            if (!this.isInitialized) return;
-            
-            const scrolled = window.pageYOffset;
-            const rate = scrolled * -0.1;
-            
-            this.particleSystem.position.y = rate;
-            this.starSystem.position.y = rate * 0.5;
+        // Touch support
+        document.addEventListener('touchmove', (event) => {
+            if (event.touches.length > 0) {
+                this.targetMouse.x = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
+                this.targetMouse.y = -(event.touches[0].clientY / window.innerHeight) * 2 + 1;
+            }
         });
     }
 
     onWindowResize() {
-        if (!this.renderer || !this.camera) return;
-        
-        this.camera.aspect = window.innerWidth / window.innerHeight;
+        if (!this.renderer || !this.camera || !this.container) return;
+
+        const width = this.container.offsetWidth;
+        const height = this.container.offsetHeight;
+
+        this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setSize(width, height);
     }
 
     animate() {
         this.animationId = requestAnimationFrame(() => this.animate());
-        
+
         if (!this.isInitialized) return;
-        
-        const time = Date.now() * 0.001;
-        
-        // Animar partículas - solo efecto de brillo, sin rotación
-        if (this.particleSystem) {
-            this.particleSystem.material.uniforms.time.value = time;
+
+        this.time += 0.016;
+
+        // Smooth mouse follow
+        this.mouse.x += (this.targetMouse.x - this.mouse.x) * 0.05;
+        this.mouse.y += (this.targetMouse.y - this.mouse.y) * 0.05;
+
+        // Camera parallax
+        this.camera.position.x = this.mouse.x * 8;
+        this.camera.position.y = this.mouse.y * 5;
+        this.camera.lookAt(0, 0, 0);
+
+        // Animate ambient stars
+        if (this.ambientStars) {
+            this.ambientStars.material.uniforms.time.value = this.time;
+            this.ambientStars.rotation.y += 0.0001;
         }
 
-        // Animar constelaciones - movimiento continuo cruzando la pantalla
-        this.constellations.forEach((constellation) => {
-            const ud = constellation.userData;
+        // Animate flowing particles
+        if (this.flowingParticles) {
+            this.flowingParticles.material.uniforms.time.value = this.time;
 
-            // Mover la constelación
-            constellation.position.x += ud.velocity.x;
-            constellation.position.y += ud.velocity.y;
+            const positions = this.flowingParticles.geometry.attributes.position.array;
+            for (let i = 0; i < positions.length / 3; i++) {
+                // Apply velocities
+                positions[i * 3] += this.particleVelocities[i * 3];
+                positions[i * 3 + 1] += this.particleVelocities[i * 3 + 1];
+                positions[i * 3 + 2] += this.particleVelocities[i * 3 + 2];
 
-            // Wrap around con límites amplios
-            const limitX = 70;
-            const limitY = 45;
-
-            if (constellation.position.x > limitX) constellation.position.x = -limitX;
-            if (constellation.position.x < -limitX) constellation.position.x = limitX;
-            if (constellation.position.y > limitY) constellation.position.y = -limitY;
-            if (constellation.position.y < -limitY) constellation.position.y = limitY;
-
-            // Rotación muy suave
-            constellation.rotation.z += ud.rotationSpeed;
-
-            // Animar cada elemento de la constelación
-            constellation.children.forEach((child) => {
-                if (child.type === 'Mesh' && child.userData.twinkleSpeed) {
-                    // Twinkle de estrellas
-                    const twinkle = Math.sin(time * child.userData.twinkleSpeed + ud.pulsePhase) * 0.25 + 0.75;
-                    child.material.opacity = child.userData.originalIntensity * twinkle;
-                } else if (child.type === 'Line' && child.userData.baseOpacity) {
-                    // Pulso suave de las líneas
-                    const linePulse = Math.sin(time * 0.8 + ud.pulsePhase) * 0.03 + 1;
-                    child.material.opacity = child.userData.baseOpacity * linePulse;
+                // Wrap around
+                if (positions[i * 3 + 1] > 50) {
+                    positions[i * 3 + 1] = -50;
+                    positions[i * 3] = (Math.random() - 0.5) * 120;
                 }
-            });
+                if (positions[i * 3] > 70) positions[i * 3] = -70;
+                if (positions[i * 3] < -70) positions[i * 3] = 70;
+            }
+            this.flowingParticles.geometry.attributes.position.needsUpdate = true;
+        }
+
+        // Animate aurora waves
+        this.auroraWaves.forEach((wave) => {
+            wave.material.uniforms.time.value = this.time;
         });
 
-        // Animar sistema de estrellas - solo efecto twinkle
-        if (this.starSystem) {
-            this.starSystem.material.uniforms.time.value = time;
-        }
+        // Animate floating orbs
+        this.floatingOrbs.forEach((orb) => {
+            const ud = orb.userData;
+            orb.position.y = ud.originalPos.y +
+                Math.sin(this.time * ud.floatSpeed + ud.floatPhase) * ud.floatAmplitude;
+            orb.position.x = ud.originalPos.x +
+                Math.cos(this.time * ud.floatSpeed * 0.7 + ud.floatPhase) * ud.floatAmplitude * 0.5;
+            orb.material.uniforms.time.value = this.time;
+        });
 
-        // Animar efecto del título
-        if (this.titleParticles) {
-            this.titleParticles.material.uniforms.time.value = time;
-        }
-        if (this.titleGlow) {
-            this.titleGlow.material.uniforms.time.value = time;
+        // Animate nebula clouds
+        if (this.nebulaClouds) {
+            this.nebulaClouds.material.uniforms.time.value = this.time;
+            this.nebulaClouds.rotation.y += 0.0002;
         }
 
         this.renderer.render(this.scene, this.camera);
@@ -625,49 +605,55 @@ export class HeroThreeEngine {
 
     updateTheme(theme) {
         this.currentTheme = theme;
-        
-        if (this.particleSystem && this.particleSystem.material.uniforms) {
-            this.particleSystem.material.uniforms.theme.value = theme === 'dark' ? 1.0 : 0.0;
-        }
-        
-        // Actualizar colores de las constelaciones
-        this.constellations.forEach(constellation => {
-            constellation.children.forEach(child => {
-                if (child.type === 'Line') { // Es una conexión
-                    child.material.color.setHex(theme === 'dark' ? 0x4FC3F7 : 0x64B5F6);
-                }
-            });
-        });
-    }
-
-    setPerformanceMode(highPerformance = true) {
-        if (!this.renderer) return;
-        
-        if (highPerformance) {
-            this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        } else {
-            this.renderer.setPixelRatio(1);
-        }
+        // Theme-based adjustments could be added here
     }
 
     dispose() {
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
         }
-        
+
+        // Dispose geometries and materials
+        if (this.flowingParticles) {
+            this.flowingParticles.geometry.dispose();
+            this.flowingParticles.material.dispose();
+        }
+
+        if (this.ambientStars) {
+            this.ambientStars.geometry.dispose();
+            this.ambientStars.material.dispose();
+        }
+
+        if (this.nebulaClouds) {
+            this.nebulaClouds.geometry.dispose();
+            this.nebulaClouds.material.dispose();
+        }
+
+        this.auroraWaves.forEach(wave => {
+            wave.geometry.dispose();
+            wave.material.dispose();
+        });
+
+        this.floatingOrbs.forEach(orb => {
+            orb.geometry.dispose();
+            orb.material.dispose();
+        });
+
         if (this.renderer) {
             this.renderer.dispose();
             if (this.renderer.domElement && this.renderer.domElement.parentNode) {
                 this.renderer.domElement.parentNode.removeChild(this.renderer.domElement);
             }
         }
-        
+
         this.scene = null;
         this.camera = null;
         this.renderer = null;
-        this.particles = [];
-        this.constellations = [];
-        this.stars = [];
+        this.flowingParticles = null;
+        this.auroraWaves = [];
+        this.floatingOrbs = [];
+        this.nebulaClouds = null;
+        this.ambientStars = null;
         this.isInitialized = false;
     }
 }

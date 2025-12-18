@@ -1,8 +1,4 @@
 import { HeroThreeEngine } from '../engines/hero-three-engine.js';
-import { TextEffectsEngine } from './text-effects-engine.js';
-import { ButtonParticlesEngine } from '../engines/button-particles-engine.js';
-import { BadgeParticlesEngine } from '../engines/badge-particles-engine.js';
-import { TechBadgesParticlesEngine } from '../engines/tech-badges-particles-engine.js';
 
 /**
  * Hero Animations Manager
@@ -21,9 +17,6 @@ export class HeroAnimations {
         this.observer = null;
         this.heroThreeEngine = null;
         this.textEffectsEngine = null;
-        this.buttonParticlesEngine = null;
-        this.badgeParticlesEngine = null;
-        this.techBadgesParticlesEngine = null;
         this.init();
     }
 
@@ -146,22 +139,7 @@ export class HeroAnimations {
             this.initTextEffects();
         }
 
-        // Inicializar Button Particles Engine si no está inicializado
-        if (!this.buttonParticlesEngine) {
-            this.initButtonParticles();
-        }
-
-        // Inicializar Badge Particles Engine si no está inicializado
-        if (!this.badgeParticlesEngine) {
-            this.initBadgeParticles();
-        }
-
-        // Inicializar Tech Badges Particles Engine si no está inicializado
-        if (!this.techBadgesParticlesEngine) {
-            this.initTechBadgesParticles();
-        }
-
-        // Iniciar animaciones de Three.js si están disponibles
+        // Iniciar animaciones de Three.js (HeroThreeEngine maneja todas las partículas)
         this.initThreeJSAnimations();
     }
 
@@ -315,36 +293,9 @@ export class HeroAnimations {
     }
 
     initTextEffects() {
-        this.textEffectsEngine = new TextEffectsEngine();
-        this.textEffectsEngine.init();
-    
-    }
-
-    initButtonParticles() {
-        this.buttonParticlesEngine = new ButtonParticlesEngine();
-        this.buttonParticlesEngine.init();
-       
-    }
-
-    initBadgeParticles() {
-        try {
-            const badge = this.hero.querySelector('.hero-badge');
-            if (badge) {
-                this.badgeParticlesEngine = new BadgeParticlesEngine(badge);
-                
-            }
-        } catch (error) {
-            console.warn('❌ Error inicializando Badge Particles Engine:', error);
-        }
-    }
-
-    initTechBadgesParticles() {
-        try {
-            this.techBadgesParticlesEngine = new TechBadgesParticlesEngine();
-    
-        } catch (error) {
-            console.warn('❌ Error inicializando Tech Badges Particles Engine:', error);
-        }
+        // Desactivado - el TextEffectsEngine crea rectángulos con gradientes visibles
+        // El sistema neural de Three.js es suficiente para los efectos visuales
+        return;
     }
 
     setupThemeIntegration() {
@@ -450,25 +401,7 @@ export class HeroAnimations {
             this.textEffectsEngine.dispose();
             this.textEffectsEngine = null;
         }
-        
-        // Limpiar motor de partículas de botones
-        if (this.buttonParticlesEngine) {
-            this.buttonParticlesEngine.dispose();
-            this.buttonParticlesEngine = null;
-        }
 
-        // Limpiar motor de partículas del badge
-        if (this.badgeParticlesEngine) {
-            this.badgeParticlesEngine.dispose();
-            this.badgeParticlesEngine = null;
-        }
-
-        // Limpiar motor de partículas de tech-badges
-        if (this.techBadgesParticlesEngine) {
-            this.techBadgesParticlesEngine.dispose();
-            this.techBadgesParticlesEngine = null;
-        }
-        
         // Remover event listeners
         if (this.scrollIndicator) {
             this.scrollIndicator.removeEventListener('click', this.scrollToNextSection);

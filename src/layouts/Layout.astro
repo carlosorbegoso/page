@@ -1,0 +1,292 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Carlos Orbegoso - Backend Developer & Java Specialist",
+  description = "Backend Developer especializado en Java, Spring Boot y Quarkus. Experiencia en microservicios y arquitecturas cloud."
+} = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#64B5F6">
+    <title>{title}</title>
+    <meta name="description" content={description}>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Contenedor para efectos visuales Three.js -->
+    <div id="visual-effects-container" class="visual-effects-container"></div>
+
+    <!-- Main Content -->
+    <slot />
+
+    <!-- Scripts de inicialización -->
+    <script>
+        import '../styles/main.css';
+        import { CONFIG } from '../scripts/config/config.js';
+        import { log } from '../scripts/utils/logger.js';
+        import { DOM, Events, Performance } from '../scripts/utils/helpers.js';
+        import { VisualEffectsEngine } from '../scripts/engines/visual-effects-engine.js';
+        import { NeuralSystemEngine } from '../scripts/engines/neural-system/NeuralSystemEngine.js';
+        import { HeroThreeEngine } from '../scripts/engines/hero-three-engine.js';
+        import { DeviceDetector } from '../scripts/utils/device-detector.js';
+        import { MobileMenuManager } from '../scripts/utils/mobile-menu.js';
+        import { HeroAnimations } from '../scripts/utils/hero-animations.js';
+        import { AboutAnimations } from '../scripts/utils/about-animations.js';
+
+        class Portfolio {
+            constructor() {
+                this.isInitialized = false;
+                this.modules = new Map();
+                this.visualEngine = null;
+                this.brainEngine = null;
+                this.heroEngine = null;
+                this.deviceDetector = null;
+                this.mobileMenuManager = null;
+                this.heroAnimations = null;
+                this.aboutAnimations = null;
+            }
+
+            async init() {
+                try {
+                    await this.initializeBasicModules();
+                    this.setupBasicFeatures();
+                    await this.initializeAdvancedModules();
+                    this.setupGlobalEvents();
+                    this.isInitialized = true;
+                    log.info('Portfolio inicializado');
+                } catch (error) {
+                    console.error('Error inicializando portfolio:', error);
+                }
+            }
+
+            async initializeBasicModules() {
+                this.deviceDetector = new DeviceDetector();
+                this.mobileMenuManager = new MobileMenuManager();
+                this.heroAnimations = new HeroAnimations();
+                this.aboutAnimations = new AboutAnimations();
+            }
+
+            async initializeAdvancedModules() {
+                try {
+                    this.visualEngine = new VisualEffectsEngine();
+                    const currentTheme = localStorage.getItem('theme') || CONFIG.THEMES.DEFAULT;
+                    this.visualEngine.updateTheme(currentTheme);
+                    this.initializeSectionEffects();
+                } catch (error) {
+                    log.error('Error inicializando motor visual:', error);
+                }
+
+                try {
+                    this.heroEngine = new HeroThreeEngine();
+                    await this.heroEngine.init('hero-particles');
+                } catch (error) {
+                    log.error('Error inicializando Hero Three.js Engine:', error);
+                }
+
+                // Inicializar cerebro anatómico épico como fondo
+                try {
+                    console.log('Creando NeuralSystemEngine (Cerebro Anatómico Épico)...');
+                    this.brainEngine = new NeuralSystemEngine('visual-effects-container');
+                } catch (error) {
+                    console.error('Error creando cerebro épico:', error);
+                }
+            }
+
+            initializeSectionEffects() {
+                if (!this.visualEngine) return;
+
+                const sections = [
+                    { name: 'Hero', containerId: 'hero-effects' },
+                    { name: 'About', containerId: 'about-effects' },
+                    { name: 'Experience', containerId: 'experience-effects' },
+                    { name: 'Skills', containerId: 'skills-effects' },
+                    { name: 'Projects', containerId: 'projects-effects' },
+                    { name: 'Contact', containerId: 'contact-effects' }
+                ];
+
+                sections.forEach(section => {
+                    const sectionElement = document.getElementById(section.name.toLowerCase());
+                    if (sectionElement) {
+                        this.visualEngine.initSectionEffects(section.name, section.containerId);
+                    }
+                });
+
+                this.setupSectionEffectsObserver();
+            }
+
+            setupSectionEffectsObserver() {
+                const sections = ['hero', 'about', 'experience', 'skills', 'projects', 'contact'];
+
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('section-effects-active');
+                        }
+                    });
+                }, { threshold: 0.1, rootMargin: '0px 0px -100px 0px' });
+
+                sections.forEach(sectionId => {
+                    const section = document.getElementById(sectionId);
+                    if (section) observer.observe(section);
+                });
+            }
+
+            setupBasicFeatures() {
+                this.setupThemeToggle();
+                this.setupMobileMenu();
+                this.setupSmoothScrolling();
+                this.setupLanguageToggle();
+                this.setupMobileOptimizations();
+                this.setupTouchInteractions();
+            }
+
+            setupThemeToggle() {
+                const themeToggle = DOM.select('#theme-toggle');
+                if (!themeToggle) return;
+
+                const currentTheme = localStorage.getItem('theme') || CONFIG.THEMES.DEFAULT;
+                document.documentElement.setAttribute('data-theme', currentTheme);
+                this.updateThemeIcon(currentTheme);
+
+                Events.on(themeToggle, 'click', () => {
+                    const newTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+                    document.documentElement.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    this.updateThemeIcon(newTheme);
+
+                    if (this.visualEngine) this.visualEngine.updateTheme(newTheme);
+                    if (this.heroEngine) this.heroEngine.updateTheme(newTheme);
+
+                    Events.trigger(window, 'themeChanged', { theme: newTheme });
+                });
+            }
+
+            updateThemeIcon(theme) {
+                const themeIcon = DOM.select('#theme-toggle i');
+                if (themeIcon) {
+                    themeIcon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+                }
+            }
+
+            setupMobileMenu() {
+                const menuToggle = DOM.select('#menu-toggle');
+                const navLinks = DOM.select('.nav-links');
+                if (!menuToggle || !navLinks) return;
+
+                Events.on(menuToggle, 'click', () => {
+                    DOM.toggleClass(navLinks, 'active');
+                    DOM.toggleClass(menuToggle, 'active');
+                    document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+                });
+
+                DOM.selectAll('.nav-link').forEach(link => {
+                    Events.on(link, 'click', () => {
+                        DOM.removeClasses(navLinks, 'active');
+                        DOM.removeClasses(menuToggle, 'active');
+                        document.body.style.overflow = '';
+                    });
+                });
+
+                Events.on(document, 'click', (e) => {
+                    if (!menuToggle.contains(e.target) && !navLinks.contains(e.target)) {
+                        DOM.removeClasses(navLinks, 'active');
+                        DOM.removeClasses(menuToggle, 'active');
+                        document.body.style.overflow = '';
+                    }
+                });
+            }
+
+            setupSmoothScrolling() {
+                DOM.selectAll('a[href^="#"]').forEach(anchor => {
+                    Events.on(anchor, 'click', (e) => {
+                        e.preventDefault();
+                        const target = DOM.select(anchor.getAttribute('href'));
+                        if (target) {
+                            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    });
+                });
+            }
+
+            setupLanguageToggle() {
+                const languageToggle = DOM.select('#language-toggle');
+                if (!languageToggle) return;
+
+                const currentLanguage = localStorage.getItem('language') || CONFIG.LANGUAGES.DEFAULT;
+                document.documentElement.setAttribute('data-language', currentLanguage);
+
+                Events.on(languageToggle, 'click', () => {
+                    const newLanguage = localStorage.getItem('language') === 'en' ? 'es' : 'en';
+                    localStorage.setItem('language', newLanguage);
+                    document.documentElement.setAttribute('data-language', newLanguage);
+                    Events.trigger(window, 'languageChanged', { language: newLanguage });
+                });
+            }
+
+            setupMobileOptimizations() {
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                if (isMobile) DOM.addClasses(document.body, 'mobile-device');
+
+                const isTablet = window.innerWidth <= CONFIG.BREAKPOINTS.TABLET && window.innerWidth > CONFIG.BREAKPOINTS.MOBILE;
+                if (isTablet) DOM.addClasses(document.body, 'tablet-device');
+            }
+
+            setupTouchInteractions() {
+                const interactiveElements = DOM.selectAll('.btn, .tech-badge, .nav-link, .card');
+                interactiveElements.forEach(element => {
+                    Events.on(element, 'touchstart', () => { element.style.transform = 'scale(0.95)'; });
+                    Events.on(element, 'touchend', () => { element.style.transform = ''; });
+                    Events.on(element, 'touchcancel', () => { element.style.transform = ''; });
+                });
+            }
+
+            setupGlobalEvents() {
+                Events.on(document, 'visibilitychange', () => {
+                    // Pausar/reanudar animaciones según visibilidad
+                });
+
+                Events.on(window, 'resize', Performance.throttle(() => {
+                    // Manejar resize
+                }, 100));
+
+                Events.on(document, 'keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        const navLinks = DOM.select('.nav-links');
+                        const menuToggle = DOM.select('#menu-toggle');
+                        if (navLinks?.classList.contains('active')) {
+                            DOM.removeClasses(navLinks, 'active');
+                            DOM.removeClasses(menuToggle, 'active');
+                        }
+                    }
+                    if (e.key === 't' && e.ctrlKey) {
+                        e.preventDefault();
+                        DOM.select('#theme-toggle')?.click();
+                    }
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const portfolio = new Portfolio();
+            await portfolio.init();
+            window.portfolio = portfolio;
+        });
+    </script>
+</body>
+</html>

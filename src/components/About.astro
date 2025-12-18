@@ -1,0 +1,211 @@
+---
+// About section - Información personal con cerebro 3D interactivo
+---
+
+<section id="about" class="about section section-bg">
+    <div class="container">
+        <!-- Header -->
+        <div class="section-header">
+            <div class="section-badge animate-fade-in-up">
+                <i class="fas fa-user" aria-hidden="true"></i>
+                <span>About Me</span>
+            </div>
+            <h2 class="section-title fade-in animate-fade-in-up">About Me</h2>
+            <p class="section-subtitle fade-in animate-fade-in-up">Discover my story and passion for development</p>
+        </div>
+
+        <!-- Layout: Info centrada, el cerebro es global y atraviesa toda la página -->
+        <div class="about-content">
+                <!-- Foto -->
+                <div class="profile-photo animate-fade-in-up">
+                    <img src="/images/profile.jpeg" alt="Carlos Orbegoso" class="avatar-img">
+                    <div class="avatar-glow-ring"></div>
+                </div>
+
+                <!-- Resumen -->
+                <div class="about-summary animate-fade-in-up">
+                    <h3 class="summary-title">Backend Developer & Java Specialist</h3>
+                    <p class="summary-text">Backend developer with over <strong>5 years of experience</strong> in enterprise applications. Specialized in <strong>Java</strong>, <strong>Spring Boot</strong> and <strong>Quarkus</strong>.</p>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-row animate-fade-in-up">
+                    <div class="stat-item">
+                        <span class="stat-number">5+</span>
+                        <span class="stat-label">Years</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">50+</span>
+                        <span class="stat-label">Projects</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">100%</span>
+                        <span class="stat-label">Commitment</span>
+                    </div>
+                </div>
+
+            <!-- Tech Stack -->
+            <div class="tech-stack animate-fade-in-up">
+                <span class="tech-tag">Java</span>
+                <span class="tech-tag">Spring Boot</span>
+                <span class="tech-tag">Quarkus</span>
+                <span class="tech-tag">Angular</span>
+                <span class="tech-tag">Docker</span>
+                <span class="tech-tag">Kubernetes</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* Layout centrado - el cerebro es global */
+    .about-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    /* Foto de perfil */
+    .profile-photo {
+        display: flex;
+        justify-content: center;
+        position: relative;
+    }
+
+    .avatar-img {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 4px solid var(--primary-color);
+        box-shadow: 0 0 40px rgba(0, 255, 255, 0.4);
+        position: relative;
+        z-index: 2;
+    }
+
+    .avatar-glow-ring {
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        border: 2px solid var(--primary-color);
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.5;
+        animation: pulse-ring 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-ring {
+        0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+        50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+    }
+
+    /* Resumen */
+    .about-summary {
+        text-align: center;
+    }
+
+    .summary-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+    }
+
+    .summary-text {
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    .summary-text strong {
+        color: var(--primary-color);
+    }
+
+    /* Stats row */
+    .stats-row {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 1rem;
+        background: rgba(0, 255, 255, 0.05);
+        border-radius: 12px;
+        border: 1px solid rgba(0, 255, 255, 0.1);
+        min-width: 80px;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        line-height: 1;
+        text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* Tech stack */
+    .tech-stack {
+        display: flex;
+        justify-content: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .tech-tag {
+        padding: 0.5rem 1rem;
+        background: rgba(0, 255, 255, 0.1);
+        border: 1px solid rgba(0, 255, 255, 0.3);
+        border-radius: 20px;
+        font-size: 0.875rem;
+        color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .tech-tag:hover {
+        background: rgba(0, 255, 255, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+        .avatar-img {
+            width: 120px;
+            height: 120px;
+        }
+
+        .avatar-glow-ring {
+            width: 150px;
+            height: 150px;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+        }
+
+        .stats-row {
+            gap: 1rem;
+        }
+
+        .stat-item {
+            min-width: 70px;
+            padding: 0.75rem;
+        }
+    }
+</style>

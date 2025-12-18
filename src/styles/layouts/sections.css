@@ -18,10 +18,7 @@
 }
 
 .section-bg {
-    background: linear-gradient(135deg, 
-        var(--bg-color) 0%, 
-        rgba(100, 181, 246, 0.02) 50%, 
-        var(--bg-color) 100%);
+    background: transparent !important;
 }
 
 .section-title {
@@ -76,6 +73,61 @@
 
 .contact {
     padding: var(--section-padding);
+}
+
+/* ===== LAYOUT ALTERNADO CON CEREBRO ===== */
+
+/* Cuando el cerebro está a la izquierda, contenido a la derecha */
+.brain-left .container,
+.brain-left .section-content {
+    margin-left: auto;
+    margin-right: 5%;
+    max-width: 50%;
+    text-align: left;
+}
+
+/* Cuando el cerebro está a la derecha, contenido a la izquierda */
+.brain-right .container,
+.brain-right .section-content {
+    margin-right: auto;
+    margin-left: 5%;
+    max-width: 50%;
+    text-align: left;
+}
+
+/* Transición suave al cambiar de lado */
+.section .container,
+.section .section-content {
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hero especial - contenido centrado inicialmente */
+.hero.brain-left .hero-content {
+    margin-left: auto;
+    margin-right: 10%;
+    text-align: right;
+}
+
+.hero.brain-right .hero-content {
+    margin-right: auto;
+    margin-left: 10%;
+    text-align: left;
+}
+
+/* Ajustes para títulos en layout alternado */
+.brain-left .section-title,
+.brain-right .section-title {
+    text-align: inherit;
+}
+
+.brain-left .section-title::after,
+.brain-right .section-title::after {
+    left: 0;
+    transform: none;
+}
+
+.brain-right .section-title::after {
+    left: 0;
 }
 
 /* ===== RESPONSIVE ===== */

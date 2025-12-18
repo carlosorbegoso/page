@@ -1,9 +1,15 @@
 /* ===== ARCHIVO PRINCIPAL DEL PORTFOLIO - REORGANIZADO Y LIMPIO ===== */
 
+// Importar estilos CSS para que Vite los procese
+import '../styles/main.css';
+
 import { CONFIG, FEATURES, DEBUG } from './config/config.js';
 import { log, initLogger } from './utils/logger.js';
 import { DOM, Events, Performance } from './utils/helpers.js';
-import VisualEffectsEngine from './engines/visual-effects-engine.js';
+import { VisualEffectsEngine } from './engines/visual-effects-engine.js';
+import { BrainThreeEngine } from './engines/brain-three-engine.js';
+import { HeroThreeEngine } from './engines/hero-three-engine.js';
+// import { AboutThreeEngine } from './engines/about-three-engine.js'; // Deshabilitado para evitar conflictos WebGL
 import { componentLoader } from './utils/component-loader.js';
 import { getOrderedComponents, getConditionalComponents, getLoadingConfig } from './config/components.js';
 import { DeviceDetector } from './utils/device-detector.js';
@@ -18,6 +24,9 @@ class Portfolio {
         this.modules = new Map();
         this.eventListeners = new Map();
         this.visualEngine = null;
+        this.brainEngine = null;
+        this.heroEngine = null;
+        this.aboutEngine = null;
         this.deviceDetector = null;
         this.mobileMenuManager = null;
         this.heroAnimations = null;
@@ -108,16 +117,42 @@ class Portfolio {
         try {
             this.visualEngine = new VisualEffectsEngine();
             log.info('✅ Motor de efectos visuales inicializado');
-            
+
             // Establecer tema inicial
             const currentTheme = localStorage.getItem('theme') || CONFIG.THEMES.DEFAULT;
             this.visualEngine.updateTheme(currentTheme);
-            
+
             // Inicializar efectos para todas las secciones
             this.initializeSectionEffects();
-            
+
         } catch (error) {
             log.error('❌ Error inicializando motor visual:', error);
+        }
+
+        // Inicializar Hero Three.js Engine
+        try {
+            this.heroEngine = new HeroThreeEngine();
+            await this.heroEngine.init('hero-particles');
+            log.info('🌟 Hero Three.js Engine inicializado');
+        } catch (error) {
+            log.error('❌ Error inicializando Hero Three.js Engine:', error);
+        }
+
+        // AboutThreeEngine deshabilitado temporalmente para evitar conflictos de contexto WebGL
+        // El cerebro 3D (BrainThreeEngine) proporciona los efectos visuales principales para About
+        // try {
+        //     this.aboutEngine = new AboutThreeEngine();
+        //     log.info('✨ About Three.js Engine inicializado');
+        // } catch (error) {
+        //     log.error('❌ Error inicializando About Three.js Engine:', error);
+        // }
+
+        // Inicializar cerebro 3D en la sección About
+        try {
+            this.brainEngine = new BrainThreeEngine('brain-container');
+            log.info('🧠 Cerebro 3D inicializado en sección About');
+        } catch (error) {
+            log.error('❌ Error inicializando cerebro 3D:', error);
         }
         
         // Simular carga de otros módulos avanzados
@@ -379,12 +414,27 @@ class Portfolio {
             
             // Actualizar icono
             this.updateThemeIcon(newTheme);
-            
+
             // Actualizar motor visual
             if (this.visualEngine) {
                 this.visualEngine.updateTheme(newTheme);
             }
-            
+
+            // Actualizar Hero Three.js Engine
+            if (this.heroEngine) {
+                this.heroEngine.updateTheme(newTheme);
+            }
+
+            // Actualizar About Three.js Engine
+            if (this.aboutEngine && this.aboutEngine.updateTheme) {
+                this.aboutEngine.updateTheme();
+            }
+
+            // Actualizar Brain Engine
+            if (this.brainEngine && this.brainEngine.updateTheme) {
+                this.brainEngine.updateTheme();
+            }
+
             // Disparar evento para el motor visual
             Events.trigger(window, 'themeChanged', { theme: newTheme });
             

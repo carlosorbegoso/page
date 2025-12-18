@@ -905,11 +905,13 @@ class VisualEffectsEngine {
 
     animate() {
         this.animationId = requestAnimationFrame(this.animate.bind(this));
-        
-        if (this.constellationSystem) {
-            this.constellationSystem.update();
+
+        const time = Date.now() * 0.001;
+
+        if (this.constellationSystem && typeof this.constellationSystem.animate === 'function') {
+            this.constellationSystem.animate(time);
         }
-        
+
         if (this.renderer && this.scene && this.camera) {
             this.renderer.render(this.scene, this.camera);
         }

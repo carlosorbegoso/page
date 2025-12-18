@@ -5,15 +5,14 @@
   "main": "src/scripts/main.js",
   "type": "module",
   "scripts": {
-    "dev": "bun run vite",
-    "start": "bun run vite",
-    "build": "bun run vite build",
-    "preview": "bun run vite preview",
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
-    "format": "prettier --write src/**/*.{js,css,html}",
-    "clean": "rm -rf dist",
-    "serve": "bun run vite"
+    "format": "prettier --write src/**/*.{js,css,html,astro}",
+    "clean": "rm -rf dist"
   },
   "keywords": [
     "portfolio",
@@ -28,11 +27,18 @@
   "author": "Carlos Orbegoso",
   "license": "MIT",
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@tailwindcss/vite": "^4.1.18",
+    "autoprefixer": "^10.4.23",
     "eslint": "^8.55.0",
+    "postcss": "^8.5.6",
     "prettier": "^3.1.0",
+    "tailwindcss": "^4.1.18",
     "vite": "^7.1.3"
   },
   "dependencies": {
+    "@astrojs/tailwind": "^6.0.2",
+    "astro": "^5.16.6",
     "three": "^0.158.0"
   },
   "engines": {

@@ -1,0 +1,42 @@
+---
+// Footer component
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <p class="footer-text">
+                &copy; {currentYear} Carlos Orbegoso. All rights reserved.
+            </p>
+            <p class="footer-subtext">
+                Backend Developer & Java Specialist
+            </p>
+        </div>
+    </div>
+</footer>
+
+<style>
+    .footer {
+        position: relative;
+        padding: 2rem 0;
+        background: transparent;
+        border-top: 1px solid rgba(100, 181, 246, 0.08);
+    }
+
+    .footer-content {
+        text-align: center;
+    }
+
+    .footer-text {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .footer-subtext {
+        color: var(--primary-color);
+        font-size: 0.75rem;
+        opacity: 0.8;
+    }
+</style>

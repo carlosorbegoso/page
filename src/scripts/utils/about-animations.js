@@ -1,15 +1,15 @@
 /**
  * About Animations - Sistema de animaciones para la sección About
+ * Nota: AboutThreeEngine deshabilitado para evitar conflictos de contexto WebGL
+ * El cerebro 3D (BrainThreeEngine) proporciona los efectos visuales principales
  */
-import { AboutThreeEngine } from '../engines/about-three-engine.js';
 
 class AboutAnimations {
     constructor() {
         this.aboutSection = null;
-        this.aboutThreeEngine = null;
         this.observer = null;
         this.isInitialized = false;
-        
+
         this.init();
     }
     
@@ -52,9 +52,6 @@ class AboutAnimations {
   
         this.isInitialized = true;
         
-        // Inicializar Three.js Engine
-        this.initThreeJSAnimations();
-        
         // Activar animaciones CSS
         this.activateCSSAnimations();
         
@@ -63,31 +60,7 @@ class AboutAnimations {
     }
     
     onAboutHidden(target) {
-       
-        
-        // Limpiar Three.js Engine
-        if (this.aboutThreeEngine) {
-            this.aboutThreeEngine.dispose();
-            this.aboutThreeEngine = null;
-        }
-        
         this.isInitialized = false;
-    }
-    
-    initThreeJSAnimations() {
-        try {
-            // Verificar que el módulo AboutThreeEngine esté disponible
-            if (typeof AboutThreeEngine === 'undefined') {
-                console.warn('⚠️ AboutThreeEngine no está disponible, usando animaciones CSS alternativas');
-                return;
-            }
-            
-            this.aboutThreeEngine = new AboutThreeEngine();
-            
-        } catch (error) {
-            console.error('❌ Error inicializando About Three.js Engine:', error);
-            
-        }
     }
     
     activateCSSAnimations() {
@@ -614,14 +587,6 @@ class AboutAnimations {
                 break;
         }
         
-        // Activar partículas de hover si Three.js está disponible
-        if (this.aboutThreeEngine && typeof this.aboutThreeEngine.activateHoverEffect === 'function') {
-            try {
-                this.aboutThreeEngine.activateHoverEffect(element, type);
-            } catch (error) {
-                console.warn('⚠️ Error activando hover effect en Three.js:', error);
-            }
-        }
     }
     
     deactivateHoverEffect(element, type) {
@@ -629,27 +594,13 @@ class AboutAnimations {
         element.style.transform = 'translateY(0) scale(1)';
         element.style.boxShadow = 'none';
         
-        // Desactivar partículas de hover si Three.js está disponible
-        if (this.aboutThreeEngine && typeof this.aboutThreeEngine.deactivateHoverEffect === 'function') {
-            try {
-                this.aboutThreeEngine.deactivateHoverEffect(element, type);
-            } catch (error) {
-                console.warn('⚠️ Error desactivando hover effect en Three.js:', error);
-            }
-        }
     }
-    
+
     destroy() {
         // Limpiar recursos
         if (this.observer) {
             this.observer.disconnect();
         }
-        
-        if (this.aboutThreeEngine) {
-            this.aboutThreeEngine.dispose();
-        }
-        
-
     }
 }
 

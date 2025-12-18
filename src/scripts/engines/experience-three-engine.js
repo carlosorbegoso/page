@@ -282,10 +282,10 @@ export class ExperienceThreeEngine {
     }
 }
 
-// Auto-initialize
-document.addEventListener('DOMContentLoaded', () => {
-    const container = document.getElementById('experience-three-container');
-    if (container) {
-        new ExperienceThreeEngine('experience-three-container');
-    }
-});
+// Auto-initialize - DISABLED: floating squares effect looked out of place
+// document.addEventListener('DOMContentLoaded', () => {
+//     const container = document.getElementById('experience-three-container');
+//     if (container) {
+//         new ExperienceThreeEngine('experience-three-container');
+//     }
+// });

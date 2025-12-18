@@ -1,12 +1,10 @@
 ---
-// Header component - Navegación principal futurista espacial/aurora
-// Efectos Three.js con aurora boreal y partículas estelares
+// Header component - Desktop top header + Mobile bottom navigation
+// Modern tab bar navigation for mobile
 ---
 
-<header class="header header-cosmic" data-header>
-    <!-- Three.js Aurora Container -->
-    <div id="header-aurora-container" class="header-aurora-container"></div>
-
+<!-- DESKTOP HEADER (hidden on mobile) -->
+<header class="header header-cosmic header-desktop" data-header>
     <!-- Brand Logo with Constellation Effect -->
     <div class="nav-brand cosmic-brand">
         <div class="brand-icon constellation-icon">
@@ -41,7 +39,7 @@
         <span class="brand-text">CO</span>
     </div>
 
-    <!-- Navigation with Cosmic Effects -->
+    <!-- Desktop Navigation -->
     <nav class="nav-links cosmic-nav" data-nav-links>
         <a href="#hero" class="nav-link cosmic-link" data-nav-link>
             <span class="link-glow"></span>
@@ -65,16 +63,14 @@
         </a>
     </nav>
 
-    <!-- Controls with Orbital Effect -->
+    <!-- Desktop Controls -->
     <div class="nav-controls cosmic-controls">
-        <!-- Weather-aware theme toggle -->
         <button class="theme-toggle cosmic-btn weather-btn" id="theme-toggle" aria-label="Change theme" data-theme-toggle>
             <span class="btn-orbit"></span>
             <i class="fas fa-sun theme-icon" id="weather-icon"></i>
             <span class="weather-temp" id="header-temp"></span>
         </button>
 
-        <!-- Local time display -->
         <div class="time-display cosmic-btn" id="time-display" aria-label="Local time">
             <i class="fas fa-clock time-icon"></i>
             <span class="time-text" id="header-time">--:--</span>
@@ -84,14 +80,111 @@
             <span class="btn-orbit"></span>
             <i class="fas fa-globe"></i>
         </button>
-
-        <button class="menu-toggle cosmic-menu-btn" id="menu-toggle" aria-label="Mobile menu" data-mobile-toggle>
-            <span class="hamburger-line"></span>
-            <span class="hamburger-line"></span>
-            <span class="hamburger-line"></span>
-        </button>
     </div>
 
-    <!-- Cosmic Progress Bar -->
+    <!-- Progress Bar -->
     <div class="header-progress cosmic-progress" data-header-progress></div>
 </header>
+
+<!-- MOBILE BOTTOM NAVIGATION (hidden on desktop) -->
+<nav class="mobile-bottom-nav" data-mobile-nav>
+    <div class="mobile-nav-glow"></div>
+
+    <a href="#hero" class="mobile-nav-item active" data-nav-section="hero">
+        <div class="nav-item-indicator"></div>
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+    </a>
+
+    <a href="#experience" class="mobile-nav-item" data-nav-section="experience">
+        <div class="nav-item-indicator"></div>
+        <i class="fas fa-briefcase"></i>
+        <span>Work</span>
+    </a>
+
+    <a href="#tech" class="mobile-nav-item" data-nav-section="tech">
+        <div class="nav-item-indicator"></div>
+        <i class="fas fa-code"></i>
+        <span>Tech</span>
+    </a>
+
+    <a href="#contact" class="mobile-nav-item" data-nav-section="contact">
+        <div class="nav-item-indicator"></div>
+        <i class="fas fa-envelope"></i>
+        <span>Contact</span>
+    </a>
+
+    <button class="mobile-nav-item mobile-theme-btn" id="mobile-theme-toggle" aria-label="Toggle theme">
+        <div class="nav-item-indicator"></div>
+        <i class="fas fa-moon"></i>
+        <span>Theme</span>
+    </button>
+</nav>
+
+<script>
+// Mobile bottom navigation active state management
+document.addEventListener('DOMContentLoaded', () => {
+    const mobileNav = document.querySelector('[data-mobile-nav]');
+    const mobileNavItems = document.querySelectorAll('.mobile-nav-item[data-nav-section]');
+    const mobileThemeBtn = document.getElementById('mobile-theme-toggle');
+    const desktopThemeBtn = document.getElementById('theme-toggle');
+
+    // Update active state based on scroll position
+    const sections = ['hero', 'experience', 'tech', 'contact'];
+
+    const updateActiveNav = () => {
+        let currentSection = 'hero';
+        const scrollY = window.scrollY + window.innerHeight / 3;
+
+        sections.forEach(sectionId => {
+            const section = document.getElementById(sectionId);
+            if (section && section.offsetTop <= scrollY) {
+                currentSection = sectionId;
+            }
+        });
+
+        mobileNavItems.forEach(item => {
+            const isActive = item.dataset.navSection === currentSection;
+            item.classList.toggle('active', isActive);
+        });
+    };
+
+    // Throttled scroll handler
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            requestAnimationFrame(() => {
+                updateActiveNav();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    });
+
+    // Sync mobile theme toggle with desktop
+    if (mobileThemeBtn && desktopThemeBtn) {
+        mobileThemeBtn.addEventListener('click', () => {
+            desktopThemeBtn.click();
+            // Update icon
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const icon = mobileThemeBtn.querySelector('i');
+            icon.className = currentTheme === 'light' ? 'fas fa-sun' : 'fas fa-moon';
+        });
+    }
+
+    // Smooth scroll for mobile nav
+    mobileNavItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = item.getAttribute('href')?.substring(1);
+            const target = document.getElementById(targetId);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+
+    // Initial state
+    updateActiveNav();
+});
+</script>

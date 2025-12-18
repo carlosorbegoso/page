@@ -500,132 +500,162 @@ body {
     box-shadow: 0 0 10px rgba(100, 181, 246, 0.5);
 }
 
-/* Header Cosmic Responsive */
+/* ===== MOBILE BOTTOM NAVIGATION ===== */
+.mobile-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: linear-gradient(180deg, rgba(10, 10, 25, 0.95) 0%, rgba(5, 5, 15, 0.98) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(0, 255, 255, 0.15);
+    z-index: 9999;
+    padding: 0 0.5rem;
+    padding-bottom: env(safe-area-inset-bottom);
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.3), 0 -2px 20px rgba(0, 255, 255, 0.1);
+}
+
+[data-theme="light"] .mobile-bottom-nav {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 255, 0.98) 100%);
+    border-top-color: rgba(100, 181, 246, 0.2);
+    box-shadow: 0 -4px 30px rgba(100, 181, 246, 0.1), 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.mobile-nav-glow {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 40px;
+    background: radial-gradient(ellipse, rgba(0, 255, 255, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+[data-theme="light"] .mobile-nav-glow {
+    background: radial-gradient(ellipse, rgba(100, 181, 246, 0.15) 0%, transparent 70%);
+}
+
+.mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    min-width: 60px;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.65rem;
+    font-weight: 500;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+}
+
+[data-theme="light"] .mobile-nav-item {
+    color: rgba(30, 41, 59, 0.5);
+}
+
+.mobile-nav-item i {
+    font-size: 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.mobile-nav-item span {
+    letter-spacing: 0.02em;
+}
+
+.nav-item-indicator {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 24px;
+    height: 3px;
+    background: linear-gradient(90deg, #00ffff, #a855f7);
+    border-radius: 0 0 4px 4px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 10px rgba(0, 255, 255, 0.5);
+}
+
+[data-theme="light"] .nav-item-indicator {
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    box-shadow: 0 2px 10px rgba(100, 181, 246, 0.5);
+}
+
+.mobile-nav-item.active {
+    color: #00ffff;
+}
+
+[data-theme="light"] .mobile-nav-item.active {
+    color: var(--primary-color);
+}
+
+.mobile-nav-item.active i {
+    transform: scale(1.15);
+    text-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+}
+
+[data-theme="light"] .mobile-nav-item.active i {
+    text-shadow: 0 0 15px rgba(100, 181, 246, 0.6);
+}
+
+.mobile-nav-item.active .nav-item-indicator {
+    transform: translateX(-50%) scaleX(1);
+}
+
+.mobile-nav-item:active {
+    transform: scale(0.92);
+}
+
+/* Mobile Theme Button specific */
+.mobile-theme-btn {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="light"] .mobile-theme-btn {
+    color: rgba(30, 41, 59, 0.5);
+}
+
+.mobile-theme-btn:active {
+    color: #a855f7;
+}
+
+/* Header Responsive - Hide desktop on mobile, show bottom nav */
 @media (max-width: 768px) {
-    .header.header-cosmic {
-        padding: 0.75rem 1rem;
-        min-height: 56px;
-        background: linear-gradient(180deg, rgba(10, 10, 25, 0.98) 0%, rgba(10, 10, 25, 0.95) 100%) !important;
-        backdrop-filter: blur(20px) !important;
-        border-bottom: 1px solid rgba(0, 255, 255, 0.1) !important;
-    }
-
-    [data-theme="light"] .header.header-cosmic {
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 248, 255, 0.95) 100%) !important;
-        border-bottom-color: rgba(100, 181, 246, 0.2) !important;
-    }
-
-    .header-aurora-container {
-        display: none;
-    }
-
-    .cosmic-brand .brand-text {
-        display: none;
-    }
-
-    .constellation-icon {
-        width: 36px;
-        height: 36px;
-    }
-
-    .cosmic-nav {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100vh;
-        height: 100dvh;
-        background: linear-gradient(180deg, rgba(10, 10, 25, 0.99) 0%, rgba(5, 5, 15, 0.99) 100%);
-        backdrop-filter: blur(30px);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: 1rem;
-        transform: translateX(-100%);
-        opacity: 0;
-        visibility: hidden;
-        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, visibility 0.3s ease;
-        z-index: 999;
-        padding: 2rem;
-    }
-
-    [data-theme="light"] .cosmic-nav {
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(240, 248, 255, 0.99) 100%);
-    }
-
-    .cosmic-nav.active {
-        transform: translateX(0);
-        opacity: 1;
-        visibility: visible;
-    }
-
-    .cosmic-link {
-        font-size: 1.2rem;
-        padding: 1rem 2rem;
-        width: 100%;
-        max-width: 280px;
-        text-align: center;
-        justify-content: center;
-        background: rgba(0, 255, 255, 0.05);
-        border: 1px solid rgba(0, 255, 255, 0.15);
-        border-radius: 12px;
-    }
-
-    [data-theme="light"] .cosmic-link {
-        background: rgba(100, 181, 246, 0.05);
-        border-color: rgba(100, 181, 246, 0.15);
-    }
-
-    .cosmic-link .nav-icon {
-        font-size: 1rem;
-        opacity: 0.8;
-    }
-
-    .cosmic-link:hover,
-    .cosmic-link:active {
-        background: rgba(0, 255, 255, 0.15);
-        border-color: rgba(0, 255, 255, 0.4);
-        transform: scale(1.02);
-    }
-
-    [data-theme="light"] .cosmic-link:hover,
-    [data-theme="light"] .cosmic-link:active {
-        background: rgba(100, 181, 246, 0.15);
-        border-color: rgba(100, 181, 246, 0.4);
-    }
-
-    .cosmic-menu-btn {
-        display: flex;
-        z-index: 10002;
-    }
-
-    .cosmic-controls {
-        border-left: none;
-        padding-left: 0;
-        margin-left: 0;
-        gap: 0.4rem;
-    }
-
-    .cosmic-btn {
-        width: 38px;
-        height: 38px;
-    }
-
-    /* Hide time and language on mobile for cleaner header */
-    .time-display,
-    .language-toggle {
+    /* Hide desktop header on mobile */
+    .header.header-desktop {
         display: none !important;
     }
 
-    /* Compact weather button on mobile */
-    .weather-btn {
-        width: 38px;
-        height: 38px;
+    /* Show mobile bottom navigation */
+    .mobile-bottom-nav {
+        display: flex;
     }
 
-    .weather-btn .weather-temp {
+    /* Add bottom padding to body for mobile nav */
+    body {
+        padding-bottom: calc(70px + env(safe-area-inset-bottom));
+    }
+}
+
+/* Desktop styles remain unchanged above 768px */
+@media (min-width: 769px) {
+    .mobile-bottom-nav {
         display: none !important;
+    }
+
+    .header.header-desktop {
+        display: flex;
     }
 }
 

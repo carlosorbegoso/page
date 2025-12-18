@@ -828,12 +828,12 @@
 
     /* ===== MOBILE OPTIMIZATIONS ===== */
 
-    /* Tablet */
+    /* Tablet - Mobile bottom nav now at bottom, no top header */
     @media (max-width: 768px) {
         .hero {
-            padding: 70px 1.25rem 1.5rem; /* Header height ~56px + gap */
+            padding: 1.5rem 1.25rem 5rem; /* Minimal top, extra bottom for nav */
             min-height: 100svh; /* Safe viewport height */
-            align-items: flex-start;
+            align-items: center; /* Center content vertically */
         }
 
         .hero-grid {
@@ -926,7 +926,7 @@
     /* Mobile */
     @media (max-width: 480px) {
         .hero {
-            padding: 65px 1rem 1rem; /* Minimal top padding */
+            padding: 1rem 1rem 5rem; /* Minimal top, bottom for nav */
         }
 
         .hero-grid {
@@ -1063,7 +1063,7 @@
     /* Very small screens */
     @media (max-width: 360px) {
         .hero {
-            padding: 60px 0.75rem 1rem;
+            padding: 0.75rem 0.75rem 5rem;
         }
 
         .photo-container {
@@ -1094,7 +1094,7 @@
     /* Landscape mobile */
     @media (max-height: 600px) and (orientation: landscape) {
         .hero {
-            padding: 65px 2rem 1rem;
+            padding: 1rem 2rem 5rem;
             min-height: auto;
         }
 

@@ -843,7 +843,7 @@
     .projects-section {
         display: flex;
         flex-direction: column;
-        gap: 1.5rem;
+        gap: 2rem;
     }
 
     .section-header-small {
@@ -877,19 +877,18 @@
 
     .projects-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 1.25rem;
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: 1.5rem;
     }
 
     .project-card {
         position: relative;
-        padding: 1.5rem;
-        background: rgba(0, 0, 0, 0.3);
-        border-radius: 1rem;
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 1.25rem;
         text-decoration: none;
         overflow: hidden;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        backdrop-filter: blur(10px);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(15px);
         display: flex;
         flex-direction: column;
     }
@@ -898,37 +897,141 @@
         content: '';
         position: absolute;
         inset: 0;
-        border-radius: 1rem;
+        border-radius: 1.25rem;
         padding: 1px;
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.3), rgba(255, 0, 255, 0.2));
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.4), rgba(255, 0, 255, 0.2), rgba(0, 255, 255, 0.1));
         -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
         mask-composite: exclude;
         pointer-events: none;
-        transition: all 0.3s ease;
-    }
-
-    .project-card::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
-        transition: left 0.5s ease;
+        transition: all 0.4s ease;
     }
 
     .project-card:hover {
-        transform: translateY(-10px) scale(1.02);
-        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), 0 0 40px rgba(0, 255, 255, 0.15);
+        transform: translateY(-12px) scale(1.02);
+        box-shadow:
+            0 35px 70px rgba(0, 0, 0, 0.5),
+            0 0 50px rgba(0, 255, 255, 0.2),
+            0 0 100px rgba(255, 0, 255, 0.1);
     }
 
     .project-card:hover::before {
-        background: linear-gradient(135deg, #00ffff, #ff00ff);
+        background: linear-gradient(135deg, #00ffff, #ff00ff, #00ffff);
     }
 
-    .project-card:hover::after {
-        left: 100%;
+    /* Project Preview Header */
+    .project-preview {
+        position: relative;
+        height: 140px;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.08) 0%, rgba(255, 0, 255, 0.05) 50%, rgba(0, 0, 0, 0.3) 100%);
+        overflow: hidden;
+    }
+
+    .project-preview::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.1) 0%, transparent 50%);
+    }
+
+    .project-preview-pattern {
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 20px 20px;
+        opacity: 0.5;
+    }
+
+    .project-preview-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(0, 255, 255, 0.3);
+        border-radius: 1rem;
+        font-size: 1.75rem;
+        color: #00ffff;
+        text-shadow: 0 0 20px #00ffff;
+        transition: all 0.4s ease;
+        backdrop-filter: blur(5px);
+    }
+
+    .project-card:hover .project-preview-icon {
+        transform: translate(-50%, -50%) scale(1.15) rotate(5deg);
+        box-shadow: 0 0 40px rgba(0, 255, 255, 0.4);
+        border-color: #00ffff;
+    }
+
+    .project-type-badge {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        padding: 0.4rem 0.9rem;
+        background: rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(255, 0, 255, 0.4);
+        border-radius: 50px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: #ff00ff;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        backdrop-filter: blur(5px);
+        transition: all 0.3s ease;
+    }
+
+    .project-card:hover .project-type-badge {
+        background: rgba(255, 0, 255, 0.2);
+        box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+    }
+
+    .project-links {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .project-link-btn {
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(0, 255, 255, 0.3);
+        border-radius: 8px;
+        color: rgba(0, 255, 255, 0.7);
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(5px);
+    }
+
+    .project-link-btn:hover {
+        background: rgba(0, 255, 255, 0.15);
+        border-color: #00ffff;
+        color: #00ffff;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 20px rgba(0, 255, 255, 0.3);
+    }
+
+    /* Project Content */
+    .project-content {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        position: relative;
+        z-index: 1;
     }
 
     .project-header {
@@ -936,72 +1039,154 @@
         justify-content: space-between;
         align-items: flex-start;
         margin-bottom: 0.75rem;
-        position: relative;
-        z-index: 1;
     }
 
     .project-name {
-        font-size: 1.1rem;
+        font-size: 1.2rem;
         font-weight: 700;
-        background: linear-gradient(135deg, #fff, #00ffff);
+        background: linear-gradient(135deg, #fff 0%, #00ffff 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-    }
-
-    .project-icon {
-        color: rgba(0, 255, 255, 0.5);
-        font-size: 1rem;
+        line-height: 1.3;
         transition: all 0.3s ease;
     }
 
-    .project-card:hover .project-icon {
-        color: #00ffff;
-        text-shadow: 0 0 10px #00ffff;
-        transform: translate(3px, -3px);
+    .project-card:hover .project-name {
+        text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+    }
+
+    .project-lang-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.35rem 0.7rem;
+        background: rgba(0, 255, 255, 0.08);
+        border: 1px solid rgba(0, 255, 255, 0.2);
+        border-radius: 50px;
+        font-size: 0.75rem;
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    .project-lang-badge .lang-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        box-shadow: 0 0 8px currentColor;
     }
 
     .project-desc {
-        font-size: 0.875rem;
+        font-size: 0.9rem;
         color: var(--text-secondary);
-        line-height: 1.6;
-        margin-bottom: 1rem;
+        line-height: 1.7;
+        margin-bottom: 1.25rem;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
-        position: relative;
-        z-index: 1;
         flex: 1;
     }
 
-    .project-meta {
+    /* Project Tech Tags */
+    .project-tech-tags {
         display: flex;
-        align-items: center;
-        gap: 1.25rem;
-        font-size: 0.8rem;
-        color: var(--text-secondary);
-        position: relative;
-        z-index: 1;
-        padding-top: 0.75rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
     }
 
-    .project-lang {
+    .project-tech-tag {
+        padding: 0.3rem 0.65rem;
+        background: rgba(0, 255, 255, 0.06);
+        border: 1px solid rgba(0, 255, 255, 0.15);
+        border-radius: 6px;
+        font-size: 0.7rem;
+        color: rgba(0, 255, 255, 0.8);
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .project-tech-tag:hover {
+        background: rgba(0, 255, 255, 0.12);
+        border-color: rgba(0, 255, 255, 0.4);
+        transform: translateY(-2px);
+    }
+
+    /* Project Stats Footer */
+    .project-stats-footer {
         display: flex;
         align-items: center;
-        gap: 0.4rem;
+        gap: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .project-stat {
         display: flex;
         align-items: center;
-        gap: 0.3rem;
+        gap: 0.4rem;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        transition: all 0.3s ease;
     }
 
     .project-stat i {
-        font-size: 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .project-stat.stars i {
         color: #fbbf24;
+    }
+
+    .project-stat.forks i {
+        color: #a855f7;
+    }
+
+    .project-stat:hover {
+        color: var(--text-primary);
+    }
+
+    .project-stat-divider {
+        width: 1px;
+        height: 16px;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .project-updated {
+        margin-left: auto;
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.4);
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .project-updated i {
+        font-size: 0.65rem;
+    }
+
+    /* Shimmer effect on hover */
+    .project-card .shimmer {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(0, 255, 255, 0.05),
+            rgba(255, 255, 255, 0.1),
+            rgba(0, 255, 255, 0.05),
+            transparent
+        );
+        transition: left 0.6s ease;
+        pointer-events: none;
+    }
+
+    .project-card:hover .shimmer {
+        left: 100%;
     }
 
     .view-all-btn {
@@ -1259,11 +1444,63 @@
 
         .projects-grid {
             grid-template-columns: 1fr;
-            gap: 1rem;
+            gap: 1.25rem;
         }
 
-        .project-card {
+        .project-preview {
+            height: 120px;
+        }
+
+        .project-preview-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+        }
+
+        .project-type-badge {
+            font-size: 0.6rem;
+            padding: 0.35rem 0.75rem;
+        }
+
+        .project-link-btn {
+            width: 30px;
+            height: 30px;
+            font-size: 0.8rem;
+        }
+
+        .project-content {
             padding: 1.25rem;
+        }
+
+        .project-name {
+            font-size: 1.1rem;
+        }
+
+        .project-lang-badge {
+            font-size: 0.7rem;
+            padding: 0.3rem 0.6rem;
+        }
+
+        .project-desc {
+            font-size: 0.85rem;
+        }
+
+        .project-tech-tags {
+            gap: 0.4rem;
+        }
+
+        .project-tech-tag {
+            font-size: 0.65rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .project-stats-footer {
+            gap: 1rem;
+            padding-top: 0.75rem;
+        }
+
+        .project-stat {
+            font-size: 0.75rem;
         }
 
         .view-all-btn {
@@ -1450,26 +1687,93 @@
         }
 
         .projects-grid {
-            gap: 0.75rem;
+            gap: 1rem;
         }
 
-        .project-card {
+        .project-preview {
+            height: 100px;
+        }
+
+        .project-preview-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 1.25rem;
+            border-radius: 0.75rem;
+        }
+
+        .project-type-badge {
+            top: 0.75rem;
+            left: 0.75rem;
+            font-size: 0.55rem;
+            padding: 0.3rem 0.6rem;
+        }
+
+        .project-links {
+            top: 0.75rem;
+            right: 0.75rem;
+            gap: 0.4rem;
+        }
+
+        .project-link-btn {
+            width: 28px;
+            height: 28px;
+            font-size: 0.75rem;
+            border-radius: 6px;
+        }
+
+        .project-content {
             padding: 1rem;
+        }
+
+        .project-header {
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
         }
 
         .project-name {
             font-size: 1rem;
         }
 
-        .project-desc {
-            font-size: 0.8rem;
-            -webkit-line-clamp: 3;
+        .project-lang-badge {
+            align-self: flex-start;
+            font-size: 0.65rem;
+            padding: 0.25rem 0.5rem;
         }
 
-        .project-meta {
-            gap: 1rem;
-            font-size: 0.75rem;
-            padding-top: 0.5rem;
+        .project-desc {
+            font-size: 0.8rem;
+            -webkit-line-clamp: 2;
+            margin-bottom: 1rem;
+        }
+
+        .project-tech-tags {
+            gap: 0.35rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .project-tech-tag {
+            font-size: 0.6rem;
+            padding: 0.2rem 0.45rem;
+            border-radius: 4px;
+        }
+
+        .project-stats-footer {
+            gap: 0.75rem;
+            padding-top: 0.65rem;
+        }
+
+        .project-stat {
+            font-size: 0.7rem;
+            gap: 0.3rem;
+        }
+
+        .project-stat i {
+            font-size: 0.7rem;
+        }
+
+        .project-updated {
+            font-size: 0.6rem;
         }
 
         .view-all-btn {
@@ -1615,30 +1919,141 @@
         }
     }
 
-    function renderProjects(repos: Array<{name: string, description: string | null, url: string, language: string | null, stars: number, forks: number}>): void {
+    interface RepoData {
+        name: string;
+        description: string | null;
+        url: string;
+        language: string | null;
+        stars: number;
+        forks: number;
+        topics?: string[];
+        updatedAt?: string;
+        homepage?: string | null;
+    }
+
+    function getProjectIcon(repo: RepoData): string {
+        const name = repo.name.toLowerCase();
+        const lang = repo.language?.toLowerCase() || '';
+        const topics = (repo.topics || []).map(t => t.toLowerCase());
+
+        if (topics.includes('api') || name.includes('api')) return 'fas fa-plug';
+        if (topics.includes('mobile') || lang === 'kotlin' || lang === 'swift') return 'fas fa-mobile-alt';
+        if (topics.includes('web') || topics.includes('frontend')) return 'fas fa-globe';
+        if (topics.includes('docker') || topics.includes('kubernetes')) return 'fab fa-docker';
+        if (topics.includes('ai') || topics.includes('ml') || topics.includes('machine-learning')) return 'fas fa-brain';
+        if (lang === 'java' || topics.includes('spring')) return 'fab fa-java';
+        if (lang === 'python') return 'fab fa-python';
+        if (lang === 'typescript' || lang === 'javascript') return 'fab fa-js-square';
+        if (lang === 'go') return 'fab fa-golang';
+        if (lang === 'rust') return 'fab fa-rust';
+        if (name.includes('workflow') || name.includes('ci') || name.includes('cd')) return 'fas fa-cogs';
+        if (lang === 'shell') return 'fas fa-terminal';
+        if (topics.includes('database') || topics.includes('sql')) return 'fas fa-database';
+
+        return 'fas fa-code';
+    }
+
+    function getProjectType(repo: RepoData): string {
+        const lang = repo.language?.toLowerCase() || '';
+        const topics = (repo.topics || []).map(t => t.toLowerCase());
+        const name = repo.name.toLowerCase();
+
+        if (topics.includes('fullstack') || topics.includes('full-stack')) return 'Full Stack';
+        if (topics.includes('frontend') || lang === 'vue' || lang === 'svelte') return 'Frontend';
+        if (topics.includes('backend') || lang === 'java' || lang === 'kotlin' || lang === 'go') return 'Backend';
+        if (topics.includes('mobile') || lang === 'swift' || lang === 'dart') return 'Mobile';
+        if (topics.includes('devops') || topics.includes('ci-cd') || topics.includes('docker')) return 'DevOps';
+        if (topics.includes('api') || name.includes('api')) return 'API';
+        if (topics.includes('cli') || lang === 'shell') return 'CLI Tool';
+        if (topics.includes('library') || topics.includes('package')) return 'Library';
+        if (lang === 'typescript' || lang === 'javascript') return 'Web App';
+        if (lang === 'python') return 'Python';
+
+        return 'Project';
+    }
+
+    function formatTimeAgo(dateString: string | undefined): string {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) return 'today';
+        if (diffDays === 1) return 'yesterday';
+        if (diffDays < 7) return `${diffDays}d ago`;
+        if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+        if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
+        return `${Math.floor(diffDays / 365)}y ago`;
+    }
+
+    function renderProjects(repos: Array<RepoData>): void {
         const grid = document.getElementById('projects-grid');
         if (!grid) return;
 
         grid.innerHTML = repos.slice(0, 6).map(repo => {
             const langColor = repo.language ? (languageColors as Record<string, string>)[repo.language] || '#8b8b8b' : '#8b8b8b';
+            const icon = getProjectIcon(repo);
+            const type = getProjectType(repo);
+            const timeAgo = formatTimeAgo(repo.updatedAt);
+            const topics = repo.topics || [];
+
             return `
-                <a href="${repo.url}" target="_blank" rel="noopener noreferrer" class="project-card">
-                    <div class="project-header">
-                        <span class="project-name">${repo.name}</span>
-                        <i class="fas fa-external-link-alt project-icon"></i>
+                <div class="project-card">
+                    <div class="shimmer"></div>
+                    <div class="project-preview">
+                        <div class="project-preview-pattern"></div>
+                        <div class="project-preview-icon">
+                            <i class="${icon}"></i>
+                        </div>
+                        <span class="project-type-badge">${type}</span>
+                        <div class="project-links">
+                            <a href="${repo.url}" target="_blank" rel="noopener noreferrer" class="project-link-btn" title="View on GitHub">
+                                <i class="fab fa-github"></i>
+                            </a>
+                            ${repo.homepage ? `
+                                <a href="${repo.homepage}" target="_blank" rel="noopener noreferrer" class="project-link-btn" title="Live Demo">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            ` : ''}
+                        </div>
                     </div>
-                    <p class="project-desc">${repo.description || 'No description available'}</p>
-                    <div class="project-meta">
-                        ${repo.language ? `
-                            <span class="project-lang">
-                                <span class="lang-dot" style="background: ${langColor}; box-shadow: 0 0 8px ${langColor}"></span>
-                                ${repo.language}
-                            </span>
+                    <div class="project-content">
+                        <div class="project-header">
+                            <span class="project-name">${repo.name}</span>
+                            ${repo.language ? `
+                                <span class="project-lang-badge">
+                                    <span class="lang-dot" style="background: ${langColor}; color: ${langColor}"></span>
+                                    ${repo.language}
+                                </span>
+                            ` : ''}
+                        </div>
+                        <p class="project-desc">${repo.description || 'No description available'}</p>
+                        ${topics.length > 0 ? `
+                            <div class="project-tech-tags">
+                                ${topics.slice(0, 4).map(topic => `
+                                    <span class="project-tech-tag">${topic}</span>
+                                `).join('')}
+                            </div>
                         ` : ''}
-                        <span class="project-stat"><i class="fas fa-star"></i> ${repo.stars}</span>
-                        <span class="project-stat"><i class="fas fa-code-branch"></i> ${repo.forks}</span>
+                        <div class="project-stats-footer">
+                            <span class="project-stat stars">
+                                <i class="fas fa-star"></i>
+                                ${repo.stars}
+                            </span>
+                            <span class="project-stat forks">
+                                <i class="fas fa-code-branch"></i>
+                                ${repo.forks}
+                            </span>
+                            ${timeAgo ? `
+                                <span class="project-updated">
+                                    <i class="fas fa-clock"></i>
+                                    ${timeAgo}
+                                </span>
+                            ` : ''}
+                        </div>
                     </div>
-                </a>
+                </div>
             `;
         }).join('');
     }

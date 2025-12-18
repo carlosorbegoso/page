@@ -313,13 +313,13 @@ export class NeuralBackgroundEngine {
     }
 }
 
-// Auto-initialize when DOM is ready
-if (typeof window !== 'undefined') {
-    window.addEventListener('DOMContentLoaded', () => {
-        // Only initialize if not in reduced motion mode
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (!prefersReducedMotion) {
-            window.neuralBackground = new NeuralBackgroundEngine();
-        }
-    });
-}
+// Auto-initialize when DOM is ready - DISABLED: floating squares effect looked out of place
+// if (typeof window !== 'undefined') {
+//     window.addEventListener('DOMContentLoaded', () => {
+//         // Only initialize if not in reduced motion mode
+//         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+//         if (!prefersReducedMotion) {
+//             window.neuralBackground = new NeuralBackgroundEngine();
+//         }
+//     });
+// }

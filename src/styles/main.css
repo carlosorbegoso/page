@@ -534,12 +534,15 @@ body {
         height: 100dvh;
         background: linear-gradient(180deg, rgba(10, 10, 25, 0.99) 0%, rgba(5, 5, 15, 0.99) 100%);
         backdrop-filter: blur(30px);
+        display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         gap: 1rem;
         transform: translateX(-100%);
-        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 0;
+        visibility: hidden;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, visibility 0.3s ease;
         z-index: 999;
         padding: 2rem;
     }
@@ -550,6 +553,8 @@ body {
 
     .cosmic-nav.active {
         transform: translateX(0);
+        opacity: 1;
+        visibility: visible;
     }
 
     .cosmic-link {
@@ -622,6 +627,21 @@ body {
 }
 
 /* ===== THREE.JS CONTAINERS ===== */
+.neural-background-container {
+    position: fixed;
+    inset: 0;
+    z-index: -5;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* Hide neural background on mobile for performance and visibility */
+@media (max-width: 768px) {
+    .neural-background-container {
+        display: none !important;
+    }
+}
+
 .visual-effects-container { position: fixed; inset: 0; z-index: -10; pointer-events: none; overflow: hidden; }
 .hero-background, .about-background, .experience-background { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
 .hero-particles, .hero-constellations, .hero-stars,

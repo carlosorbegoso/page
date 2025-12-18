@@ -75,11 +75,13 @@ export class Portfolio {
         }
 
         // Global Neural Background (unified background for entire site)
-        // This is the ONLY background engine we need
-        try {
-            this.neuralBackground = new NeuralBackgroundEngine('neural-background-container');
-        } catch (error) {
-            console.error('Error creating Neural Background:', error);
+        // Skip on mobile for performance
+        if (!isMobile) {
+            try {
+                this.neuralBackground = new NeuralBackgroundEngine('neural-background-container');
+            } catch (error) {
+                console.error('Error creating Neural Background:', error);
+            }
         }
 
         // Hero Three.js Engine (skip on low power devices)

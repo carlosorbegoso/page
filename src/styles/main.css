@@ -21,12 +21,14 @@ body {
 /* ===== HEADER COSMIC (Futuristic Space/Aurora Theme) ===== */
 .header {
     position: fixed;
-    inset: 0 0 auto 0;
+    top: 0;
+    left: 0;
+    right: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 2rem;
-    min-height: 60px;
+    height: 60px;
     background: linear-gradient(180deg, rgba(10, 10, 25, 0.95) 0%, rgba(10, 10, 25, 0.85) 100%);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid rgba(0, 255, 255, 0.1);
@@ -528,7 +530,8 @@ body {
 
     .cosmic-nav {
         position: fixed;
-        inset: 0;
+        top: 0;
+        left: 0;
         width: 100%;
         height: 100vh;
         height: 100dvh;
@@ -543,7 +546,7 @@ body {
         opacity: 0;
         visibility: hidden;
         transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, visibility 0.3s ease;
-        z-index: 10001;
+        z-index: 999;
         padding: 2rem;
     }
 
@@ -1232,23 +1235,31 @@ body {
 
     .nav-links {
         position: fixed;
-        inset: 0;
+        top: 0;
+        left: 0;
         width: 100%;
         height: 100vh;
         height: 100dvh; /* Dynamic viewport height para móviles */
         background: rgba(13, 17, 23, 0.98);
         backdrop-filter: blur(25px);
+        display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         gap: 1.5rem;
         transform: translateX(-100%);
-        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 10001;
+        opacity: 0;
+        visibility: hidden;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, visibility 0.3s ease;
+        z-index: 999;
         padding: 2rem;
     }
 
-    .nav-links.active { transform: translateX(0); }
+    .nav-links.active {
+        transform: translateX(0);
+        opacity: 1;
+        visibility: visible;
+    }
 
     .nav-link {
         font-size: 1.25rem;

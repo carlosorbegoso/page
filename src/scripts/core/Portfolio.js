@@ -187,7 +187,8 @@ export class Portfolio {
 
     setupMobileMenu() {
         const menuToggle = DOM.select('#menu-toggle');
-        const navLinks = DOM.select('.nav-links');
+        // Support both .nav-links and .cosmic-nav classes
+        const navLinks = DOM.select('.cosmic-nav') || DOM.select('.nav-links');
         if (!menuToggle || !navLinks) return;
 
         Events.on(menuToggle, 'click', () => {
@@ -196,7 +197,7 @@ export class Portfolio {
             document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
         });
 
-        DOM.selectAll('.nav-link').forEach(link => {
+        DOM.selectAll('.nav-link, .cosmic-link').forEach(link => {
             Events.on(link, 'click', () => {
                 DOM.removeClasses(navLinks, 'active');
                 DOM.removeClasses(menuToggle, 'active');
@@ -270,11 +271,12 @@ export class Portfolio {
         Events.on(document, 'keydown', (e) => {
             // Escape to close menu
             if (e.key === 'Escape') {
-                const navLinks = DOM.select('.nav-links');
+                const navLinks = DOM.select('.cosmic-nav') || DOM.select('.nav-links');
                 const menuToggle = DOM.select('#menu-toggle');
                 if (navLinks?.classList.contains('active')) {
                     DOM.removeClasses(navLinks, 'active');
                     DOM.removeClasses(menuToggle, 'active');
+                    document.body.style.overflow = '';
                 }
             }
             // Ctrl+T to toggle theme

@@ -15,13 +15,18 @@ export class ConstellationSystem {
         const sectionCount = this.performanceMode === 'high' ? 8 : 6;
         
         for (let i = 0; i < sectionCount; i++) {
+            // Generate positions away from center to avoid fixed point in middle of screen
+            // Use angle distribution to spread constellations around the viewport edges
+            const angle = (i / sectionCount) * Math.PI * 2;
+            const radius = 600 + Math.random() * 400; // Keep away from center
+
             const constellation = {
                 stars: [],
                 connections: [],
                 center: new THREE.Vector3(
-                    (Math.random() - 0.5) * 1600,
-                    (Math.random() - 0.5) * 1000,
-                    (Math.random() - 0.5) * 800
+                    Math.cos(angle) * radius + (Math.random() - 0.5) * 200,
+                    Math.sin(angle) * radius * 0.6 + (Math.random() - 0.5) * 200,
+                    -200 - Math.random() * 600 // Push back in Z to avoid front-center
                 ),
                 section: i,
                 pulsePhase: Math.random() * Math.PI * 2

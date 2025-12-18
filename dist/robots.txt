@@ -1,6 +1,0 @@
-User-agent: *
-Disallow: /api/
-Disallow: /_astro/
-Allow: /
-Crawl-delay: 10
-Sitemap: https://carlosorbegoso.github.io/page/sitemap-index.xml

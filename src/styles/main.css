@@ -3189,3 +3189,361 @@ html {
         scroll-behavior: auto;
     }
 }
+
+/* ===== ACCESSIBILITY - FOCUS STATES ===== */
+/* Global focus-visible styles for keyboard navigation */
+:focus {
+    outline: none;
+}
+
+:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+/* Navigation links focus */
+.cosmic-link:focus-visible,
+.nav-link:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    background: rgba(100, 181, 246, 0.1);
+    box-shadow: 0 0 0 4px rgba(100, 181, 246, 0.15);
+}
+
+/* Buttons focus */
+.btn:focus-visible,
+.btn-primary:focus-visible,
+.btn-outline:focus-visible,
+.btn-cta:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 4px rgba(100, 181, 246, 0.2), 0 4px 20px rgba(100, 181, 246, 0.3);
+}
+
+/* Cards focus */
+.bento-card:focus-visible,
+.project-card:focus-visible,
+.experience-card:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 4px;
+    box-shadow: 0 0 0 4px rgba(100, 181, 246, 0.15), 0 8px 30px rgba(100, 181, 246, 0.2);
+}
+
+/* Skill pills focus */
+.pill:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    background: rgba(100, 181, 246, 0.15);
+    border-color: var(--primary-color);
+    transform: scale(1.05);
+}
+
+/* Social links focus */
+.social-link:focus-visible,
+.contact-link:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 3px;
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(100, 181, 246, 0.4);
+}
+
+/* Form inputs focus */
+input:focus-visible,
+textarea:focus-visible {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.2), 0 0 20px rgba(100, 181, 246, 0.1);
+}
+
+/* Back to top button focus */
+.back-to-top:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 4px rgba(100, 181, 246, 0.2);
+}
+
+/* Skip link for screen readers */
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0 0 8px 8px;
+    z-index: 10000;
+    transition: top 0.3s ease;
+    font-weight: 600;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* ===== SKELETON LOADING STATES ===== */
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        rgba(100, 181, 246, 0.05) 0%,
+        rgba(100, 181, 246, 0.1) 50%,
+        rgba(100, 181, 246, 0.05) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+    border-radius: 8px;
+}
+
+@keyframes skeletonShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Skeleton card */
+.skeleton-card {
+    background: rgba(100, 181, 246, 0.03);
+    border: 1px solid rgba(100, 181, 246, 0.1);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.skeleton-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+}
+
+.skeleton-title {
+    height: 24px;
+    width: 70%;
+    border-radius: 4px;
+}
+
+.skeleton-text {
+    height: 16px;
+    width: 100%;
+    border-radius: 4px;
+}
+
+.skeleton-text.short {
+    width: 40%;
+}
+
+.skeleton-text.medium {
+    width: 60%;
+}
+
+/* Skeleton stat */
+.skeleton-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.skeleton-stat-value {
+    width: 80px;
+    height: 32px;
+    border-radius: 6px;
+}
+
+.skeleton-stat-label {
+    width: 60px;
+    height: 14px;
+    border-radius: 4px;
+}
+
+/* Pulse animation for loading indicators */
+.skeleton-pulse {
+    animation: skeletonPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes skeletonPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ===== ENHANCED TOUCH FEEDBACK (MOBILE) ===== */
+@media (hover: none) and (pointer: coarse) {
+    /* Larger touch targets */
+    .btn,
+    .nav-link,
+    .social-link,
+    .pill {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* Enhanced press feedback */
+    .btn:active {
+        transform: scale(0.95);
+        transition: transform 0.1s ease;
+    }
+
+    .btn-primary:active {
+        box-shadow: 0 2px 8px rgba(100, 181, 246, 0.4);
+    }
+
+    /* Card press feedback */
+    .bento-card:active,
+    .project-card:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+
+    /* Pill press feedback */
+    .pill:active {
+        transform: scale(0.92);
+        background: rgba(100, 181, 246, 0.2);
+    }
+
+    /* Social link press */
+    .social-link:active {
+        transform: scale(0.9);
+    }
+
+    /* Contact item press */
+    .contact-item:active {
+        background: rgba(100, 181, 246, 0.1);
+    }
+}
+
+/* ===== TOAST NOTIFICATIONS ===== */
+.toast-container {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    pointer-events: none;
+}
+
+.toast {
+    background: rgba(10, 10, 25, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(100, 181, 246, 0.2);
+    border-radius: 12px;
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    animation: toastSlideUp 0.3s ease, toastFadeOut 0.3s ease 2.7s forwards;
+    pointer-events: auto;
+}
+
+.toast-icon {
+    font-size: 1.1rem;
+}
+
+.toast-success .toast-icon { color: #0CCE6B; }
+.toast-error .toast-icon { color: #FF4E42; }
+.toast-info .toast-icon { color: var(--primary-color); }
+
+@keyframes toastSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes toastFadeOut {
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+/* ===== SCROLL-TRIGGERED TIMELINE PROGRESS ===== */
+.timeline-progress-track {
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(100, 181, 246, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.timeline-progress-bar {
+    width: 100%;
+    height: 0%;
+    background: linear-gradient(180deg, var(--primary-color), #00ffff);
+    border-radius: 2px;
+    transition: height 0.1s ease-out;
+    box-shadow: 0 0 10px rgba(100, 181, 246, 0.5);
+}
+
+/* Animated checkmark for timeline items */
+.timeline-check {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(100, 181, 246, 0.1);
+    border: 2px solid rgba(100, 181, 246, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.timeline-check.completed {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    animation: checkPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.timeline-check.completed::after {
+    content: '✓';
+    color: white;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+@keyframes checkPop {
+    0% { transform: scale(0.5); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* ===== LAZY LOAD IMAGE TRANSITIONS ===== */
+img[loading="lazy"] {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+img[loading="lazy"].loaded,
+img[loading="lazy"]:not([data-src]) {
+    opacity: 1;
+}
+
+/* Image placeholder while loading */
+.img-placeholder {
+    background: linear-gradient(
+        135deg,
+        rgba(100, 181, 246, 0.05) 0%,
+        rgba(100, 181, 246, 0.1) 50%,
+        rgba(100, 181, 246, 0.05) 100%
+    );
+    background-size: 200% 200%;
+    animation: imgPlaceholderShimmer 2s ease infinite;
+}
+
+@keyframes imgPlaceholderShimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}

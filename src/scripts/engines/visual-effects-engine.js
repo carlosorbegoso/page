@@ -159,8 +159,7 @@ class VisualEffectsEngine {
             
             // Guardar efectos de la sección
             this.sectionEffects.set(sectionName, effects);
-            
-            console.log(`✅ Efectos inicializados para ${sectionName}`);
+
             return effects;
             
         } catch (error) {
@@ -549,16 +548,14 @@ class VisualEffectsEngine {
                 tag.addEventListener('mouseenter', (e) => {
                     this.createHoverParticles(e.target, 'tech-tag');
                 });
-                
+
                 // Efecto de constelación al hover
                 tag.addEventListener('mouseenter', (e) => {
                     this.createHoverConstellation(e.target, 'tech-tag');
                 });
             });
-            
-            console.log('✅ Efectos de hover para tech tags configurados');
         } catch (error) {
-            console.error('❌ Error configurando efectos de hover para tech tags:', error);
+            // Silent fail for hover effects
         }
     }
     
@@ -574,16 +571,14 @@ class VisualEffectsEngine {
                 button.addEventListener('mouseenter', (e) => {
                     this.createHoverParticles(e.target, 'button');
                 });
-                
+
                 // Efecto de glow al hover
                 button.addEventListener('mouseenter', (e) => {
                     this.createHoverGlow(e.target, 'button');
                 });
             });
-            
-            console.log('✅ Efectos de hover para botones configurados');
         } catch (error) {
-            console.error('❌ Error configurando efectos de hover para botones:', error);
+            // Silent fail for hover effects
         }
     }
     
@@ -599,16 +594,14 @@ class VisualEffectsEngine {
                 card.addEventListener('mouseenter', (e) => {
                     this.createHoverParticles(e.target, 'card');
                 });
-                
+
                 // Efecto de elevación con partículas
                 card.addEventListener('mouseenter', (e) => {
                     this.createCardElevation(e.target);
                 });
             });
-            
-            console.log('✅ Efectos de hover para cards configurados');
         } catch (error) {
-            console.error('❌ Error configurando efectos de hover para cards:', error);
+            // Silent fail for hover effects
         }
     }
     
@@ -858,10 +851,8 @@ class VisualEffectsEngine {
             
             // Aplicar efectos de tema a elementos interactivos
             this.applyInteractiveThemeEffects(theme);
-            
-            console.log(`✅ Efectos de tema aplicados: ${theme}`);
         } catch (error) {
-            console.error('❌ Error aplicando efectos de tema:', error);
+            // Silent fail for theme effects
         }
     }
     

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://carlosorbegoso.dev/sitemap.xml
+Sitemap: https://carlosorbegoso.github.io/page/sitemap.xml

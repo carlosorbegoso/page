@@ -18,7 +18,7 @@ export async function getVisitorCount() {
             return data.value;
         }
     } catch (error) {
-        console.log('CountAPI unavailable');
+        // CountAPI unavailable - silent fail
     }
 
     return null;
@@ -36,7 +36,7 @@ export async function getCurrentCount() {
             return data.value;
         }
     } catch (error) {
-        console.log('CountAPI unavailable');
+        // CountAPI unavailable - silent fail
     }
 
     return null;

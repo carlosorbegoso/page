@@ -113,7 +113,9 @@ function sendToAnalytics(metric) {
  * Main handler for all metrics
  */
 function handleMetric(metric) {
-    logMetric(metric);
+    if (import.meta.env.DEV) {
+        logMetric(metric);
+    }
     sendToAnalytics(metric);
 }
 
@@ -132,13 +134,7 @@ export function initWebVitals() {
         onINP(handleMetric);
         onTTFB(handleMetric);
 
-        // Log initialization in dev mode
-        if (import.meta.env.DEV) {
-            console.log(
-                '%c📊 Web Vitals tracking initialized',
-                'color: #64B5F6; font-weight: bold;'
-            );
-        }
+        // Web Vitals initialized silently
     } catch (error) {
         console.warn('Web Vitals initialization failed:', error);
     }

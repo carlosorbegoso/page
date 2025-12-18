@@ -64,6 +64,9 @@ const canonicalURL = new URL(Astro.url.pathname, siteUrl);
     <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}/favicon.svg`}>
     <link rel="apple-touch-icon" sizes="180x180" href={`${import.meta.env.BASE_URL}/favicon.svg`}>
 
+    <!-- PWA Manifest -->
+    <link rel="manifest" href={`${import.meta.env.BASE_URL}/manifest.json`}>
+
     <!-- DNS Prefetch for external resources -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
@@ -425,6 +428,12 @@ const canonicalURL = new URL(Astro.url.pathname, siteUrl);
     </style>
 </head>
 <body>
+    <!-- Skip Link for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Toast Container for Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
     <!-- Page Loader - Neural Mind Awakening -->
     <div class="page-loader" id="page-loader">
         <div class="loader-content">
@@ -494,7 +503,9 @@ const canonicalURL = new URL(Astro.url.pathname, siteUrl);
     <div id="visual-effects-container" class="visual-effects-container"></div>
 
     <!-- Main Content -->
-    <slot />
+    <main id="main-content">
+        <slot />
+    </main>
 
     <!-- Scripts de inicialización -->
     <script>
@@ -502,9 +513,19 @@ const canonicalURL = new URL(Astro.url.pathname, siteUrl);
         import { Portfolio } from '../scripts/core/Portfolio.js';
         import { LoaderProgress } from '../scripts/core/LoaderProgress.js';
         import { initWebVitals } from '../scripts/utils/web-vitals.js';
+        import { ScrollAnimations } from '../scripts/utils/scroll-animations.js';
+        import { LazyImages } from '../scripts/utils/lazy-images.js';
+        import { toast } from '../scripts/utils/toast.js';
 
         // Initialize Web Vitals tracking
         initWebVitals();
+
+        // Initialize lazy loading and scroll animations
+        const lazyImages = new LazyImages();
+        const scrollAnimations = new ScrollAnimations();
+
+        // Make toast available globally for copy-to-clipboard etc
+        window.toast = toast;
 
         const loaderProgress = new LoaderProgress();
 

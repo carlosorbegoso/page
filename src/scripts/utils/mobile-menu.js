@@ -33,8 +33,6 @@ export class MobileMenuManager {
                 if (attempts < maxAttempts) {
                     // Intentar cada 100ms
                     setTimeout(checkComponents, 100);
-                } else {
-                    console.warn('⚠️ Elementos del menú móvil no encontrados después de múltiples intentos');
                 }
             }
         };

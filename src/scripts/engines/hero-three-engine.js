@@ -20,28 +20,35 @@ export class HeroThreeEngine {
         this.isInitialized = false;
         this.currentTheme = 'light';
 
-        // Configuración de efectos - partículas pequeñas y elegantes
+        // Detectar dispositivo móvil
+        this.isMobile = window.innerWidth <= 768;
+        this.isLowPower = window.innerWidth <= 480 ||
+            (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+
+        // Configuración de efectos - reducida en mobile para mejor performance
+        const mobileMultiplier = this.isLowPower ? 0.3 : (this.isMobile ? 0.5 : 1);
+
         this.config = {
             particles: {
-                count: 80,
+                count: Math.floor(80 * mobileMultiplier),
                 size: { min: 0.3, max: 0.8 },
                 speed: { min: 0.1, max: 0.3 },
                 opacity: { min: 0.2, max: 0.5 }
             },
             constellations: {
-                count: 12,
-                starsPerConstellation: { min: 3, max: 5 },
-                starSize: 0.15,           // Estrellas más pequeñas
-                connectionOpacity: 0.12,   // Líneas más sutiles
+                count: Math.floor(12 * mobileMultiplier),
+                starsPerConstellation: { min: 3, max: this.isMobile ? 4 : 5 },
+                starSize: 0.15,
+                connectionOpacity: 0.12,
                 connectionWidth: 1
             },
             stars: {
-                count: 100,
+                count: Math.floor(100 * mobileMultiplier),
                 size: { min: 0.2, max: 0.6 },
                 twinkleSpeed: { min: 2, max: 5 }
             },
             titleEffect: {
-                particleCount: 150,
+                particleCount: Math.floor(150 * mobileMultiplier),
                 orbitRadius: 25,
                 orbitSpeed: 0.3,
                 particleSize: { min: 0.15, max: 0.5 }

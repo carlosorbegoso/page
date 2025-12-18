@@ -21,6 +21,10 @@ export class ContactThreeEngine {
         this.time = 0;
         this.isVisible = false;
 
+        // Mobile detection for performance optimization
+        this.isMobile = window.innerWidth <= 768;
+        this.isLowPower = window.innerWidth <= 480;
+
         this.init();
     }
 
@@ -33,13 +37,14 @@ export class ContactThreeEngine {
         this.camera = new THREE.PerspectiveCamera(60, aspect, 0.1, 1000);
         this.camera.position.z = 50;
 
-        // Renderer
+        // Renderer - optimized for mobile
         this.renderer = new THREE.WebGLRenderer({
-            antialias: true,
-            alpha: true
+            antialias: !this.isMobile, // Disable antialiasing on mobile
+            alpha: true,
+            powerPreference: this.isMobile ? 'low-power' : 'default'
         });
         this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.isMobile ? 1.5 : 2));
         this.container.appendChild(this.renderer.domElement);
 
         // Create elements

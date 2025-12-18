@@ -142,12 +142,13 @@
 <style>
     .hero {
         min-height: 100vh;
+        min-height: 100dvh;
         display: flex;
         align-items: center;
         justify-content: center;
         position: relative;
         overflow: hidden;
-        padding: 6rem 2rem 4rem;
+        padding: 5rem 2rem 3rem;
     }
 
     .hero-background {
@@ -825,56 +826,295 @@
         }
     }
 
-    /* Responsive */
+    /* ===== MOBILE OPTIMIZATIONS ===== */
+
+    /* Tablet */
     @media (max-width: 768px) {
+        .hero {
+            padding: 70px 1.25rem 1.5rem; /* Header height ~56px + gap */
+            min-height: 100svh; /* Safe viewport height */
+            align-items: flex-start;
+        }
+
+        .hero-grid {
+            gap: 1.5rem;
+        }
+
+        .photo-container {
+            width: 150px;
+            height: 150px;
+        }
+
+        .tech-icons-row {
+            gap: 0.6rem;
+        }
+
         .tech-icon {
-            width: 38px;
-            height: 38px;
+            width: 40px;
+            height: 40px;
             font-size: 1.1rem;
         }
 
+        .hero-title {
+            font-size: clamp(2rem, 10vw, 3rem);
+        }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .hero-bio {
+            font-size: 0.95rem;
+            padding: 0 0.5rem;
+        }
+
         .hero-stats {
-            gap: 1rem;
+            gap: 1.25rem;
+            padding: 0.75rem 0;
         }
 
         .stat-number {
             font-size: 1.5rem;
         }
+
+        .stat-label {
+            font-size: 0.65rem;
+        }
+
+        .hero-actions {
+            flex-direction: column;
+            width: 100%;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+            padding: 1rem 1.5rem;
+        }
+
+        /* Reduce orb sizes on mobile */
+        .orb-1 {
+            width: 250px;
+            height: 250px;
+            opacity: 0.3;
+        }
+
+        .orb-2 {
+            width: 180px;
+            height: 180px;
+            opacity: 0.25;
+        }
+
+        .orb-3 {
+            width: 150px;
+            height: 150px;
+            opacity: 0.2;
+        }
+
+        .hero-scroll-indicator {
+            bottom: 1.5rem;
+        }
+
+        .scroll-line {
+            height: 35px;
+        }
     }
 
+    /* Mobile */
     @media (max-width: 480px) {
         .hero {
-            padding: 5rem 1.5rem 3rem;
+            padding: 65px 1rem 1rem; /* Minimal top padding */
+        }
+
+        .hero-grid {
+            gap: 1.25rem;
         }
 
         .photo-container {
-            width: 180px;
-            height: 180px;
+            width: 130px;
+            height: 130px;
+        }
+
+        .photo-wrapper {
+            inset: 15px;
+        }
+
+        .photo-ring {
+            inset: -8px;
+            border-width: 1px;
+        }
+
+        .photo-ring.ring-2 {
+            inset: -16px;
+        }
+
+        .photo-glow {
+            inset: -20px;
+            filter: blur(20px);
         }
 
         .tech-icons-row {
             gap: 0.5rem;
+            margin-top: -0.25rem;
         }
 
         .tech-icon {
-            width: 34px;
-            height: 34px;
+            width: 36px;
+            height: 36px;
             font-size: 1rem;
+            border-radius: 10px;
         }
 
-        .btn {
-            padding: 0.75rem 1.5rem;
-            font-size: 0.875rem;
+        .hero-badges {
+            gap: 0.4rem;
+        }
+
+        .availability-badge {
+            padding: 0.4rem 0.85rem;
+            font-size: 0.75rem;
         }
 
         .location-badge {
             font-size: 0.7rem;
-            padding: 0.35rem 0.75rem;
+            padding: 0.35rem 0.7rem;
+        }
+
+        .hero-greeting {
+            font-size: 1rem;
+        }
+
+        .hero-title {
+            font-size: clamp(1.75rem, 12vw, 2.5rem);
+            gap: 0.15rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            min-height: auto;
+        }
+
+        .typing-prefix {
+            font-size: 0.9rem;
+        }
+
+        .hero-bio {
+            font-size: 0.875rem;
+            line-height: 1.6;
+            padding: 0;
         }
 
         .hero-stats {
-            flex-wrap: wrap;
-            justify-content: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
+            justify-content: space-around;
+            width: 100%;
+        }
+
+        .hero-stat {
+            flex: 1;
+            min-width: 70px;
+        }
+
+        .stat-number {
+            font-size: 1.35rem;
+        }
+
+        .stat-label {
+            font-size: 0.6rem;
+        }
+
+        .stat-divider {
+            height: 25px;
+        }
+
+        .hero-actions {
+            margin-top: 0.25rem;
+        }
+
+        .btn {
+            padding: 0.875rem 1.25rem;
+            font-size: 0.85rem;
+        }
+
+        .hero-scroll-indicator {
+            display: none; /* Hide on very small screens */
+        }
+
+        /* Reduce animations on mobile for performance */
+        .photo-ring,
+        .photo-ring.ring-2 {
+            animation: none;
+            border-style: solid;
+            opacity: 0.5;
+        }
+
+        .photo-pulse {
+            animation-duration: 3s;
+        }
+
+        .gradient-orb {
+            animation: none;
+        }
+    }
+
+    /* Very small screens */
+    @media (max-width: 360px) {
+        .hero {
+            padding: 60px 0.75rem 1rem;
+        }
+
+        .photo-container {
+            width: 120px;
+            height: 120px;
+        }
+
+        .tech-icon {
+            width: 32px;
+            height: 32px;
+            font-size: 0.9rem;
+        }
+
+        .hero-title {
+            font-size: 1.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1rem;
+            font-size: 0.8rem;
+        }
+    }
+
+    /* Landscape mobile */
+    @media (max-height: 600px) and (orientation: landscape) {
+        .hero {
+            padding: 65px 2rem 1rem;
+            min-height: auto;
+        }
+
+        .hero-grid {
+            grid-template-columns: auto 1fr;
+            gap: 2rem;
+            text-align: left;
+        }
+
+        .photo-container {
+            width: 140px;
+            height: 140px;
+        }
+
+        .hero-badges {
+            flex-direction: row;
+        }
+
+        .hero-scroll-indicator {
+            display: none;
         }
     }
 </style>

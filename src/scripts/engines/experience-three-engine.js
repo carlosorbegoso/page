@@ -20,6 +20,11 @@ export class ExperienceThreeEngine {
         this.isVisible = false;
         this.mouse = new THREE.Vector2();
 
+        // Mobile detection for performance
+        this.isMobile = window.innerWidth <= 768;
+        this.isLowPower = window.innerWidth <= 480;
+        this.particleMultiplier = this.isLowPower ? 0.3 : (this.isMobile ? 0.5 : 1);
+
         this.init();
     }
 
@@ -32,13 +37,14 @@ export class ExperienceThreeEngine {
         this.camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
         this.camera.position.z = 30;
 
-        // Renderer
+        // Renderer - optimized for mobile
         this.renderer = new THREE.WebGLRenderer({
-            antialias: true,
-            alpha: true
+            antialias: !this.isMobile,
+            alpha: true,
+            powerPreference: this.isMobile ? 'low-power' : 'default'
         });
         this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.isMobile ? 1.5 : 2));
         this.container.appendChild(this.renderer.domElement);
 
         // Create effects
@@ -56,7 +62,7 @@ export class ExperienceThreeEngine {
     }
 
     createRisingParticles() {
-        const particleCount = 200;
+        const particleCount = Math.floor(200 * this.particleMultiplier);
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(particleCount * 3);
         const velocities = new Float32Array(particleCount);

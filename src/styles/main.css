@@ -596,12 +596,28 @@ body {
         border-left: none;
         padding-left: 0;
         margin-left: 0;
-        gap: 0.5rem;
+        gap: 0.4rem;
     }
 
     .cosmic-btn {
-        width: 40px;
-        height: 40px;
+        width: 38px;
+        height: 38px;
+    }
+
+    /* Hide time and language on mobile for cleaner header */
+    .time-display,
+    .language-toggle {
+        display: none !important;
+    }
+
+    /* Compact weather button on mobile */
+    .weather-btn {
+        width: 38px;
+        height: 38px;
+    }
+
+    .weather-btn .weather-temp {
+        display: none !important;
     }
 }
 
@@ -1248,11 +1264,10 @@ body {
         border: 1px solid rgba(100, 181, 246, 0.2);
     }
 
-    /* Hero móvil */
+    /* Hero móvil - padding controlled by Hero.astro component */
     .hero {
         min-height: 100vh;
         min-height: 100dvh;
-        padding: 6rem 1rem 3rem;
     }
 
     .hero-container {
@@ -1442,7 +1457,7 @@ body {
 @media (max-width: 896px) and (orientation: landscape) {
     .hero {
         min-height: auto;
-        padding: 5rem 1rem 2rem;
+        padding: 65px 1rem 1rem;
     }
 
     .hero-title { font-size: 2.5rem; }
@@ -2086,5 +2101,368 @@ img[loading="lazy"].loaded {
     .contact-item,
     .experience-content {
         border-width: 2px;
+    }
+}
+
+/* ===== MOBILE ENHANCEMENTS - EXTRA SMALL SCREENS ===== */
+
+/* Very small phones (iPhone SE, Galaxy S8, etc.) */
+@media (max-width: 375px) {
+    /* Prevent horizontal scroll */
+    html, body {
+        overflow-x: hidden;
+        max-width: 100vw;
+    }
+
+    .container {
+        padding: 0 0.75rem;
+    }
+
+    /* Header adjustments */
+    .header, .header.header-cosmic {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .cosmic-btn, .cosmic-menu-btn {
+        width: 36px;
+        height: 36px;
+    }
+
+    .time-display {
+        display: none !important; /* Hide time on very small screens */
+    }
+
+    .cosmic-controls {
+        gap: 0.35rem;
+    }
+
+    /* Hero adjustments - padding controlled by Hero.astro component */
+
+    .hero-title {
+        font-size: clamp(1.75rem, 13vw, 2.5rem) !important;
+    }
+
+    .hero-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .hero-badge {
+        font-size: 0.7rem;
+        padding: 0.15rem 0.6rem;
+    }
+
+    .hero-description p {
+        font-size: 0.85rem;
+    }
+
+    .hero-actions {
+        gap: 0.75rem;
+    }
+
+    .btn-hero {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+        min-height: 48px;
+    }
+
+    .tech-stack {
+        gap: 0.4rem;
+    }
+
+    .tech-badge {
+        min-width: 55px;
+        min-height: 55px;
+        padding: 0.35rem;
+    }
+
+    .tech-icon {
+        font-size: 0.9rem;
+        width: 20px;
+        height: 20px;
+    }
+
+    .tech-name {
+        font-size: 0.6rem;
+    }
+
+    .hero-scroll-indicator {
+        display: none; /* Hide on very small screens */
+    }
+
+    /* Section adjustments */
+    .section {
+        padding: 2.5rem 0;
+    }
+
+    .section-header {
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: clamp(1.5rem, 8vw, 2rem) !important;
+    }
+
+    .section-subtitle {
+        font-size: 0.85rem;
+    }
+
+    .section-badge {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.7rem;
+    }
+
+    /* Experience timeline */
+    .timeline-line {
+        left: 0.75rem;
+    }
+
+    .experience-item::before {
+        left: 0.75rem;
+        width: 10px;
+        height: 10px;
+    }
+
+    .experience-item:nth-child(odd),
+    .experience-item:nth-child(2n) {
+        padding-left: calc(0.75rem + 20px + 0.75rem);
+    }
+
+    .experience-content {
+        padding: 1rem;
+    }
+
+    .experience-company {
+        font-size: 0.9rem;
+    }
+
+    .experience-position {
+        font-size: 1rem;
+    }
+
+    .experience-description {
+        font-size: 0.8rem;
+    }
+
+    .experience-period {
+        font-size: 0.75rem;
+    }
+
+    .tech-tag {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.4rem;
+    }
+
+    /* Contact */
+    .contact-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    .contact-info h5 {
+        font-size: 0.9rem;
+    }
+
+    .contact-info p {
+        font-size: 0.75rem;
+    }
+
+    .social-link {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.8rem;
+    }
+
+    /* Footer */
+    .footer-bottom {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .footer-dot {
+        display: none;
+    }
+
+    .footer-text,
+    .footer-tech,
+    .footer-visitors,
+    .footer-updated {
+        font-size: 0.65rem;
+    }
+
+    .footer-quote blockquote {
+        font-size: 0.75rem;
+    }
+
+    .footer-quote cite {
+        font-size: 0.65rem;
+    }
+}
+
+/* Ultra small screens (< 320px) */
+@media (max-width: 320px) {
+    .hero-title {
+        font-size: 1.5rem !important;
+    }
+
+    .hero-badge {
+        display: none;
+    }
+
+    .tech-stack {
+        display: none; /* Hide tech badges on ultra small */
+    }
+
+    .btn-hero {
+        font-size: 0.8rem;
+        padding: 0.7rem 0.9rem;
+    }
+
+    .experience-content {
+        padding: 0.75rem;
+    }
+
+    .experience-tech {
+        display: none; /* Hide tech tags on ultra small */
+    }
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+    /* Fix for iOS input zoom */
+    input, select, textarea {
+        font-size: 16px !important; /* Prevents zoom on focus */
+    }
+
+    /* Fix 100vh issue on iOS */
+    .hero,
+    .nav-links,
+    .cosmic-nav {
+        min-height: -webkit-fill-available;
+    }
+}
+
+/* Android Chrome address bar fix */
+@supports (height: 100dvh) {
+    .hero {
+        min-height: 100dvh;
+    }
+
+    .nav-links,
+    .cosmic-nav {
+        height: 100dvh;
+    }
+}
+
+/* Landscape mobile optimizations */
+@media (max-height: 500px) and (orientation: landscape) {
+    .hero {
+        min-height: auto;
+        padding: 65px 1rem 1rem;
+    }
+
+    .hero-title {
+        font-size: 2rem !important;
+    }
+
+    .hero-content {
+        gap: 0.75rem;
+    }
+
+    .hero-scroll-indicator {
+        display: none;
+    }
+
+    .tech-stack {
+        display: none;
+    }
+
+    .hero-actions {
+        flex-direction: row;
+    }
+
+    .section {
+        padding: 2rem 0;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    /* Larger touch targets */
+    .cosmic-btn,
+    .cosmic-menu-btn,
+    .btn-hero,
+    .tech-badge,
+    .social-link,
+    .nav-link,
+    .cosmic-link {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* Disable hover effects that don't work on touch */
+    .project-card:hover,
+    .experience-content:hover,
+    .contact-item:hover,
+    .tech-badge:hover {
+        transform: none;
+        box-shadow: inherit;
+    }
+
+    /* Better active states */
+    .btn-hero:active,
+    .tech-badge:active,
+    .social-link:active,
+    .cosmic-btn:active,
+    .cosmic-link:active {
+        transform: scale(0.95);
+        opacity: 0.8;
+    }
+
+    /* Prevent text selection on buttons */
+    button, a, .clickable {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        user-select: none;
+    }
+}
+
+/* Performance: Reduce animations on low-end devices */
+@media (prefers-reduced-motion: reduce) {
+    .scanline-overlay,
+    .cursor-particles-container,
+    .custom-cursor {
+        display: none !important;
+    }
+
+    .shimmer::before,
+    .particle-trail::before {
+        animation: none !important;
+    }
+}
+
+/* Dark mode scrollbar fix */
+@media (prefers-color-scheme: dark) {
+    ::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Notch and Dynamic Island safe areas */
+@supports (padding: env(safe-area-inset-top)) {
+    .header, .header.header-cosmic {
+        padding-top: max(0.5rem, env(safe-area-inset-top));
+        padding-left: max(0.75rem, env(safe-area-inset-left));
+        padding-right: max(0.75rem, env(safe-area-inset-right));
+    }
+
+    .footer {
+        padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+
+    .nav-links, .cosmic-nav {
+        padding-top: max(5rem, calc(4rem + env(safe-area-inset-top)));
+        padding-bottom: max(2rem, env(safe-area-inset-bottom));
+        padding-left: max(1rem, env(safe-area-inset-left));
+        padding-right: max(1rem, env(safe-area-inset-right));
     }
 }

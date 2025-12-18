@@ -6,7 +6,6 @@
 export class CursorParticlesEngine {
     constructor() {
         this.particles = [];
-        this.maxParticles = 50;
         this.mouseX = 0;
         this.mouseY = 0;
         this.isActive = true;
@@ -14,6 +13,10 @@ export class CursorParticlesEngine {
         // Check for touch device or reduced motion
         this.isTouchDevice = 'ontouchstart' in window;
         this.prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        this.isMobile = window.innerWidth <= 768;
+
+        // Reduce particles on smaller screens
+        this.maxParticles = this.isMobile ? 25 : 50;
 
         if (this.isTouchDevice || this.prefersReducedMotion) {
             return;

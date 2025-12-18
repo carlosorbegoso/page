@@ -525,19 +525,38 @@
         transform: translateY(0);
     }
 
-    /* Responsive */
+    /* ===== MOBILE OPTIMIZATIONS ===== */
+
+    /* Tablet */
     @media (max-width: 768px) {
         .experience {
-            padding: 4rem 0;
+            padding: 4rem 0 3rem;
+        }
+
+        .section-header {
+            margin-bottom: 2.5rem;
+        }
+
+        .section-title {
+            font-size: clamp(1.75rem, 8vw, 2.5rem);
+        }
+
+        .section-subtitle {
+            font-size: 0.95rem;
+            padding: 0 1rem;
+        }
+
+        .experience-timeline {
+            padding: 1rem 0;
         }
 
         .timeline-line {
-            left: 1.5rem;
+            left: 1rem;
         }
 
         .experience-item:nth-child(odd),
         .experience-item:nth-child(even) {
-            padding-left: calc(1.5rem + 2rem);
+            padding-left: calc(1rem + 2rem);
             padding-right: 0;
             text-align: left;
         }
@@ -553,12 +572,16 @@
         }
 
         .experience-marker {
-            left: 1.5rem;
+            left: 1rem;
         }
 
         .marker-dot {
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
+        }
+
+        .marker-ring {
+            display: none;
         }
 
         .experience-header {
@@ -568,26 +591,172 @@
         }
 
         .experience-content {
-            padding: 1rem;
+            padding: 1.25rem;
+            border-radius: 1rem;
         }
 
         .experience-title {
-            font-size: 1.125rem;
+            font-size: 1.1rem;
+        }
+
+        .experience-description {
+            font-size: 0.9rem;
+            line-height: 1.5;
         }
 
         .experience-item {
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .company-logo {
+            width: 28px;
+            height: 28px;
+        }
+
+        .experience-date {
+            font-size: 0.8rem;
+        }
+
+        .date-badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+        }
+
+        /* Reduce background effects */
+        .experience-pattern {
+            opacity: 0.3;
+        }
+
+        .exp-particle {
+            width: 4px;
+            height: 4px;
+            opacity: 0.2;
         }
     }
 
+    /* Mobile */
     @media (max-width: 480px) {
+        .experience {
+            padding: 3rem 0 2.5rem;
+        }
+
+        .section-header {
+            margin-bottom: 2rem;
+        }
+
+        .section-badge {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+        }
+
+        .section-subtitle {
+            font-size: 0.875rem;
+        }
+
+        .timeline-line {
+            left: 0.75rem;
+            width: 2px;
+        }
+
+        .experience-item:nth-child(odd),
+        .experience-item:nth-child(even) {
+            padding-left: calc(0.75rem + 1.5rem);
+        }
+
+        .experience-marker {
+            left: 0.75rem;
+        }
+
+        .marker-dot {
+            width: 12px;
+            height: 12px;
+        }
+
+        .experience-content {
+            padding: 1rem;
+        }
+
+        .experience-header {
+            gap: 0.4rem;
+        }
+
+        .experience-company span {
+            font-size: 0.9rem;
+        }
+
+        .company-logo {
+            width: 26px;
+            height: 26px;
+            font-size: 0.75rem;
+        }
+
+        .experience-title {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .experience-description {
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+        }
+
         .experience-achievements {
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 0.4rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .achievement {
+            font-size: 0.8rem;
+        }
+
+        .achievement i {
+            font-size: 0.65rem;
+        }
+
+        .experience-tech {
+            gap: 0.35rem;
         }
 
         .tech-tag {
             font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .experience-item {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Disable particle effects on mobile */
+        .exp-particle {
+            display: none;
+        }
+    }
+
+    /* Very small screens */
+    @media (max-width: 360px) {
+        .experience {
+            padding: 2.5rem 0 2rem;
+        }
+
+        .experience-content {
+            padding: 0.875rem;
+        }
+
+        .experience-title {
+            font-size: 0.95rem;
+        }
+
+        .experience-description {
+            font-size: 0.8rem;
+        }
+
+        .tech-tag {
+            font-size: 0.65rem;
             padding: 0.2rem 0.4rem;
         }
     }

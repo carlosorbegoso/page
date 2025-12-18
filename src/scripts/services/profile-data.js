@@ -6,6 +6,9 @@
 
 import { getGitHubStats } from './github-api.js';
 
+// Base URL for assets (handles both dev and production with base path)
+const BASE_URL = import.meta.env?.BASE_URL || '/page/';
+
 // Static profile data (things that don't come from APIs)
 const staticProfile = {
     name: 'Carlos Orbegoso',
@@ -72,7 +75,7 @@ export async function getProfileData() {
             // Fallback to static data only
             cachedProfile = {
                 ...staticProfile,
-                avatar: '/images/profile.jpeg',
+                avatar: `${BASE_URL}images/profile.jpeg`,
                 github: null
             };
         }
@@ -85,7 +88,7 @@ export async function getProfileData() {
         // Return static data on error
         return {
             ...staticProfile,
-            avatar: '/images/profile.jpeg',
+            avatar: `${BASE_URL}images/profile.jpeg`,
             github: null
         };
     }

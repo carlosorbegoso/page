@@ -369,6 +369,61 @@ body {
     box-shadow: 0 4px 20px rgba(100, 181, 246, 0.3);
 }
 
+/* Weather-aware Theme Toggle */
+.weather-btn {
+    position: relative;
+    min-width: 36px;
+    gap: 0.25rem;
+}
+
+.weather-btn .weather-temp {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #00ffff;
+    display: none;
+}
+
+.weather-btn.has-weather {
+    width: auto;
+    padding: 0 0.5rem;
+}
+
+.weather-btn.has-weather .weather-temp {
+    display: inline;
+}
+
+[data-theme="light"] .weather-btn .weather-temp {
+    color: var(--primary-color);
+}
+
+/* Time Display */
+.time-display {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0 0.6rem;
+    width: auto;
+    min-width: auto;
+    cursor: default;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.time-display .time-icon {
+    font-size: 0.7rem;
+    opacity: 0.7;
+}
+
+.time-display .time-text {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+.time-display:hover {
+    transform: none;
+    cursor: default;
+}
+
 /* Cosmic Menu Toggle */
 .cosmic-menu-btn {
     display: none;

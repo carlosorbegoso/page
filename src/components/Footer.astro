@@ -6,20 +6,14 @@ const currentYear = new Date().getFullYear();
 <footer class="footer">
     <div class="container">
         <div class="footer-content">
-            <!-- Social icons -->
-            <div class="footer-social">
-                <a href="https://github.com/carlosorbegoso" target="_blank" rel="noopener noreferrer" class="footer-social-link" aria-label="GitHub">
-                    <i class="fab fa-github"></i>
-                </a>
-                <a href="https://linkedin.com/in/carlos-orbergoso-loayza" target="_blank" rel="noopener noreferrer" class="footer-social-link" aria-label="LinkedIn">
-                    <i class="fab fa-linkedin"></i>
-                </a>
-                <a href="mailto:car_11.09@hotmail.com" class="footer-social-link" aria-label="Email">
-                    <i class="fas fa-envelope"></i>
-                </a>
+            <!-- Daily Quote -->
+            <div class="footer-quote" id="footer-quote">
+                <i class="fas fa-quote-left quote-icon"></i>
+                <blockquote id="quote-text">Loading inspiration...</blockquote>
+                <cite id="quote-author"></cite>
             </div>
 
-            <!-- Copyright -->
+            <!-- Copyright & Stats -->
             <div class="footer-bottom">
                 <p class="footer-text">
                     &copy; {currentYear} Carlos Orbegoso
@@ -27,6 +21,16 @@ const currentYear = new Date().getFullYear();
                 <span class="footer-dot">·</span>
                 <p class="footer-tech">
                     Astro + Three.js
+                </p>
+                <span class="footer-dot">·</span>
+                <p class="footer-visitors" id="visitor-count">
+                    <i class="fas fa-eye"></i>
+                    <span id="visitor-number">...</span> visits
+                </p>
+                <span class="footer-dot" id="last-updated-dot" style="display: none;">·</span>
+                <p class="footer-updated" id="last-updated" style="display: none;">
+                    <i class="fas fa-code-commit"></i>
+                    <span id="last-updated-text">...</span>
                 </p>
             </div>
 
@@ -41,7 +45,7 @@ const currentYear = new Date().getFullYear();
 <style>
     .footer {
         position: relative;
-        padding: 2rem 0 1.5rem;
+        padding: 2.5rem 0 1.5rem;
         background: rgba(13, 17, 23, 0.3);
         border-top: 1px solid rgba(100, 181, 246, 0.08);
     }
@@ -50,36 +54,39 @@ const currentYear = new Date().getFullYear();
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 1.25rem;
+        gap: 1.5rem;
         position: relative;
     }
 
-    /* Social links */
-    .footer-social {
+    /* Quote section */
+    .footer-quote {
         display: flex;
-        gap: 0.75rem;
-    }
-
-    .footer-social-link {
-        width: 38px;
-        height: 38px;
-        display: flex;
+        flex-direction: column;
         align-items: center;
-        justify-content: center;
-        background: rgba(100, 181, 246, 0.05);
-        border: 1px solid rgba(100, 181, 246, 0.12);
-        border-radius: 10px;
-        color: var(--text-secondary);
-        text-decoration: none;
-        font-size: 1rem;
-        transition: all 0.3s ease;
+        gap: 0.5rem;
+        max-width: 500px;
+        text-align: center;
+        padding: 0 1rem;
     }
 
-    .footer-social-link:hover {
-        background: rgba(100, 181, 246, 0.15);
-        border-color: rgba(100, 181, 246, 0.3);
+    .quote-icon {
+        font-size: 1rem;
+        color: rgba(100, 181, 246, 0.3);
+    }
+
+    .footer-quote blockquote {
+        font-size: 0.9rem;
+        font-style: italic;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    .footer-quote cite {
+        font-size: 0.75rem;
         color: var(--primary-color);
-        transform: translateY(-2px);
+        font-style: normal;
+        opacity: 0.8;
     }
 
     /* Bottom section */
@@ -92,7 +99,29 @@ const currentYear = new Date().getFullYear();
     }
 
     .footer-text,
-    .footer-tech {
+    .footer-tech,
+    .footer-visitors {
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+        opacity: 0.7;
+        margin: 0;
+    }
+
+    .footer-visitors,
+    .footer-updated {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .footer-visitors i,
+    .footer-updated i {
+        font-size: 0.7rem;
+        color: var(--primary-color);
+        opacity: 0.7;
+    }
+
+    .footer-updated {
         color: var(--text-secondary);
         font-size: 0.75rem;
         opacity: 0.7;
@@ -168,6 +197,103 @@ const currentYear = new Date().getFullYear();
 </style>
 
 <script>
+    import { getQuoteOfTheDay } from '../scripts/services/quotes-api.js';
+    import { getVisitorCount } from '../scripts/services/visitor-api.js';
+    import { getLastCommitDate } from '../scripts/services/github-api.js';
+
+    // Load quote
+    function loadQuote() {
+        const quoteText = document.getElementById('quote-text');
+        const quoteAuthor = document.getElementById('quote-author');
+
+        if (quoteText && quoteAuthor) {
+            try {
+                const quote = getQuoteOfTheDay();
+                quoteText.textContent = `"${quote.content}"`;
+                quoteAuthor.textContent = `— ${quote.author}`;
+            } catch (error) {
+                quoteText.textContent = `"Talk is cheap. Show me the code."`;
+                quoteAuthor.textContent = `— Linus Torvalds`;
+            }
+        }
+    }
+
+    // Load visitor count
+    async function loadVisitorCount() {
+        const visitorEl = document.getElementById('visitor-number');
+        if (visitorEl) {
+            try {
+                const count = await getVisitorCount();
+                if (count !== null) {
+                    visitorEl.textContent = count.toLocaleString();
+                } else {
+                    // Hide if API fails
+                    const container = document.getElementById('visitor-count');
+                    const dot = container?.previousElementSibling;
+                    if (container) container.style.display = 'none';
+                    if (dot) (dot as HTMLElement).style.display = 'none';
+                }
+            } catch (error) {
+                const container = document.getElementById('visitor-count');
+                const dot = container?.previousElementSibling;
+                if (container) container.style.display = 'none';
+                if (dot) (dot as HTMLElement).style.display = 'none';
+            }
+        }
+    }
+
+    // Load last updated date from GitHub
+    async function loadLastUpdated() {
+        const container = document.getElementById('last-updated');
+        const dot = document.getElementById('last-updated-dot');
+        const textEl = document.getElementById('last-updated-text');
+
+        if (container && textEl) {
+            try {
+                const commitInfo = await getLastCommitDate('page');
+                if (commitInfo) {
+                    // Format time ago
+                    const timeAgo = getTimeAgo(commitInfo.date);
+                    textEl.textContent = `Updated ${timeAgo}`;
+                    container.style.display = 'flex';
+                    if (dot) dot.style.display = '';
+
+                    // Add tooltip with commit info
+                    container.setAttribute('title', `${commitInfo.sha}: ${commitInfo.message}`);
+                }
+            } catch (error) {
+                console.error('Error loading last updated:', error);
+            }
+        }
+    }
+
+    // Helper function to format time ago
+    function getTimeAgo(date: Date): string {
+        const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+
+        const intervals = [
+            { label: 'year', seconds: 31536000 },
+            { label: 'month', seconds: 2592000 },
+            { label: 'week', seconds: 604800 },
+            { label: 'day', seconds: 86400 },
+            { label: 'hour', seconds: 3600 },
+            { label: 'minute', seconds: 60 }
+        ];
+
+        for (const interval of intervals) {
+            const count = Math.floor(seconds / interval.seconds);
+            if (count >= 1) {
+                return `${count} ${interval.label}${count > 1 ? 's' : ''} ago`;
+            }
+        }
+
+        return 'just now';
+    }
+
+    loadQuote();
+    loadVisitorCount();
+    loadLastUpdated();
+
     // Back to top functionality
     const backToTop = document.getElementById('back-to-top');
     if (backToTop) {

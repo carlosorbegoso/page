@@ -412,9 +412,81 @@ const {
                 max-width: 240px;
             }
         }
+
+        /* Custom Cursor */
+        .custom-cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 99999;
+            mix-blend-mode: difference;
+        }
+
+        .cursor-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease, width 0.2s ease, height 0.2s ease;
+        }
+
+        .cursor-outline {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.15s ease-out, width 0.2s ease, height 0.2s ease, border-color 0.2s ease;
+        }
+
+        .custom-cursor.hover .cursor-dot {
+            transform: translate(-50%, -50%) scale(2);
+            background: #64B5F6;
+        }
+
+        .custom-cursor.hover .cursor-outline {
+            transform: translate(-50%, -50%) scale(1.5);
+            border-color: #64B5F6;
+            border-width: 1px;
+        }
+
+        .custom-cursor.clicking .cursor-dot {
+            transform: translate(-50%, -50%) scale(0.5);
+        }
+
+        .custom-cursor.clicking .cursor-outline {
+            transform: translate(-50%, -50%) scale(0.8);
+        }
+
+        /* Hide on touch devices */
+        @media (hover: none) and (pointer: coarse) {
+            .custom-cursor {
+                display: none;
+            }
+        }
+
+        /* Hide default cursor on desktop when custom cursor is active */
+        @media (hover: hover) and (pointer: fine) {
+            body {
+                cursor: none;
+            }
+            a, button, .btn, .nav-link, .project-card, .stat-card, .tech-tag, .social-link, .floating-icon {
+                cursor: none;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Custom Cursor -->
+    <div class="custom-cursor" id="custom-cursor">
+        <div class="cursor-dot"></div>
+        <div class="cursor-outline"></div>
+    </div>
+
     <!-- Page Loader -->
     <div class="page-loader" id="page-loader">
         <div class="loader-content">
@@ -735,6 +807,10 @@ const {
                     // Manejar resize
                 }, 100));
 
+                // Konami Code Easter Egg: ↑↑↓↓←→←→BA
+                const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+                let konamiIndex = 0;
+
                 Events.on(document, 'keydown', (e) => {
                     if (e.key === 'Escape') {
                         const navLinks = DOM.select('.nav-links');
@@ -748,7 +824,161 @@ const {
                         e.preventDefault();
                         DOM.select('#theme-toggle')?.click();
                     }
+
+                    // Konami Code detection
+                    if (e.key === konamiCode[konamiIndex]) {
+                        konamiIndex++;
+                        if (konamiIndex === konamiCode.length) {
+                            this.activateKonamiEasterEgg();
+                            konamiIndex = 0;
+                        }
+                    } else {
+                        konamiIndex = 0;
+                    }
                 });
+            }
+
+            activateKonamiEasterEgg() {
+                // Create epic overlay
+                const overlay = document.createElement('div');
+                overlay.className = 'konami-overlay';
+                overlay.innerHTML = `
+                    <div class="konami-content">
+                        <div class="konami-icon">🎮</div>
+                        <h2 class="konami-title">Achievement Unlocked!</h2>
+                        <p class="konami-text">You found the secret Konami Code!</p>
+                        <div class="konami-badges">
+                            <span class="konami-badge">+30 Lives</span>
+                            <span class="konami-badge">God Mode</span>
+                            <span class="konami-badge">All Weapons</span>
+                        </div>
+                        <p class="konami-signature">~ Carlos Orbegoso, Backend Developer & Gamer ~</p>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+
+                // Add styles dynamically
+                const style = document.createElement('style');
+                style.textContent = `
+                    .konami-overlay {
+                        position: fixed;
+                        inset: 0;
+                        background: rgba(0, 0, 0, 0.95);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 99999;
+                        animation: konamiFadeIn 0.5s ease;
+                    }
+                    @keyframes konamiFadeIn {
+                        from { opacity: 0; }
+                        to { opacity: 1; }
+                    }
+                    .konami-content {
+                        text-align: center;
+                        animation: konamiSlideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+                    }
+                    @keyframes konamiSlideUp {
+                        from { opacity: 0; transform: translateY(50px) scale(0.9); }
+                        to { opacity: 1; transform: translateY(0) scale(1); }
+                    }
+                    .konami-icon {
+                        font-size: 5rem;
+                        animation: konamiPulse 1s ease infinite;
+                        margin-bottom: 1.5rem;
+                    }
+                    @keyframes konamiPulse {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.2); }
+                    }
+                    .konami-title {
+                        font-family: 'Poppins', sans-serif;
+                        font-size: 2.5rem;
+                        font-weight: 800;
+                        background: linear-gradient(90deg, #FFD700, #FF6B35, #00FFFF, #64B5F6);
+                        background-size: 300% 300%;
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                        background-clip: text;
+                        animation: konamiGradient 2s ease infinite;
+                        margin-bottom: 1rem;
+                    }
+                    @keyframes konamiGradient {
+                        0%, 100% { background-position: 0% 50%; }
+                        50% { background-position: 100% 50%; }
+                    }
+                    .konami-text {
+                        color: #ccc;
+                        font-size: 1.1rem;
+                        margin-bottom: 2rem;
+                    }
+                    .konami-badges {
+                        display: flex;
+                        gap: 1rem;
+                        justify-content: center;
+                        flex-wrap: wrap;
+                        margin-bottom: 2rem;
+                    }
+                    .konami-badge {
+                        padding: 0.5rem 1rem;
+                        background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 107, 53, 0.2));
+                        border: 1px solid rgba(255, 215, 0, 0.5);
+                        border-radius: 20px;
+                        color: #FFD700;
+                        font-family: 'JetBrains Mono', monospace;
+                        font-size: 0.85rem;
+                        animation: konamiBadgePop 0.5s ease backwards;
+                    }
+                    .konami-badge:nth-child(1) { animation-delay: 0.3s; }
+                    .konami-badge:nth-child(2) { animation-delay: 0.5s; }
+                    .konami-badge:nth-child(3) { animation-delay: 0.7s; }
+                    @keyframes konamiBadgePop {
+                        from { opacity: 0; transform: scale(0); }
+                        to { opacity: 1; transform: scale(1); }
+                    }
+                    .konami-signature {
+                        color: #666;
+                        font-style: italic;
+                        font-size: 0.9rem;
+                    }
+                    @keyframes konamiFadeOut {
+                        from { opacity: 1; }
+                        to { opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+
+                // Play retro sound effect
+                try {
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    oscillator.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+                    oscillator.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1);
+                    oscillator.frequency.setValueAtTime(1174.66, audioCtx.currentTime + 0.2);
+                    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                    oscillator.start(audioCtx.currentTime);
+                    oscillator.stop(audioCtx.currentTime + 0.5);
+                } catch (e) {}
+
+                // Remove overlay on click
+                overlay.addEventListener('click', () => {
+                    overlay.style.animation = 'konamiFadeOut 0.3s ease forwards';
+                    setTimeout(() => {
+                        overlay.remove();
+                        style.remove();
+                    }, 300);
+                });
+
+                // Auto-close after 5 seconds
+                setTimeout(() => {
+                    if (document.body.contains(overlay)) {
+                        overlay.click();
+                    }
+                }, 5000);
             }
         }
 
@@ -907,6 +1137,67 @@ const {
                 setTimeout(hideLoader, 800);
             }
         });
+
+        // Custom Cursor
+        const setupCustomCursor = () => {
+            const cursor = document.getElementById('custom-cursor');
+            if (!cursor) return;
+
+            const cursorDot = cursor.querySelector('.cursor-dot');
+            const cursorOutline = cursor.querySelector('.cursor-outline');
+
+            let mouseX = 0, mouseY = 0;
+            let outlineX = 0, outlineY = 0;
+
+            // Update cursor position
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+
+                // Move dot immediately
+                if (cursorDot) {
+                    cursorDot.style.left = mouseX + 'px';
+                    cursorDot.style.top = mouseY + 'px';
+                }
+            });
+
+            // Smooth outline follow
+            const animateOutline = () => {
+                outlineX += (mouseX - outlineX) * 0.15;
+                outlineY += (mouseY - outlineY) * 0.15;
+
+                if (cursorOutline) {
+                    cursorOutline.style.left = outlineX + 'px';
+                    cursorOutline.style.top = outlineY + 'px';
+                }
+
+                requestAnimationFrame(animateOutline);
+            };
+            animateOutline();
+
+            // Hover effect on interactive elements
+            const interactiveElements = document.querySelectorAll('a, button, .btn, .nav-link, .project-card, .stat-card, .tech-tag, .social-link, .floating-icon, input, textarea, select');
+
+            interactiveElements.forEach(el => {
+                el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+                el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+            });
+
+            // Click effect
+            document.addEventListener('mousedown', () => cursor.classList.add('clicking'));
+            document.addEventListener('mouseup', () => cursor.classList.remove('clicking'));
+
+            // Hide when leaving window
+            document.addEventListener('mouseleave', () => cursor.style.opacity = '0');
+            document.addEventListener('mouseenter', () => cursor.style.opacity = '1');
+        };
+
+        // Initialize cursor after DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setupCustomCursor);
+        } else {
+            setupCustomCursor();
+        }
     </script>
 </body>
 </html>

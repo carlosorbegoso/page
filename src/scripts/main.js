@@ -147,13 +147,13 @@ class Portfolio {
         //     log.error('❌ Error inicializando About Three.js Engine:', error);
         // }
 
-        // Inicializar cerebro 3D en la sección About
-        try {
-            this.brainEngine = new BrainThreeEngine('brain-container');
-            log.info('🧠 Cerebro 3D inicializado en sección About');
-        } catch (error) {
-            log.error('❌ Error inicializando cerebro 3D:', error);
-        }
+        // BrainThreeEngine deshabilitado - interfiere con la sección About
+        // try {
+        //     this.brainEngine = new BrainThreeEngine('brain-container');
+        //     log.info('🧠 Cerebro 3D inicializado en sección About');
+        // } catch (error) {
+        //     log.error('❌ Error inicializando cerebro 3D:', error);
+        // }
         
         // Simular carga de otros módulos avanzados
         await this.simulateModuleLoad('UIActionsEngine');

@@ -153,13 +153,6 @@
                         </div>
                     </div>
 
-                    <!-- Availability Status -->
-                    <div class="availability contact-animate" data-anim-delay="600">
-                        <div class="status-indicator">
-                            <span class="status-dot"></span>
-                            <span class="status-text">Available for new opportunities</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -537,40 +530,6 @@
     .social-link i {
         position: relative;
         z-index: 1;
-    }
-
-    /* Availability */
-    .availability {
-        margin-top: 0.5rem;
-    }
-
-    .status-indicator {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.625rem;
-        padding: 0.625rem 1.25rem;
-        background: rgba(74, 222, 128, 0.1);
-        border: 1px solid rgba(74, 222, 128, 0.2);
-        border-radius: 50px;
-    }
-
-    .status-dot {
-        width: 10px;
-        height: 10px;
-        background: #4ade80;
-        border-radius: 50%;
-        animation: statusPulse 2s ease-in-out infinite;
-    }
-
-    @keyframes statusPulse {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6); }
-        50% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); }
-    }
-
-    .status-text {
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #4ade80;
     }
 
     /* Animation observer styles */

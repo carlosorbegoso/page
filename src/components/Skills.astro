@@ -7,21 +7,15 @@
     <div id="skills-three-container" class="skills-three-container"></div>
 
     <div class="container">
-        <!-- Header con terminal style -->
+        <!-- Header -->
         <div class="section-header">
-            <div class="terminal-badge skill-animate" data-anim-delay="0">
-                <span class="terminal-dot red"></span>
-                <span class="terminal-dot yellow"></span>
-                <span class="terminal-dot green"></span>
-                <span class="terminal-text">~/skills</span>
+            <div class="section-badge skill-animate" data-anim-delay="0">
+                <i class="fas fa-layer-group"></i>
+                <span>Tech Stack</span>
             </div>
             <h2 class="section-title skill-animate" data-anim-delay="100">
-                <span class="title-gradient">Tech Stack</span>
-                <span class="title-cursor">_</span>
+                <span class="title-gradient">What I Work With</span>
             </h2>
-            <p class="section-subtitle skill-animate" data-anim-delay="200">
-                Technologies I use to build scalable and robust applications
-            </p>
         </div>
 
         <!-- Bento Grid Premium -->
@@ -37,9 +31,6 @@
                             <span class="card-label">Primary Focus</span>
                             <h3>Backend Development</h3>
                         </div>
-                        <div class="expertise-meter">
-                            <span class="progress-text">95%</span>
-                        </div>
                     </div>
 
                     <div class="skill-pills">
@@ -51,14 +42,6 @@
                         <div class="pill"><i class="fas fa-bolt"></i><span>GraphQL</span></div>
                         <div class="pill"><i class="fas fa-stream"></i><span>Kafka</span></div>
                         <div class="pill"><i class="fas fa-shield-alt"></i><span>OAuth 2.0</span></div>
-                    </div>
-
-                    <div class="card-stats">
-                        <div class="stat"><span class="stat-value">5+</span><span class="stat-label">Years</span></div>
-                        <div class="stat-divider"></div>
-                        <div class="stat"><span class="stat-value">50+</span><span class="stat-label">Projects</span></div>
-                        <div class="stat-divider"></div>
-                        <div class="stat"><span class="stat-value">1M+</span><span class="stat-label">Lines</span></div>
                     </div>
                 </div>
             </div>
@@ -195,34 +178,6 @@
         z-index: 1;
     }
 
-    .terminal-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        background: rgba(30, 35, 45, 0.8);
-        border: 1px solid rgba(100, 181, 246, 0.2);
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-        font-family: 'JetBrains Mono', monospace;
-    }
-
-    .terminal-dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-    }
-
-    .terminal-dot.red { background: #ff5f57; }
-    .terminal-dot.yellow { background: #febc2e; }
-    .terminal-dot.green { background: #28c840; }
-
-    .terminal-text {
-        color: var(--text-secondary);
-        font-size: 0.85rem;
-        margin-left: 0.5rem;
-    }
-
     .section-title {
         font-size: clamp(2rem, 5vw, 3rem);
         font-weight: 800;
@@ -239,13 +194,6 @@
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
-
-    .title-cursor {
-        color: var(--primary-color);
-        animation: blink 1s step-end infinite;
-    }
-
-    @keyframes blink { 50% { opacity: 0; } }
 
     .section-subtitle {
         font-size: 1.1rem;
@@ -378,24 +326,6 @@
 
     .card-header.mini h3 { font-size: 1rem; }
 
-    .expertise-meter {
-        margin-left: auto;
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(100, 181, 246, 0.1);
-        border-radius: 50%;
-        border: 2px solid rgba(100, 181, 246, 0.3);
-    }
-
-    .progress-text {
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: var(--primary-color);
-    }
-
     /* Skill Pills */
     .skill-pills {
         display: flex;
@@ -452,40 +382,6 @@
 
     .pill-learning { background: rgba(251, 191, 36, 0.08); border-color: rgba(251, 191, 36, 0.2); }
     .pill-learning i { color: #fbbf24; }
-
-    /* Card Stats */
-    .card-stats {
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-        margin-top: auto;
-        padding-top: 1.25rem;
-        border-top: 1px solid rgba(100, 181, 246, 0.08);
-    }
-
-    .stat { display: flex; flex-direction: column; }
-
-    .stat-value {
-        font-size: 1.5rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, var(--primary-color), #00ffff);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .stat-label {
-        font-size: 0.65rem;
-        color: var(--text-secondary);
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-    }
-
-    .stat-divider {
-        width: 1px;
-        height: 30px;
-        background: rgba(100, 181, 246, 0.15);
-    }
 
     /* Tech Marquee */
     .tech-marquee {
@@ -562,24 +458,16 @@
         .card-icon { width: 44px; height: 44px; font-size: 1.1rem; }
         .card-header h3 { font-size: 1.05rem; }
         .pill { padding: 0.35rem 0.65rem; font-size: 0.75rem; }
-        .card-stats { gap: 1rem; flex-wrap: wrap; }
-        .stat-value { font-size: 1.25rem; }
         .marquee-item { width: 44px; height: 44px; font-size: 1.25rem; }
         .bento-card:hover { transform: translateY(-3px); }
     }
 
     @media (max-width: 480px) {
-        .terminal-badge { font-size: 0.75rem; padding: 0.4rem 0.8rem; }
-        .terminal-dot { width: 8px; height: 8px; }
         .card-content { padding: 1rem; }
         .card-header { flex-wrap: wrap; gap: 0.75rem; }
         .card-icon { width: 40px; height: 40px; font-size: 1rem; border-radius: 10px; }
-        .expertise-meter { width: 42px; height: 42px; }
         .pill { padding: 0.3rem 0.5rem; font-size: 0.7rem; }
         .pill i { font-size: 0.65rem; }
-        .card-stats { padding-top: 1rem; }
-        .stat-value { font-size: 1.1rem; }
-        .stat-label { font-size: 0.6rem; }
         .tech-marquee { margin-top: 2.5rem; }
     }
 
@@ -593,7 +481,7 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-        .marquee-track, .title-cursor { animation: none; }
+        .marquee-track { animation: none; }
         .skill-animate { transition: opacity 0.3s ease; transform: none; }
     }
 </style>

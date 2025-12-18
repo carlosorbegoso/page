@@ -306,6 +306,30 @@ export async function getGitHubStats() {
     }
 }
 
+/**
+ * Get last commit date for the portfolio repo
+ */
+export async function getLastCommitDate(repoName = 'page') {
+    try {
+        const url = `${GITHUB_API_BASE}/repos/${GITHUB_USERNAME}/${repoName}/commits?per_page=1`;
+        const commits = await fetchWithCache(url);
+
+        if (commits && commits.length > 0) {
+            const lastCommit = commits[0];
+            return {
+                date: new Date(lastCommit.commit.committer.date),
+                message: lastCommit.commit.message.split('\n')[0],
+                sha: lastCommit.sha.substring(0, 7),
+                author: lastCommit.commit.author.name
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error('Error fetching last commit:', error);
+        return null;
+    }
+}
+
 // Language colors mapping (GitHub official colors)
 export const languageColors = {
     'Java': '#b07219',

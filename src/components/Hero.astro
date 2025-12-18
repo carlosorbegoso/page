@@ -1,5 +1,5 @@
 ---
-// Hero section - Sección principal con Three.js
+// Hero section - Main section with profile and Three.js background
 ---
 
 <section id="hero" class="hero section section-bg">
@@ -8,109 +8,1007 @@
         <div class="hero-particles" id="hero-particles"></div>
         <div class="hero-constellations" id="hero-constellations"></div>
         <div class="hero-stars" id="hero-stars"></div>
+        <!-- Gradient orbs -->
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
     </div>
 
     <!-- Contenido principal -->
     <div class="hero-container">
         <div class="hero-content">
-            <!-- Badge de rol -->
-            <div class="hero-badge animate-fade-in-up" data-delay="0.2s">
-                <div class="badge-icon">
-                    <i class="fas fa-code"></i>
-                </div>
-                <span class="badge-text">Available for Work</span>
-                <div class="badge-glow"></div>
-            </div>
-
-            <!-- Título principal - texto simple, efectos via Three.js -->
-            <h1 class="hero-title animate-fade-in-up" data-delay="0.4s" id="hero-title">
-                <span class="title-line">Carlos</span>
-                <span class="title-line">Orbegoso</span>
-            </h1>
-
-            <!-- Subtítulo con efecto typing -->
-            <p class="hero-subtitle animate-fade-in-up" data-delay="0.6s">
-                <span class="typing-text">Backend Developer & Java Specialist</span>
-                <span class="typing-cursor">|</span>
-            </p>
-
-            <!-- Descripción -->
-            <div class="hero-description animate-fade-in-up" data-delay="0.8s">
-                <p>I develop robust and scalable enterprise applications with the best technologies in the market.</p>
-            </div>
-
-            <!-- Botones de acción -->
-            <div class="hero-actions animate-fade-in-up" data-delay="1.0s">
-                <a href="#projects" class="btn btn-primary btn-hero">
-                    <div class="btn-content">
-                        <i class="fas fa-rocket btn-icon"></i>
-                        <span class="btn-text">View Projects</span>
+            <!-- Layout con foto y texto -->
+            <div class="hero-grid">
+                <!-- Foto de perfil -->
+                <div class="hero-photo animate-fade-in-up" data-delay="0.2s">
+                    <div class="photo-container">
+                        <div class="photo-wrapper">
+                            <img src="/images/profile.jpeg" alt="Carlos Orbegoso" class="profile-img">
+                            <div class="photo-ring"></div>
+                            <div class="photo-ring ring-2"></div>
+                            <div class="photo-glow"></div>
+                            <div class="photo-pulse"></div>
+                        </div>
                     </div>
-                    <div class="btn-glow"></div>
-                    <div class="btn-particles"></div>
-                </a>
 
-                <a href="#contact" class="btn btn-outline btn-hero">
-                    <div class="btn-content">
-                        <i class="fas fa-envelope btn-icon"></i>
-                        <span class="btn-text">Contact</span>
+                    <!-- Tech Icons Row (below photo) -->
+                    <div class="tech-icons-row">
+                        <div class="tech-icon icon-java" style="--delay: 0s;">
+                            <i class="fab fa-java"></i>
+                        </div>
+                        <div class="tech-icon icon-docker" style="--delay: 0.1s;">
+                            <i class="fab fa-docker"></i>
+                        </div>
+                        <div class="tech-icon icon-aws" style="--delay: 0.2s;">
+                            <i class="fab fa-aws"></i>
+                        </div>
+                        <div class="tech-icon icon-git" style="--delay: 0.3s;">
+                            <i class="fab fa-git-alt"></i>
+                        </div>
                     </div>
-                    <div class="btn-glow"></div>
-                    <div class="btn-particles"></div>
-                </a>
-            </div>
 
-            <!-- Stack de tecnologías -->
-            <div class="tech-stack animate-fade-in-up" data-delay="1.2s">
-                <div class="tech-badge" data-tech="java" data-delay="0.1s">
-                    <div class="tech-icon">
-                        <i class="fab fa-java"></i>
+                    <!-- Badges -->
+                    <div class="hero-badges">
+                        <!-- Badge disponible -->
+                        <div class="availability-badge">
+                            <span class="pulse"></span>
+                            <span>Available for Work</span>
+                        </div>
+                        <!-- Badge ubicación/clima -->
+                        <div class="location-badge" id="location-badge">
+                            <i class="fas fa-sun" id="hero-weather-icon"></i>
+                            <span id="hero-temp">--°C</span>
+                            <span class="location-separator">·</span>
+                            <span class="location-text">Lima, Peru</span>
+                        </div>
                     </div>
-                    <span class="tech-name">Java</span>
-                    <div class="tech-glow"></div>
                 </div>
 
-                <div class="tech-badge" data-tech="spring" data-delay="0.2s">
-                    <div class="tech-icon">
-                        <i class="fas fa-leaf"></i>
+                <!-- Info -->
+                <div class="hero-info">
+                    <!-- Greeting -->
+                    <div class="hero-greeting animate-fade-in-up" data-delay="0.3s">
+                        <span class="greeting-wave">👋</span>
+                        <span class="greeting-text">Hello, I'm</span>
                     </div>
-                    <span class="tech-name">Spring</span>
-                    <div class="tech-glow"></div>
-                </div>
 
-                <div class="tech-badge" data-tech="quarkus" data-delay="0.3s">
-                    <div class="tech-icon">
-                        <i class="fas fa-rocket"></i>
-                    </div>
-                    <span class="tech-name">Quarkus</span>
-                    <div class="tech-glow"></div>
-                </div>
+                    <!-- Nombre con efecto glitch -->
+                    <h1 class="hero-title animate-fade-in-up" data-delay="0.4s">
+                        <span class="title-line">Carlos</span>
+                        <span class="title-line highlight glitch" data-text="Orbegoso">Orbegoso</span>
+                    </h1>
 
-                <div class="tech-badge" data-tech="angular" data-delay="0.4s">
-                    <div class="tech-icon">
-                        <i class="fab fa-angular"></i>
+                    <!-- Rol con typing effect -->
+                    <div class="hero-subtitle animate-fade-in-up" data-delay="0.6s">
+                        <span class="typing-prefix">I'm a</span>
+                        <span class="typing-container">
+                            <span class="typing-text" id="typing-text"></span>
+                            <span class="typing-cursor">|</span>
+                        </span>
                     </div>
-                    <span class="tech-name">Angular</span>
-                    <div class="tech-glow"></div>
+
+                    <!-- Bio con highlight animado -->
+                    <p class="hero-bio animate-fade-in-up" data-delay="0.8s">
+                        Passionate about building <strong class="highlight-word">robust, scalable systems</strong> using modern technologies.
+                        Specialized in <strong class="highlight-word">microservices</strong>, <strong class="highlight-word">clean code</strong>, and delivering
+                        high-quality solutions that make a real impact.
+                    </p>
+
+                    <!-- Stats mini -->
+                    <div class="hero-stats animate-fade-in-up" data-delay="0.9s">
+                        <div class="hero-stat">
+                            <span class="stat-number" data-count="5">0</span>
+                            <span class="stat-label">Years Exp</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="hero-stat">
+                            <span class="stat-number" data-count="20">0</span>
+                            <span class="stat-label">Projects</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="hero-stat">
+                            <span class="stat-number" data-count="100">0</span>
+                            <span class="stat-label">% Passion</span>
+                        </div>
+                    </div>
+
+                    <!-- Botones mejorados -->
+                    <div class="hero-actions animate-fade-in-up" data-delay="1.0s">
+                        <a href="#tech" class="btn btn-primary magnetic-btn">
+                            <span class="btn-bg"></span>
+                            <i class="fas fa-rocket"></i>
+                            <span>View Projects</span>
+                        </a>
+                        <a href="#contact" class="btn btn-outline magnetic-btn">
+                            <span class="btn-border"></span>
+                            <i class="fas fa-envelope"></i>
+                            <span>Get In Touch</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Indicador de scroll -->
+    <!-- Indicador de scroll mejorado -->
     <div class="hero-scroll-indicator animate-fade-in-up" data-delay="1.4s">
-        <div class="scroll-arrow">
-            <div class="arrow-line"></div>
-            <div class="arrow-line"></div>
+        <div class="scroll-line">
+            <div class="scroll-dot"></div>
         </div>
-        <span class="scroll-text">Scroll to explore</span>
-        <div class="scroll-glow"></div>
-    </div>
-
-    <!-- Elementos decorativos flotantes -->
-    <div class="hero-decorations">
-        <div class="floating-element element-1"></div>
-        <div class="floating-element element-2"></div>
-        <div class="floating-element element-3"></div>
+        <span class="scroll-text">Scroll</span>
     </div>
 </section>
+
+<style>
+    .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        padding: 6rem 2rem 4rem;
+    }
+
+    .hero-background {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+
+    /* Gradient Orbs */
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.4;
+        animation: orbFloat 20s ease-in-out infinite;
+    }
+
+    .orb-1 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(100, 181, 246, 0.4) 0%, transparent 70%);
+        top: -10%;
+        right: -5%;
+        animation-delay: 0s;
+    }
+
+    .orb-2 {
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+        bottom: 10%;
+        left: -5%;
+        animation-delay: -7s;
+    }
+
+    .orb-3 {
+        width: 250px;
+        height: 250px;
+        background: radial-gradient(circle, rgba(0, 255, 255, 0.25) 0%, transparent 70%);
+        top: 40%;
+        left: 30%;
+        animation-delay: -14s;
+    }
+
+    @keyframes orbFloat {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        25% { transform: translate(30px, -30px) scale(1.1); }
+        50% { transform: translate(-20px, 20px) scale(0.95); }
+        75% { transform: translate(20px, 30px) scale(1.05); }
+    }
+
+    .hero-container {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .hero-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        align-items: center;
+        text-align: center;
+    }
+
+    @media (min-width: 768px) {
+        .hero-grid {
+            grid-template-columns: auto 1fr;
+            gap: 4rem;
+            text-align: left;
+        }
+    }
+
+    /* Photo Container */
+    .hero-photo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .photo-container {
+        position: relative;
+        width: 220px;
+        height: 220px;
+    }
+
+    @media (min-width: 768px) {
+        .photo-container {
+            width: 300px;
+            height: 300px;
+        }
+    }
+
+    /* Tech Icons Row (below photo) */
+    .tech-icons-row {
+        display: flex;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-top: -0.5rem;
+    }
+
+    .tech-icon {
+        width: 42px;
+        height: 42px;
+        background: rgba(13, 17, 23, 0.9);
+        border: 1px solid rgba(100, 181, 246, 0.3);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        animation: iconAppear 0.5s ease forwards;
+        animation-delay: calc(0.5s + var(--delay));
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    @keyframes iconAppear {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .tech-icon:hover {
+        transform: translateY(-5px) scale(1.1);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 20px currentColor;
+        border-color: currentColor;
+    }
+
+    .icon-java { color: #f89820; border-color: rgba(248, 152, 32, 0.3); }
+    .icon-docker { color: #2496ed; border-color: rgba(36, 150, 237, 0.3); }
+    .icon-aws { color: #ff9900; border-color: rgba(255, 153, 0, 0.3); }
+    .icon-git { color: #f05032; border-color: rgba(240, 80, 50, 0.3); }
+
+    .icon-java:hover { border-color: #f89820; }
+    .icon-docker:hover { border-color: #2496ed; }
+    .icon-aws:hover { border-color: #ff9900; }
+    .icon-git:hover { border-color: #f05032; }
+
+    .photo-wrapper {
+        position: absolute;
+        inset: 20px;
+    }
+
+    .profile-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center top;
+        border-radius: 50%;
+        border: 4px solid transparent;
+        background:
+            linear-gradient(var(--bg-color), var(--bg-color)) padding-box,
+            linear-gradient(135deg, var(--primary-color), #00ffff, #a855f7) border-box;
+        position: relative;
+        z-index: 2;
+        transition: transform 0.5s ease;
+    }
+
+    .photo-wrapper:hover .profile-img {
+        transform: scale(1.02);
+    }
+
+    .photo-ring {
+        position: absolute;
+        inset: -12px;
+        border-radius: 50%;
+        border: 2px dashed rgba(100, 181, 246, 0.3);
+        animation: spin 30s linear infinite;
+    }
+
+    .photo-ring.ring-2 {
+        inset: -24px;
+        border: 1px dashed rgba(168, 85, 247, 0.2);
+        animation: spinReverse 40s linear infinite;
+    }
+
+    .photo-glow {
+        position: absolute;
+        inset: -30px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(100, 181, 246, 0.25) 0%, transparent 70%);
+        filter: blur(25px);
+        z-index: 0;
+        animation: glowPulse 3s ease-in-out infinite;
+    }
+
+    .photo-pulse {
+        position: absolute;
+        inset: -5px;
+        border-radius: 50%;
+        border: 2px solid rgba(100, 181, 246, 0.5);
+        animation: pulseRing 2.5s ease-out infinite;
+        z-index: 1;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes spinReverse {
+        to { transform: rotate(-360deg); }
+    }
+
+    @keyframes glowPulse {
+        0%, 100% { opacity: 0.6; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.05); }
+    }
+
+    @keyframes pulseRing {
+        0% { transform: scale(1); opacity: 0.6; }
+        100% { transform: scale(1.3); opacity: 0; }
+    }
+
+    /* Badges */
+    .hero-badges {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .availability-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        border-radius: 50px;
+        font-size: 0.8rem;
+        color: #22c55e;
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+    }
+
+    .pulse {
+        width: 8px;
+        height: 8px;
+        background: #22c55e;
+        border-radius: 50%;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+        50% { opacity: 0.8; transform: scale(1.1); box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+    }
+
+    .location-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.4rem 0.85rem;
+        background: rgba(100, 181, 246, 0.08);
+        border: 1px solid rgba(100, 181, 246, 0.2);
+        border-radius: 50px;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .location-badge i {
+        color: #fbbf24;
+        font-size: 0.8rem;
+    }
+
+    .location-badge #hero-temp {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    .location-separator {
+        color: rgba(100, 181, 246, 0.4);
+    }
+
+    .location-text {
+        color: var(--text-secondary);
+        opacity: 0.8;
+    }
+
+    .location-badge:hover {
+        background: rgba(100, 181, 246, 0.12);
+        border-color: rgba(100, 181, 246, 0.3);
+    }
+
+    /* Info Section */
+    .hero-info {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    @media (min-width: 768px) {
+        .hero-info {
+            align-items: flex-start;
+        }
+    }
+
+    /* Greeting */
+    .hero-greeting {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+    }
+
+    .greeting-wave {
+        display: inline-block;
+        animation: wave 2.5s ease-in-out infinite;
+        transform-origin: 70% 70%;
+    }
+
+    @keyframes wave {
+        0%, 100% { transform: rotate(0deg); }
+        10%, 30% { transform: rotate(14deg); }
+        20% { transform: rotate(-8deg); }
+        40% { transform: rotate(0deg); }
+    }
+
+    /* Title with Glitch */
+    .hero-title {
+        font-size: clamp(2.5rem, 8vw, 4rem);
+        font-weight: 800;
+        line-height: 1.1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    @media (min-width: 768px) {
+        .hero-title {
+            flex-direction: row;
+            gap: 0.75rem;
+        }
+    }
+
+    .title-line {
+        color: var(--text-primary);
+    }
+
+    .title-line.highlight {
+        background: linear-gradient(135deg, var(--primary-color), #00ffff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        position: relative;
+    }
+
+    .glitch {
+        position: relative;
+    }
+
+    .glitch:hover::before,
+    .glitch:hover::after {
+        content: attr(data-text);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, var(--primary-color), #00ffff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .glitch:hover::before {
+        animation: glitch-1 0.3s infinite linear alternate-reverse;
+        clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+    }
+
+    .glitch:hover::after {
+        animation: glitch-2 0.3s infinite linear alternate-reverse;
+        clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+    }
+
+    @keyframes glitch-1 {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(3px); }
+    }
+
+    @keyframes glitch-2 {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-3px); }
+    }
+
+    /* Typing Effect */
+    .hero-subtitle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 1.25rem;
+        font-weight: 500;
+        min-height: 2rem;
+    }
+
+    @media (min-width: 768px) {
+        .hero-subtitle {
+            justify-content: flex-start;
+            font-size: 1.5rem;
+        }
+    }
+
+    .typing-prefix {
+        color: var(--text-secondary);
+    }
+
+    .typing-container {
+        display: flex;
+        align-items: center;
+    }
+
+    .typing-text {
+        background: linear-gradient(135deg, var(--primary-color), #00ffff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 600;
+    }
+
+    .typing-cursor {
+        color: var(--primary-color);
+        animation: blink 1s step-end infinite;
+        margin-left: 2px;
+    }
+
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+    }
+
+    /* Bio */
+    .hero-bio {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        line-height: 1.7;
+        max-width: 500px;
+    }
+
+    @media (min-width: 768px) {
+        .hero-bio {
+            font-size: 1.05rem;
+        }
+    }
+
+    .highlight-word {
+        color: var(--primary-color);
+        font-weight: 600;
+        position: relative;
+    }
+
+    .highlight-word::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary-color), #00ffff);
+        transition: width 0.3s ease;
+    }
+
+    .hero-bio:hover .highlight-word::after {
+        width: 100%;
+    }
+
+    /* Mini Stats */
+    .hero-stats {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1rem 0;
+    }
+
+    .hero-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    @media (min-width: 768px) {
+        .hero-stat {
+            align-items: flex-start;
+        }
+    }
+
+    .stat-number {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--primary-color);
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .stat-divider {
+        width: 1px;
+        height: 30px;
+        background: linear-gradient(180deg, transparent, rgba(100, 181, 246, 0.3), transparent);
+    }
+
+    /* Action Buttons */
+    .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 0.5rem;
+    }
+
+    @media (min-width: 768px) {
+        .hero-actions {
+            justify-content: flex-start;
+        }
+    }
+
+    .btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.875rem 1.75rem;
+        border-radius: 50px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        overflow: hidden;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), #00bcd4);
+        color: #000;
+        border: none;
+        box-shadow: 0 4px 15px rgba(100, 181, 246, 0.3);
+    }
+
+    .btn-primary .btn-bg {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, #00bcd4, var(--primary-color));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .btn-primary:hover .btn-bg {
+        opacity: 1;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(100, 181, 246, 0.5);
+    }
+
+    .btn-primary i,
+    .btn-primary span {
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: var(--primary-color);
+        border: 2px solid rgba(100, 181, 246, 0.3);
+    }
+
+    .btn-outline .btn-border {
+        position: absolute;
+        inset: -2px;
+        border-radius: 50px;
+        background: linear-gradient(135deg, var(--primary-color), #00ffff);
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .btn-outline::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 50px;
+        background: var(--bg-color);
+        z-index: -1;
+    }
+
+    .btn-outline:hover {
+        color: #fff;
+        border-color: transparent;
+        transform: translateY(-3px);
+    }
+
+    .btn-outline:hover .btn-border {
+        opacity: 1;
+    }
+
+    /* Scroll Indicator */
+    .hero-scroll-indicator {
+        position: absolute;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+    }
+
+    .scroll-line {
+        width: 1px;
+        height: 50px;
+        background: linear-gradient(180deg, rgba(100, 181, 246, 0.5), transparent);
+        position: relative;
+    }
+
+    .scroll-dot {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 6px;
+        height: 6px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        animation: scrollDot 2s ease-in-out infinite;
+    }
+
+    @keyframes scrollDot {
+        0%, 100% { top: 0; opacity: 1; }
+        50% { top: 100%; opacity: 0.3; }
+    }
+
+    /* Animations */
+    .animate-fade-in-up {
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.8s ease forwards;
+    }
+
+    .animate-fade-in-up[data-delay="0.2s"] { animation-delay: 0.2s; }
+    .animate-fade-in-up[data-delay="0.3s"] { animation-delay: 0.3s; }
+    .animate-fade-in-up[data-delay="0.4s"] { animation-delay: 0.4s; }
+    .animate-fade-in-up[data-delay="0.6s"] { animation-delay: 0.6s; }
+    .animate-fade-in-up[data-delay="0.8s"] { animation-delay: 0.8s; }
+    .animate-fade-in-up[data-delay="0.9s"] { animation-delay: 0.9s; }
+    .animate-fade-in-up[data-delay="1.0s"] { animation-delay: 1.0s; }
+    .animate-fade-in-up[data-delay="1.4s"] { animation-delay: 1.4s; }
+
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .tech-icon {
+            width: 38px;
+            height: 38px;
+            font-size: 1.1rem;
+        }
+
+        .hero-stats {
+            gap: 1rem;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .hero {
+            padding: 5rem 1.5rem 3rem;
+        }
+
+        .photo-container {
+            width: 180px;
+            height: 180px;
+        }
+
+        .tech-icons-row {
+            gap: 0.5rem;
+        }
+
+        .tech-icon {
+            width: 34px;
+            height: 34px;
+            font-size: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        .location-badge {
+            font-size: 0.7rem;
+            padding: 0.35rem 0.75rem;
+        }
+
+        .hero-stats {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    }
+</style>
+
+<script>
+    import { getCurrentWeather, getCurrentTime } from '../scripts/services/weather-api.js';
+
+    // Typing effect
+    const roles = ['Backend Developer', 'Java Specialist', 'Microservices Expert', 'Cloud Architect'];
+    let roleIndex = 0;
+    let charIndex = 0;
+    let isDeleting = false;
+    const typingEl = document.getElementById('typing-text');
+
+    function typeEffect() {
+        if (!typingEl) return;
+
+        const currentRole = roles[roleIndex];
+
+        if (isDeleting) {
+            typingEl.textContent = currentRole.substring(0, charIndex - 1);
+            charIndex--;
+        } else {
+            typingEl.textContent = currentRole.substring(0, charIndex + 1);
+            charIndex++;
+        }
+
+        let typeSpeed = isDeleting ? 50 : 100;
+
+        if (!isDeleting && charIndex === currentRole.length) {
+            typeSpeed = 2000; // Pause at end
+            isDeleting = true;
+        } else if (isDeleting && charIndex === 0) {
+            isDeleting = false;
+            roleIndex = (roleIndex + 1) % roles.length;
+            typeSpeed = 500; // Pause before next word
+        }
+
+        setTimeout(typeEffect, typeSpeed);
+    }
+
+    // Animate numbers
+    function animateNumbers() {
+        const statNumbers = document.querySelectorAll('.stat-number[data-count]');
+        statNumbers.forEach(el => {
+            const target = parseInt(el.getAttribute('data-count') || '0');
+            const duration = 2000;
+            const start = performance.now();
+
+            function update(now: number) {
+                const progress = Math.min((now - start) / duration, 1);
+                const ease = 1 - Math.pow(1 - progress, 3);
+                el.textContent = Math.floor(target * ease).toString();
+                if (progress < 1) requestAnimationFrame(update);
+                else el.textContent = target.toString();
+            }
+            requestAnimationFrame(update);
+        });
+    }
+
+    // Update weather data
+    async function updateWeather() {
+        try {
+            const weather = await getCurrentWeather();
+
+            if (weather) {
+                // Update Hero badge
+                const heroTempEl = document.getElementById('hero-temp');
+                const heroIconEl = document.getElementById('hero-weather-icon');
+
+                if (heroTempEl) {
+                    heroTempEl.textContent = `${weather.temperature}°C`;
+                }
+
+                if (heroIconEl) {
+                    heroIconEl.className = `fas ${weather.icon}`;
+                    // Color based on weather
+                    if (weather.icon.includes('sun')) {
+                        heroIconEl.style.color = '#fbbf24';
+                    } else if (weather.icon.includes('cloud')) {
+                        heroIconEl.style.color = '#94a3b8';
+                    } else if (weather.icon.includes('rain') || weather.icon.includes('bolt')) {
+                        heroIconEl.style.color = '#60a5fa';
+                    } else if (weather.icon.includes('moon')) {
+                        heroIconEl.style.color = '#a78bfa';
+                    } else {
+                        heroIconEl.style.color = '#fbbf24';
+                    }
+                }
+
+                // Add tooltip with weather details
+                const locationBadge = document.getElementById('location-badge');
+                if (locationBadge) {
+                    locationBadge.setAttribute('data-tooltip',
+                        `${weather.description} · Feels like ${weather.feelsLike}°C · ${weather.humidity}% humidity`
+                    );
+                }
+
+                // Update Header weather button
+                const headerTempEl = document.getElementById('header-temp');
+                const headerIconEl = document.getElementById('weather-icon');
+                const weatherBtn = document.querySelector('.weather-btn');
+
+                if (headerTempEl && headerIconEl && weatherBtn) {
+                    headerTempEl.textContent = `${weather.temperature}°`;
+                    headerIconEl.className = `fas ${weather.icon} theme-icon`;
+                    weatherBtn.classList.add('has-weather');
+                }
+            }
+        } catch (error) {
+            console.log('Weather API unavailable');
+        }
+    }
+
+    // Update time display
+    function updateTime() {
+        const timeEl = document.getElementById('header-time');
+        if (timeEl) {
+            const time = getCurrentTime();
+            if (time) {
+                timeEl.textContent = time;
+            }
+        }
+    }
+
+    // Initialize
+    setTimeout(typeEffect, 1500); // Start typing after animations
+    setTimeout(animateNumbers, 1200); // Animate numbers
+    updateWeather();
+    updateTime();
+
+    // Update time every minute
+    setInterval(updateTime, 60000);
+
+    // Update weather every 15 minutes
+    setInterval(updateWeather, 15 * 60 * 1000);
+</script>

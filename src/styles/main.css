@@ -476,28 +476,51 @@ body {
     transform: rotate(-45deg) translate(4px, -4px);
 }
 
-/* Cosmic Progress Bar */
+/* Cosmic Progress Bar - Premium Edition */
 .cosmic-progress {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 0%;
     height: 3px;
-    background: linear-gradient(90deg, #00ffff, #a855f7, #06b6d4, #00ffff);
-    background-size: 300% 100%;
-    animation: progressGlow 3s linear infinite;
-    transition: width 0.3s ease;
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(168, 85, 247, 0.3);
+    background: linear-gradient(90deg, #00ffff, #a855f7, #06b6d4, #ff6b9d, #00ffff);
+    background-size: 400% 100%;
+    animation: progressGlow 4s linear infinite;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow:
+        0 0 10px rgba(0, 255, 255, 0.6),
+        0 0 20px rgba(168, 85, 247, 0.4),
+        0 0 30px rgba(0, 255, 255, 0.2);
+    z-index: 100;
+    overflow: hidden;
+}
+
+.cosmic-progress::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: progressShine 2s ease-in-out infinite;
+}
+
+@keyframes progressShine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
 }
 
 @keyframes progressGlow {
     0% { background-position: 0% 50%; }
-    100% { background-position: 300% 50%; }
+    100% { background-position: 400% 50%; }
 }
 
 [data-theme="light"] .cosmic-progress {
-    background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--primary-color));
-    box-shadow: 0 0 10px rgba(100, 181, 246, 0.5);
+    background: linear-gradient(90deg, var(--primary-color), #a855f7, var(--accent-color), var(--primary-color));
+    box-shadow:
+        0 0 10px rgba(100, 181, 246, 0.6),
+        0 0 20px rgba(168, 85, 247, 0.3);
 }
 
 /* ===== MOBILE BOTTOM NAVIGATION ===== */
@@ -2527,5 +2550,339 @@ img[loading="lazy"].loaded {
         padding-bottom: max(2rem, env(safe-area-inset-bottom));
         padding-left: max(1rem, env(safe-area-inset-left));
         padding-right: max(1rem, env(safe-area-inset-right));
+    }
+}
+
+/* ===== PREMIUM SECTION TRANSITIONS ===== */
+
+/* Scroll-based reveal animations */
+.reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-on-scroll.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Staggered reveal for children */
+.reveal-stagger > * {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-stagger.is-visible > *:nth-child(1) { transition-delay: 0.1s; opacity: 1; transform: translateY(0); }
+.reveal-stagger.is-visible > *:nth-child(2) { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
+.reveal-stagger.is-visible > *:nth-child(3) { transition-delay: 0.3s; opacity: 1; transform: translateY(0); }
+.reveal-stagger.is-visible > *:nth-child(4) { transition-delay: 0.4s; opacity: 1; transform: translateY(0); }
+.reveal-stagger.is-visible > *:nth-child(5) { transition-delay: 0.5s; opacity: 1; transform: translateY(0); }
+.reveal-stagger.is-visible > *:nth-child(6) { transition-delay: 0.6s; opacity: 1; transform: translateY(0); }
+
+/* Section fade transitions */
+.section {
+    --section-transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.section-header {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity var(--section-transition), transform var(--section-transition);
+}
+
+.section.section-visible .section-header {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ===== PREMIUM CARD HOVER EFFECTS ===== */
+
+/* Enhanced glass card with premium hover */
+.glass-card-premium {
+    background: var(--card-bg-glass);
+    backdrop-filter: var(--card-backdrop);
+    border: var(--card-border);
+    border-radius: var(--card-radius);
+    padding: var(--card-padding);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card-premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(100, 181, 246, 0.08),
+        transparent
+    );
+    transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card-premium::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+        800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(100, 181, 246, 0.06),
+        transparent 40%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.glass-card-premium:hover::before {
+    left: 100%;
+}
+
+.glass-card-premium:hover::after {
+    opacity: 1;
+}
+
+.glass-card-premium:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border: var(--card-border-hover);
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-8px) scale(1.01);
+}
+
+/* Card with glow border effect */
+.card-glow-border {
+    position: relative;
+    background: var(--card-bg-glass);
+    backdrop-filter: var(--card-backdrop);
+    border-radius: var(--card-radius);
+    padding: var(--card-padding);
+    transition: all 0.4s ease;
+}
+
+.card-glow-border::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: calc(var(--card-radius) + 1px);
+    background: linear-gradient(
+        135deg,
+        rgba(100, 181, 246, 0.3),
+        rgba(100, 181, 246, 0.05),
+        rgba(0, 255, 255, 0.3)
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: -1;
+}
+
+.card-glow-border:hover::before {
+    opacity: 1;
+}
+
+.card-glow-border:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25),
+                0 0 40px rgba(100, 181, 246, 0.1);
+}
+
+/* Interactive card with 3D tilt */
+.card-3d-tilt {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.card-3d-tilt:hover {
+    transform: rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg)) translateZ(10px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3),
+                0 0 50px rgba(100, 181, 246, 0.15);
+}
+
+.card-3d-tilt .card-content {
+    transform: translateZ(20px);
+    transition: transform 0.4s ease;
+}
+
+/* ===== ENHANCED SKILL CARD EFFECTS ===== */
+.skill-category {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.skill-category:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--card-shadow-glow);
+}
+
+.skill-category::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+}
+
+.skill-category:hover::before {
+    transform: scaleX(1);
+}
+
+/* ===== ENHANCED PROJECT CARD ===== */
+.project-card {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.project-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3),
+                0 0 50px rgba(100, 181, 246, 0.15);
+}
+
+.project-card .project-image {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.project-card:hover .project-image {
+    transform: scale(1.08) rotate(2deg);
+}
+
+/* ===== EXPERIENCE CARD ENHANCEMENTS ===== */
+.experience-content {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.experience-content:hover {
+    transform: translateY(-6px) translateX(5px);
+    box-shadow: var(--card-shadow-glow);
+}
+
+/* ===== CONTACT CARD ENHANCEMENTS ===== */
+.contact-item {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.contact-item:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--card-shadow-glow);
+}
+
+.contact-item .contact-icon {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.contact-item:hover .contact-icon {
+    transform: scale(1.15) rotate(10deg);
+    background: rgba(100, 181, 246, 0.15);
+    box-shadow: 0 0 25px rgba(100, 181, 246, 0.3);
+}
+
+/* ===== BUTTON PREMIUM HOVER ===== */
+.btn-premium {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-premium::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+}
+
+.btn-premium:hover::before {
+    width: 300%;
+    height: 300%;
+}
+
+.btn-premium:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(100, 181, 246, 0.3);
+}
+
+/* ===== MOBILE OPTIMIZATIONS ===== */
+@media (max-width: 768px) {
+    /* Disable complex hover effects on touch devices */
+    .glass-card-premium::before,
+    .glass-card-premium::after,
+    .card-glow-border::before {
+        display: none;
+    }
+
+    /* Simplify transitions */
+    .glass-card-premium:hover,
+    .card-glow-border:hover,
+    .skill-category:hover,
+    .project-card:hover,
+    .experience-content:hover,
+    .contact-item:hover {
+        transform: translateY(-4px);
+    }
+
+    /* Reduce animation complexity */
+    .reveal-on-scroll {
+        transform: translateY(20px);
+        transition-duration: 0.5s;
+    }
+
+    /* Touch-friendly interactions */
+    .glass-card-premium:active,
+    .card-glow-border:active,
+    .project-card:active,
+    .contact-item:active {
+        transform: scale(0.98);
+        transition-duration: 0.1s;
+    }
+}
+
+/* Ultra-low power mode for very small devices */
+@media (max-width: 480px) {
+    .reveal-on-scroll {
+        opacity: 1;
+        transform: none;
+    }
+
+    .glass-card-premium:hover,
+    .card-glow-border:hover,
+    .skill-category:hover,
+    .project-card:hover,
+    .experience-content:hover,
+    .contact-item:hover {
+        transform: none;
+        box-shadow: var(--card-shadow);
+    }
+
+    /* Minimal transition for performance */
+    * {
+        transition-duration: 0.2s !important;
+    }
+}
+
+/* ===== SMOOTH SCROLL BEHAVIOR ===== */
+html {
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
     }
 }

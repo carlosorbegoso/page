@@ -16,6 +16,7 @@ import { DeviceDetector } from './utils/device-detector.js';
 import { MobileMenuManager } from './utils/mobile-menu.js';
 import { HeroAnimations } from './utils/hero-animations.js';
 import { AboutAnimations } from './utils/about-animations.js';
+import { CardEffects } from './utils/card-effects.js';
 
 // ===== CLASE PRINCIPAL DEL PORTFOLIO =====
 class Portfolio {
@@ -31,6 +32,7 @@ class Portfolio {
         this.mobileMenuManager = null;
         this.heroAnimations = null;
         this.aboutAnimations = null;
+        this.cardEffects = null;
     }
 
     /**
@@ -93,7 +95,11 @@ class Portfolio {
         // Inicializar animaciones del About
         this.aboutAnimations = new AboutAnimations();
         log.info('🎭 AboutAnimations inicializado');
-        
+
+        // Inicializar efectos de cards
+        this.cardEffects = new CardEffects();
+        log.info('🃏 CardEffects inicializado');
+
         // Simular carga de otros módulos
         await this.simulateModuleLoad('StyleManager');
         await this.simulateModuleLoad('LanguageSystem');

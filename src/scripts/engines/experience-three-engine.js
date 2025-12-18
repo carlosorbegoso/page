@@ -1,6 +1,6 @@
 /**
  * Experience Section Three.js Engine
- * Subtle rising particles and timeline glow effects
+ * Elegant timeline effect with flowing energy and subtle particles
  */
 
 import * as THREE from 'three';
@@ -13,13 +13,14 @@ export class ExperienceThreeEngine {
         this.scene = null;
         this.camera = null;
         this.renderer = null;
-        this.risingParticles = null;
-        this.glowSpheres = [];
-        this.timelineBeam = null;
+        this.flowingParticles = null;
+        this.timelineEnergy = null;
+        this.floatingOrbs = [];
         this.ambientStars = null;
         this.time = 0;
         this.isVisible = false;
         this.mouse = new THREE.Vector2();
+        this.targetMouse = new THREE.Vector2();
 
         // Mobile detection for performance
         this.isMobile = window.innerWidth <= 768;
@@ -50,11 +51,11 @@ export class ExperienceThreeEngine {
         this.container.appendChild(this.renderer.domElement);
         this.renderer.domElement.style.pointerEvents = 'none';
 
-        // Create subtle effects
-        this.createRisingParticles();
-        this.createGlowSpheres();
-        this.createTimelineBeam();
+        // Create elegant effects
         this.createAmbientStars();
+        this.createFlowingParticles();
+        this.createTimelineEnergy();
+        this.createFloatingOrbs();
 
         // Events
         window.addEventListener('resize', () => this.onResize());
@@ -64,35 +65,98 @@ export class ExperienceThreeEngine {
         this.animate();
     }
 
-    createRisingParticles() {
-        const particleCount = Math.floor(150 * this.particleMultiplier);
+    createAmbientStars() {
+        const count = Math.floor(100 * this.particleMultiplier);
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(count * 3);
+        const sizes = new Float32Array(count);
+        const twinklePhases = new Float32Array(count);
+
+        for (let i = 0; i < count; i++) {
+            positions[i * 3] = (Math.random() - 0.5) * 150;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 100;
+            positions[i * 3 + 2] = -40 - Math.random() * 30;
+
+            sizes[i] = 0.2 + Math.random() * 0.5;
+            twinklePhases[i] = Math.random() * Math.PI * 2;
+        }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        geometry.setAttribute('twinklePhase', new THREE.BufferAttribute(twinklePhases, 1));
+
+        const material = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 },
+                pixelRatio: { value: this.renderer.getPixelRatio() }
+            },
+            vertexShader: `
+                attribute float size;
+                attribute float twinklePhase;
+                uniform float time;
+                uniform float pixelRatio;
+                varying float vTwinkle;
+
+                void main() {
+                    vTwinkle = 0.4 + 0.4 * sin(time * 1.2 + twinklePhase);
+
+                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                    gl_PointSize = size * pixelRatio * (80.0 / -mvPosition.z);
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            `,
+            fragmentShader: `
+                varying float vTwinkle;
+
+                void main() {
+                    float dist = length(gl_PointCoord - vec2(0.5));
+                    if (dist > 0.5) discard;
+
+                    float alpha = vTwinkle * smoothstep(0.5, 0.0, dist) * 0.6;
+                    gl_FragColor = vec4(1.0, 1.0, 1.0, alpha);
+                }
+            `,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+
+        this.ambientStars = new THREE.Points(geometry, material);
+        this.scene.add(this.ambientStars);
+    }
+
+    createFlowingParticles() {
+        const particleCount = Math.floor(120 * this.particleMultiplier);
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(particleCount * 3);
         const colors = new Float32Array(particleCount * 3);
         const sizes = new Float32Array(particleCount);
         const velocities = [];
+        const phases = new Float32Array(particleCount);
 
         for (let i = 0; i < particleCount; i++) {
             // Spread particles across the view
             positions[i * 3] = (Math.random() - 0.5) * 100;
             positions[i * 3 + 1] = Math.random() * 100 - 50;
-            positions[i * 3 + 2] = (Math.random() - 0.5) * 40 - 20;
+            positions[i * 3 + 2] = (Math.random() - 0.5) * 40 - 15;
 
             // Cyan/blue colors with variation
-            const hue = 0.5 + Math.random() * 0.1; // Cyan range
+            const hue = 0.52 + Math.random() * 0.08;
             const color = new THREE.Color();
-            color.setHSL(hue, 0.8, 0.6);
+            color.setHSL(hue, 0.7, 0.55);
             colors[i * 3] = color.r;
             colors[i * 3 + 1] = color.g;
             colors[i * 3 + 2] = color.b;
 
-            sizes[i] = 0.5 + Math.random() * 1.5;
-            velocities.push(0.02 + Math.random() * 0.04);
+            sizes[i] = 0.8 + Math.random() * 1.5;
+            velocities.push(0.015 + Math.random() * 0.03);
+            phases[i] = Math.random() * Math.PI * 2;
         }
 
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
         geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        geometry.setAttribute('phase', new THREE.BufferAttribute(phases, 1));
 
         const material = new THREE.ShaderMaterial({
             uniforms: {
@@ -102,6 +166,7 @@ export class ExperienceThreeEngine {
             vertexShader: `
                 attribute float size;
                 attribute vec3 color;
+                attribute float phase;
                 uniform float time;
                 uniform float pixelRatio;
                 varying vec3 vColor;
@@ -112,14 +177,14 @@ export class ExperienceThreeEngine {
 
                     vec3 pos = position;
                     // Gentle floating motion
-                    pos.x += sin(time * 0.3 + position.y * 0.05) * 2.0;
-                    pos.z += cos(time * 0.2 + position.x * 0.03) * 1.5;
+                    pos.x += sin(time * 0.4 + phase + position.y * 0.04) * 2.5;
+                    pos.z += cos(time * 0.25 + phase) * 1.8;
 
                     // Pulse alpha based on position
-                    vAlpha = 0.3 + 0.3 * sin(time * 1.5 + position.y * 0.1);
+                    vAlpha = 0.35 + 0.25 * sin(time * 1.8 + phase);
 
                     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-                    gl_PointSize = size * pixelRatio * (180.0 / -mvPosition.z);
+                    gl_PointSize = size * pixelRatio * (140.0 / -mvPosition.z);
                     gl_Position = projectionMatrix * mvPosition;
                 }
             `,
@@ -131,8 +196,9 @@ export class ExperienceThreeEngine {
                     float dist = length(gl_PointCoord - vec2(0.5));
                     if (dist > 0.5) discard;
 
-                    float alpha = vAlpha * smoothstep(0.5, 0.0, dist);
-                    gl_FragColor = vec4(vColor, alpha);
+                    float alpha = vAlpha * smoothstep(0.5, 0.1, dist);
+                    vec3 glow = vColor + vec3(0.15) * (1.0 - dist * 2.0);
+                    gl_FragColor = vec4(glow, alpha);
                 }
             `,
             transparent: true,
@@ -140,21 +206,84 @@ export class ExperienceThreeEngine {
             depthWrite: false
         });
 
-        this.risingParticles = new THREE.Points(geometry, material);
+        this.flowingParticles = new THREE.Points(geometry, material);
         this.particleVelocities = velocities;
-        this.scene.add(this.risingParticles);
+        this.scene.add(this.flowingParticles);
     }
 
-    createGlowSpheres() {
-        // Subtle glow spheres that float around
-        const count = Math.floor(8 * this.particleMultiplier);
+    createTimelineEnergy() {
+        // Vertical energy beam on the left side (where timeline is)
+        const geometry = new THREE.PlaneGeometry(3, 120, 1, 60);
+
+        const material = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                uniform float time;
+
+                void main() {
+                    vUv = uv;
+
+                    vec3 pos = position;
+                    // Subtle wave
+                    pos.x += sin(uv.y * 8.0 + time * 2.0) * 0.3;
+
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform float time;
+                varying vec2 vUv;
+
+                void main() {
+                    // Horizontal gradient (fade at edges)
+                    float horizFade = exp(-pow(abs(vUv.x - 0.5) * 4.0, 2.0));
+
+                    // Energy pulses moving upward
+                    float pulse1 = sin(vUv.y * 20.0 - time * 3.0) * 0.5 + 0.5;
+                    float pulse2 = sin(vUv.y * 15.0 - time * 2.0 + 1.5) * 0.5 + 0.5;
+                    float energy = pulse1 * 0.6 + pulse2 * 0.4;
+
+                    // Color gradient (cyan to blue)
+                    vec3 color1 = vec3(0.0, 0.9, 0.9);
+                    vec3 color2 = vec3(0.3, 0.5, 1.0);
+                    vec3 color = mix(color1, color2, vUv.y + sin(time * 0.5) * 0.2);
+
+                    float alpha = horizFade * energy * 0.12;
+
+                    gl_FragColor = vec4(color, alpha);
+                }
+            `,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            side: THREE.DoubleSide
+        });
+
+        this.timelineEnergy = new THREE.Mesh(geometry, material);
+        this.timelineEnergy.position.set(-38, 0, -10);
+        this.scene.add(this.timelineEnergy);
+    }
+
+    createFloatingOrbs() {
+        // Subtle glow orbs that float around
+        const count = Math.floor(5 * this.particleMultiplier);
 
         for (let i = 0; i < count; i++) {
-            const geometry = new THREE.SphereGeometry(2 + Math.random() * 3, 16, 16);
+            const size = 2 + Math.random() * 3;
+            const geometry = new THREE.SphereGeometry(size, 24, 24);
+
+            const hue = 0.5 + Math.random() * 0.12;
+            const color = new THREE.Color();
+            color.setHSL(hue, 0.75, 0.5);
+
             const material = new THREE.ShaderMaterial({
                 uniforms: {
                     time: { value: 0 },
-                    color: { value: new THREE.Color(i % 2 === 0 ? 0x00ffff : 0x4488ff) }
+                    color: { value: color },
+                    phase: { value: Math.random() * Math.PI * 2 }
                 },
                 vertexShader: `
                     varying vec3 vNormal;
@@ -166,12 +295,14 @@ export class ExperienceThreeEngine {
                 fragmentShader: `
                     uniform float time;
                     uniform vec3 color;
+                    uniform float phase;
                     varying vec3 vNormal;
 
                     void main() {
-                        float intensity = pow(0.6 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.5);
-                        float pulse = 0.5 + 0.3 * sin(time * 2.0);
-                        gl_FragColor = vec4(color, intensity * pulse * 0.3);
+                        float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 2.8);
+                        float pulse = 0.5 + 0.3 * sin(time * 1.8 + phase);
+                        float alpha = fresnel * pulse * 0.35;
+                        gl_FragColor = vec4(color, alpha);
                     }
                 `,
                 transparent: true,
@@ -180,90 +311,23 @@ export class ExperienceThreeEngine {
                 side: THREE.BackSide
             });
 
-            const sphere = new THREE.Mesh(geometry, material);
-            sphere.position.set(
+            const orb = new THREE.Mesh(geometry, material);
+            orb.position.set(
                 (Math.random() - 0.5) * 80,
                 (Math.random() - 0.5) * 60,
-                (Math.random() - 0.5) * 30 - 15
+                (Math.random() - 0.5) * 25 - 15
             );
 
-            sphere.userData = {
-                originalY: sphere.position.y,
+            orb.userData = {
+                originalPos: orb.position.clone(),
                 floatPhase: Math.random() * Math.PI * 2,
-                floatSpeed: 0.3 + Math.random() * 0.3,
-                driftX: (Math.random() - 0.5) * 0.02,
-                driftZ: (Math.random() - 0.5) * 0.01
+                floatSpeed: 0.25 + Math.random() * 0.25,
+                floatAmplitude: 4 + Math.random() * 4
             };
 
-            this.glowSpheres.push(sphere);
-            this.scene.add(sphere);
+            this.floatingOrbs.push(orb);
+            this.scene.add(orb);
         }
-    }
-
-    createTimelineBeam() {
-        // Vertical beam of light on the left side (where timeline is)
-        const geometry = new THREE.PlaneGeometry(0.5, 100);
-        const material = new THREE.ShaderMaterial({
-            uniforms: {
-                time: { value: 0 }
-            },
-            vertexShader: `
-                varying vec2 vUv;
-                void main() {
-                    vUv = uv;
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-            `,
-            fragmentShader: `
-                uniform float time;
-                varying vec2 vUv;
-
-                void main() {
-                    float dist = abs(vUv.x - 0.5) * 2.0;
-                    float beam = exp(-dist * 8.0);
-
-                    // Moving glow effect
-                    float wave = sin(vUv.y * 10.0 - time * 2.0) * 0.5 + 0.5;
-                    beam *= 0.3 + wave * 0.4;
-
-                    vec3 color = mix(vec3(0.0, 1.0, 1.0), vec3(0.3, 0.6, 1.0), vUv.y);
-                    gl_FragColor = vec4(color, beam * 0.15);
-                }
-            `,
-            transparent: true,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false,
-            side: THREE.DoubleSide
-        });
-
-        this.timelineBeam = new THREE.Mesh(geometry, material);
-        this.timelineBeam.position.set(-35, 0, -10);
-        this.scene.add(this.timelineBeam);
-    }
-
-    createAmbientStars() {
-        const count = Math.floor(80 * this.particleMultiplier);
-        const geometry = new THREE.BufferGeometry();
-        const positions = new Float32Array(count * 3);
-
-        for (let i = 0; i < count; i++) {
-            positions[i * 3] = (Math.random() - 0.5) * 120;
-            positions[i * 3 + 1] = (Math.random() - 0.5) * 80;
-            positions[i * 3 + 2] = -30 - Math.random() * 20;
-        }
-
-        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-        const material = new THREE.PointsMaterial({
-            color: 0xffffff,
-            size: 0.3,
-            transparent: true,
-            opacity: 0.15,
-            blending: THREE.AdditiveBlending
-        });
-
-        this.ambientStars = new THREE.Points(geometry, material);
-        this.scene.add(this.ambientStars);
     }
 
     setupIntersectionObserver() {
@@ -281,8 +345,8 @@ export class ExperienceThreeEngine {
     }
 
     onMouseMove(event) {
-        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        this.targetMouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        this.targetMouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     }
 
     onResize() {
@@ -303,11 +367,21 @@ export class ExperienceThreeEngine {
 
         this.time += 0.016;
 
-        // Animate rising particles
-        if (this.risingParticles) {
-            this.risingParticles.material.uniforms.time.value = this.time;
+        // Smooth mouse follow
+        this.mouse.x += (this.targetMouse.x - this.mouse.x) * 0.04;
+        this.mouse.y += (this.targetMouse.y - this.mouse.y) * 0.04;
 
-            const positions = this.risingParticles.geometry.attributes.position.array;
+        // Animate ambient stars
+        if (this.ambientStars) {
+            this.ambientStars.material.uniforms.time.value = this.time;
+            this.ambientStars.rotation.y += 0.00008;
+        }
+
+        // Animate flowing particles
+        if (this.flowingParticles) {
+            this.flowingParticles.material.uniforms.time.value = this.time;
+
+            const positions = this.flowingParticles.geometry.attributes.position.array;
             for (let i = 0; i < positions.length / 3; i++) {
                 // Rise upward
                 positions[i * 3 + 1] += this.particleVelocities[i];
@@ -318,48 +392,53 @@ export class ExperienceThreeEngine {
                     positions[i * 3] = (Math.random() - 0.5) * 100;
                 }
             }
-            this.risingParticles.geometry.attributes.position.needsUpdate = true;
+            this.flowingParticles.geometry.attributes.position.needsUpdate = true;
         }
 
-        // Animate glow spheres
-        this.glowSpheres.forEach(sphere => {
-            const ud = sphere.userData;
+        // Animate timeline energy
+        if (this.timelineEnergy) {
+            this.timelineEnergy.material.uniforms.time.value = this.time;
+        }
 
-            // Float up and down
-            sphere.position.y = ud.originalY + Math.sin(this.time * ud.floatSpeed + ud.floatPhase) * 5;
-
-            // Drift slowly
-            sphere.position.x += ud.driftX;
-            sphere.position.z += ud.driftZ;
-
-            // Wrap around
-            if (sphere.position.x > 50) sphere.position.x = -50;
-            if (sphere.position.x < -50) sphere.position.x = 50;
-
-            // Update shader time
-            sphere.material.uniforms.time.value = this.time;
+        // Animate floating orbs
+        this.floatingOrbs.forEach(orb => {
+            const ud = orb.userData;
+            orb.position.y = ud.originalPos.y +
+                Math.sin(this.time * ud.floatSpeed + ud.floatPhase) * ud.floatAmplitude;
+            orb.position.x = ud.originalPos.x +
+                Math.cos(this.time * ud.floatSpeed * 0.6 + ud.floatPhase) * ud.floatAmplitude * 0.4;
+            orb.material.uniforms.time.value = this.time;
         });
 
-        // Animate timeline beam
-        if (this.timelineBeam) {
-            this.timelineBeam.material.uniforms.time.value = this.time;
-        }
-
-        // Rotate ambient stars slowly
-        if (this.ambientStars) {
-            this.ambientStars.rotation.y += 0.0002;
-            this.ambientStars.rotation.x += 0.0001;
-        }
-
         // Camera subtle movement based on mouse
-        this.camera.position.x += (this.mouse.x * 5 - this.camera.position.x) * 0.02;
-        this.camera.position.y += (this.mouse.y * 3 - this.camera.position.y) * 0.02;
+        this.camera.position.x += (this.mouse.x * 6 - this.camera.position.x) * 0.02;
+        this.camera.position.y += (this.mouse.y * 4 - this.camera.position.y) * 0.02;
         this.camera.lookAt(0, 0, 0);
 
         this.renderer.render(this.scene, this.camera);
     }
 
     dispose() {
+        if (this.flowingParticles) {
+            this.flowingParticles.geometry.dispose();
+            this.flowingParticles.material.dispose();
+        }
+
+        if (this.ambientStars) {
+            this.ambientStars.geometry.dispose();
+            this.ambientStars.material.dispose();
+        }
+
+        if (this.timelineEnergy) {
+            this.timelineEnergy.geometry.dispose();
+            this.timelineEnergy.material.dispose();
+        }
+
+        this.floatingOrbs.forEach(orb => {
+            orb.geometry.dispose();
+            orb.material.dispose();
+        });
+
         if (this.renderer) {
             this.renderer.dispose();
             this.container.removeChild(this.renderer.domElement);

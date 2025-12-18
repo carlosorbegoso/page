@@ -75,7 +75,7 @@ export async function getProfileData() {
             // Fallback to static data only
             cachedProfile = {
                 ...staticProfile,
-                avatar: `${BASE_URL}images/profile.jpeg`,
+                avatar: `${BASE_URL}/images/profile.jpeg`,
                 github: null
             };
         }
@@ -88,7 +88,7 @@ export async function getProfileData() {
         // Return static data on error
         return {
             ...staticProfile,
-            avatar: `${BASE_URL}images/profile.jpeg`,
+            avatar: `${BASE_URL}/images/profile.jpeg`,
             github: null
         };
     }

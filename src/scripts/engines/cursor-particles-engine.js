@@ -46,6 +46,12 @@ export class CursorParticlesEngine {
             <div class="cursor-ring"></div>
             <div class="cursor-ring-outer"></div>
         `;
+        // Hide cursor until first mouse movement - position offscreen
+        this.cursor.style.opacity = '0';
+        this.cursor.style.visibility = 'hidden';
+        this.cursor.style.left = '-9999px';
+        this.cursor.style.top = '-9999px';
+        this.hasMouseMoved = false;
         document.body.appendChild(this.cursor);
 
         // Add styles
@@ -164,6 +170,13 @@ export class CursorParticlesEngine {
         document.addEventListener('mousemove', (e) => {
             this.mouseX = e.clientX;
             this.mouseY = e.clientY;
+
+            // Show cursor on first mouse movement
+            if (!this.hasMouseMoved) {
+                this.hasMouseMoved = true;
+                this.cursor.style.opacity = '1';
+                this.cursor.style.visibility = 'visible';
+            }
 
             // Update cursor position
             this.cursor.style.left = `${this.mouseX}px`;

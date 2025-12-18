@@ -6,11 +6,16 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# ===== BUILD =====
+# ===== BUILD & OUTPUT =====
+dist/
 build/
 out/
 .next/
 .nuxt/
+.output/
+
+# ===== ASTRO =====
+.astro/
 
 # ===== ENTORNO =====
 .env
@@ -86,6 +91,10 @@ coverage/
 *.orig
 
 # ===== ARCHIVOS DE LOCK =====
+# Nota: bun.lockb SÍ debe incluirse en git para reproducibilidad
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# ===== BUN =====
+.bun/

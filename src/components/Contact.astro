@@ -19,66 +19,263 @@
         </div>
 
         <div class="contact-content">
-            <!-- Métodos de contacto -->
-            <div class="contact-methods animate-fade-in-up" data-delay="0.8s">
-                <h4>Contact Methods</h4>
-                <div class="contact-grid">
-                    <div class="contact-item card card-hover">
-                        <i class="fas fa-envelope contact-icon"></i>
-                        <div class="contact-info">
-                            <h5>Email</h5>
-                            <p>carlos.orbegoso@email.com</p>
-                            <small>Response within 24h</small>
+            <div class="contact-layout">
+                <!-- Formulario de contacto -->
+                <div class="contact-form-section animate-fade-in-up" data-delay="0.8s">
+                    <h4>Send me a message</h4>
+                    <form id="contact-form" class="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-user"></i>
+                                <input type="text" id="name" name="name" placeholder="Your name" required>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="contact-item card card-hover">
-                        <i class="fab fa-linkedin contact-icon"></i>
-                        <div class="contact-info">
-                            <h5>LinkedIn</h5>
-                            <p>linkedin.com/in/carlosorbegoso</p>
-                            <small>Let's connect professionally</small>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-envelope"></i>
+                                <input type="email" id="email" name="email" placeholder="your@email.com" required>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="contact-item card card-hover">
-                        <i class="fab fa-github contact-icon"></i>
-                        <div class="contact-info">
-                            <h5>GitHub</h5>
-                            <p>github.com/carlosorbegoso</p>
-                            <small>Check out my code</small>
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-tag"></i>
+                                <select id="subject" name="subject" required>
+                                    <option value="">Select a subject</option>
+                                    <option value="job">Job Opportunity</option>
+                                    <option value="project">Project Collaboration</option>
+                                    <option value="consulting">Consulting</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <div class="input-wrapper textarea-wrapper">
+                                <i class="fas fa-comment-alt"></i>
+                                <textarea id="message" name="message" placeholder="Tell me about your project..." rows="4" required></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-submit">
+                            <i class="fas fa-paper-plane"></i>
+                            <span>Send Message</span>
+                        </button>
+                    </form>
                 </div>
-            </div>
 
-            <!-- Redes sociales -->
-            <div class="social-section animate-fade-in-up" data-delay="1.0s">
-                <h4>Follow me on Social Media</h4>
-                <div class="social-links">
-                    <a href="#" class="social-link" aria-label="LinkedIn">
-                        <i class="fab fa-linkedin"></i>
-                        <span>LinkedIn</span>
-                    </a>
-                    <a href="#" class="social-link" aria-label="GitHub">
-                        <i class="fab fa-github"></i>
-                        <span>GitHub</span>
-                    </a>
-                    <a href="#" class="social-link" aria-label="Twitter">
-                        <i class="fab fa-twitter"></i>
-                        <span>Twitter</span>
-                    </a>
-                    <a href="#" class="social-link" aria-label="Instagram">
-                        <i class="fab fa-instagram"></i>
-                        <span>Instagram</span>
-                    </a>
+                <!-- Información de contacto -->
+                <div class="contact-info-section">
+                    <!-- Métodos de contacto -->
+                    <div class="contact-methods animate-fade-in-up" data-delay="0.9s">
+                        <h4>Contact Methods</h4>
+                        <div class="contact-grid">
+                            <a href="mailto:car_11.09@hotmail.com" class="contact-item card card-hover">
+                                <i class="fas fa-envelope contact-icon"></i>
+                                <div class="contact-info">
+                                    <h5>Email</h5>
+                                    <p>car_11.09@hotmail.com</p>
+                                    <small>Response within 24h</small>
+                                </div>
+                            </a>
+
+                            <a href="https://linkedin.com/in/carlos-orbergoso-loayza" target="_blank" rel="noopener noreferrer" class="contact-item card card-hover">
+                                <i class="fab fa-linkedin contact-icon"></i>
+                                <div class="contact-info">
+                                    <h5>LinkedIn</h5>
+                                    <p>linkedin.com/in/carlos-orbergoso-loayza</p>
+                                    <small>Let's connect professionally</small>
+                                </div>
+                            </a>
+
+                            <a href="https://github.com/carlosorbegoso" target="_blank" rel="noopener noreferrer" class="contact-item card card-hover">
+                                <i class="fab fa-github contact-icon"></i>
+                                <div class="contact-info">
+                                    <h5>GitHub</h5>
+                                    <p>github.com/carlosorbegoso</p>
+                                    <small>Check out my code</small>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Redes sociales -->
+                    <div class="social-section animate-fade-in-up" data-delay="1.0s">
+                        <h4>Follow me on Social Media</h4>
+                        <div class="social-links">
+                            <a href="https://linkedin.com/in/carlos-orbergoso-loayza" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="LinkedIn">
+                                <i class="fab fa-linkedin"></i>
+                                <span>LinkedIn</span>
+                            </a>
+                            <a href="https://github.com/carlosorbegoso" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="GitHub">
+                                <i class="fab fa-github"></i>
+                                <span>GitHub</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Call to action -->
             <div class="contact-cta animate-fade-in-up" data-delay="1.2s">
-                <p>Interested in working together? Feel free to reach out through any of the channels above.</p>
+                <p>Interested in working together? Feel free to reach out through any of the channels above or use the contact form.</p>
             </div>
         </div>
     </div>
 </section>
+
+<style>
+    .contact-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 968px) {
+        .contact-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .contact-form-section h4,
+    .contact-methods h4 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .contact-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+    }
+
+    .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-wrapper i {
+        position: absolute;
+        left: 1rem;
+        color: var(--primary-color);
+        font-size: 0.875rem;
+        z-index: 1;
+    }
+
+    .input-wrapper input,
+    .input-wrapper select,
+    .input-wrapper textarea {
+        width: 100%;
+        padding: 0.875rem 1rem 0.875rem 2.75rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(100, 181, 246, 0.15);
+        border-radius: 0.75rem;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+    }
+
+    .input-wrapper input::placeholder,
+    .input-wrapper textarea::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.6;
+    }
+
+    .input-wrapper input:focus,
+    .input-wrapper select:focus,
+    .input-wrapper textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        background: rgba(100, 181, 246, 0.05);
+        box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.1);
+    }
+
+    .input-wrapper select {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%2364B5F6' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.25rem;
+    }
+
+    .input-wrapper select option {
+        background: var(--bg-color);
+        color: var(--text-primary);
+    }
+
+    .textarea-wrapper {
+        align-items: flex-start;
+    }
+
+    .textarea-wrapper i {
+        top: 1rem;
+    }
+
+    .textarea-wrapper textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .btn-submit {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        border: none;
+        border-radius: 9999px;
+        color: white;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 0.5rem;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(100, 181, 246, 0.3);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .contact-info-section {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .contact-item {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .contact-item:hover {
+        text-decoration: none;
+    }
+</style>

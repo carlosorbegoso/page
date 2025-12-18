@@ -395,6 +395,15 @@ body {
     border-color: rgba(100, 181, 246, 0.12);
     box-shadow: 0 4px 20px rgba(100, 181, 246, 0.1);
 }
+.btn-secondary.btn-hero {
+    background: linear-gradient(135deg, var(--accent-color) 0%, #ff8c5a 100%);
+    border: none;
+    color: white;
+}
+.btn-secondary.btn-hero:hover {
+    background: linear-gradient(135deg, #ff8c5a 0%, var(--accent-color) 100%);
+    box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
+}
 .btn-content { display: flex; align-items: center; gap: 0.5rem; justify-content: center; }
 .btn-icon { font-size: 1.125rem; transition: transform 0.3s ease; }
 .btn-hero:hover .btn-icon { transform: scale(1.05) rotate(2deg); }

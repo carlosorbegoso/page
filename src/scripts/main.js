@@ -17,6 +17,7 @@ import { MobileMenuManager } from './utils/mobile-menu.js';
 import { HeroAnimations } from './utils/hero-animations.js';
 import { AboutAnimations } from './utils/about-animations.js';
 import { CardEffects } from './utils/card-effects.js';
+import { RippleEffect } from './utils/ripple-effect.js';
 
 // ===== CLASE PRINCIPAL DEL PORTFOLIO =====
 class Portfolio {
@@ -33,6 +34,7 @@ class Portfolio {
         this.heroAnimations = null;
         this.aboutAnimations = null;
         this.cardEffects = null;
+        this.rippleEffect = null;
     }
 
     /**
@@ -99,6 +101,10 @@ class Portfolio {
         // Inicializar efectos de cards
         this.cardEffects = new CardEffects();
         log.info('🃏 CardEffects inicializado');
+
+        // Inicializar efectos de ripple
+        this.rippleEffect = new RippleEffect();
+        log.info('💧 RippleEffect inicializado');
 
         // Simular carga de otros módulos
         await this.simulateModuleLoad('StyleManager');

@@ -348,6 +348,35 @@
         font-size: 0.8rem;
         color: var(--text-secondary);
         transition: all 0.3s ease;
+        /* Stagger animation initial state */
+        opacity: 0;
+        transform: translateY(10px) scale(0.9);
+    }
+
+    /* Stagger animation when card becomes visible */
+    .bento-card.visible .pill {
+        animation: pillReveal 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    /* Stagger delays for each pill */
+    .bento-card.visible .pill:nth-child(1) { animation-delay: 0.05s; }
+    .bento-card.visible .pill:nth-child(2) { animation-delay: 0.1s; }
+    .bento-card.visible .pill:nth-child(3) { animation-delay: 0.15s; }
+    .bento-card.visible .pill:nth-child(4) { animation-delay: 0.2s; }
+    .bento-card.visible .pill:nth-child(5) { animation-delay: 0.25s; }
+    .bento-card.visible .pill:nth-child(6) { animation-delay: 0.3s; }
+    .bento-card.visible .pill:nth-child(7) { animation-delay: 0.35s; }
+    .bento-card.visible .pill:nth-child(8) { animation-delay: 0.4s; }
+
+    @keyframes pillReveal {
+        0% {
+            opacity: 0;
+            transform: translateY(10px) scale(0.9);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
     }
 
     .pill i {
@@ -483,6 +512,11 @@
     @media (prefers-reduced-motion: reduce) {
         .marquee-track { animation: none; }
         .skill-animate { transition: opacity 0.3s ease; transform: none; }
+        .pill {
+            opacity: 1;
+            transform: none;
+            animation: none !important;
+        }
     }
 </style>
 
@@ -494,11 +528,18 @@
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     const delay = parseInt(entry.target.getAttribute('data-anim-delay') || '0');
-                    setTimeout(() => entry.target.classList.add('visible'), delay);
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                        // Also trigger pill stagger animation
+                        if (entry.target.classList.contains('bento-card')) {
+                            entry.target.classList.add('visible');
+                        }
+                    }, delay);
                 }
             });
         }, observerOptions);
 
+        // Observe skill-animate elements (includes bento-cards)
         document.querySelectorAll('.skill-animate').forEach(el => observer.observe(el));
 
         // 3D Tilt Effect for cards

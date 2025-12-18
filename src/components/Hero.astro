@@ -130,12 +130,11 @@
         </div>
     </div>
 
-    <!-- Indicador de scroll mejorado -->
+    <!-- Indicador de scroll minimalista -->
     <div class="hero-scroll-indicator animate-fade-in-up" data-delay="1.4s">
-        <div class="scroll-line">
-            <div class="scroll-dot"></div>
+        <div class="scroll-mouse">
+            <div class="scroll-wheel"></div>
         </div>
-        <span class="scroll-text">Scroll</span>
     </div>
 </section>
 
@@ -763,7 +762,41 @@
         opacity: 1;
     }
 
-    /* Scroll Indicator */
+    /* Ripple Effect */
+    .btn .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.4);
+        transform: scale(0);
+        animation: rippleEffect 0.6s ease-out forwards;
+        pointer-events: none;
+    }
+
+    .btn-outline .ripple {
+        background: rgba(100, 181, 246, 0.3);
+    }
+
+    @keyframes rippleEffect {
+        0% {
+            transform: scale(0);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+
+    /* Active state with press feedback */
+    .btn:active {
+        transform: translateY(-1px) scale(0.98);
+    }
+
+    .btn-primary:active {
+        box-shadow: 0 2px 10px rgba(100, 181, 246, 0.3);
+    }
+
+    /* Scroll Indicator - Minimal Mouse */
     .hero-scroll-indicator {
         position: absolute;
         bottom: 2rem;
@@ -772,35 +805,43 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.5rem;
-        color: var(--text-secondary);
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 0.15em;
+        opacity: 0.5;
+        transition: opacity 0.3s ease;
     }
 
-    .scroll-line {
-        width: 1px;
-        height: 50px;
-        background: linear-gradient(180deg, rgba(100, 181, 246, 0.5), transparent);
+    .hero-scroll-indicator:hover {
+        opacity: 0.8;
+    }
+
+    .scroll-mouse {
+        width: 22px;
+        height: 36px;
+        border: 2px solid rgba(0, 255, 255, 0.4);
+        border-radius: 12px;
         position: relative;
+        display: flex;
+        justify-content: center;
+        padding-top: 6px;
     }
 
-    .scroll-dot {
-        position: absolute;
-        top: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 6px;
-        height: 6px;
-        background: var(--primary-color);
-        border-radius: 50%;
-        animation: scrollDot 2s ease-in-out infinite;
+    .scroll-wheel {
+        width: 3px;
+        height: 8px;
+        background: #00ffff;
+        border-radius: 2px;
+        animation: scrollWheel 1.8s ease-in-out infinite;
+        box-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
     }
 
-    @keyframes scrollDot {
-        0%, 100% { top: 0; opacity: 1; }
-        50% { top: 100%; opacity: 0.3; }
+    @keyframes scrollWheel {
+        0%, 100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        50% {
+            transform: translateY(12px);
+            opacity: 0.2;
+        }
     }
 
     /* Animations */
@@ -918,8 +959,13 @@
             bottom: 1.5rem;
         }
 
-        .scroll-line {
-            height: 35px;
+        .scroll-mouse {
+            width: 20px;
+            height: 32px;
+        }
+
+        .scroll-wheel {
+            height: 6px;
         }
     }
 
@@ -1251,4 +1297,35 @@
 
     // Update weather every 15 minutes
     setInterval(updateWeather, 15 * 60 * 1000);
+
+    // Ripple effect for CTA buttons
+    function createRipple(event: MouseEvent) {
+        const button = event.currentTarget as HTMLElement;
+        if (!button) return;
+
+        // Remove existing ripples
+        const existingRipples = button.querySelectorAll('.ripple');
+        existingRipples.forEach(r => r.remove());
+
+        const rect = button.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = event.clientX - rect.left - size / 2;
+        const y = event.clientY - rect.top - size / 2;
+
+        const ripple = document.createElement('span');
+        ripple.classList.add('ripple');
+        ripple.style.width = ripple.style.height = `${size}px`;
+        ripple.style.left = `${x}px`;
+        ripple.style.top = `${y}px`;
+
+        button.appendChild(ripple);
+
+        // Remove ripple after animation
+        setTimeout(() => ripple.remove(), 600);
+    }
+
+    // Attach ripple to all CTA buttons
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('click', createRipple as EventListener);
+    });
 </script>

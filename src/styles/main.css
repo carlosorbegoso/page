@@ -1898,17 +1898,145 @@ body {
     }
 }
 
-/* Better focus states for accessibility */
+/* ===== ENHANCED FOCUS STATES FOR ACCESSIBILITY ===== */
+
+/* Global focus-visible styling */
 :focus-visible {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 3px;
-    border-radius: 4px;
+    outline: none;
 }
 
+/* Focus ring with glow effect */
+.focus-ring {
+    position: relative;
+}
+
+.focus-ring:focus-visible::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(100, 181, 246, 0.2),
+                0 0 15px rgba(100, 181, 246, 0.3);
+    animation: focusPulse 1.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes focusPulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(100, 181, 246, 0.2), 0 0 15px rgba(100, 181, 246, 0.3); }
+    50% { box-shadow: 0 0 0 6px rgba(100, 181, 246, 0.1), 0 0 20px rgba(100, 181, 246, 0.4); }
+}
+
+/* Buttons focus state */
 button:focus-visible,
+.btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--bg-color),
+                0 0 0 5px var(--primary-color),
+                0 0 20px rgba(100, 181, 246, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Links and navigation focus state */
 a:focus-visible {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 3px;
+    outline: none;
+    text-decoration: underline;
+    text-decoration-color: var(--primary-color);
+    text-underline-offset: 4px;
+    text-decoration-thickness: 2px;
+}
+
+.nav-link:focus-visible {
+    outline: none;
+    background: rgba(100, 181, 246, 0.1);
+    box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.3),
+                inset 0 0 15px rgba(100, 181, 246, 0.1);
+}
+
+/* Input fields focus state */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+    outline: none;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.15),
+                0 0 15px rgba(100, 181, 246, 0.1);
+}
+
+/* Card focus state */
+.bento-card:focus-visible,
+.project-card:focus-visible,
+.skill-category:focus-visible,
+.contact-item:focus-visible {
+    outline: none;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.2),
+                0 4px 20px rgba(100, 181, 246, 0.3);
+    transform: translateY(-3px);
+}
+
+/* Mobile navigation focus */
+.mobile-nav-item:focus-visible {
+    outline: none;
+    background: rgba(100, 181, 246, 0.15);
+    border-radius: 8px;
+}
+
+/* Skip to content link for screen readers */
+.skip-to-content {
+    position: absolute;
+    top: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 1rem 2rem;
+    background: var(--primary-color);
+    color: var(--bg-color);
+    font-weight: 600;
+    border-radius: 0 0 8px 8px;
+    z-index: 10000;
+    transition: top 0.3s ease;
+}
+
+.skip-to-content:focus {
+    top: 0;
+}
+
+/* Focus within for grouped elements */
+.hero-actions:focus-within,
+.contact-form:focus-within {
+    position: relative;
+}
+
+.hero-actions:focus-within::before,
+.contact-form:focus-within::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border: 1px dashed rgba(100, 181, 246, 0.2);
+    border-radius: 12px;
+    pointer-events: none;
+    animation: focusGroupPulse 2s ease-in-out infinite;
+}
+
+@keyframes focusGroupPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    :focus-visible {
+        outline: 3px solid currentColor !important;
+        outline-offset: 2px !important;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible {
+        outline: 3px solid currentColor !important;
+        box-shadow: none !important;
+    }
 }
 
 /* Reduce motion for users who prefer it */
@@ -1920,6 +2048,181 @@ a:focus-visible {
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
+    }
+}
+
+/* ===== TOUCH TARGET OPTIMIZATION FOR MOBILE ===== */
+
+/* Touch devices - ensure minimum 44x44px touch targets (WCAG 2.5.5) */
+@media (hover: none) and (pointer: coarse) {
+    /* Buttons minimum size */
+    button,
+    .btn,
+    a.btn,
+    .nav-link,
+    .mobile-nav-item,
+    .social-link,
+    .tech-icon,
+    .pill,
+    .back-to-top,
+    [role="button"],
+    input[type="submit"],
+    input[type="button"] {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* Navigation links - larger touch area */
+    .nav-link {
+        padding: 12px 16px;
+    }
+
+    /* Mobile bottom navigation items */
+    .mobile-nav-item {
+        padding: 10px 8px;
+        min-width: 60px;
+    }
+
+    /* Pills/tags - more touch-friendly */
+    .pill {
+        padding: 10px 14px;
+        font-size: 0.85rem;
+        min-height: 40px;
+    }
+
+    /* Social links */
+    .social-link,
+    .contact-item a {
+        min-width: 48px;
+        min-height: 48px;
+        padding: 12px;
+    }
+
+    /* Tech icons */
+    .tech-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    /* Form inputs - larger for easier tapping */
+    input,
+    textarea,
+    select {
+        min-height: 48px;
+        font-size: 16px; /* Prevents iOS zoom on focus */
+        padding: 14px 16px;
+    }
+
+    /* Checkboxes and radios */
+    input[type="checkbox"],
+    input[type="radio"] {
+        width: 24px;
+        height: 24px;
+        min-width: 24px;
+        min-height: 24px;
+    }
+
+    /* Back to top button */
+    .back-to-top {
+        width: 48px;
+        height: 48px;
+    }
+
+    /* Theme toggle */
+    .theme-toggle,
+    .language-toggle,
+    #theme-toggle,
+    #mobile-theme-toggle {
+        min-width: 48px;
+        min-height: 48px;
+    }
+
+    /* Cards - add touch feedback */
+    .bento-card,
+    .project-card,
+    .experience-content,
+    .skill-category {
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .bento-card:active,
+    .project-card:active,
+    .experience-content:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+
+    /* Increase spacing between interactive elements */
+    .hero-actions {
+        gap: 12px;
+    }
+
+    .skill-pills {
+        gap: 8px;
+    }
+
+    .tech-icons-row {
+        gap: 10px;
+    }
+
+    /* Add touch feedback visual */
+    .touch-feedback {
+        position: relative;
+    }
+
+    .touch-feedback::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(100, 181, 246, 0.1);
+        opacity: 0;
+        border-radius: inherit;
+        transition: opacity 0.2s ease;
+        pointer-events: none;
+    }
+
+    .touch-feedback:active::before {
+        opacity: 1;
+    }
+
+    /* Prevent accidental double-tap zoom */
+    * {
+        touch-action: manipulation;
+    }
+
+    /* Better scrolling experience */
+    .scroll-container,
+    .projects-grid,
+    .bento-grid {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+}
+
+/* Larger screens with touch (tablets, etc.) */
+@media (hover: none) and (pointer: coarse) and (min-width: 768px) {
+    .nav-link {
+        padding: 14px 20px;
+    }
+
+    .btn {
+        padding: 16px 28px;
+    }
+
+    .pill {
+        padding: 12px 18px;
+    }
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: max(0px)) {
+    .mobile-bottom-nav {
+        padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    }
+
+    .hero {
+        padding-top: max(1.5rem, env(safe-area-inset-top));
     }
 }
 

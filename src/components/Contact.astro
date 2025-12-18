@@ -1,27 +1,34 @@
 ---
-// Contact section - Información de contacto
+// Contact section - Información de contacto con animaciones mejoradas
 ---
 
 <section id="contact" class="contact section section-bg">
     <div class="contact-background">
         <div class="contact-pattern"></div>
-        <div class="contact-particles" id="contact-particles"></div>
+        <!-- Animated connection lines -->
+        <div class="connection-lines">
+            <svg class="connection-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path class="connection-path" d="M0,50 Q25,30 50,50 T100,50" />
+                <path class="connection-path delay-1" d="M0,30 Q25,50 50,30 T100,30" />
+                <path class="connection-path delay-2" d="M0,70 Q25,50 50,70 T100,70" />
+            </svg>
+        </div>
     </div>
 
     <div class="container">
         <div class="section-header">
-            <div class="section-badge animate-fade-in-up" data-delay="0.2s">
+            <div class="section-badge contact-animate" data-anim-delay="0">
                 <i class="fas fa-envelope" aria-hidden="true"></i>
-                <span>Let's Connect</span>
+                <span>Get In Touch</span>
             </div>
-            <h2 class="section-title fade-in animate-fade-in-up" data-delay="0.4s">Let's Connect!</h2>
-            <p class="section-subtitle fade-in animate-fade-in-up" data-delay="0.6s">Looking for a challenging backend project? Want to collaborate on Java or Quarkus? I'd love to chat with you!</p>
+            <h2 class="section-title contact-animate gradient-text-animated" data-anim-delay="100">Let's Connect!</h2>
+            <p class="section-subtitle contact-animate" data-anim-delay="200">Looking for a challenging backend project? Want to collaborate on Java or Quarkus? I'd love to chat with you!</p>
         </div>
 
         <div class="contact-content">
             <div class="contact-layout">
                 <!-- Formulario de contacto -->
-                <div class="contact-form-section animate-fade-in-up" data-delay="0.8s">
+                <div class="contact-form-section contact-animate" data-anim-delay="300">
                     <h4>Send me a message</h4>
                     <form id="contact-form" class="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
                         <div class="form-group">
@@ -58,7 +65,7 @@
                                 <textarea id="message" name="message" placeholder="Tell me about your project..." rows="4" required></textarea>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-submit">
+                        <button type="submit" class="btn-submit">
                             <i class="fas fa-paper-plane"></i>
                             <span>Send Message</span>
                         </button>
@@ -68,74 +75,163 @@
                 <!-- Información de contacto -->
                 <div class="contact-info-section">
                     <!-- Métodos de contacto -->
-                    <div class="contact-methods animate-fade-in-up" data-delay="0.9s">
+                    <div class="contact-methods contact-animate" data-anim-delay="400">
                         <h4>Contact Methods</h4>
                         <div class="contact-grid">
-                            <a href="mailto:car_11.09@hotmail.com" class="contact-item card card-hover">
-                                <i class="fas fa-envelope contact-icon"></i>
+                            <a href="mailto:car_11.09@hotmail.com" class="contact-item glass-card">
+                                <div class="contact-icon-wrapper">
+                                    <i class="fas fa-envelope contact-icon"></i>
+                                    <div class="icon-ring"></div>
+                                </div>
                                 <div class="contact-info">
                                     <h5>Email</h5>
                                     <p>car_11.09@hotmail.com</p>
-                                    <small>Response within 24h</small>
+                                    <span class="response-time">
+                                        <i class="fas fa-clock"></i>
+                                        Response within 24h
+                                    </span>
+                                </div>
+                                <div class="contact-arrow">
+                                    <i class="fas fa-arrow-right"></i>
                                 </div>
                             </a>
 
-                            <a href="https://linkedin.com/in/carlos-orbergoso-loayza" target="_blank" rel="noopener noreferrer" class="contact-item card card-hover">
-                                <i class="fab fa-linkedin contact-icon"></i>
+                            <a href="https://linkedin.com/in/carlos-orbergoso-loayza" target="_blank" rel="noopener noreferrer" class="contact-item glass-card">
+                                <div class="contact-icon-wrapper">
+                                    <i class="fab fa-linkedin contact-icon"></i>
+                                    <div class="icon-ring"></div>
+                                </div>
                                 <div class="contact-info">
                                     <h5>LinkedIn</h5>
-                                    <p>linkedin.com/in/carlos-orbergoso-loayza</p>
-                                    <small>Let's connect professionally</small>
+                                    <p>carlos-orbergoso-loayza</p>
+                                    <span class="response-time">
+                                        <i class="fas fa-user-tie"></i>
+                                        Professional network
+                                    </span>
+                                </div>
+                                <div class="contact-arrow">
+                                    <i class="fas fa-arrow-right"></i>
                                 </div>
                             </a>
 
-                            <a href="https://github.com/carlosorbegoso" target="_blank" rel="noopener noreferrer" class="contact-item card card-hover">
-                                <i class="fab fa-github contact-icon"></i>
+                            <a href="https://github.com/carlosorbegoso" target="_blank" rel="noopener noreferrer" class="contact-item glass-card">
+                                <div class="contact-icon-wrapper">
+                                    <i class="fab fa-github contact-icon"></i>
+                                    <div class="icon-ring"></div>
+                                </div>
                                 <div class="contact-info">
                                     <h5>GitHub</h5>
-                                    <p>github.com/carlosorbegoso</p>
-                                    <small>Check out my code</small>
+                                    <p>carlosorbegoso</p>
+                                    <span class="response-time">
+                                        <i class="fas fa-code"></i>
+                                        Check my code
+                                    </span>
+                                </div>
+                                <div class="contact-arrow">
+                                    <i class="fas fa-arrow-right"></i>
                                 </div>
                             </a>
                         </div>
                     </div>
 
                     <!-- Redes sociales -->
-                    <div class="social-section animate-fade-in-up" data-delay="1.0s">
-                        <h4>Follow me on Social Media</h4>
+                    <div class="social-section contact-animate" data-anim-delay="500">
+                        <h4>Also find me on</h4>
                         <div class="social-links">
                             <a href="https://linkedin.com/in/carlos-orbergoso-loayza" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="LinkedIn">
                                 <i class="fab fa-linkedin"></i>
-                                <span>LinkedIn</span>
                             </a>
                             <a href="https://github.com/carlosorbegoso" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="GitHub">
                                 <i class="fab fa-github"></i>
-                                <span>GitHub</span>
+                            </a>
+                            <a href="#" class="social-link" aria-label="Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="social-link" aria-label="Instagram">
+                                <i class="fab fa-instagram"></i>
                             </a>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Call to action -->
-            <div class="contact-cta animate-fade-in-up" data-delay="1.2s">
-                <p>Interested in working together? Feel free to reach out through any of the channels above or use the contact form.</p>
+                    <!-- Availability Status -->
+                    <div class="availability contact-animate" data-anim-delay="600">
+                        <div class="status-indicator">
+                            <span class="status-dot"></span>
+                            <span class="status-text">Available for new opportunities</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
 <style>
+    .contact {
+        position: relative;
+        padding: 6rem 0;
+        overflow: hidden;
+    }
+
+    .contact-background {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+    }
+
+    .contact-pattern {
+        position: absolute;
+        inset: 0;
+        background-image:
+            radial-gradient(circle at 50% 0%, rgba(100, 181, 246, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 50% 100%, rgba(255, 107, 53, 0.05) 0%, transparent 50%);
+    }
+
+    .connection-lines {
+        position: absolute;
+        inset: 0;
+        opacity: 0.15;
+    }
+
+    .connection-svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    .connection-path {
+        fill: none;
+        stroke: var(--primary-color);
+        stroke-width: 0.3;
+        stroke-dasharray: 100;
+        stroke-dashoffset: 100;
+        animation: drawPath 4s ease-in-out infinite;
+    }
+
+    .connection-path.delay-1 {
+        animation-delay: 1s;
+    }
+
+    .connection-path.delay-2 {
+        animation-delay: 2s;
+    }
+
+    @keyframes drawPath {
+        0%, 100% { stroke-dashoffset: 100; }
+        50% { stroke-dashoffset: 0; }
+    }
+
     .contact-layout {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 3rem;
-        margin-bottom: 2rem;
+        max-width: 1100px;
+        margin: 0 auto;
     }
 
     @media (max-width: 968px) {
         .contact-layout {
             grid-template-columns: 1fr;
+            gap: 2.5rem;
         }
     }
 
@@ -145,7 +241,6 @@
         font-weight: 600;
         color: var(--text-primary);
         margin-bottom: 1.5rem;
-        text-align: center;
     }
 
     .contact-form {
@@ -172,7 +267,7 @@
         align-items: center;
     }
 
-    .input-wrapper i {
+    .input-wrapper > i {
         position: absolute;
         left: 1rem;
         color: var(--primary-color);
@@ -227,7 +322,7 @@
         align-items: flex-start;
     }
 
-    .textarea-wrapper i {
+    .textarea-wrapper > i {
         top: 1rem;
     }
 
@@ -258,24 +353,329 @@
         box-shadow: 0 10px 30px rgba(100, 181, 246, 0.3);
     }
 
-    .btn-submit:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
-        transform: none;
-    }
-
     .contact-info-section {
         display: flex;
         flex-direction: column;
         gap: 2rem;
     }
 
+    .contact-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
     .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.25rem;
+        border-radius: 1rem;
         text-decoration: none;
-        color: inherit;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .contact-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: linear-gradient(180deg, var(--primary-color), var(--accent-color));
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .contact-item:hover::before {
+        transform: scaleY(1);
     }
 
     .contact-item:hover {
+        transform: translateX(5px);
+        border-color: rgba(100, 181, 246, 0.3);
+        box-shadow: 0 10px 30px rgba(100, 181, 246, 0.15);
+    }
+
+    .contact-icon-wrapper {
+        position: relative;
+        width: 50px;
+        height: 50px;
+        flex-shrink: 0;
+    }
+
+    .contact-icon {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(100, 181, 246, 0.1);
+        border: 1px solid rgba(100, 181, 246, 0.2);
+        border-radius: 0.75rem;
+        font-size: 1.25rem;
+        color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .icon-ring {
+        position: absolute;
+        inset: -5px;
+        border: 2px solid var(--primary-color);
+        border-radius: 1rem;
+        opacity: 0;
+        transform: scale(0.8);
+        transition: all 0.3s ease;
+    }
+
+    .contact-item:hover .icon-ring {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+
+    .contact-item:hover .contact-icon {
+        background: rgba(100, 181, 246, 0.2);
+        transform: rotate(5deg);
+    }
+
+    .contact-info {
+        flex: 1;
+    }
+
+    .contact-info h5 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .contact-info p {
+        color: var(--primary-color);
+        font-size: 0.9rem;
+        margin: 0 0 0.25rem 0;
+    }
+
+    .response-time {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        opacity: 0.8;
+    }
+
+    .response-time i {
+        font-size: 0.7rem;
+    }
+
+    .contact-arrow {
+        color: var(--text-secondary);
+        opacity: 0;
+        transform: translateX(-10px);
+        transition: all 0.3s ease;
+    }
+
+    .contact-item:hover .contact-arrow {
+        opacity: 1;
+        transform: translateX(0);
+        color: var(--primary-color);
+    }
+
+    /* Social Links */
+    .social-section h4 {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .social-links {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .social-link {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(100, 181, 246, 0.05);
+        border: 1px solid rgba(100, 181, 246, 0.15);
+        border-radius: 50%;
+        color: var(--primary-color);
+        font-size: 1.25rem;
         text-decoration: none;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .social-link::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .social-link:hover::before {
+        opacity: 1;
+    }
+
+    .social-link:hover {
+        color: white;
+        transform: translateY(-5px) rotate(5deg);
+        box-shadow: 0 10px 25px rgba(100, 181, 246, 0.3);
+    }
+
+    .social-link i {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Availability */
+    .availability {
+        margin-top: 0.5rem;
+    }
+
+    .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.625rem;
+        padding: 0.625rem 1.25rem;
+        background: rgba(74, 222, 128, 0.1);
+        border: 1px solid rgba(74, 222, 128, 0.2);
+        border-radius: 50px;
+    }
+
+    .status-dot {
+        width: 10px;
+        height: 10px;
+        background: #4ade80;
+        border-radius: 50%;
+        animation: statusPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes statusPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6); }
+        50% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); }
+    }
+
+    .status-text {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #4ade80;
+    }
+
+    /* Animation observer styles */
+    .contact-animate {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .contact-animate.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .contact {
+            padding: 4rem 0;
+        }
+
+        .contact-layout {
+            gap: 2rem;
+        }
+
+        .contact-item {
+            padding: 1rem;
+        }
+
+        .contact-icon-wrapper {
+            width: 40px;
+            height: 40px;
+        }
+
+        .contact-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+
+        .social-link {
+            width: 45px;
+            height: 45px;
+            font-size: 1.125rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .contact-info h5 {
+            font-size: 1rem;
+        }
+
+        .contact-info p {
+            font-size: 0.8rem;
+        }
+
+        .social-links {
+            gap: 0.75rem;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+
+        .btn-submit {
+            padding: 0.875rem 1.5rem;
+            font-size: 0.9rem;
+        }
     }
 </style>
+
+<script>
+    // Intersection Observer for scroll animations
+    document.addEventListener('DOMContentLoaded', () => {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const delay = parseInt(entry.target.getAttribute('data-anim-delay') || '0');
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                    }, delay);
+                }
+            });
+        }, observerOptions);
+
+        // Observe all animated elements
+        document.querySelectorAll('.contact-animate').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Form submission handling
+        const form = document.getElementById('contact-form');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                const submitBtn = form.querySelector('.btn-submit');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Sending...</span>';
+                }
+            });
+        }
+    });
+</script>

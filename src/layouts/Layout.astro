@@ -79,89 +79,338 @@ const {
         .page-loader {
             position: fixed;
             inset: 0;
-            background: linear-gradient(135deg, #0d1117 0%, #1a1a2e 100%);
+            background: #0a0a0f;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 9999;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
+            overflow: hidden;
         }
+
+        .page-loader::before {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle at 30% 30%, rgba(100, 181, 246, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 70%, rgba(255, 107, 53, 0.06) 0%, transparent 50%);
+            animation: loaderBgPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes loaderBgPulse {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.1) rotate(180deg); opacity: 0.8; }
+        }
+
         .page-loader.loaded {
-            opacity: 0;
-            visibility: hidden;
+            animation: loaderExit 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
+
+        @keyframes loaderExit {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 0; transform: scale(0.9); visibility: hidden; }
+        }
+
         .loader-content {
             text-align: center;
-        }
-        .loader-logo {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 2rem;
             position: relative;
+            z-index: 1;
         }
-        .loader-ring {
-            position: absolute;
-            inset: 0;
-            border: 3px solid transparent;
-            border-top-color: #64B5F6;
-            border-radius: 50%;
-            animation: loaderSpin 1s linear infinite;
-        }
-        .loader-ring:nth-child(2) {
-            inset: 8px;
-            border-top-color: #FF6B35;
-            animation-duration: 1.5s;
-            animation-direction: reverse;
-        }
-        .loader-ring:nth-child(3) {
-            inset: 16px;
-            border-top-color: #00ffff;
-            animation-duration: 2s;
-        }
-        .loader-icon {
-            position: absolute;
-            inset: 24px;
+
+        /* Logo con código animado */
+        .loader-logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2.5rem;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #64B5F6;
-            font-size: 1.5rem;
         }
+
+        /* Hexágono de fondo */
+        .loader-hexagon {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .loader-hexagon svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 20px rgba(100, 181, 246, 0.3));
+        }
+
+        .hex-path {
+            fill: none;
+            stroke: url(#hexGradient);
+            stroke-width: 2;
+            stroke-dasharray: 400;
+            stroke-dashoffset: 400;
+            animation: hexDraw 2s ease-out forwards;
+        }
+
+        @keyframes hexDraw {
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* Partículas orbitando */
+        .loader-orbit {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            animation: orbitSpin 3s linear infinite;
+        }
+
+        .loader-orbit::before,
+        .loader-orbit::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(135deg, #64B5F6, #00ffff);
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(100, 181, 246, 0.8);
+        }
+
+        .loader-orbit::before {
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .loader-orbit::after {
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #FF6B35, #ff9966);
+            box-shadow: 0 0 15px rgba(255, 107, 53, 0.8);
+        }
+
+        .loader-orbit-2 {
+            width: 100px;
+            height: 100px;
+            animation: orbitSpin 2s linear infinite reverse;
+        }
+
+        .loader-orbit-2::before {
+            width: 6px;
+            height: 6px;
+            background: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+        }
+
+        .loader-orbit-2::after {
+            width: 6px;
+            height: 6px;
+            background: #aa44ff;
+            box-shadow: 0 0 10px rgba(170, 68, 255, 0.8);
+        }
+
+        @keyframes orbitSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Icono central con efecto de código */
+        .loader-code {
+            position: relative;
+            z-index: 2;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #64B5F6, #00ffff, #FF6B35);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: codeGradient 2s ease infinite, codePulse 1.5s ease-in-out infinite;
+            text-shadow: 0 0 30px rgba(100, 181, 246, 0.5);
+        }
+
+        @keyframes codeGradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes codePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Texto con typing effect */
         .loader-text {
             color: #ffffff;
             font-family: 'Inter', sans-serif;
-            font-size: 1.25rem;
-            font-weight: 600;
+            font-size: 1.5rem;
+            font-weight: 700;
             margin-bottom: 0.5rem;
+            letter-spacing: 0.05em;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease forwards 0.5s;
         }
-        .loader-subtext {
-            color: #b0b0b0;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.875rem;
+
+        .loader-role {
+            display: inline-block;
+            color: transparent;
+            background: linear-gradient(90deg, #64B5F6, #FF6B35);
+            -webkit-background-clip: text;
+            background-clip: text;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            font-weight: 500;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease forwards 0.8s;
         }
+
+        .loader-role::after {
+            content: '|';
+            color: #64B5F6;
+            animation: blink 1s step-end infinite;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Progress bar moderna */
+        .loader-progress-container {
+            width: 280px;
+            margin-top: 2.5rem;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease forwards 1s;
+        }
+
+        .loader-progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: #666;
+        }
+
+        .loader-progress-value {
+            color: #64B5F6;
+        }
+
         .loader-progress {
-            width: 200px;
-            height: 4px;
-            background: rgba(100, 181, 246, 0.2);
-            border-radius: 2px;
-            margin-top: 1.5rem;
+            width: 100%;
+            height: 3px;
+            background: rgba(100, 181, 246, 0.1);
+            border-radius: 10px;
             overflow: hidden;
+            position: relative;
         }
+
+        .loader-progress::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(100, 181, 246, 0.1) 50%,
+                transparent 100%
+            );
+            animation: progressShine 1.5s ease infinite;
+        }
+
+        @keyframes progressShine {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(100%); }
+        }
+
         .loader-progress-bar {
             width: 0%;
             height: 100%;
-            background: linear-gradient(90deg, #64B5F6, #FF6B35);
-            border-radius: 2px;
-            animation: loaderProgress 2s ease-out forwards;
+            background: linear-gradient(90deg, #64B5F6, #00ffff, #FF6B35);
+            background-size: 200% 100%;
+            border-radius: 10px;
+            animation: progressGradient 1s ease infinite;
+            box-shadow: 0 0 10px rgba(100, 181, 246, 0.5);
+            transition: width 0.3s ease-out;
         }
-        @keyframes loaderSpin {
-            to { transform: rotate(360deg); }
+
+        @keyframes progressGradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
-        @keyframes loaderProgress {
-            0% { width: 0%; }
-            50% { width: 70%; }
-            100% { width: 100%; }
+
+        /* Skills que se cargan */
+        .loader-skills {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+            max-width: 300px;
+        }
+
+        .loader-skill {
+            padding: 0.3rem 0.75rem;
+            background: rgba(100, 181, 246, 0.05);
+            border: 1px solid rgba(100, 181, 246, 0.15);
+            border-radius: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: #888;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        .loader-skill:nth-child(1) { animation: skillPop 0.4s ease forwards 1.2s; }
+        .loader-skill:nth-child(2) { animation: skillPop 0.4s ease forwards 1.4s; }
+        .loader-skill:nth-child(3) { animation: skillPop 0.4s ease forwards 1.6s; }
+        .loader-skill:nth-child(4) { animation: skillPop 0.4s ease forwards 1.8s; }
+
+        @keyframes skillPop {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .loader-logo {
+                width: 100px;
+                height: 100px;
+            }
+            .loader-orbit {
+                width: 120px;
+                height: 120px;
+            }
+            .loader-orbit-2 {
+                width: 80px;
+                height: 80px;
+            }
+            .loader-code {
+                font-size: 1.5rem;
+            }
+            .loader-text {
+                font-size: 1.25rem;
+            }
+            .loader-progress-container {
+                width: 220px;
+            }
+            .loader-skills {
+                max-width: 240px;
+            }
         }
     </style>
 </head>
@@ -170,17 +419,41 @@ const {
     <div class="page-loader" id="page-loader">
         <div class="loader-content">
             <div class="loader-logo">
-                <div class="loader-ring"></div>
-                <div class="loader-ring"></div>
-                <div class="loader-ring"></div>
-                <div class="loader-icon">
-                    <i class="fas fa-code"></i>
+                <!-- Hexágono animado -->
+                <div class="loader-hexagon">
+                    <svg viewBox="0 0 100 100">
+                        <defs>
+                            <linearGradient id="hexGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#64B5F6"/>
+                                <stop offset="50%" style="stop-color:#00ffff"/>
+                                <stop offset="100%" style="stop-color:#FF6B35"/>
+                            </linearGradient>
+                        </defs>
+                        <polygon class="hex-path" points="50,5 90,27.5 90,72.5 50,95 10,72.5 10,27.5"/>
+                    </svg>
                 </div>
+                <!-- Órbitas con partículas -->
+                <div class="loader-orbit"></div>
+                <div class="loader-orbit loader-orbit-2"></div>
+                <!-- Código central -->
+                <span class="loader-code">&lt;/&gt;</span>
             </div>
             <div class="loader-text">Carlos Orbegoso</div>
-            <div class="loader-subtext">Loading experience...</div>
-            <div class="loader-progress">
-                <div class="loader-progress-bar"></div>
+            <div class="loader-role">Backend Developer</div>
+            <div class="loader-progress-container">
+                <div class="loader-progress-label">
+                    <span class="loader-status">Initializing</span>
+                    <span class="loader-progress-value">0%</span>
+                </div>
+                <div class="loader-progress">
+                    <div class="loader-progress-bar" id="loader-progress-bar"></div>
+                </div>
+            </div>
+            <div class="loader-skills">
+                <span class="loader-skill">Java</span>
+                <span class="loader-skill">Spring</span>
+                <span class="loader-skill">Quarkus</span>
+                <span class="loader-skill">Cloud</span>
             </div>
         </div>
     </div>
@@ -199,6 +472,9 @@ const {
         import { VisualEffectsEngine } from '../scripts/engines/visual-effects-engine.js';
         import { NeuralSystemEngine } from '../scripts/engines/neural-system/NeuralSystemEngine.js';
         import { HeroThreeEngine } from '../scripts/engines/hero-three-engine.js';
+        import { HeaderAuroraEngine } from '../scripts/engines/header-aurora-engine.js';
+        import { SkillsThreeEngine } from '../scripts/engines/skills-three-engine.js';
+        import { AboutThreeEngine } from '../scripts/engines/about-three-engine.js';
         import { DeviceDetector } from '../scripts/utils/device-detector.js';
         import { MobileMenuManager } from '../scripts/utils/mobile-menu.js';
         import { HeroAnimations } from '../scripts/utils/hero-animations.js';
@@ -211,6 +487,9 @@ const {
                 this.visualEngine = null;
                 this.brainEngine = null;
                 this.heroEngine = null;
+                this.headerAuroraEngine = null;
+                this.skillsEngine = null;
+                this.aboutEngine = null;
                 this.deviceDetector = null;
                 this.mobileMenuManager = null;
                 this.heroAnimations = null;
@@ -260,6 +539,39 @@ const {
                     this.brainEngine = new NeuralSystemEngine('visual-effects-container');
                 } catch (error) {
                     console.error('Error creando cerebro épico:', error);
+                }
+
+                // Inicializar Header Aurora Engine (efectos espaciales/aurora)
+                try {
+                    this.headerAuroraEngine = new HeaderAuroraEngine();
+                    await this.headerAuroraEngine.init('header-aurora-container');
+                    const currentTheme = localStorage.getItem('theme') || CONFIG.THEMES.DEFAULT;
+                    this.headerAuroraEngine.updateTheme(currentTheme);
+                    console.log('Header Aurora Engine initialized');
+                } catch (error) {
+                    console.error('Error initializing Header Aurora Engine:', error);
+                }
+
+                // Inicializar Skills Three.js Engine
+                try {
+                    this.skillsEngine = new SkillsThreeEngine();
+                    await this.skillsEngine.init('skills-three-container');
+                    const currentTheme = localStorage.getItem('theme') || CONFIG.THEMES.DEFAULT;
+                    this.skillsEngine.updateTheme(currentTheme);
+                    console.log('Skills Three.js Engine initialized');
+                } catch (error) {
+                    console.error('Error initializing Skills Three.js Engine:', error);
+                }
+
+                // Inicializar About Three.js Engine
+                try {
+                    this.aboutEngine = new AboutThreeEngine();
+                    await this.aboutEngine.init('about-three-container');
+                    const currentTheme = localStorage.getItem('theme') || CONFIG.THEMES.DEFAULT;
+                    this.aboutEngine.updateTheme(currentTheme);
+                    console.log('About Three.js Engine initialized');
+                } catch (error) {
+                    console.error('Error initializing About Three.js Engine:', error);
                 }
             }
 
@@ -327,6 +639,9 @@ const {
 
                     if (this.visualEngine) this.visualEngine.updateTheme(newTheme);
                     if (this.heroEngine) this.heroEngine.updateTheme(newTheme);
+                    if (this.headerAuroraEngine) this.headerAuroraEngine.updateTheme(newTheme);
+                    if (this.skillsEngine) this.skillsEngine.updateTheme(newTheme);
+                    if (this.aboutEngine) this.aboutEngine.updateTheme(newTheme);
 
                     Events.trigger(window, 'themeChanged', { theme: newTheme });
                 });
@@ -437,15 +752,93 @@ const {
             }
         }
 
+        // Loader progress management
+        class LoaderProgress {
+            constructor() {
+                this.progressBar = document.getElementById('loader-progress-bar');
+                this.progressValue = document.querySelector('.loader-progress-value');
+                this.statusText = document.querySelector('.loader-status');
+                this.currentProgress = 0;
+                this.targetProgress = 0;
+                this.isComplete = false;
+                this.stages = [
+                    { progress: 15, status: 'Loading assets...' },
+                    { progress: 35, status: 'Initializing...' },
+                    { progress: 55, status: 'Loading modules...' },
+                    { progress: 75, status: 'Preparing UI...' },
+                    { progress: 90, status: 'Almost ready...' },
+                    { progress: 100, status: 'Complete!' }
+                ];
+            }
+
+            updateProgress(progress) {
+                this.targetProgress = Math.min(progress, 100);
+                this.animateProgress();
+            }
+
+            animateProgress() {
+                if (this.currentProgress < this.targetProgress) {
+                    this.currentProgress += Math.max(1, (this.targetProgress - this.currentProgress) * 0.1);
+
+                    if (this.currentProgress >= this.targetProgress - 0.5) {
+                        this.currentProgress = this.targetProgress;
+                    }
+
+                    const roundedProgress = Math.round(this.currentProgress);
+
+                    if (this.progressBar) {
+                        this.progressBar.style.width = `${roundedProgress}%`;
+                    }
+                    if (this.progressValue) {
+                        this.progressValue.textContent = `${roundedProgress}%`;
+                    }
+
+                    // Update status text based on progress
+                    this.updateStatus(roundedProgress);
+
+                    if (this.currentProgress < this.targetProgress) {
+                        requestAnimationFrame(() => this.animateProgress());
+                    }
+                }
+            }
+
+            updateStatus(progress) {
+                if (!this.statusText) return;
+
+                for (let i = this.stages.length - 1; i >= 0; i--) {
+                    if (progress >= this.stages[i].progress - 10) {
+                        this.statusText.textContent = this.stages[i].status;
+                        break;
+                    }
+                }
+            }
+
+            complete() {
+                this.isComplete = true;
+                this.updateProgress(100);
+            }
+        }
+
+        const loaderProgress = new LoaderProgress();
+
+        // Simulate initial progress
+        setTimeout(() => loaderProgress.updateProgress(15), 100);
+        setTimeout(() => loaderProgress.updateProgress(35), 400);
+        setTimeout(() => loaderProgress.updateProgress(55), 800);
+
         // Hide loader when page is ready
         const hideLoader = () => {
-            const loader = document.getElementById('page-loader');
-            if (loader) {
-                loader.classList.add('loaded');
-                setTimeout(() => {
-                    loader.style.display = 'none';
-                }, 500);
-            }
+            loaderProgress.complete();
+
+            setTimeout(() => {
+                const loader = document.getElementById('page-loader');
+                if (loader) {
+                    loader.classList.add('loaded');
+                    setTimeout(() => {
+                        loader.style.display = 'none';
+                    }, 800);
+                }
+            }, 400);
         };
 
         // Setup scroll progress indicator
@@ -488,20 +881,31 @@ const {
         };
 
         document.addEventListener('DOMContentLoaded', async () => {
+            loaderProgress.updateProgress(60);
+
             const portfolio = new Portfolio();
+
+            // Update progress during initialization
+            loaderProgress.updateProgress(75);
             await portfolio.init();
+            loaderProgress.updateProgress(90);
+
             window.portfolio = portfolio;
 
             setupScrollProgress();
             setupContactForm();
 
             // Hide loader after everything is initialized
-            setTimeout(hideLoader, 2000);
+            loaderProgress.updateProgress(100);
+            setTimeout(hideLoader, 600);
         });
 
         // Fallback: hide loader after max wait time
         window.addEventListener('load', () => {
-            setTimeout(hideLoader, 2500);
+            if (!loaderProgress.isComplete) {
+                loaderProgress.updateProgress(100);
+                setTimeout(hideLoader, 800);
+            }
         });
     </script>
 </body>

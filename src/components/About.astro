@@ -1,17 +1,20 @@
 ---
-// About section - Información personal con efectos mejorados
+// About section - Información personal con efectos Three.js
 ---
 
 <section id="about" class="about section section-bg">
+    <!-- Three.js container for background effects -->
+    <div id="about-three-container" class="about-three-container"></div>
+
     <div class="container">
         <!-- Header -->
         <div class="section-header">
             <div class="section-badge animate-on-scroll">
                 <i class="fas fa-user" aria-hidden="true"></i>
-                <span>About Me</span>
+                <span>Get to Know Me</span>
             </div>
-            <h2 class="section-title animate-on-scroll">About Me</h2>
-            <p class="section-subtitle animate-on-scroll">Discover my story and passion for development</p>
+            <h2 class="section-title animate-on-scroll gradient-text-animated">Who I Am</h2>
+            <p class="section-subtitle animate-on-scroll">Passionate backend developer crafting robust solutions</p>
         </div>
 
         <!-- Layout mejorado con dos columnas en desktop -->
@@ -19,21 +22,9 @@
             <!-- Columna izquierda: Foto con efectos -->
             <div class="about-visual animate-on-scroll">
                 <div class="profile-container">
-                    <!-- Anillos animados -->
-                    <div class="orbit-ring ring-1"></div>
-                    <div class="orbit-ring ring-2"></div>
-                    <div class="orbit-ring ring-3"></div>
-
-                    <!-- Partículas orbitando -->
-                    <div class="orbit-particle particle-1"></div>
-                    <div class="orbit-particle particle-2"></div>
-                    <div class="orbit-particle particle-3"></div>
-                    <div class="orbit-particle particle-4"></div>
-
                     <!-- Foto -->
                     <div class="profile-photo-wrapper">
                         <img src="/images/profile.jpeg" alt="Carlos Orbegoso" class="profile-img">
-                        <div class="photo-glow"></div>
                     </div>
                 </div>
 
@@ -124,6 +115,24 @@
 </section>
 
 <style>
+    /* Three.js container */
+    .about-three-container {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+    }
+
+    .about.section {
+        position: relative;
+    }
+
+    .about .container {
+        position: relative;
+        z-index: 1;
+    }
+
     /* Grid principal */
     .about-grid {
         display: grid;
@@ -149,7 +158,7 @@
         gap: 2rem;
     }
 
-    /* Contenedor de foto con órbitas */
+    /* Contenedor de foto */
     .profile-container {
         position: relative;
         width: 220px;
@@ -166,94 +175,7 @@
         }
     }
 
-    /* Anillos orbitales */
-    .orbit-ring {
-        position: absolute;
-        border-radius: 50%;
-        border: 1px solid;
-        animation: orbit-rotate 20s linear infinite;
-    }
-
-    .ring-1 {
-        width: 100%;
-        height: 100%;
-        border-color: rgba(0, 255, 255, 0.2);
-        animation-duration: 25s;
-    }
-
-    .ring-2 {
-        width: 130%;
-        height: 130%;
-        border-color: rgba(170, 68, 255, 0.15);
-        animation-duration: 35s;
-        animation-direction: reverse;
-    }
-
-    .ring-3 {
-        width: 160%;
-        height: 160%;
-        border-color: rgba(255, 68, 170, 0.1);
-        animation-duration: 45s;
-    }
-
-    @keyframes orbit-rotate {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-
-    /* Partículas orbitando */
-    .orbit-particle {
-        position: absolute;
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: var(--primary-color);
-        box-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color);
-    }
-
-    .particle-1 {
-        animation: orbit-particle-1 8s linear infinite;
-    }
-
-    .particle-2 {
-        background: #aa44ff;
-        box-shadow: 0 0 10px #aa44ff, 0 0 20px #aa44ff;
-        animation: orbit-particle-2 12s linear infinite;
-    }
-
-    .particle-3 {
-        background: #ff44aa;
-        box-shadow: 0 0 10px #ff44aa, 0 0 20px #ff44aa;
-        animation: orbit-particle-3 10s linear infinite reverse;
-    }
-
-    .particle-4 {
-        background: #44ff88;
-        box-shadow: 0 0 10px #44ff88, 0 0 20px #44ff88;
-        animation: orbit-particle-4 15s linear infinite;
-    }
-
-    @keyframes orbit-particle-1 {
-        0% { transform: rotate(0deg) translateX(110px) rotate(0deg); }
-        100% { transform: rotate(360deg) translateX(110px) rotate(-360deg); }
-    }
-
-    @keyframes orbit-particle-2 {
-        0% { transform: rotate(90deg) translateX(140px) rotate(-90deg); }
-        100% { transform: rotate(450deg) translateX(140px) rotate(-450deg); }
-    }
-
-    @keyframes orbit-particle-3 {
-        0% { transform: rotate(180deg) translateX(125px) rotate(-180deg); }
-        100% { transform: rotate(540deg) translateX(125px) rotate(-540deg); }
-    }
-
-    @keyframes orbit-particle-4 {
-        0% { transform: rotate(270deg) translateX(155px) rotate(-270deg); }
-        100% { transform: rotate(630deg) translateX(155px) rotate(-630deg); }
-    }
-
-    /* Wrapper de foto */
+    /* Wrapper de foto - simplified, no heavy animations */
     .profile-photo-wrapper {
         position: relative;
         width: 180px;
@@ -265,9 +187,15 @@
         padding: 4px;
         box-shadow:
             0 0 30px rgba(0, 255, 255, 0.4),
-            0 0 60px rgba(0, 255, 255, 0.2),
-            inset 0 0 20px rgba(0, 255, 255, 0.1);
-        animation: border-rotate 6s linear infinite;
+            0 0 60px rgba(0, 255, 255, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .profile-photo-wrapper:hover {
+        transform: scale(1.02);
+        box-shadow:
+            0 0 40px rgba(0, 255, 255, 0.5),
+            0 0 80px rgba(0, 255, 255, 0.3);
     }
 
     @media (min-width: 768px) {
@@ -278,29 +206,11 @@
         }
     }
 
-    @keyframes border-rotate {
-        0% {
-            background: linear-gradient(0deg, var(--primary-color), #00ffff, #aa44ff);
-        }
-        25% {
-            background: linear-gradient(90deg, var(--primary-color), #00ffff, #aa44ff);
-        }
-        50% {
-            background: linear-gradient(180deg, var(--primary-color), #00ffff, #aa44ff);
-        }
-        75% {
-            background: linear-gradient(270deg, var(--primary-color), #00ffff, #aa44ff);
-        }
-        100% {
-            background: linear-gradient(360deg, var(--primary-color), #00ffff, #aa44ff);
-        }
-    }
-
     .profile-img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        object-position: center top; /* Centra en la parte superior para caras */
+        object-position: center top;
         border-radius: 50%;
         background: var(--bg-color);
         display: block;
@@ -309,57 +219,6 @@
 
     .profile-photo-wrapper:hover .profile-img {
         transform: scale(1.05);
-    }
-
-    .photo-glow {
-        position: absolute;
-        inset: -25px;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(0, 255, 255, 0.4) 0%, rgba(170, 68, 255, 0.2) 40%, transparent 70%);
-        z-index: -1;
-        animation: photo-pulse 3s ease-in-out infinite;
-        pointer-events: none;
-    }
-
-    @keyframes photo-pulse {
-        0%, 100% { opacity: 0.6; transform: scale(1); }
-        50% { opacity: 1; transform: scale(1.08); }
-    }
-
-    /* Efecto de brillo giratorio */
-    .profile-photo-wrapper::before {
-        content: '';
-        position: absolute;
-        inset: -3px;
-        background: conic-gradient(
-            from 0deg,
-            transparent,
-            rgba(0, 255, 255, 0.8),
-            transparent 30%
-        );
-        border-radius: 50%;
-        z-index: -1;
-        animation: glow-spin 4s linear infinite;
-    }
-
-    @keyframes glow-spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-
-    /* Efecto adicional de partículas alrededor */
-    .profile-photo-wrapper::after {
-        content: '';
-        position: absolute;
-        inset: -8px;
-        border-radius: 50%;
-        border: 2px dashed rgba(0, 255, 255, 0.3);
-        animation: dash-rotate 20s linear infinite;
-    }
-
-    @keyframes dash-rotate {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(-360deg); }
     }
 
     /* Stats */

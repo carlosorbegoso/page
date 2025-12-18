@@ -413,80 +413,9 @@ const {
             }
         }
 
-        /* Custom Cursor */
-        .custom-cursor {
-            position: fixed;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            z-index: 99999;
-            mix-blend-mode: difference;
-        }
-
-        .cursor-dot {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: #fff;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: transform 0.1s ease, width 0.2s ease, height 0.2s ease;
-        }
-
-        .cursor-outline {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: transform 0.15s ease-out, width 0.2s ease, height 0.2s ease, border-color 0.2s ease;
-        }
-
-        .custom-cursor.hover .cursor-dot {
-            transform: translate(-50%, -50%) scale(2);
-            background: #64B5F6;
-        }
-
-        .custom-cursor.hover .cursor-outline {
-            transform: translate(-50%, -50%) scale(1.5);
-            border-color: #64B5F6;
-            border-width: 1px;
-        }
-
-        .custom-cursor.clicking .cursor-dot {
-            transform: translate(-50%, -50%) scale(0.5);
-        }
-
-        .custom-cursor.clicking .cursor-outline {
-            transform: translate(-50%, -50%) scale(0.8);
-        }
-
-        /* Hide on touch devices */
-        @media (hover: none) and (pointer: coarse) {
-            .custom-cursor {
-                display: none;
-            }
-        }
-
-        /* Hide default cursor on desktop when custom cursor is active */
-        @media (hover: hover) and (pointer: fine) {
-            body {
-                cursor: none;
-            }
-            a, button, .btn, .nav-link, .project-card, .stat-card, .tech-tag, .social-link, .floating-icon {
-                cursor: none;
-            }
-        }
-    </style>
+            </style>
 </head>
 <body>
-    <!-- Custom Cursor -->
-    <div class="custom-cursor" id="custom-cursor">
-        <div class="cursor-dot"></div>
-        <div class="cursor-outline"></div>
-    </div>
-
     <!-- Page Loader -->
     <div class="page-loader" id="page-loader">
         <div class="loader-content">
@@ -646,6 +575,14 @@ const {
                     console.log('About Three.js Engine initialized');
                 } catch (error) {
                     console.error('Error initializing About Three.js Engine:', error);
+                }
+
+                // Inicializar Cursor Particles Engine
+                try {
+                    this.cursorEngine = new CursorParticlesEngine();
+                    console.log('Cursor Particles Engine initialized');
+                } catch (error) {
+                    console.error('Error initializing Cursor Particles Engine:', error);
                 }
             }
 
@@ -1140,66 +1077,6 @@ const {
             }
         });
 
-        // Custom Cursor
-        const setupCustomCursor = () => {
-            const cursor = document.getElementById('custom-cursor');
-            if (!cursor) return;
-
-            const cursorDot = cursor.querySelector('.cursor-dot');
-            const cursorOutline = cursor.querySelector('.cursor-outline');
-
-            let mouseX = 0, mouseY = 0;
-            let outlineX = 0, outlineY = 0;
-
-            // Update cursor position
-            document.addEventListener('mousemove', (e) => {
-                mouseX = e.clientX;
-                mouseY = e.clientY;
-
-                // Move dot immediately
-                if (cursorDot) {
-                    cursorDot.style.left = mouseX + 'px';
-                    cursorDot.style.top = mouseY + 'px';
-                }
-            });
-
-            // Smooth outline follow
-            const animateOutline = () => {
-                outlineX += (mouseX - outlineX) * 0.15;
-                outlineY += (mouseY - outlineY) * 0.15;
-
-                if (cursorOutline) {
-                    cursorOutline.style.left = outlineX + 'px';
-                    cursorOutline.style.top = outlineY + 'px';
-                }
-
-                requestAnimationFrame(animateOutline);
-            };
-            animateOutline();
-
-            // Hover effect on interactive elements
-            const interactiveElements = document.querySelectorAll('a, button, .btn, .nav-link, .project-card, .stat-card, .tech-tag, .social-link, .floating-icon, input, textarea, select');
-
-            interactiveElements.forEach(el => {
-                el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-                el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
-            });
-
-            // Click effect
-            document.addEventListener('mousedown', () => cursor.classList.add('clicking'));
-            document.addEventListener('mouseup', () => cursor.classList.remove('clicking'));
-
-            // Hide when leaving window
-            document.addEventListener('mouseleave', () => cursor.style.opacity = '0');
-            document.addEventListener('mouseenter', () => cursor.style.opacity = '1');
-        };
-
-        // Initialize cursor after DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', setupCustomCursor);
-        } else {
-            setupCustomCursor();
-        }
-    </script>
+            </script>
 </body>
 </html>

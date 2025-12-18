@@ -4,6 +4,8 @@
 
 <section id="contact" class="contact section section-bg">
     <div class="contact-background">
+        <!-- Three.js Neural Network Container -->
+        <div id="contact-three-container" class="contact-three-container"></div>
         <div class="contact-pattern"></div>
         <!-- Animated connection lines -->
         <div class="connection-lines">
@@ -170,6 +172,12 @@
         position: absolute;
         inset: 0;
         pointer-events: none;
+    }
+
+    .contact-three-container {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
     }
 
     .contact-pattern {
@@ -636,5 +644,10 @@
                 }
             });
         }
+
+        // Initialize Three.js engine
+        import('../scripts/engines/contact-three-engine.js').then(module => {
+            new module.ContactThreeEngine('contact-three-container');
+        }).catch(() => {});
     });
 </script>

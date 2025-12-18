@@ -2,12 +2,17 @@
 interface Props {
   title?: string;
   description?: string;
+  image?: string;
 }
 
+const siteUrl = 'https://carlosorbegoso.github.io/page';
 const {
   title = "Carlos Orbegoso - Backend Developer & Java Specialist",
-  description = "Backend Developer especializado en Java, Spring Boot y Quarkus. Experiencia en microservicios y arquitecturas cloud."
+  description = "Backend Developer especializado en Java, Spring Boot y Quarkus. +5 años de experiencia en microservicios, APIs REST y arquitecturas cloud-native.",
+  image = `${siteUrl}/images/og-image.jpg`
 } = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, siteUrl);
 ---
 
 <!DOCTYPE html>
@@ -18,44 +23,66 @@ const {
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="theme-color" content="#64B5F6">
+    <meta name="theme-color" content="#64B5F6" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
     <title>{title}</title>
     <meta name="description" content={description}>
 
     <!-- SEO Meta Tags -->
     <meta name="author" content="Carlos Orbegoso">
-    <meta name="keywords" content="Backend Developer, Java, Spring Boot, Quarkus, Microservices, Cloud Native, Software Engineer">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://carlosorbegoso.dev">
+    <meta name="keywords" content="Backend Developer, Java Developer, Spring Boot, Quarkus, Microservices, Cloud Native, Software Engineer, API REST, Lima Peru, Desarrollador Backend">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow">
+    <link rel="canonical" href={canonicalURL}>
+
+    <!-- Geo Tags for Local SEO -->
+    <meta name="geo.region" content="PE-LIM">
+    <meta name="geo.placename" content="Lima, Peru">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://carlosorbegoso.dev">
+    <meta property="og:url" content={canonicalURL}>
     <meta property="og:title" content={title}>
     <meta property="og:description" content={description}>
-    <meta property="og:image" content="https://carlosorbegoso.dev/og-image.jpg">
-    <meta property="og:locale" content="es_ES">
+    <meta property="og:image" content={image}>
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Carlos Orbegoso - Backend Developer Portfolio">
+    <meta property="og:locale" content="es_PE">
+    <meta property="og:locale:alternate" content="en_US">
+    <meta property="og:site_name" content="Carlos Orbegoso Portfolio">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://carlosorbegoso.dev">
+    <meta name="twitter:url" content={canonicalURL}>
     <meta name="twitter:title" content={title}>
     <meta name="twitter:description" content={description}>
-    <meta name="twitter:image" content="https://carlosorbegoso.dev/og-image.jpg">
+    <meta name="twitter:image" content={image}>
+    <meta name="twitter:creator" content="@carlosorbegoso">
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}/favicon.svg`}>
     <link rel="apple-touch-icon" sizes="180x180" href={`${import.meta.env.BASE_URL}/favicon.svg`}>
 
-    <!-- Structured Data / JSON-LD -->
-    <script type="application/ld+json">
-    {
+    <!-- DNS Prefetch for external resources -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Structured Data / JSON-LD - Person -->
+    <script is:inline type="application/ld+json" set:html={JSON.stringify({
         "@context": "https://schema.org",
         "@type": "Person",
         "name": "Carlos Orbegoso",
-        "url": "https://carlosorbegoso.dev",
-        "image": "https://carlosorbegoso.dev/og-image.jpg",
+        "url": siteUrl,
+        "image": image,
         "jobTitle": "Backend Developer",
+        "description": description,
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Lima",
+            "addressCountry": "PE"
+        },
         "worksFor": {
             "@type": "Organization",
             "name": "Tata Consultancy Services"
@@ -64,9 +91,21 @@ const {
             "https://github.com/carlosorbegoso",
             "https://linkedin.com/in/carlos-orbergoso-loayza"
         ],
-        "knowsAbout": ["Java", "Spring Boot", "Quarkus", "Microservices", "Cloud Native", "Backend Development"]
-    }
-    </script>
+        "knowsAbout": ["Java", "Spring Boot", "Quarkus", "Microservices", "Cloud Native", "Backend Development", "REST API", "Docker", "Kubernetes", "AWS"]
+    })} />
+
+    <!-- Structured Data / JSON-LD - WebSite -->
+    <script is:inline type="application/ld+json" set:html={JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Carlos Orbegoso Portfolio",
+        "url": siteUrl,
+        "description": description,
+        "author": {
+            "@type": "Person",
+            "name": "Carlos Orbegoso"
+        }
+    })} />
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -462,6 +501,10 @@ const {
         import '../styles/main.css';
         import { Portfolio } from '../scripts/core/Portfolio.js';
         import { LoaderProgress } from '../scripts/core/LoaderProgress.js';
+        import { initWebVitals } from '../scripts/utils/web-vitals.js';
+
+        // Initialize Web Vitals tracking
+        initWebVitals();
 
         const loaderProgress = new LoaderProgress();
 

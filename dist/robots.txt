@@ -1,4 +1,6 @@
 User-agent: *
+Disallow: /api/
+Disallow: /_astro/
 Allow: /
-
-Sitemap: https://carlosorbegoso.dev/sitemap.xml
+Crawl-delay: 10
+Sitemap: https://carlosorbegoso.github.io/page/sitemap-index.xml

@@ -543,7 +543,7 @@ body {
         opacity: 0;
         visibility: hidden;
         transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, visibility 0.3s ease;
-        z-index: 999;
+        z-index: 10001;
         padding: 2rem;
     }
 
@@ -594,7 +594,7 @@ body {
 
     .cosmic-menu-btn {
         display: flex;
-        z-index: 1001;
+        z-index: 10002;
     }
 
     .cosmic-controls {
@@ -1244,7 +1244,7 @@ body {
         gap: 1.5rem;
         transform: translateX(-100%);
         transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 999;
+        z-index: 10001;
         padding: 2rem;
     }
 
@@ -1274,7 +1274,7 @@ body {
         height: 44px;
         background: rgba(100, 181, 246, 0.1);
         border: 1px solid rgba(100, 181, 246, 0.2);
-        z-index: 1001;
+        z-index: 10002;
     }
 
     .theme-toggle, .language-toggle {

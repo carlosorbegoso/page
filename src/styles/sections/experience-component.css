@@ -1,0 +1,552 @@
+    .experience {
+        position: relative;
+        padding: 6rem 0;
+        overflow: hidden;
+    }
+
+    /* Three.js container */
+    .experience-three-container {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
+    .experience-three-container canvas {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    .experience-background {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+    }
+
+    .experience-pattern {
+        position: absolute;
+        inset: 0;
+        background-image:
+            radial-gradient(circle at 75% 25%, rgba(100, 181, 246, 0.03) 0%, transparent 50%),
+            radial-gradient(circle at 25% 75%, rgba(255, 107, 53, 0.03) 0%, transparent 50%);
+    }
+
+    .experience-particles {
+        position: absolute;
+        inset: 0;
+    }
+
+    .exp-particle {
+        position: absolute;
+        left: var(--x);
+        top: var(--y);
+        width: 6px;
+        height: 6px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        opacity: 0.3;
+        animation: expParticleFloat 8s ease-in-out infinite;
+        animation-delay: var(--delay);
+    }
+
+    @keyframes expParticleFloat {
+        0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+        25% { transform: translate(15px, -25px) scale(1.3); opacity: 0.6; }
+        50% { transform: translate(-10px, -50px) scale(1); opacity: 0.4; }
+        75% { transform: translate(20px, -25px) scale(1.2); opacity: 0.5; }
+    }
+
+    .experience-timeline {
+        position: relative;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem 0;
+    }
+
+    .timeline-line {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: linear-gradient(to bottom, transparent 0%, rgba(100, 181, 246, 0.2) 10%, rgba(100, 181, 246, 0.2) 90%, transparent 100%);
+        transform: translateX(-50%);
+    }
+
+    .timeline-progress {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 0%;
+        background: linear-gradient(to bottom, var(--primary-color), var(--accent-color));
+        border-radius: 3px;
+        transition: height 1s ease;
+    }
+
+    .timeline-line.animate .timeline-progress {
+        height: 100%;
+    }
+
+    .experience-item {
+        position: relative;
+        margin-bottom: 4rem;
+        opacity: 0;
+        transform: translateY(50px);
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .experience-item.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .experience-item:nth-child(odd) {
+        padding-right: calc(50% + 2rem);
+        text-align: right;
+    }
+
+    .experience-item:nth-child(odd) .experience-content {
+        transform-origin: right center;
+    }
+
+    .experience-item:nth-child(even) {
+        padding-left: calc(50% + 2rem);
+        text-align: left;
+    }
+
+    .experience-item:nth-child(even) .experience-content {
+        transform-origin: left center;
+    }
+
+    .experience-marker {
+        position: absolute;
+        left: 50%;
+        top: 1.5rem;
+        transform: translateX(-50%);
+        z-index: 10;
+    }
+
+    .marker-dot {
+        width: 20px;
+        height: 20px;
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        border-radius: 50%;
+        position: relative;
+        box-shadow: 0 0 20px rgba(100, 181, 246, 0.5);
+    }
+
+    .marker-ring {
+        position: absolute;
+        inset: -8px;
+        border: 2px solid var(--neural-cyan);
+        border-radius: 50%;
+        opacity: 0;
+        animation: markerRingPulse 3s ease-out infinite;
+    }
+
+    .marker-ring.delay-1 {
+        animation-delay: 1s;
+        border-color: var(--neural-primary);
+    }
+
+    .marker-ring.delay-2 {
+        animation-delay: 2s;
+        border-color: var(--neural-purple);
+    }
+
+    @keyframes markerRingPulse {
+        0% { transform: scale(0.8); opacity: 0.6; }
+        50% { opacity: 0.3; }
+        100% { transform: scale(2.5); opacity: 0; }
+    }
+
+    .experience-content {
+        padding: var(--card-padding);
+        border-radius: var(--card-radius);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .experience-content:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: var(--card-shadow-glow);
+    }
+
+    .experience-header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        align-items: center;
+    }
+
+    .experience-item:nth-child(odd) .experience-header {
+        justify-content: flex-end;
+    }
+
+    .experience-item:nth-child(even) .experience-header {
+        justify-content: flex-start;
+    }
+
+    .experience-date {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .experience-date i {
+        color: var(--primary-color);
+    }
+
+    .date-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: rgba(100, 181, 246, 0.1);
+        color: var(--primary-color);
+    }
+
+    .date-badge.current {
+        background: linear-gradient(135deg, rgba(100, 181, 246, 0.2), rgba(255, 107, 53, 0.2));
+        animation: currentPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes currentPulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+
+    .experience-company {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .company-logo {
+        width: 32px;
+        height: 32px;
+        background: rgba(100, 181, 246, 0.1);
+        border: 1px solid rgba(100, 181, 246, 0.2);
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .experience-content:hover .company-logo {
+        transform: rotate(5deg) scale(1.1);
+        background: rgba(100, 181, 246, 0.2);
+    }
+
+    .experience-company span {
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .experience-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+    }
+
+    .experience-description {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .experience-achievements {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .achievement {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .achievement i {
+        color: #4ade80;
+        font-size: 0.75rem;
+    }
+
+    .experience-tech {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .experience-item:nth-child(odd) .experience-tech,
+    .experience-item:nth-child(odd) .experience-achievements {
+        justify-content: flex-end;
+    }
+
+    /* Glass card override for experience */
+    .experience-content.glass-card {
+        background: var(--card-bg-glass);
+        border: var(--card-border);
+    }
+
+    [data-theme="dark"] .experience-content.glass-card {
+        background: rgba(20, 20, 35, 0.6);
+    }
+
+    /* Animation observer styles */
+    .exp-animate {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .exp-animate.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* ===== MOBILE OPTIMIZATIONS ===== */
+
+    /* Tablet */
+    @media (max-width: 768px) {
+        .experience {
+            padding: 4rem 0 3rem;
+        }
+
+        .section-header {
+            margin-bottom: 2.5rem;
+        }
+
+        .section-title {
+            font-size: clamp(1.75rem, 8vw, 2.5rem);
+        }
+
+        .section-subtitle {
+            font-size: 0.95rem;
+            padding: 0 1rem;
+        }
+
+        .experience-timeline {
+            padding: 1rem 0;
+        }
+
+        .timeline-line {
+            left: 1rem;
+        }
+
+        .experience-item:nth-child(odd),
+        .experience-item:nth-child(even) {
+            padding-left: calc(1rem + 2rem);
+            padding-right: 0;
+            text-align: left;
+        }
+
+        .experience-item:nth-child(odd) .experience-header,
+        .experience-item:nth-child(even) .experience-header {
+            justify-content: flex-start;
+        }
+
+        .experience-item:nth-child(odd) .experience-tech,
+        .experience-item:nth-child(odd) .experience-achievements {
+            justify-content: flex-start;
+        }
+
+        .experience-marker {
+            left: 1rem;
+        }
+
+        .marker-dot {
+            width: 14px;
+            height: 14px;
+        }
+
+        .marker-ring {
+            display: none;
+        }
+
+        .experience-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .experience-content {
+            padding: 1.25rem;
+            border-radius: 1rem;
+        }
+
+        .experience-title {
+            font-size: 1.1rem;
+        }
+
+        .experience-description {
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .experience-item {
+            margin-bottom: 2rem;
+        }
+
+        .company-logo {
+            width: 28px;
+            height: 28px;
+        }
+
+        .experience-date {
+            font-size: 0.8rem;
+        }
+
+        .date-badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+        }
+
+        /* Reduce background effects */
+        .experience-pattern {
+            opacity: 0.3;
+        }
+
+        .exp-particle {
+            width: 4px;
+            height: 4px;
+            opacity: 0.2;
+        }
+    }
+
+    /* Mobile */
+    @media (max-width: 480px) {
+        .experience {
+            padding: 3rem 0 2.5rem;
+        }
+
+        .section-header {
+            margin-bottom: 2rem;
+        }
+
+        .section-badge {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+        }
+
+        .section-subtitle {
+            font-size: 0.875rem;
+        }
+
+        .timeline-line {
+            left: 0.75rem;
+            width: 2px;
+        }
+
+        .experience-item:nth-child(odd),
+        .experience-item:nth-child(even) {
+            padding-left: calc(0.75rem + 1.5rem);
+        }
+
+        .experience-marker {
+            left: 0.75rem;
+        }
+
+        .marker-dot {
+            width: 12px;
+            height: 12px;
+        }
+
+        .experience-content {
+            padding: 1rem;
+        }
+
+        .experience-header {
+            gap: 0.4rem;
+        }
+
+        .experience-company span {
+            font-size: 0.9rem;
+        }
+
+        .company-logo {
+            width: 26px;
+            height: 26px;
+            font-size: 0.75rem;
+        }
+
+        .experience-title {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .experience-description {
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .experience-achievements {
+            flex-direction: column;
+            gap: 0.4rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .achievement {
+            font-size: 0.8rem;
+        }
+
+        .achievement i {
+            font-size: 0.65rem;
+        }
+
+        .experience-tech {
+            gap: 0.35rem;
+        }
+
+        .tech-tag {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .experience-item {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Disable particle effects on mobile */
+        .exp-particle {
+            display: none;
+        }
+    }
+
+    /* Very small screens */
+    @media (max-width: 360px) {
+        .experience {
+            padding: 2.5rem 0 2rem;
+        }
+
+        .experience-content {
+            padding: 0.875rem;
+        }
+
+        .experience-title {
+            font-size: 0.95rem;
+        }
+
+        .experience-description {
+            font-size: 0.8rem;
+        }
+
+        .tech-tag {
+            font-size: 0.65rem;
+            padding: 0.2rem 0.4rem;
+        }
+    }

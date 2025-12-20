@@ -17,10 +17,13 @@
 @import url('./components/threejs-containers.css');
 @import url('./components/sections-shared.css');
 @import url('./sections/hero.css');
+@import url('./sections/hero-component.css');
 @import url('./sections/about.css');
 @import url('./sections/experience.css');
+@import url('./sections/experience-component.css');
 @import url('./sections/projects.css');
 @import url('./sections/contact.css');
+@import url('./sections/contact-component.css');
 @import url('./sections/tech-projects.css');
 @import url('./utilities/animations.css');
 @import url('./utilities/effects.css');

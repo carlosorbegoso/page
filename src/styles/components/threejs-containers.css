@@ -1,0 +1,46 @@
+/* ===== THREE.JS CONTAINERS ===== */
+.neural-background-container {
+    position: fixed;
+    inset: 0;
+    z-index: -5;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* Hide neural background on mobile for performance and visibility */
+@media (max-width: 768px) {
+    .neural-background-container {
+        display: none !important;
+    }
+}
+
+.visual-effects-container { position: fixed; inset: 0; z-index: -10; pointer-events: none; overflow: hidden; }
+.hero-background, .about-background, .experience-background { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+.hero-particles, .hero-constellations, .hero-stars,
+.about-particles, .about-constellations { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.hero-particles { opacity: 0.6; z-index: 2; }
+.hero-constellations { opacity: 0.4; z-index: 3; }
+.hero-stars { opacity: 0.3; z-index: 4; }
+.hero-gradient, .about-gradient {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: transparent;
+}
+
+/* Ocultar efectos de texto que causan rectángulos visibles */
+.text-glow,
+.text-wave,
+.text-particle,
+.subtle-glow {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+/* Brain container ya definido en About.astro - estilos adicionales */
+.brain-container canvas {
+    border-radius: 16px;
+}
+
+/* Brain glow and particles now handled by NeuralSystemEngine (Three.js) */
+

@@ -1,6 +1,7 @@
 /**
- * Contact Section Three.js Engine
+ * Contact Section Three.js Engine - Neural Mind Edition
  * Elegant network visualization with flowing connections
+ * Uses unified neural color palette
  */
 
 import * as THREE from 'three';
@@ -23,6 +24,14 @@ export class ContactThreeEngine {
         this.targetMouse = new THREE.Vector2();
         this.time = 0;
         this.isVisible = false;
+
+        // Neural color palette (unified)
+        this.neuralColors = {
+            primary: new THREE.Color(0x64B5F6),   // --neural-primary
+            cyan: new THREE.Color(0x00ffff),      // --neural-cyan
+            purple: new THREE.Color(0xaa44ff),    // --neural-purple
+            spark: new THREE.Color(0xFF6B35)      // --neural-spark
+        };
 
         // Mobile detection for performance
         this.isMobile = window.innerWidth <= 768;
@@ -170,7 +179,10 @@ export class ContactThreeEngine {
                         float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 2.0);
                         float pulse = 0.6 + 0.3 * sin(time * 2.0 + phase);
 
-                        vec3 color = vec3(0.0, 0.9, 0.9);
+                        // Neural colors - mix cyan and primary
+                        vec3 neuralCyan = vec3(0.0, 1.0, 1.0);
+                        vec3 neuralPrimary = vec3(0.392, 0.71, 0.965);
+                        vec3 color = mix(neuralCyan, neuralPrimary, 0.3 + fresnel * 0.3);
                         float alpha = (0.4 + fresnel * 0.5) * pulse;
 
                         gl_FragColor = vec4(color, alpha);
@@ -207,7 +219,10 @@ export class ContactThreeEngine {
                         float pulse = 0.5 + 0.3 * sin(time * 1.5 + phase);
                         float ring = smoothstep(0.0, 0.3, vUv.y) * smoothstep(1.0, 0.7, vUv.y);
 
-                        vec3 color = vec3(0.0, 0.85, 0.85);
+                        // Neural purple accent for rings
+                        vec3 neuralPurple = vec3(0.667, 0.267, 1.0);
+                        vec3 neuralCyan = vec3(0.0, 1.0, 1.0);
+                        vec3 color = mix(neuralCyan, neuralPurple, 0.3);
                         float alpha = ring * pulse * 0.3;
 
                         gl_FragColor = vec4(color, alpha);
@@ -282,11 +297,12 @@ export class ContactThreeEngine {
                     uniform float phase;
 
                     void main() {
-                        vec3 color = vec3(0.0, 0.8, 0.9);
+                        // Neural primary color for connections
+                        vec3 neuralPrimary = vec3(0.392, 0.71, 0.965);
                         float pulse = 0.5 + 0.3 * sin(time * 2.0 + phase);
                         float alpha = 0.12 * pulse;
 
-                        gl_FragColor = vec4(color, alpha);
+                        gl_FragColor = vec4(neuralPrimary, alpha);
                     }
                 `,
                 transparent: true,
@@ -307,8 +323,10 @@ export class ContactThreeEngine {
 
     createEnergyPulse(startPos, endPos) {
         const geometry = new THREE.SphereGeometry(0.2, 8, 8);
+        // Use neural colors for pulses
+        const pulseColors = [0x64B5F6, 0x00ffff, 0xaa44ff];
         const material = new THREE.MeshBasicMaterial({
-            color: 0x00ffff,
+            color: pulseColors[Math.floor(Math.random() * pulseColors.length)],
             transparent: true,
             opacity: 0.8
         });

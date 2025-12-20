@@ -1,0 +1,58 @@
+/* ===== PROJECTS SECTION ===== */
+.projects { position: relative; padding: 6rem 0; background: transparent; overflow: hidden; }
+.projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; max-width: 1000px; margin: 0 auto; }
+.project-card {
+    background: transparent;
+    border: 1px solid rgba(100, 181, 246, 0.08);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s ease;
+}
+.project-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    transform: scaleX(0);
+    transition: transform 0.6s ease;
+}
+.project-card:hover::before { transform: scaleX(1); }
+.project-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(100, 181, 246, 0.15);
+    border-color: rgba(100, 181, 246, 0.2);
+}
+.project-image {
+    width: 60px;
+    height: 60px;
+    border: 1px solid rgba(100, 181, 246, 0.1);
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem auto;
+    font-size: 1.25rem;
+    color: var(--primary-color);
+    transition: all 0.3s ease;
+}
+.project-card:hover .project-image { transform: scale(1.05) rotate(3deg); background: rgba(100, 181, 246, 0.03); border-color: rgba(100, 181, 246, 0.2); }
+.project-content h3 { font-size: 1.125rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; text-align: center; }
+.project-type {
+    font-size: 0.875rem;
+    color: var(--accent-color);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(255, 107, 53, 0.1);
+    border: 1px solid rgba(255, 107, 53, 0.2);
+    border-radius: 9999px;
+    display: inline-block;
+}
+.project-content p { color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; }
+.project-tech { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+

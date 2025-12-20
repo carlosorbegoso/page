@@ -94,7 +94,7 @@
         background: linear-gradient(
             90deg,
             transparent,
-            rgba(100, 181, 246, 0.1),
+            rgba(100, 181, 246, 0.1),  /* --neural-primary */
             rgba(100, 181, 246, 0.2),
             rgba(100, 181, 246, 0.1),
             transparent
@@ -108,7 +108,7 @@
         100% { top: 100%; }
     }
 
-    /* Glitch lines that appear occasionally */
+    /* Glitch lines that appear occasionally - using neural palette */
     .scanline-overlay::after {
         content: '';
         position: absolute;
@@ -118,10 +118,10 @@
         background: linear-gradient(
             90deg,
             transparent 0%,
-            rgba(255, 107, 53, 0.3) 20%,
-            rgba(100, 181, 246, 0.3) 40%,
-            rgba(0, 255, 255, 0.3) 60%,
-            rgba(255, 107, 53, 0.3) 80%,
+            rgba(255, 107, 53, 0.3) 20%,   /* --neural-spark */
+            rgba(100, 181, 246, 0.3) 40%,  /* --neural-primary */
+            rgba(0, 255, 255, 0.3) 60%,    /* --neural-cyan */
+            rgba(170, 68, 255, 0.3) 80%,   /* --neural-purple (was spark repeated) */
             transparent 100%
         );
         animation: glitchLine 10s ease-in-out infinite;

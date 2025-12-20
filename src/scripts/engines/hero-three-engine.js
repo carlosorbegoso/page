@@ -1,6 +1,7 @@
 /**
- * Hero Three.js Engine - Premium Edition
- * Elegant flowing particles with aurora effect
+ * Hero Three.js Engine - Neural Mind Edition
+ * Elegant neural-inspired particles with flowing aurora effect
+ * Unified "Inside the Mind" visual theme
  */
 
 import * as THREE from 'three';
@@ -29,23 +30,31 @@ export class HeroThreeEngine {
 
         const quality = this.isLowPower ? 0.3 : (this.isMobile ? 0.5 : 1);
 
+        // Neural color palette (unified)
+        this.neuralColors = {
+            primary: new THREE.Color(0x64B5F6),   // --neural-primary
+            cyan: new THREE.Color(0x00ffff),      // --neural-cyan
+            purple: new THREE.Color(0xaa44ff),    // --neural-purple
+            spark: new THREE.Color(0xFF6B35)      // --neural-spark (accent)
+        };
+
         this.config = {
             flowingParticles: {
-                count: Math.floor(300 * quality),
+                count: Math.floor(250 * quality), // Slightly reduced for cleaner look
                 layers: 3
             },
             aurora: {
                 waves: this.isMobile ? 2 : 3,
-                segments: Math.floor(80 * quality)
+                segments: Math.floor(60 * quality) // Smoother waves
             },
             orbs: {
-                count: Math.floor(6 * quality)
+                count: Math.floor(5 * quality) // Fewer, more impactful orbs
             },
             nebula: {
-                count: Math.floor(40 * quality)
+                count: Math.floor(30 * quality) // Subtle background
             },
             stars: {
-                count: Math.floor(150 * quality)
+                count: Math.floor(120 * quality) // Elegant star field
             }
         };
     }
@@ -124,19 +133,40 @@ export class HeroThreeEngine {
         const count = this.config.stars.count;
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(count * 3);
+        const colors = new Float32Array(count * 3);
         const sizes = new Float32Array(count);
         const twinklePhases = new Float32Array(count);
 
-        for (let i = 0; i < count; i++) {
-            positions[i * 3] = (Math.random() - 0.5) * 200;
-            positions[i * 3 + 1] = (Math.random() - 0.5) * 120;
-            positions[i * 3 + 2] = -50 - Math.random() * 50;
+        // Star colors - mostly white with subtle neural tints
+        const starColors = [
+            new THREE.Color(1.0, 1.0, 1.0),           // Pure white
+            new THREE.Color(0.9, 0.95, 1.0),          // Slight blue tint
+            new THREE.Color(0.85, 0.92, 1.0),         // More blue
+            this.neuralColors.primary.clone().multiplyScalar(0.3).addScalar(0.7) // Subtle neural
+        ];
 
-            sizes[i] = 0.3 + Math.random() * 0.7;
+        for (let i = 0; i < count; i++) {
+            // Distribute stars avoiding center
+            const angle = Math.random() * Math.PI * 2;
+            const radius = 20 + Math.random() * 80;
+
+            positions[i * 3] = Math.cos(angle) * radius + (Math.random() - 0.5) * 40;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 100;
+            positions[i * 3 + 2] = -40 - Math.random() * 60; // Deep background
+
+            // Assign colors
+            const starColor = starColors[Math.floor(Math.random() * starColors.length)];
+            colors[i * 3] = starColor.r;
+            colors[i * 3 + 1] = starColor.g;
+            colors[i * 3 + 2] = starColor.b;
+
+            // Varied sizes for depth
+            sizes[i] = 0.2 + Math.random() * 0.6;
             twinklePhases[i] = Math.random() * Math.PI * 2;
         }
 
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
         geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
         geometry.setAttribute('twinklePhase', new THREE.BufferAttribute(twinklePhases, 1));
 
@@ -146,29 +176,35 @@ export class HeroThreeEngine {
                 pixelRatio: { value: this.renderer.getPixelRatio() }
             },
             vertexShader: `
+                attribute vec3 color;
                 attribute float size;
                 attribute float twinklePhase;
                 uniform float time;
                 uniform float pixelRatio;
                 varying float vTwinkle;
+                varying vec3 vColor;
 
                 void main() {
-                    vTwinkle = 0.5 + 0.5 * sin(time * 1.5 + twinklePhase);
+                    vColor = color;
+                    // Slower, more natural twinkle
+                    vTwinkle = 0.4 + 0.6 * sin(time * 1.0 + twinklePhase);
 
                     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-                    gl_PointSize = size * pixelRatio * (100.0 / -mvPosition.z);
+                    gl_PointSize = size * pixelRatio * (80.0 / -mvPosition.z);
                     gl_Position = projectionMatrix * mvPosition;
                 }
             `,
             fragmentShader: `
                 varying float vTwinkle;
+                varying vec3 vColor;
 
                 void main() {
                     float dist = length(gl_PointCoord - vec2(0.5));
                     if (dist > 0.5) discard;
 
-                    float alpha = vTwinkle * smoothstep(0.5, 0.0, dist) * 0.8;
-                    gl_FragColor = vec4(1.0, 1.0, 1.0, alpha);
+                    // Softer glow effect
+                    float alpha = vTwinkle * smoothstep(0.5, 0.1, dist) * 0.7;
+                    gl_FragColor = vec4(vColor, alpha);
                 }
             `,
             transparent: true,
@@ -189,28 +225,37 @@ export class HeroThreeEngine {
         const velocities = new Float32Array(count * 3);
         const phases = new Float32Array(count);
 
+        // Neural color palette for particles
+        const colorPalette = [
+            this.neuralColors.primary,
+            this.neuralColors.cyan,
+            this.neuralColors.purple
+        ];
+
         for (let i = 0; i < count; i++) {
-            // Spread across view with depth variation
-            positions[i * 3] = (Math.random() - 0.5) * 120;
-            positions[i * 3 + 1] = (Math.random() - 0.5) * 80;
-            positions[i * 3 + 2] = (Math.random() - 0.5) * 40 - 10;
+            // Distribute particles in a more organic pattern - avoiding center
+            const angle = Math.random() * Math.PI * 2;
+            const radius = 15 + Math.random() * 50; // Min 15 units from center
+            const heightVariation = (Math.random() - 0.5) * 70;
 
-            // Cyan to blue gradient colors
-            const hue = 0.52 + Math.random() * 0.08;
-            const saturation = 0.7 + Math.random() * 0.3;
-            const lightness = 0.5 + Math.random() * 0.2;
-            const color = new THREE.Color();
-            color.setHSL(hue, saturation, lightness);
-            colors[i * 3] = color.r;
-            colors[i * 3 + 1] = color.g;
-            colors[i * 3 + 2] = color.b;
+            positions[i * 3] = Math.cos(angle) * radius + (Math.random() - 0.5) * 30;
+            positions[i * 3 + 1] = heightVariation;
+            positions[i * 3 + 2] = -5 - Math.random() * 35; // Depth layers
 
-            sizes[i] = 1 + Math.random() * 2;
+            // Use neural color palette
+            const baseColor = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+            const colorVariation = 0.1 + Math.random() * 0.2;
+            colors[i * 3] = baseColor.r * (1 - colorVariation) + colorVariation;
+            colors[i * 3 + 1] = baseColor.g * (1 - colorVariation) + colorVariation;
+            colors[i * 3 + 2] = baseColor.b * (1 - colorVariation) + colorVariation;
 
-            // Flow velocities - gentle upward drift
-            velocities[i * 3] = (Math.random() - 0.5) * 0.02;
-            velocities[i * 3 + 1] = 0.01 + Math.random() * 0.03;
-            velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.01;
+            // Varied sizes for depth perception
+            sizes[i] = 0.8 + Math.random() * 1.8;
+
+            // Gentle flowing velocities - like neural signals
+            velocities[i * 3] = (Math.random() - 0.5) * 0.015;
+            velocities[i * 3 + 1] = 0.008 + Math.random() * 0.02; // Upward drift
+            velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.008;
 
             phases[i] = Math.random() * Math.PI * 2;
         }
@@ -281,7 +326,8 @@ export class HeroThreeEngine {
         const segments = this.config.aurora.segments;
 
         for (let w = 0; w < waveCount; w++) {
-            const geometry = new THREE.PlaneGeometry(140, 30, segments, 1);
+            // Wider, more subtle waves
+            const geometry = new THREE.PlaneGeometry(160, 25, segments, 1);
 
             const material = new THREE.ShaderMaterial({
                 uniforms: {
@@ -300,15 +346,15 @@ export class HeroThreeEngine {
 
                         vec3 pos = position;
 
-                        // Multiple wave layers
-                        float wave1 = sin(uv.x * 6.0 + time * 0.8 + waveIndex * 2.0) * 4.0;
-                        float wave2 = sin(uv.x * 3.0 - time * 0.5 + waveIndex) * 2.0;
-                        float wave3 = cos(uv.x * 8.0 + time * 1.2) * 1.5;
+                        // Smoother, more organic wave motion
+                        float wave1 = sin(uv.x * 4.0 + time * 0.5 + waveIndex * 1.5) * 3.0;
+                        float wave2 = sin(uv.x * 2.5 - time * 0.35 + waveIndex) * 2.0;
+                        float wave3 = cos(uv.x * 5.0 + time * 0.8) * 1.0;
 
                         pos.y += wave1 + wave2 + wave3;
-                        pos.z += sin(uv.x * 4.0 + time * 0.3) * 3.0;
+                        pos.z += sin(uv.x * 3.0 + time * 0.25) * 2.0;
 
-                        vWave = (wave1 + wave2 + wave3) / 7.5 + 0.5;
+                        vWave = (wave1 + wave2 + wave3) / 6.0 + 0.5;
 
                         gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
                     }
@@ -321,26 +367,27 @@ export class HeroThreeEngine {
                     varying float vWave;
 
                     void main() {
-                        // Aurora colors - cyan to purple gradient
-                        vec3 color1 = vec3(0.0, 0.9, 0.8); // Cyan
-                        vec3 color2 = vec3(0.3, 0.5, 1.0); // Blue
-                        vec3 color3 = vec3(0.6, 0.2, 0.8); // Purple
+                        // Neural palette colors - more cohesive
+                        vec3 neuralPrimary = vec3(0.392, 0.71, 0.965); // #64B5F6
+                        vec3 neuralCyan = vec3(0.0, 1.0, 1.0);          // #00ffff
+                        vec3 neuralPurple = vec3(0.667, 0.267, 1.0);    // #aa44ff
 
-                        float t = vUv.x + sin(time * 0.5) * 0.2;
-                        vec3 color = mix(color1, color2, smoothstep(0.0, 0.5, t));
-                        color = mix(color, color3, smoothstep(0.5, 1.0, t));
+                        float t = vUv.x + sin(time * 0.4) * 0.15;
+                        vec3 color = mix(neuralCyan, neuralPrimary, smoothstep(0.0, 0.5, t));
+                        color = mix(color, neuralPurple, smoothstep(0.5, 1.0, t));
 
-                        // Vertical fade
-                        float verticalFade = smoothstep(0.0, 0.3, vUv.y) * smoothstep(1.0, 0.7, vUv.y);
+                        // Smoother vertical fade
+                        float verticalFade = smoothstep(0.0, 0.35, vUv.y) * smoothstep(1.0, 0.65, vUv.y);
 
-                        // Wave intensity
-                        float intensity = vWave * 0.5 + 0.5;
+                        // Wave intensity with subtle breathing
+                        float intensity = vWave * 0.4 + 0.6;
 
-                        // Edge fade
-                        float edgeFade = smoothstep(0.0, 0.2, vUv.x) * smoothstep(1.0, 0.8, vUv.x);
+                        // Wider edge fade for seamless blend
+                        float edgeFade = smoothstep(0.0, 0.25, vUv.x) * smoothstep(1.0, 0.75, vUv.x);
 
-                        float alpha = verticalFade * intensity * edgeFade * 0.15;
-                        alpha *= 1.0 - (waveIndex / totalWaves) * 0.3;
+                        // More subtle alpha for elegance
+                        float alpha = verticalFade * intensity * edgeFade * 0.12;
+                        alpha *= 1.0 - (waveIndex / totalWaves) * 0.25;
 
                         gl_FragColor = vec4(color, alpha);
                     }
@@ -352,8 +399,9 @@ export class HeroThreeEngine {
             });
 
             const wave = new THREE.Mesh(geometry, material);
-            wave.position.set(0, 20 - w * 8, -30 - w * 5);
-            wave.rotation.x = -0.3;
+            // Position waves higher and spread them out more
+            wave.position.set(0, 25 - w * 10, -35 - w * 8);
+            wave.rotation.x = -0.25;
 
             this.auroraWaves.push(wave);
             this.scene.add(wave);
@@ -363,13 +411,20 @@ export class HeroThreeEngine {
     createFloatingOrbs() {
         const count = this.config.orbs.count;
 
-        for (let i = 0; i < count; i++) {
-            const size = 3 + Math.random() * 4;
-            const geometry = new THREE.SphereGeometry(size, 32, 32);
+        // Neural colors for orbs
+        const orbColors = [
+            this.neuralColors.primary,
+            this.neuralColors.cyan,
+            this.neuralColors.purple
+        ];
 
-            const hue = 0.5 + Math.random() * 0.15;
-            const color = new THREE.Color();
-            color.setHSL(hue, 0.8, 0.5);
+        for (let i = 0; i < count; i++) {
+            // Smaller, more subtle orbs
+            const size = 2 + Math.random() * 2.5;
+            const geometry = new THREE.SphereGeometry(size, 24, 24);
+
+            // Use neural color palette
+            const color = orbColors[i % orbColors.length].clone();
 
             const material = new THREE.ShaderMaterial({
                 uniforms: {
@@ -395,18 +450,18 @@ export class HeroThreeEngine {
                     varying vec3 vPosition;
 
                     void main() {
-                        // Fresnel effect for glow
-                        float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 3.0);
+                        // Softer fresnel effect
+                        float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 2.5);
 
-                        // Pulsing
-                        float pulse = 0.5 + 0.3 * sin(time * 1.5 + phase);
+                        // Slower, more subtle pulsing
+                        float pulse = 0.6 + 0.2 * sin(time * 1.0 + phase);
 
-                        // Inner glow
-                        float innerGlow = exp(-length(vPosition) * 0.2) * 0.5;
+                        // Softer inner glow
+                        float innerGlow = exp(-length(vPosition) * 0.25) * 0.4;
 
-                        float alpha = (fresnel * 0.6 + innerGlow) * pulse;
+                        float alpha = (fresnel * 0.5 + innerGlow) * pulse;
 
-                        gl_FragColor = vec4(color, alpha * 0.4);
+                        gl_FragColor = vec4(color, alpha * 0.3);
                     }
                 `,
                 transparent: true,
@@ -416,17 +471,23 @@ export class HeroThreeEngine {
             });
 
             const orb = new THREE.Mesh(geometry, material);
+
+            // Position orbs away from center - distributed around edges
+            const angle = (i / count) * Math.PI * 2 + Math.random() * 0.8;
+            const radiusX = 45 + Math.random() * 25;
+            const radiusY = 30 + Math.random() * 15;
+
             orb.position.set(
-                (Math.random() - 0.5) * 100,
-                (Math.random() - 0.5) * 60,
-                (Math.random() - 0.5) * 30 - 20
+                Math.cos(angle) * radiusX,
+                Math.sin(angle) * radiusY,
+                -30 - Math.random() * 20
             );
 
             orb.userData = {
                 originalPos: orb.position.clone(),
                 floatPhase: Math.random() * Math.PI * 2,
-                floatSpeed: 0.3 + Math.random() * 0.3,
-                floatAmplitude: 5 + Math.random() * 5
+                floatSpeed: 0.2 + Math.random() * 0.2, // Slower floating
+                floatAmplitude: 4 + Math.random() * 4
             };
 
             this.floatingOrbs.push(orb);
@@ -442,8 +503,11 @@ export class HeroThreeEngine {
         const sizes = new Float32Array(count);
 
         for (let i = 0; i < count; i++) {
-            positions[i * 3] = (Math.random() - 0.5) * 150;
-            positions[i * 3 + 1] = (Math.random() - 0.5) * 100;
+            // Position nebula clouds away from center
+            const angle = Math.random() * Math.PI * 2;
+            const radius = 30 + Math.random() * 50; // Min 30 units from center
+            positions[i * 3] = Math.cos(angle) * radius + (Math.random() - 0.5) * 40;
+            positions[i * 3 + 1] = Math.sin(angle) * radius * 0.7 + (Math.random() - 0.5) * 30;
             positions[i * 3 + 2] = -60 - Math.random() * 40;
 
             // Soft purple/blue colors

@@ -1,6 +1,7 @@
 /**
- * Experience Section Three.js Engine
+ * Experience Section Three.js Engine - Neural Mind Edition
  * Elegant timeline effect with flowing energy and subtle particles
+ * Uses unified neural color palette
  */
 
 import * as THREE from 'three';
@@ -21,6 +22,14 @@ export class ExperienceThreeEngine {
         this.isVisible = false;
         this.mouse = new THREE.Vector2();
         this.targetMouse = new THREE.Vector2();
+
+        // Neural color palette (unified)
+        this.neuralColors = {
+            primary: new THREE.Color(0x64B5F6),   // --neural-primary
+            cyan: new THREE.Color(0x00ffff),      // --neural-cyan
+            purple: new THREE.Color(0xaa44ff),    // --neural-purple
+            spark: new THREE.Color(0xFF6B35)      // --neural-spark
+        };
 
         // Mobile detection for performance
         this.isMobile = window.innerWidth <= 768;
@@ -134,19 +143,27 @@ export class ExperienceThreeEngine {
         const velocities = [];
         const phases = new Float32Array(particleCount);
 
+        // Neural color palette for particles
+        const colorPalette = [
+            this.neuralColors.primary,
+            this.neuralColors.cyan,
+            this.neuralColors.purple
+        ];
+
         for (let i = 0; i < particleCount; i++) {
-            // Spread particles across the view
-            positions[i * 3] = (Math.random() - 0.5) * 100;
+            // Spread particles across the view - avoiding center
+            const angle = Math.random() * Math.PI * 2;
+            const radius = 15 + Math.random() * 40;
+            positions[i * 3] = Math.cos(angle) * radius + (Math.random() - 0.5) * 20;
             positions[i * 3 + 1] = Math.random() * 100 - 50;
             positions[i * 3 + 2] = (Math.random() - 0.5) * 40 - 15;
 
-            // Cyan/blue colors with variation
-            const hue = 0.52 + Math.random() * 0.08;
-            const color = new THREE.Color();
-            color.setHSL(hue, 0.7, 0.55);
-            colors[i * 3] = color.r;
-            colors[i * 3 + 1] = color.g;
-            colors[i * 3 + 2] = color.b;
+            // Use neural color palette
+            const baseColor = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+            const colorVariation = 0.1 + Math.random() * 0.15;
+            colors[i * 3] = baseColor.r * (1 - colorVariation) + colorVariation;
+            colors[i * 3 + 1] = baseColor.g * (1 - colorVariation) + colorVariation;
+            colors[i * 3 + 2] = baseColor.b * (1 - colorVariation) + colorVariation;
 
             sizes[i] = 0.8 + Math.random() * 1.5;
             velocities.push(0.015 + Math.random() * 0.03);
@@ -246,10 +263,13 @@ export class ExperienceThreeEngine {
                     float pulse2 = sin(vUv.y * 15.0 - time * 2.0 + 1.5) * 0.5 + 0.5;
                     float energy = pulse1 * 0.6 + pulse2 * 0.4;
 
-                    // Color gradient (cyan to blue)
-                    vec3 color1 = vec3(0.0, 0.9, 0.9);
-                    vec3 color2 = vec3(0.3, 0.5, 1.0);
-                    vec3 color = mix(color1, color2, vUv.y + sin(time * 0.5) * 0.2);
+                    // Neural color gradient (cyan to purple via primary)
+                    vec3 neuralCyan = vec3(0.0, 1.0, 1.0);
+                    vec3 neuralPrimary = vec3(0.392, 0.71, 0.965);
+                    vec3 neuralPurple = vec3(0.667, 0.267, 1.0);
+                    float t = vUv.y + sin(time * 0.5) * 0.2;
+                    vec3 color = mix(neuralCyan, neuralPrimary, smoothstep(0.0, 0.5, t));
+                    color = mix(color, neuralPurple, smoothstep(0.5, 1.0, t));
 
                     float alpha = horizFade * energy * 0.12;
 
@@ -271,13 +291,19 @@ export class ExperienceThreeEngine {
         // Subtle glow orbs that float around
         const count = Math.floor(5 * this.particleMultiplier);
 
+        // Neural colors for orbs
+        const orbColors = [
+            this.neuralColors.primary,
+            this.neuralColors.cyan,
+            this.neuralColors.purple
+        ];
+
         for (let i = 0; i < count; i++) {
-            const size = 2 + Math.random() * 3;
+            const size = 2 + Math.random() * 2.5;
             const geometry = new THREE.SphereGeometry(size, 24, 24);
 
-            const hue = 0.5 + Math.random() * 0.12;
-            const color = new THREE.Color();
-            color.setHSL(hue, 0.75, 0.5);
+            // Use neural color palette
+            const color = orbColors[i % orbColors.length].clone();
 
             const material = new THREE.ShaderMaterial({
                 uniforms: {
@@ -312,10 +338,16 @@ export class ExperienceThreeEngine {
             });
 
             const orb = new THREE.Mesh(geometry, material);
+
+            // Position orbs away from center
+            const angle = (i / count) * Math.PI * 2 + Math.random() * 0.5;
+            const radiusX = 30 + Math.random() * 20;
+            const radiusY = 20 + Math.random() * 15;
+
             orb.position.set(
-                (Math.random() - 0.5) * 80,
-                (Math.random() - 0.5) * 60,
-                (Math.random() - 0.5) * 25 - 15
+                Math.cos(angle) * radiusX,
+                Math.sin(angle) * radiusY,
+                -20 - Math.random() * 15
             );
 
             orb.userData = {

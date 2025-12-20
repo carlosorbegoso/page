@@ -1,0 +1,329 @@
+/* ===== ADVANCED VISUAL EFFECTS ===== */
+
+/* Glassmorphism cards - Unified Design System */
+.glass-card {
+    background: var(--card-bg-glass);
+    backdrop-filter: var(--card-backdrop);
+    border: var(--card-border);
+    border-radius: var(--card-radius);
+    padding: var(--card-padding);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border: var(--card-border-hover);
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-5px);
+}
+
+/* Gradient text animation */
+.gradient-text-animated {
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--primary-color));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientFlow 3s linear infinite;
+}
+
+@keyframes gradientFlow {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+}
+
+/* Hover glow effect */
+.hover-glow {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.hover-glow::after {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    background: radial-gradient(circle, rgba(100, 181, 246, 0.2) 0%, transparent 70%);
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.hover-glow:hover::after {
+    opacity: 1;
+}
+
+/* Particle trail effect */
+.particle-trail {
+    position: relative;
+    overflow: visible;
+}
+
+.particle-trail::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(100, 181, 246, 0.1), transparent);
+    transform: translateX(-100%);
+    animation: particleTrail 3s ease-in-out infinite;
+}
+
+@keyframes particleTrail {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Neon border effect */
+.neon-border {
+    position: relative;
+    border: 1px solid transparent;
+    background: linear-gradient(var(--bg-color), var(--bg-color)) padding-box,
+                linear-gradient(135deg, var(--primary-color), var(--accent-color)) border-box;
+    animation: neonPulse 2s ease-in-out infinite;
+}
+
+@keyframes neonPulse {
+    0%, 100% { box-shadow: 0 0 5px rgba(100, 181, 246, 0.3), 0 0 10px rgba(100, 181, 246, 0.2); }
+    50% { box-shadow: 0 0 10px rgba(100, 181, 246, 0.5), 0 0 20px rgba(100, 181, 246, 0.3); }
+}
+
+/* Floating animations now handled by Three.js engines */
+
+/* Shimmer effect */
+.shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Rotating borders and pulse rings now handled by Three.js engines */
+
+/* Interactive hover scale */
+.scale-hover {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.scale-hover:hover {
+    transform: scale(1.05);
+}
+
+/* Magnetic button effect placeholder */
+.magnetic-btn {
+    transition: transform 0.2s ease;
+}
+
+/* Section dividers with gradient */
+.section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(100, 181, 246, 0.3), transparent);
+    margin: 4rem 0;
+}
+
+/* Skill bars with animation */
+.skill-bar {
+    height: 8px;
+    background: rgba(100, 181, 246, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.skill-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    border-radius: 4px;
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: skillFill 1.5s ease forwards;
+}
+
+@keyframes skillFill {
+    to { transform: scaleX(1); }
+}
+
+/* Text reveal animation */
+.text-reveal {
+    overflow: hidden;
+}
+
+.text-reveal span {
+    display: inline-block;
+    transform: translateY(100%);
+    animation: textReveal 0.6s ease forwards;
+}
+
+@keyframes textReveal {
+    to { transform: translateY(0); }
+}
+
+/* Staggered children animation */
+.stagger-children > * {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: staggerIn 0.5s ease forwards;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.4s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.5s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes staggerIn {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scroll indicator with mouse icon */
+.scroll-mouse {
+    width: 24px;
+    height: 40px;
+    border: 2px solid var(--primary-color);
+    border-radius: 12px;
+    position: relative;
+}
+
+.scroll-mouse::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 4px;
+    height: 8px;
+    background: var(--primary-color);
+    border-radius: 2px;
+    transform: translateX(-50%);
+    animation: scrollWheel 1.5s ease-in-out infinite;
+}
+
+@keyframes scrollWheel {
+    0%, 100% { transform: translateX(-50%) translateY(0); opacity: 1; }
+    50% { transform: translateX(-50%) translateY(10px); opacity: 0.3; }
+}
+
+/* Card tilt effect on hover */
+.tilt-card {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    transition: transform 0.3s ease;
+}
+
+.tilt-card:hover {
+    transform: rotateX(5deg) rotateY(-5deg);
+}
+
+/* Animated underline */
+.animated-underline {
+    position: relative;
+    display: inline-block;
+}
+
+.animated-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    transition: width 0.3s ease;
+}
+
+.animated-underline:hover::after {
+    width: 100%;
+}
+
+/* Loading dots */
+.loading-dots {
+    display: flex;
+    gap: 4px;
+}
+
+.loading-dots span {
+    width: 8px;
+    height: 8px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    animation: loadingDot 1.4s ease-in-out infinite;
+}
+
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes loadingDot {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+    40% { transform: scale(1); opacity: 1; }
+}
+
+/* Section effects now handled by Three.js engines (Skills, About, Hero) */
+
+/* ===== BRAIN ALTERNATING LAYOUT SYSTEM ===== */
+/* When brain is on LEFT, content moves to RIGHT */
+.brain-left .container,
+.brain-left .section-content,
+.brain-left .hero-container,
+.brain-left .about-content,
+.brain-left .experience-timeline {
+    margin-left: auto;
+    margin-right: 5%;
+    max-width: 55%;
+    text-align: left;
+}
+
+/* When brain is on RIGHT, content moves to LEFT */
+.brain-right .container,
+.brain-right .section-content,
+.brain-right .hero-container,
+.brain-right .about-content,
+.brain-right .experience-timeline {
+    margin-right: auto;
+    margin-left: 5%;
+    max-width: 55%;
+    text-align: left;
+}
+
+/* Reset for mobile - full width */
+@media (max-width: 1024px) {
+    .brain-left .container,
+    .brain-left .section-content,
+    .brain-left .hero-container,
+    .brain-left .about-content,
+    .brain-left .experience-timeline,
+    .brain-right .container,
+    .brain-right .section-content,
+    .brain-right .hero-container,
+    .brain-right .about-content,
+    .brain-right .experience-timeline {
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 100%;
+        text-align: center;
+    }
+}
+
+/* Brain container fullscreen overlay */
+.visual-effects-container canvas {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    pointer-events: none !important;
+    z-index: 1 !important;
+}
+

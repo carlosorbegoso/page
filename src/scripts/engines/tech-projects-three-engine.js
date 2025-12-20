@@ -1,6 +1,7 @@
 /**
- * Tech Projects Section Three.js Engine
+ * Tech Projects Section Three.js Engine - Neural Mind Edition
  * Holographic data visualization with floating code particles
+ * Uses unified neural color palette
  */
 
 import * as THREE from 'three';
@@ -16,6 +17,14 @@ export class TechProjectsThreeEngine {
         this.isVisible = false;
         this.mouse = new THREE.Vector2(0, 0);
         this.targetMouse = new THREE.Vector2(0, 0);
+
+        // Neural color palette (unified)
+        this.neuralColors = {
+            primary: new THREE.Color(0x64B5F6),   // --neural-primary
+            cyan: new THREE.Color(0x00ffff),      // --neural-cyan
+            purple: new THREE.Color(0xaa44ff),    // --neural-purple
+            spark: new THREE.Color(0xFF6B35)      // --neural-spark
+        };
 
         // Effects
         this.codeParticles = null;
@@ -197,7 +206,7 @@ export class TechProjectsThreeEngine {
             // Core sphere
             const coreGeo = new THREE.IcosahedronGeometry(0.8, 1);
             const coreMat = new THREE.MeshBasicMaterial({
-                color: i % 2 === 0 ? 0x00ffff : 0xff00ff,
+                color: i % 2 === 0 ? 0x00ffff : 0xaa44ff, // cyan / neural purple
                 transparent: true,
                 opacity: 0.8,
                 wireframe: true
@@ -208,7 +217,7 @@ export class TechProjectsThreeEngine {
             // Outer ring
             const ringGeo = new THREE.TorusGeometry(1.5, 0.05, 8, 32);
             const ringMat = new THREE.MeshBasicMaterial({
-                color: i % 2 === 0 ? 0x00ffff : 0xff00ff,
+                color: i % 2 === 0 ? 0x00ffff : 0xaa44ff, // cyan / neural purple
                 transparent: true,
                 opacity: 0.4
             });
@@ -256,7 +265,7 @@ export class TechProjectsThreeEngine {
                     ]);
 
                     const material = new THREE.LineBasicMaterial({
-                        color: 0x00ffff,
+                        color: 0x64B5F6, // neural primary for connections
                         transparent: true,
                         opacity: 0.15
                     });
@@ -290,8 +299,10 @@ export class TechProjectsThreeEngine {
                 const y = (i - (count - 1) / 2) * nodeSpacing;
 
                 const geometry = new THREE.SphereGeometry(0.3, 8, 8);
+                // Alternate colors from neural palette
+                const neuronColors = [0x64B5F6, 0x00ffff, 0xaa44ff];
                 const material = new THREE.MeshBasicMaterial({
-                    color: 0x00ffff,
+                    color: neuronColors[layerIndex % neuronColors.length],
                     transparent: true,
                     opacity: 0.6
                 });
@@ -363,7 +374,7 @@ export class TechProjectsThreeEngine {
         const innerCubeGeo = new THREE.BoxGeometry(4, 4, 4);
         const innerEdges = new THREE.EdgesGeometry(innerCubeGeo);
         const innerLineMat = new THREE.LineBasicMaterial({
-            color: 0xff00ff,
+            color: 0xaa44ff, // neural purple
             transparent: true,
             opacity: 0.6
         });
@@ -397,7 +408,7 @@ export class TechProjectsThreeEngine {
             const radius = 15 + i * 8;
             const geometry = new THREE.TorusGeometry(radius, 0.08, 8, 128);
             const material = new THREE.MeshBasicMaterial({
-                color: i % 2 === 0 ? 0x00ffff : 0xff00ff,
+                color: i % 2 === 0 ? 0x00ffff : 0xaa44ff, // cyan / neural purple
                 transparent: true,
                 opacity: 0.12
             });

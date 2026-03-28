@@ -5,6 +5,7 @@
  */
 
 import * as THREE from 'three';
+import { log } from '../utils/logger.js';
 
 export class LoaderThreeEngine {
     constructor() {
@@ -96,7 +97,7 @@ export class LoaderThreeEngine {
 
             return true;
         } catch (error) {
-            console.warn('LoaderThreeEngine: Init failed', error);
+            log.warn('LoaderThreeEngine: Init failed', error);
             return false;
         }
     }

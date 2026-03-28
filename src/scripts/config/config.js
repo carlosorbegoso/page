@@ -46,13 +46,6 @@ export const CONFIG = {
         }
     },
     
-    // ===== CONFIGURACIÓN DE IDIOMAS =====
-    LANGUAGES: {
-        DEFAULT: 'en',
-        SUPPORTED: ['en', 'es'],
-        FALLBACK: 'en'
-    },
-    
     // ===== CONFIGURACIÓN DE TEMAS =====
     THEMES: {
         DEFAULT: 'light',
@@ -100,8 +93,8 @@ export const CONFIG = {
 
 // ===== CONFIGURACIÓN DE ENTORNO =====
 export const ENV = {
-    IS_DEVELOPMENT: true,
-    IS_PRODUCTION: false,
+    IS_DEVELOPMENT: import.meta.env.DEV,
+    IS_PRODUCTION: import.meta.env.PROD,
     IS_TESTING: false
 };
 
@@ -111,7 +104,7 @@ export const FEATURES = {
     ANIMATIONS: true,
     NOTIFICATIONS: true,
     THEME_SWITCHING: true,
-    LANGUAGE_SWITCHING: true,
+    LANGUAGE_SWITCHING: false,
     MOBILE_OPTIMIZATIONS: true,
     TOUCH_GESTURES: true,
     ACCESSIBILITY: true

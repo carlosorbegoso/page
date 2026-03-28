@@ -5,6 +5,7 @@
  */
 
 import * as THREE from 'three';
+import { log } from '../utils/logger.js';
 
 class BrainThreeEngine {
     constructor(containerId = 'visual-effects-container') {
@@ -55,7 +56,7 @@ class BrainThreeEngine {
     init() {
         this.container = document.getElementById(this.containerId);
         if (!this.container) {
-            console.error('[Neural] Container not found');
+            log.error('[Neural] Container not found');
             return;
         }
 
@@ -109,7 +110,7 @@ class BrainThreeEngine {
         this.isActive = true;
         this.animate();
 
-        console.log('[Neural] EPIC Futuristic AI Network initialized!');
+        log.info('[Neural] EPIC Futuristic AI Network initialized!');
     }
 
     createMassiveNeuralNetwork() {
@@ -712,7 +713,7 @@ class BrainThreeEngine {
     }
 
     updateTheme(theme) {
-        console.log('[Neural] Theme updated:', theme);
+        log.debug('[Neural] Theme updated:', theme);
     }
 
     dispose() {

@@ -1,5 +1,5 @@
 ---
-// Hero section - Main section with profile and Three.js background
+// Hero section - Main section with profile, Three.js background & audio-reactive visualizer
 ---
 
 <section id="hero" class="hero section section-bg">
@@ -58,7 +58,7 @@
                         <div class="location-badge" id="location-badge">
                             <i class="fas fa-sun" id="hero-weather-icon"></i>
                             <span id="hero-temp">--°C</span>
-                            <span class="location-separator">·</span>
+                            <span class="location-separator">&middot;</span>
                             <span class="location-text">Lima, Peru</span>
                         </div>
                     </div>
@@ -66,20 +66,14 @@
 
                 <!-- Info -->
                 <div class="hero-info">
-                    <!-- Greeting -->
-                    <div class="hero-greeting animate-fade-in-up" data-delay="0.3s">
-                        <span class="greeting-wave">👋</span>
-                        <span class="greeting-text">Hello, I'm</span>
-                    </div>
-
-                    <!-- Nombre con efecto glitch -->
-                    <h1 class="hero-title animate-fade-in-up" data-delay="0.4s">
+                    <!-- Nombre -->
+                    <h1 class="hero-title animate-fade-in-up" data-delay="0.3s">
                         <span class="title-line">Carlos</span>
                         <span class="title-line highlight glitch" data-text="Orbegoso">Orbegoso</span>
                     </h1>
 
                     <!-- Rol con typing effect -->
-                    <div class="hero-subtitle animate-fade-in-up" data-delay="0.6s">
+                    <div class="hero-subtitle animate-fade-in-up" data-delay="0.5s">
                         <span class="typing-prefix">I'm a</span>
                         <span class="typing-container">
                             <span class="typing-text" id="typing-text"></span>
@@ -87,15 +81,15 @@
                         </span>
                     </div>
 
-                    <!-- Bio con highlight animado -->
-                    <p class="hero-bio animate-fade-in-up" data-delay="0.8s">
-                        Passionate about building <strong class="highlight-word">robust, scalable systems</strong> using modern technologies.
-                        Specialized in <strong class="highlight-word">microservices</strong>, <strong class="highlight-word">clean code</strong>, and delivering
-                        high-quality solutions that make a real impact.
+                    <!-- Bio mejorada -->
+                    <p class="hero-bio animate-fade-in-up" data-delay="0.7s">
+                        I architect <strong class="highlight-word">distributed systems</strong> that handle millions of requests.
+                        From designing <strong class="highlight-word">event-driven microservices</strong> to deploying on
+                        <strong class="highlight-word">AWS & Kubernetes</strong>, I turn complex problems into elegant, production-ready solutions.
                     </p>
 
-                    <!-- Stats mini -->
-                    <div class="hero-stats animate-fade-in-up" data-delay="0.9s">
+                    <!-- Stats mejorados -->
+                    <div class="hero-stats animate-fade-in-up" data-delay="0.8s">
                         <div class="hero-stat">
                             <span class="stat-number" data-count="5">0</span>
                             <span class="stat-label">Years Exp</span>
@@ -107,22 +101,27 @@
                         </div>
                         <div class="stat-divider"></div>
                         <div class="hero-stat">
-                            <span class="stat-number" data-count="100">0</span>
-                            <span class="stat-label">% Passion</span>
+                            <span class="stat-number" data-count="6">0</span>
+                            <span class="stat-label">Certifications</span>
                         </div>
                     </div>
 
-                    <!-- Botones mejorados -->
-                    <div class="hero-actions animate-fade-in-up" data-delay="1.0s">
+                    <!-- Botones optimizados -->
+                    <div class="hero-actions animate-fade-in-up" data-delay="0.9s">
                         <a href="#tech" class="btn btn-primary magnetic-btn">
                             <span class="btn-bg"></span>
-                            <i class="fas fa-rocket"></i>
+                            <i class="fas fa-rocket" aria-hidden="true"></i>
                             <span>View Projects</span>
                         </a>
                         <a href="#contact" class="btn btn-outline magnetic-btn">
                             <span class="btn-border"></span>
-                            <i class="fas fa-envelope"></i>
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
                             <span>Get In Touch</span>
+                        </a>
+                        <a href={`${import.meta.env.BASE_URL}/cv/carlos-orbegoso-cv.pdf`} class="btn btn-outline magnetic-btn" download aria-label="Download CV as PDF">
+                            <span class="btn-border"></span>
+                            <i class="fas fa-file-download" aria-hidden="true"></i>
+                            <span>Download CV</span>
                         </a>
                     </div>
                 </div>
@@ -131,7 +130,7 @@
     </div>
 
     <!-- Indicador de scroll minimalista -->
-    <div class="hero-scroll-indicator animate-fade-in-up" data-delay="1.4s">
+    <div class="hero-scroll-indicator animate-fade-in-up" data-delay="1.2s">
         <div class="scroll-mouse">
             <div class="scroll-wheel"></div>
         </div>
@@ -245,7 +244,7 @@
                 }
             }
         } catch (error) {
-            console.log('Weather API unavailable');
+            // Weather API unavailable
         }
     }
 

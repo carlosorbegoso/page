@@ -5,6 +5,7 @@
  */
 
 import * as THREE from 'three';
+import { log } from '../utils/logger.js';
 
 export class HeroThreeEngine {
     constructor() {
@@ -62,7 +63,7 @@ export class HeroThreeEngine {
     async init(containerId = 'hero-particles') {
         try {
             if (typeof THREE === 'undefined') {
-                console.warn('Three.js not available');
+                log.warn('Three.js not available');
                 return false;
             }
 
@@ -83,7 +84,7 @@ export class HeroThreeEngine {
             this.isInitialized = true;
             return true;
         } catch (error) {
-            console.error('Error initializing Hero Three.js Engine:', error);
+            log.error('Error initializing Hero Three.js Engine:', error);
             return false;
         }
     }
@@ -105,7 +106,7 @@ export class HeroThreeEngine {
     setupRenderer(containerId) {
         const container = document.getElementById(containerId);
         if (!container) {
-            console.warn(`Container ${containerId} not found`);
+            log.warn(`Container ${containerId} not found`);
             return;
         }
 

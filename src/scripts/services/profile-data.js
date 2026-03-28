@@ -5,6 +5,7 @@
  */
 
 import { getGitHubStats } from './github-api.js';
+import { log } from '../utils/logger.js';
 
 // Base URL for assets (handles both dev and production with base path)
 const BASE_URL = import.meta.env?.BASE_URL || '/page/';
@@ -84,7 +85,7 @@ export async function getProfileData() {
         return cachedProfile;
 
     } catch (error) {
-        console.error('Error fetching profile data:', error);
+        log.error('Error fetching profile data:', error);
         // Return static data on error
         return {
             ...staticProfile,

@@ -5,6 +5,7 @@
  */
 
 import * as THREE from 'three';
+import { log } from '../../utils/logger.js';
 
 export class NeuralSystemEngine {
     constructor(containerId = 'visual-effects-container') {
@@ -67,7 +68,7 @@ export class NeuralSystemEngine {
         this.setupInteraction();
         this.startAnimation();
 
-        console.log('🧠 Neural System - Holographic Mode');
+        log.info('Neural System - Holographic Mode');
     }
 
     setupScene() {

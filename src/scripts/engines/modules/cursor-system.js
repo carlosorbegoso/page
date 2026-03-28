@@ -1,6 +1,7 @@
 // ===== SISTEMA DE CURSOR MODULAR =====
 
 import * as THREE from 'three';
+import { log } from '../../utils/logger.js';
 
 export class CursorSystem {
     constructor(scene, camera) {
@@ -60,7 +61,7 @@ export class CursorSystem {
             // Actualizar trail
             this.updateCursorTrail(pos);
         } catch (error) {
-            console.warn('⚠️ Error actualizando posición del cursor:', error);
+            log.warn('Error actualizando posición del cursor:', error);
         }
     }
 
@@ -120,7 +121,7 @@ export class CursorSystem {
                 }, 1000);
             }
         } catch (error) {
-            console.warn('⚠️ Error creando efecto de click:', error);
+            log.warn('Error creando efecto de click:', error);
         }
     }
 

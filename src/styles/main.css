@@ -16,7 +16,6 @@
 @import url('./components/mobile-nav.css');
 @import url('./components/threejs-containers.css');
 @import url('./components/sections-shared.css');
-@import url('./sections/hero.css');
 @import url('./sections/hero-component.css');
 @import url('./sections/about.css');
 @import url('./sections/experience.css');
@@ -30,6 +29,9 @@
 @import url('./utilities/responsive.css');
 @import url('./utilities/premium-effects.css');
 @import url('./utilities/accessibility.css');
+@import url('./themes/light.css');
+@import url('./themes/dark.css');
+@import url('./responsive/mobile.css');
 
 /* ===== TAILWIND (generates utility classes) ===== */
 @import "tailwindcss";

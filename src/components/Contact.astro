@@ -29,56 +29,9 @@
 
         <div class="contact-content">
             <div class="contact-layout">
-                <!-- Formulario de contacto -->
-                <div class="contact-form-section contact-animate" data-anim-delay="300">
-                    <h4>Send me a message</h4>
-                    <form id="contact-form" class="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
-                        <div class="form-group">
-                            <label for="name">Name</label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-user"></i>
-                                <input type="text" id="name" name="name" placeholder="Your name" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-envelope"></i>
-                                <input type="email" id="email" name="email" placeholder="your@email.com" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="subject">Subject</label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-tag"></i>
-                                <select id="subject" name="subject" required>
-                                    <option value="">Select a subject</option>
-                                    <option value="job">Job Opportunity</option>
-                                    <option value="project">Project Collaboration</option>
-                                    <option value="consulting">Consulting</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="message">Message</label>
-                            <div class="input-wrapper textarea-wrapper">
-                                <i class="fas fa-comment-alt"></i>
-                                <textarea id="message" name="message" placeholder="Tell me about your project..." rows="4" required></textarea>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn-submit">
-                            <i class="fas fa-paper-plane"></i>
-                            <span>Send Message</span>
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Información de contacto -->
-                <div class="contact-info-section">
-                    <!-- Métodos de contacto -->
-                    <div class="contact-methods contact-animate" data-anim-delay="400">
-                        <h4>Contact Methods</h4>
+                <!-- Métodos de contacto -->
+                <div class="contact-methods contact-animate" data-anim-delay="300">
+                    <h4>Contact Methods</h4>
                         <div class="contact-grid">
                             <a href="mailto:car_11.09@hotmail.com" class="contact-item glass-card">
                                 <div class="contact-icon-wrapper">
@@ -134,24 +87,22 @@
                                 </div>
                             </a>
                         </div>
-                    </div>
+                </div>
 
-                    <!-- Redes sociales -->
-                    <div class="social-section contact-animate" data-anim-delay="500">
-                        <h4>Also find me on</h4>
-                        <div class="social-links">
-                            <a href="https://linkedin.com/in/carlos-orbergoso-loayza" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="LinkedIn">
-                                <i class="fab fa-linkedin"></i>
-                            </a>
-                            <a href="https://github.com/carlosorbegoso" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="GitHub">
-                                <i class="fab fa-github"></i>
-                            </a>
-                            <a href="mailto:car_11.09@hotmail.com" class="social-link" aria-label="Email">
-                                <i class="fas fa-envelope"></i>
-                            </a>
-                        </div>
+                <!-- Redes sociales -->
+                <div class="social-section contact-animate" data-anim-delay="400">
+                    <h4>Also find me on</h4>
+                    <div class="social-links">
+                        <a href="https://linkedin.com/in/carlos-orbergoso-loayza" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="LinkedIn">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="https://github.com/carlosorbegoso" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="mailto:car_11.09@hotmail.com" class="social-link" aria-label="Email">
+                            <i class="fas fa-envelope"></i>
+                        </a>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -183,20 +134,20 @@
             observer.observe(el);
         });
 
-        // Form submission handling
-        const form = document.getElementById('contact-form');
-        if (form) {
-            form.addEventListener('submit', (e) => {
-                const submitBtn = form.querySelector('.btn-submit');
-                if (submitBtn) {
-                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Sending...</span>';
-                }
-            });
+        // Lazy-load Three.js engine only when section is visible
+        const contactSection = document.getElementById('contact');
+        if (contactSection) {
+            const threeObserver = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        import('../scripts/engines/contact-three-engine.js').then(module => {
+                            new module.ContactThreeEngine('contact-three-container');
+                        }).catch(() => {});
+                        obs.unobserve(entry.target);
+                    }
+                });
+            }, { rootMargin: '200px' });
+            threeObserver.observe(contactSection);
         }
-
-        // Initialize Three.js engine
-        import('../scripts/engines/contact-three-engine.js').then(module => {
-            new module.ContactThreeEngine('contact-three-container');
-        }).catch(() => {});
     });
 </script>

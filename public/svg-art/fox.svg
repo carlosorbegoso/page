@@ -1,0 +1,18 @@
+<svg id="fox" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400">
+<defs><style>.cls-1{fill:none;stroke:white;stroke-miterlimit:10;stroke-width:2;}</style></defs>
+<path class="cls-1" d="M120,80 L90,10 L130,60 L170,5 L160,75"/>
+<path class="cls-1" d="M340,80 L310,5 L330,60 L370,10 L380,75"/>
+<path class="cls-1" d="M160,75 C180,65 200,60 250,60 C300,60 320,65 340,75 C370,90 390,120 395,160 C400,200 380,240 350,260 C340,268 330,272 325,280 L310,320 C300,345 280,360 250,365 C220,360 200,345 190,320 L175,280 C170,272 160,268 150,260 C120,240 100,200 105,160 C110,120 130,90 160,75Z"/>
+<circle class="cls-1" cx="190" cy="150" r="12"/>
+<circle class="cls-1" cx="310" cy="150" r="12"/>
+<circle class="cls-1" cx="190" cy="150" r="5"/>
+<circle class="cls-1" cx="310" cy="150" r="5"/>
+<path class="cls-1" d="M230,200 L250,220 L270,200"/>
+<path class="cls-1" d="M250,220 L250,240"/>
+<path class="cls-1" d="M220,250 Q250,270 280,250"/>
+<path class="cls-1" d="M105,180 L40,170 L70,185 L20,195 L80,200"/>
+<path class="cls-1" d="M395,180 L460,170 L430,185 L480,195 L420,200"/>
+<path class="cls-1" d="M250,365 L250,395"/>
+<path class="cls-1" d="M210,380 L200,395 L220,390"/>
+<path class="cls-1" d="M290,380 L300,395 L280,390"/>
+</svg>

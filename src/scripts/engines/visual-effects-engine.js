@@ -8,6 +8,7 @@ import { ParticleSystem } from './modules/particle-system.js';
 import { ConstellationSystem } from './modules/constellation-system.js';
 import { CursorSystem } from './modules/cursor-system.js';
 import { BackgroundSystem } from './modules/background-system.js';
+import { log } from '../utils/logger.js';
 
 class VisualEffectsEngine {
     constructor() {
@@ -48,7 +49,7 @@ class VisualEffectsEngine {
             try {
                 await this.initializeConstellationSystem();
             } catch (error) {
-                console.error('❌ Error inicializando ConstellationSystem:', error);
+                log.error('Error inicializando ConstellationSystem:', error);
             }
             
             this.cursorSystem = new CursorSystem(this.scene, this.camera);
@@ -62,7 +63,7 @@ class VisualEffectsEngine {
             this.isInitialized = true;
             
         } catch (error) {
-            console.error('❌ Error inicializando motor visual:', error);
+            log.error('Error inicializando motor visual:', error);
         }
     }
     
@@ -163,7 +164,7 @@ class VisualEffectsEngine {
             return effects;
             
         } catch (error) {
-            console.error(`❌ Error inicializando efectos para ${sectionName}:`, error);
+            log.error(`Error inicializando efectos para ${sectionName}:`, error);
             return null;
         }
     }
@@ -673,7 +674,7 @@ class VisualEffectsEngine {
                 }, 1500);
             }
         } catch (error) {
-            console.error('❌ Error creando partículas de hover:', error);
+            log.error('Error creando partículas de hover:', error);
         }
     }
     
@@ -753,7 +754,7 @@ class VisualEffectsEngine {
                 }
             }, 2000);
         } catch (error) {
-            console.error('❌ Error creando constelación de hover:', error);
+            log.error('Error creando constelación de hover:', error);
         }
     }
     
@@ -770,7 +771,7 @@ class VisualEffectsEngine {
                 element.classList.remove('button-glow-active');
             }, 2000);
         } catch (error) {
-            console.error('❌ Error creando glow de hover:', error);
+            log.error('Error creando glow de hover:', error);
         }
     }
     
@@ -787,7 +788,7 @@ class VisualEffectsEngine {
                 element.classList.remove('card-elevation-active');
             }, 2000);
         } catch (error) {
-            console.error('❌ Error creando elevación de card:', error);
+            log.error('Error creando elevación de card:', error);
         }
     }
     
@@ -812,7 +813,7 @@ class VisualEffectsEngine {
                 }
             });
         } catch (error) {
-            console.error('❌ Error aplicando efectos de parallax:', error);
+            log.error('Error aplicando efectos de parallax:', error);
         }
     }
     
@@ -877,7 +878,7 @@ class VisualEffectsEngine {
             });
             
         } catch (error) {
-            console.error('❌ Error aplicando efectos de tema interactivos:', error);
+            log.error('Error aplicando efectos de tema interactivos:', error);
         }
     }
 

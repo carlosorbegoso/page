@@ -4,6 +4,7 @@
  */
 
 import * as THREE from 'three';
+import { log } from '../utils/logger.js';
 
 class NeuralSystemEngine {
     constructor() {
@@ -54,7 +55,7 @@ class NeuralSystemEngine {
         this.isActive = true;
         this.animate();
 
-        console.log('[NeuralSystem] Initialized - Brain with hemispheres + connected spine');
+        log.info('[NeuralSystem] Initialized - Brain with hemispheres + connected spine');
     }
 
     createContainer() {

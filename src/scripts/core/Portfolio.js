@@ -6,7 +6,6 @@
 import { CONFIG } from '../config/config.js';
 import { log } from '../utils/logger.js';
 import { DOM, Events, Performance } from '../utils/helpers.js';
-import { NeuralBackgroundEngine } from '../engines/neural-background-engine.js';
 import { DeviceDetector } from '../utils/device-detector.js';
 import { MobileMenuManager } from '../utils/mobile-menu.js';
 import { HeroAnimations } from '../utils/hero-animations.js';
@@ -16,15 +15,18 @@ import { KonamiEasterEgg } from './KonamiEasterEgg.js';
 // Lazy imports for desktop-only engines
 let VisualEffectsEngine = null;
 let HeroThreeEngine = null;
+let ConnectedParticlesEngine = null;
 let CursorParticlesEngine = null;
+let AudioReactiveEngine = null;
 
 export class Portfolio {
     constructor() {
         this.visualEngine = null;
         this.brainEngine = null;
-        this.neuralBackground = null;
         this.heroEngine = null;
+        this.connectedParticlesEngine = null;
         this.cursorEngine = null;
+        this.audioEngine = null;
         this.deviceDetector = null;
         this.mobileMenuManager = null;
         this.heroAnimations = null;
@@ -43,7 +45,7 @@ export class Portfolio {
             this.isInitialized = true;
             log.info('Portfolio initialized');
         } catch (error) {
-            console.error('Error initializing portfolio:', error);
+            log.error('Error initializing portfolio:', error);
         }
     }
 
@@ -74,16 +76,6 @@ export class Portfolio {
             }
         }
 
-        // Global Neural Background (unified background for entire site)
-        // DISABLED: floating squares effect looked out of place
-        // if (!isMobile) {
-        //     try {
-        //         this.neuralBackground = new NeuralBackgroundEngine('neural-background-container');
-        //     } catch (error) {
-        //         console.error('Error creating Neural Background:', error);
-        //     }
-        // }
-
         // Hero Three.js Engine (skip on low power devices)
         if (!isLowPower) {
             try {
@@ -96,6 +88,18 @@ export class Portfolio {
             }
         }
 
+        // Connected Particles Engine - interactive particle network
+        if (!isLowPower) {
+            try {
+                const module = await import('../engines/connected-particles-engine.js');
+                ConnectedParticlesEngine = module.ConnectedParticlesEngine;
+                this.connectedParticlesEngine = new ConnectedParticlesEngine();
+                await this.connectedParticlesEngine.init('hero-constellations');
+            } catch (error) {
+                log.error('Error initializing Connected Particles Engine:', error);
+            }
+        }
+
         // Cursor Particles Engine (only on desktop)
         if (!isMobile) {
             try {
@@ -103,8 +107,22 @@ export class Portfolio {
                 CursorParticlesEngine = module.CursorParticlesEngine;
                 this.cursorEngine = new CursorParticlesEngine();
             } catch (error) {
-                console.error('Error initializing Cursor Particles Engine:', error);
+                log.error('Error initializing Cursor Particles Engine:', error);
             }
+        }
+
+        // Audio Reactive Engine - global audio-reactive system for entire page
+        try {
+            const module = await import('../engines/audio-reactive-engine.js');
+            AudioReactiveEngine = module.AudioReactiveEngine;
+            this.audioEngine = new AudioReactiveEngine();
+            await this.audioEngine.init();
+            if (this.heroEngine) this.audioEngine.setHeroEngine(this.heroEngine);
+            if (this.connectedParticlesEngine) this.audioEngine.setConnectedParticlesEngine(this.connectedParticlesEngine);
+            if (this.visualEngine) this.audioEngine.setVisualEngine(this.visualEngine);
+            this.autoStartAudio();
+        } catch (error) {
+            log.error('Error initializing Audio Reactive Engine:', error);
         }
     }
 
@@ -151,7 +169,6 @@ export class Portfolio {
         this.setupThemeToggle();
         this.setupMobileMenu();
         this.setupSmoothScrolling();
-        this.setupLanguageToggle();
         this.setupMobileOptimizations();
         this.setupTouchInteractions();
     }
@@ -172,8 +189,7 @@ export class Portfolio {
 
             if (this.visualEngine) this.visualEngine.updateTheme(newTheme);
             if (this.heroEngine) this.heroEngine.updateTheme(newTheme);
-            if (this.neuralBackground) this.neuralBackground.updateTheme(newTheme);
-
+            if (this.connectedParticlesEngine) this.connectedParticlesEngine.updateTheme(newTheme);
             Events.trigger(window, 'themeChanged', { theme: newTheme });
         });
     }
@@ -186,32 +202,8 @@ export class Portfolio {
     }
 
     setupMobileMenu() {
-        const menuToggle = DOM.select('#menu-toggle');
-        // Support both .nav-links and .cosmic-nav classes
-        const navLinks = DOM.select('.cosmic-nav') || DOM.select('.nav-links');
-        if (!menuToggle || !navLinks) return;
-
-        Events.on(menuToggle, 'click', () => {
-            DOM.toggleClass(navLinks, 'active');
-            DOM.toggleClass(menuToggle, 'active');
-            document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
-        });
-
-        DOM.selectAll('.nav-link, .cosmic-link').forEach(link => {
-            Events.on(link, 'click', () => {
-                DOM.removeClasses(navLinks, 'active');
-                DOM.removeClasses(menuToggle, 'active');
-                document.body.style.overflow = '';
-            });
-        });
-
-        Events.on(document, 'click', (e) => {
-            if (!menuToggle.contains(e.target) && !navLinks.contains(e.target)) {
-                DOM.removeClasses(navLinks, 'active');
-                DOM.removeClasses(menuToggle, 'active');
-                document.body.style.overflow = '';
-            }
-        });
+        // Command Hub navigation is self-contained in Header.astro script
+        // No additional setup needed from Portfolio.js
     }
 
     setupSmoothScrolling() {
@@ -223,21 +215,6 @@ export class Portfolio {
                     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             });
-        });
-    }
-
-    setupLanguageToggle() {
-        const languageToggle = DOM.select('#language-toggle');
-        if (!languageToggle) return;
-
-        const currentLanguage = localStorage.getItem('language') || CONFIG.LANGUAGES.DEFAULT;
-        document.documentElement.setAttribute('data-language', currentLanguage);
-
-        Events.on(languageToggle, 'click', () => {
-            const newLanguage = localStorage.getItem('language') === 'en' ? 'es' : 'en';
-            localStorage.setItem('language', newLanguage);
-            document.documentElement.setAttribute('data-language', newLanguage);
-            Events.trigger(window, 'languageChanged', { language: newLanguage });
         });
     }
 
@@ -258,6 +235,26 @@ export class Portfolio {
         });
     }
 
+    autoStartAudio() {
+        if (!this.audioEngine) return;
+
+        // Browsers require user interaction before allowing microphone access
+        // Start on first click/touch/key anywhere on the page
+        const startAudio = async () => {
+            const success = await this.audioEngine.startListening();
+            if (success) {
+                log.info('Audio reactive engine started - entire page is now sound-reactive');
+            }
+            document.removeEventListener('click', startAudio);
+            document.removeEventListener('touchstart', startAudio);
+            document.removeEventListener('keydown', startAudio);
+        };
+
+        document.addEventListener('click', startAudio, { once: true });
+        document.addEventListener('touchstart', startAudio, { once: true });
+        document.addEventListener('keydown', startAudio, { once: true });
+    }
+
     setupGlobalEvents() {
         Events.on(document, 'visibilitychange', () => {
             // Pause/resume animations based on visibility
@@ -269,14 +266,15 @@ export class Portfolio {
 
         // Keyboard shortcuts
         Events.on(document, 'keydown', (e) => {
-            // Escape to close menu
+            // Escape to close command palette
             if (e.key === 'Escape') {
-                const navLinks = DOM.select('.cosmic-nav') || DOM.select('.nav-links');
-                const menuToggle = DOM.select('#menu-toggle');
-                if (navLinks?.classList.contains('active')) {
-                    DOM.removeClasses(navLinks, 'active');
-                    DOM.removeClasses(menuToggle, 'active');
-                    document.body.style.overflow = '';
+                const palette = document.getElementById('cmd-palette');
+                const trigger = document.getElementById('cmd-hub-trigger');
+                if (palette?.classList.contains('open')) {
+                    palette.classList.remove('open');
+                    palette.setAttribute('aria-hidden', 'true');
+                    trigger?.classList.remove('active');
+                    trigger?.setAttribute('aria-expanded', 'false');
                 }
             }
             // Ctrl+T to toggle theme

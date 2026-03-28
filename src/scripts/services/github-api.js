@@ -4,6 +4,8 @@
  * Rate limit: 60 requests/hour for unauthenticated requests
  */
 
+import { log } from '../utils/logger.js';
+
 const GITHUB_API_BASE = 'https://api.github.com';
 const GITHUB_USERNAME = 'carlosorbegoso';
 
@@ -35,7 +37,7 @@ async function fetchWithCache(url) {
         cache.set(url, { data, timestamp: Date.now() });
         return data;
     } catch (error) {
-        console.error('GitHub API fetch error:', error);
+        log.error('GitHub API fetch error:', error);
         throw error;
     }
 }
@@ -301,7 +303,7 @@ export async function getGitHubStats() {
             contributionData: streak.contributionData
         };
     } catch (error) {
-        console.error('Error fetching GitHub stats:', error);
+        log.error('Error fetching GitHub stats:', error);
         return null;
     }
 }
@@ -325,7 +327,7 @@ export async function getLastCommitDate(repoName = 'page') {
         }
         return null;
     } catch (error) {
-        console.error('Error fetching last commit:', error);
+        log.error('Error fetching last commit:', error);
         return null;
     }
 }

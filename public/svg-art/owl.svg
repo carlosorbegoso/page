@@ -1,0 +1,20 @@
+<svg id="owl" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 450">
+<defs><style>.cls-1{fill:none;stroke:white;stroke-miterlimit:10;stroke-width:2;}</style></defs>
+<path class="cls-1" d="M200,50 C160,50 120,70 100,110 C80,150 75,200 90,240 C95,255 85,270 80,290 C75,310 85,340 110,360 C135,380 160,395 200,400 C240,395 265,380 290,360 C315,340 325,310 320,290 C315,270 305,255 310,240 C325,200 320,150 300,110 C280,70 240,50 200,50Z"/>
+<circle class="cls-1" cx="155" cy="170" r="40"/>
+<circle class="cls-1" cx="245" cy="170" r="40"/>
+<circle class="cls-1" cx="155" cy="170" r="20"/>
+<circle class="cls-1" cx="245" cy="170" r="20"/>
+<circle class="cls-1" cx="155" cy="170" r="8"/>
+<circle class="cls-1" cx="245" cy="170" r="8"/>
+<path class="cls-1" d="M185,210 L200,235 L215,210"/>
+<path class="cls-1" d="M170,260 Q200,280 230,260"/>
+<path class="cls-1" d="M100,110 C90,80 120,40 150,30 C170,25 190,35 200,50"/>
+<path class="cls-1" d="M300,110 C310,80 280,40 250,30 C230,25 210,35 200,50"/>
+<path class="cls-1" d="M90,240 C60,250 40,230 50,200"/>
+<path class="cls-1" d="M310,240 C340,250 360,230 350,200"/>
+<path class="cls-1" d="M130,320 L120,370 L145,350"/>
+<path class="cls-1" d="M270,320 L280,370 L255,350"/>
+<path class="cls-1" d="M160,400 L155,430 L175,420 L170,445 L190,430"/>
+<path class="cls-1" d="M240,400 L245,430 L225,420 L230,445 L210,430"/>
+</svg>

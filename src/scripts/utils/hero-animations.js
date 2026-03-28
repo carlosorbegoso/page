@@ -1,4 +1,5 @@
 import { HeroThreeEngine } from '../engines/hero-three-engine.js';
+import { log } from './logger.js';
 
 /**
  * Hero Animations Manager
@@ -288,7 +289,7 @@ export class HeroAnimations {
                 }
             });
         } catch (error) {
-            console.warn('Three.js no está disponible para el hero:', error);
+            log.warn('Three.js no está disponible para el hero:', error);
         }
     }
 

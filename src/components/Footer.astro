@@ -22,11 +22,6 @@ const currentYear = new Date().getFullYear();
                 <p class="footer-tech">
                     Astro + Three.js
                 </p>
-                <span class="footer-dot">·</span>
-                <p class="footer-visitors" id="visitor-count">
-                    <i class="fas fa-eye"></i>
-                    <span id="visitor-number">...</span> visits
-                </p>
                 <span class="footer-dot" id="last-updated-dot" style="display: none;">·</span>
                 <p class="footer-updated" id="last-updated" style="display: none;">
                     <i class="fas fa-code-commit"></i>
@@ -141,8 +136,7 @@ const currentYear = new Date().getFullYear();
     /* Stagger animation for bottom items */
     .footer-bottom.visible .footer-text { animation: bottomItemFade 0.4s ease 0.3s forwards; opacity: 0; }
     .footer-bottom.visible .footer-tech { animation: bottomItemFade 0.4s ease 0.4s forwards; opacity: 0; }
-    .footer-bottom.visible .footer-visitors { animation: bottomItemFade 0.4s ease 0.5s forwards; opacity: 0; }
-    .footer-bottom.visible .footer-updated { animation: bottomItemFade 0.4s ease 0.6s forwards; opacity: 0; }
+    .footer-bottom.visible .footer-updated { animation: bottomItemFade 0.4s ease 0.5s forwards; opacity: 0; }
     .footer-bottom.visible .footer-dot { animation: dotFade 0.3s ease 0.35s forwards; opacity: 0; }
     .footer-bottom.visible .footer-dot:nth-child(4) { animation-delay: 0.45s; }
     .footer-bottom.visible .footer-dot:nth-child(6) { animation-delay: 0.55s; }
@@ -307,7 +301,6 @@ const currentYear = new Date().getFullYear();
 
 <script>
     import { getQuoteOfTheDay } from '../scripts/services/quotes-api.js';
-    import { getVisitorCount } from '../scripts/services/visitor-api.js';
     import { getLastCommitDate } from '../scripts/services/github-api.js';
 
     // Load quote
@@ -323,30 +316,6 @@ const currentYear = new Date().getFullYear();
             } catch (error) {
                 quoteText.textContent = `"Talk is cheap. Show me the code."`;
                 quoteAuthor.textContent = `— Linus Torvalds`;
-            }
-        }
-    }
-
-    // Load visitor count
-    async function loadVisitorCount() {
-        const visitorEl = document.getElementById('visitor-number');
-        if (visitorEl) {
-            try {
-                const count = await getVisitorCount();
-                if (count !== null) {
-                    visitorEl.textContent = count.toLocaleString();
-                } else {
-                    // Hide if API fails
-                    const container = document.getElementById('visitor-count');
-                    const dot = container?.previousElementSibling;
-                    if (container) container.style.display = 'none';
-                    if (dot) (dot as HTMLElement).style.display = 'none';
-                }
-            } catch (error) {
-                const container = document.getElementById('visitor-count');
-                const dot = container?.previousElementSibling;
-                if (container) container.style.display = 'none';
-                if (dot) (dot as HTMLElement).style.display = 'none';
             }
         }
     }
@@ -371,7 +340,7 @@ const currentYear = new Date().getFullYear();
                     container.setAttribute('title', `${commitInfo.sha}: ${commitInfo.message}`);
                 }
             } catch (error) {
-                console.error('Error loading last updated:', error);
+                // Error loading last updated
             }
         }
     }
@@ -400,7 +369,6 @@ const currentYear = new Date().getFullYear();
     }
 
     loadQuote();
-    loadVisitorCount();
     loadLastUpdated();
 
     // Footer entrance animations with IntersectionObserver

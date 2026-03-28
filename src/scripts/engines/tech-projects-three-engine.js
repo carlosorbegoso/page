@@ -5,6 +5,7 @@
  */
 
 import * as THREE from 'three';
+import { log } from '../utils/logger.js';
 
 export class TechProjectsThreeEngine {
     constructor(containerId = 'tech-three-container') {
@@ -44,7 +45,7 @@ export class TechProjectsThreeEngine {
     async init() {
         this.container = document.getElementById(this.containerId);
         if (!this.container) {
-            console.warn(`Container ${this.containerId} not found`);
+            log.warn(`Container ${this.containerId} not found`);
             return false;
         }
 
@@ -68,7 +69,7 @@ export class TechProjectsThreeEngine {
 
             return true;
         } catch (error) {
-            console.error('TechProjectsThreeEngine init error:', error);
+            log.error('TechProjectsThreeEngine init error:', error);
             return false;
         }
     }

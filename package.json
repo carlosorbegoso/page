@@ -2,7 +2,7 @@
   "name": "carlos-orbegoso-portfolio",
   "version": "2.0.0",
   "description": "Portfolio profesional de Carlos Orbegoso - Backend Developer & Java Specialist",
-  "main": "src/scripts/main.js",
+  "main": "src/scripts/core/Portfolio.js",
   "type": "module",
   "scripts": {
     "dev": "astro dev",
@@ -27,22 +27,22 @@
   "author": "Carlos Orbegoso",
   "license": "MIT",
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.18",
-    "@tailwindcss/vite": "^4.1.18",
-    "autoprefixer": "^10.4.23",
-    "eslint": "^8.55.0",
-    "postcss": "^8.5.6",
-    "prettier": "^3.1.0",
-    "tailwindcss": "^4.1.18",
-    "vite": "^7.1.3"
+    "@tailwindcss/postcss": "^4.2.2",
+    "@tailwindcss/vite": "^4.2.2",
+    "autoprefixer": "^10.4.27",
+    "eslint": "^8.57.1",
+    "postcss": "^8.5.8",
+    "prettier": "^3.8.1",
+    "tailwindcss": "^4.2.2",
+    "vite": "^7.3.1"
   },
   "dependencies": {
-    "@astrojs/sitemap": "^3.6.0",
-    "astro": "^5.16.6",
-    "astro-compressor": "^1.2.0",
+    "@astrojs/sitemap": "^3.7.2",
+    "astro": "^5.18.1",
+    "astro-compressor": "^1.3.0",
     "astro-robots-txt": "^1.0.0",
     "three": "^0.158.0",
-    "web-vitals": "^5.1.0"
+    "web-vitals": "^5.2.0"
   },
   "engines": {
     "node": ">=18.0.0",

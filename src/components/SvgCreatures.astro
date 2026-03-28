@@ -1,0 +1,196 @@
+---
+// SVG Creatures - Vibrant neon animals living across the portfolio
+// Each has unique gradient colors, stroke-draw animation, glow, and floating movement
+const creatures = [
+    { name: 'owl',        section: 'hero',       x: '3%',  y: '10%', size: '180px', delay: '0s',   colors: ['#00ffff', '#0088ff', '#aa44ff'] },
+    { name: 'fox',        section: 'hero',       x: '85%', y: '65%', size: '140px', delay: '2s',   colors: ['#ff44aa', '#ff6b35', '#ffaa00'] },
+    { name: 'seahorse',   section: 'experience', x: '90%', y: '8%',  size: '160px', delay: '1s',   colors: ['#00ff88', '#00ffff', '#0088ff'] },
+    { name: 'snail',      section: 'experience', x: '3%',  y: '70%', size: '120px', delay: '0.5s', colors: ['#aa44ff', '#ff44aa', '#ff6b35'] },
+    { name: 'chameleon',  section: 'tech',       x: '88%', y: '5%',  size: '150px', delay: '3s',   colors: ['#44ff44', '#ffff00', '#ff8800'] },
+    { name: 'bat',        section: 'tech',       x: '2%',  y: '75%', size: '140px', delay: '1.5s', colors: ['#8844ff', '#ff44ff', '#ff4488'] },
+    { name: 'moth',       section: 'contact',    x: '88%', y: '10%', size: '130px', delay: '2.5s', colors: ['#ffaa00', '#ff4444', '#ff0088'] },
+    { name: 'dinosaur',   section: 'contact',    x: '5%',  y: '60%', size: '140px', delay: '0s',   colors: ['#00ffaa', '#00aaff', '#4444ff'] },
+    { name: 'deer',       section: 'github',     x: '90%', y: '15%', size: '150px', delay: '1s',   colors: ['#00bbff', '#00ffdd', '#44ffaa'] },
+    { name: 'anglerfish', section: 'github',     x: '3%',  y: '70%', size: '120px', delay: '2s',   colors: ['#ff6600', '#ff0066', '#aa00ff'] },
+];
+---
+
+<div class="svg-creatures-data" data-creatures={JSON.stringify(creatures)} style="display:none"></div>
+
+<style is:global>
+    .svg-creature {
+        position: absolute;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0;
+        transition: opacity 2s ease;
+    }
+
+    .svg-creature.visible {
+        opacity: 0.55;
+    }
+
+    .svg-creature:hover {
+        opacity: 0.85;
+    }
+
+    .svg-creature svg {
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+    }
+
+    /* Stroke draw + glow breath */
+    .svg-creature path {
+        stroke-dasharray: 3000;
+        stroke-dashoffset: 3000;
+        animation: creatureDraw 5s ease-in-out forwards,
+                   creatureGlow 6s ease-in-out infinite 5s;
+    }
+
+    @keyframes creatureDraw {
+        to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes creatureGlow {
+        0%, 100% { filter: drop-shadow(0 0 2px currentColor); }
+        50% { filter: drop-shadow(0 0 10px currentColor) brightness(1.2); }
+    }
+
+    /* 5 float patterns */
+    .creature-float-0 { animation: cfloat0 14s ease-in-out infinite; }
+    .creature-float-1 { animation: cfloat1 18s ease-in-out infinite; }
+    .creature-float-2 { animation: cfloat2 16s ease-in-out infinite; }
+    .creature-float-3 { animation: cfloat3 20s ease-in-out infinite; }
+    .creature-float-4 { animation: cfloat4 15s ease-in-out infinite; }
+
+    @keyframes cfloat0 {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        25%  { transform: translate(15px, -20px) rotate(3deg); }
+        50%  { transform: translate(-10px, -35px) rotate(-2deg); }
+        75%  { transform: translate(20px, -15px) rotate(2deg); }
+    }
+    @keyframes cfloat1 {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33%  { transform: translate(-20px, -25px) rotate(-3deg) scale(1.05); }
+        66%  { transform: translate(15px, -40px) rotate(2deg) scale(0.95); }
+    }
+    @keyframes cfloat2 {
+        0%, 100% { transform: translate(0, 0); }
+        20%  { transform: translate(25px, -10px) rotate(2deg); }
+        40%  { transform: translate(10px, -30px) rotate(-3deg); }
+        60%  { transform: translate(-15px, -25px) rotate(4deg); }
+        80%  { transform: translate(-8px, -8px) rotate(-1deg); }
+    }
+    @keyframes cfloat3 {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50%  { transform: translate(12px, -30px) scale(1.08); }
+    }
+    @keyframes cfloat4 {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        30%  { transform: translateY(-20px) rotate(-2deg); }
+        70%  { transform: translateY(-35px) rotate(3deg); }
+    }
+
+    @media (max-width: 768px) {
+        .svg-creature { display: none; }
+    }
+    @media (max-width: 1200px) {
+        .svg-creature { max-width: 100px !important; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .svg-creature path { animation: none; stroke-dashoffset: 0; }
+        [class*="creature-float"] { animation: none; }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const dataEl = document.querySelector('.svg-creatures-data');
+        if (!dataEl) return;
+
+        const creatures = JSON.parse(dataEl.dataset.creatures);
+        const basePath = import.meta.env.BASE_URL || '/page';
+
+        for (let idx = 0; idx < creatures.length; idx++) {
+            const creature = creatures[idx];
+            try {
+                const res = await fetch(`${basePath}/svg/${creature.name}.svg`);
+                if (!res.ok) continue;
+                const svgText = await res.text();
+
+                const section = document.getElementById(creature.section);
+                if (!section) continue;
+
+                if (getComputedStyle(section).position === 'static') {
+                    section.style.position = 'relative';
+                }
+
+                // Unique gradient ID
+                const gid = `cg-${idx}`;
+                const [c1, c2, c3] = creature.colors;
+
+                // Parse SVG
+                const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml');
+                const svg = doc.querySelector('svg');
+                if (!svg) continue;
+
+                // Replace defs with our vibrant gradient
+                let defs = svg.querySelector('defs');
+                if (!defs) {
+                    defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                    svg.prepend(defs);
+                }
+                defs.innerHTML = `
+                    <linearGradient id="${gid}" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="${c1}"/>
+                        <stop offset="50%" stop-color="${c2}"/>
+                        <stop offset="100%" stop-color="${c3}"/>
+                    </linearGradient>
+                `;
+
+                // Remove old styles
+                svg.querySelectorAll('style').forEach(s => s.remove());
+
+                // Apply gradient to all elements
+                svg.querySelectorAll('path, circle, line, polyline, polygon, ellipse').forEach(el => {
+                    el.setAttribute('stroke', `url(#${gid})`);
+                    el.setAttribute('stroke-width', '2.5');
+                    el.setAttribute('stroke-linecap', 'round');
+                    el.setAttribute('stroke-linejoin', 'round');
+
+                    // Subtle fill for filled elements
+                    const origFill = el.getAttribute('fill');
+                    if (origFill && origFill !== 'none') {
+                        el.setAttribute('fill', `url(#${gid})`);
+                        el.setAttribute('fill-opacity', '0.12');
+                    } else {
+                        el.setAttribute('fill', 'none');
+                    }
+                });
+
+                // Create wrapper
+                const wrapper = document.createElement('div');
+                wrapper.className = `svg-creature creature-float-${idx % 5}`;
+                wrapper.style.cssText = `
+                    left:${creature.x}; top:${creature.y};
+                    width:${creature.size};
+                    animation-delay:${creature.delay};
+                `;
+                wrapper.appendChild(document.importNode(svg, true));
+                section.appendChild(wrapper);
+
+                // Reveal on scroll
+                new IntersectionObserver((entries, obs) => {
+                    entries.forEach(e => {
+                        if (e.isIntersecting) {
+                            wrapper.classList.add('visible');
+                            obs.unobserve(e.target);
+                        }
+                    });
+                }, { threshold: 0.05 }).observe(wrapper);
+
+            } catch { /* skip */ }
+        }
+    });
+</script>

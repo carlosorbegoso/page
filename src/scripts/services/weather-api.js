@@ -4,6 +4,8 @@
  * Location: Lima, Peru (default)
  */
 
+import { log } from '../utils/logger.js';
+
 // Lima, Peru coordinates
 const DEFAULT_LAT = -12.0464;
 const DEFAULT_LON = -77.0428;
@@ -75,7 +77,7 @@ export async function getCurrentWeather(lat = DEFAULT_LAT, lon = DEFAULT_LON, ti
             return cachedWeather;
         }
     } catch (error) {
-        console.log('Open-Meteo API unavailable');
+        log.debug('Open-Meteo API unavailable');
     }
 
     return null;

@@ -5,6 +5,7 @@
  */
 
 import * as THREE from 'three';
+import { log } from '../../../utils/logger.js';
 
 export class BrainRenderer {
     constructor(containerId) {
@@ -22,7 +23,7 @@ export class BrainRenderer {
     init() {
         this.container = document.getElementById(this.containerId);
         if (!this.container) {
-            console.error(`Container #${this.containerId} not found`);
+            log.error(`Container #${this.containerId} not found`);
             return false;
         }
 

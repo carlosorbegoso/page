@@ -3,6 +3,8 @@
  * Uses multiple free APIs for programming/tech quotes
  */
 
+import { log } from '../utils/logger.js';
+
 // Programming quotes collection (fallback)
 const programmingQuotes = [
     { content: "First, solve the problem. Then, write the code.", author: "John Johnson" },
@@ -55,7 +57,7 @@ export async function getRandomQuote() {
             return cachedQuote;
         }
     } catch (error) {
-        console.log('Quotable API unavailable, using fallback quotes');
+        log.debug('Quotable API unavailable, using fallback quotes');
     }
 
     // Fallback to local quotes

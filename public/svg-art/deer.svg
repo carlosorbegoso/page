@@ -1,0 +1,18 @@
+<svg id="deer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+<defs><style>.cls-1{fill:none;stroke:white;stroke-miterlimit:10;stroke-width:2;}</style></defs>
+<path class="cls-1" d="M140,120 L120,60 L110,80 L90,30 L100,70 L80,50 L95,85 L115,75 L130,110"/>
+<path class="cls-1" d="M310,120 L330,60 L340,80 L360,30 L350,70 L370,50 L355,85 L335,75 L320,110"/>
+<path class="cls-1" d="M225,100 C200,100 170,115 155,140 C140,165 135,195 145,225 C150,240 145,255 140,275 L135,320 C130,350 145,375 170,390 C190,400 210,405 225,408"/>
+<path class="cls-1" d="M225,100 C250,100 280,115 295,140 C310,165 315,195 305,225 C300,240 305,255 310,275 L315,320 C320,350 305,375 280,390 C260,400 240,405 225,408"/>
+<ellipse class="cls-1" cx="190" cy="165" rx="15" ry="18"/>
+<ellipse class="cls-1" cx="260" cy="165" rx="15" ry="18"/>
+<circle class="cls-1" cx="190" cy="165" r="6"/>
+<circle class="cls-1" cx="260" cy="165" r="6"/>
+<path class="cls-1" d="M210,210 Q225,230 240,210"/>
+<path class="cls-1" d="M225,230 L225,245"/>
+<path class="cls-1" d="M200,260 Q225,275 250,260"/>
+<path class="cls-1" d="M155,140 C140,130 125,125 115,130"/>
+<path class="cls-1" d="M295,140 C310,130 325,125 335,130"/>
+<path class="cls-1" d="M170,390 L160,440 L180,430 L175,465"/>
+<path class="cls-1" d="M280,390 L290,440 L270,430 L275,465"/>
+</svg>

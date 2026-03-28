@@ -4,6 +4,8 @@
  * El cerebro 3D (BrainThreeEngine) proporciona los efectos visuales principales
  */
 
+import { log } from './logger.js';
+
 class AboutAnimations {
     constructor() {
         this.aboutSection = null;
@@ -20,7 +22,7 @@ class AboutAnimations {
             this.setupHoverEffects();
          
         } catch (error) {
-            console.error('❌ Error inicializando About Animations:', error);
+            log.error('Error inicializando About Animations:', error);
         }
     }
     

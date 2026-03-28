@@ -2,22 +2,22 @@
 
 :root {
     /* ===== NEURAL MIND COLOR SYSTEM (PRIMARY - Use only these) ===== */
-    --neural-primary: #64B5F6;     /* Synaptic signals - main interactive color */
-    --neural-cyan: #00ffff;         /* Active neurons - accent glow */
-    --neural-purple: #aa44ff;       /* Deep thought - secondary accent */
-    --neural-spark: #FF6B35;        /* Inspiration sparks - highlight/CTA */
+    --neural-primary: #7EC8E3;     /* Synaptic signals - softer sky blue */
+    --neural-cyan: #58D5D5;         /* Active neurons - teal, less harsh */
+    --neural-purple: #B07CFF;       /* Deep thought - warmer purple */
+    --neural-spark: #FF8A5C;        /* Inspiration sparks - warm coral CTA */
 
     /* ===== MIND DEPTH BACKGROUNDS ===== */
-    --mind-void: #030308;           /* Deepest unconscious (loader bg) */
-    --mind-deep: #050510;           /* Deep consciousness */
-    --mind-base: #0a0a12;           /* Base layer */
-    --mind-surface: #0f0f18;        /* Surface thoughts */
+    --mind-void: #020208;           /* Deepest unconscious (loader bg) */
+    --mind-deep: #06060F;           /* Deep consciousness */
+    --mind-base: #0B0B14;           /* Base layer */
+    --mind-surface: #111119;        /* Surface thoughts */
 
     /* ===== NEURAL GLOW EFFECTS ===== */
-    --glow-neural: 0 0 20px rgba(100, 181, 246, 0.3);
-    --glow-synapse: 0 0 15px rgba(0, 255, 255, 0.25);
-    --glow-thought: 0 0 12px rgba(170, 68, 255, 0.2);
-    --glow-spark: 0 0 18px rgba(255, 107, 53, 0.25);
+    --glow-neural: 0 0 20px rgba(126, 200, 227, 0.25);
+    --glow-synapse: 0 0 15px rgba(88, 213, 213, 0.2);
+    --glow-thought: 0 0 12px rgba(176, 124, 255, 0.2);
+    --glow-spark: 0 0 18px rgba(255, 138, 92, 0.25);
 
     /* ===== GLOW INTENSITY LEVELS ===== */
     --glow-intense: 0.6;

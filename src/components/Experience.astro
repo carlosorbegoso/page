@@ -28,13 +28,13 @@
             <p class="section-subtitle exp-animate" data-anim-delay="200">A journey through my backend development career</p>
         </div>
 
-        <div class="experience-timeline">
+        <div class="experience-timeline" role="list" aria-label="Work experience timeline">
             <div class="timeline-line">
                 <div class="timeline-progress"></div>
             </div>
 
             <!-- Experience 1 - TCS (Current) -->
-            <div class="experience-item exp-animate" data-anim-delay="300">
+            <div class="experience-item exp-animate" role="listitem" data-anim-delay="300">
                 <div class="experience-marker">
                     <div class="marker-dot">
                         <div class="marker-ring"></div>
@@ -78,7 +78,7 @@
             </div>
 
             <!-- Experience 2 - Intercorp Retail -->
-            <div class="experience-item exp-animate" data-anim-delay="400">
+            <div class="experience-item exp-animate" role="listitem" data-anim-delay="400">
                 <div class="experience-marker">
                     <div class="marker-dot">
                         <div class="marker-ring"></div>
@@ -120,7 +120,7 @@
             </div>
 
             <!-- Experience 3 - Baufest -->
-            <div class="experience-item exp-animate" data-anim-delay="500">
+            <div class="experience-item exp-animate" role="listitem" data-anim-delay="500">
                 <div class="experience-marker">
                     <div class="marker-dot">
                         <div class="marker-ring"></div>
@@ -167,7 +167,7 @@
             </div>
 
             <!-- Experience 4 - SYSARP -->
-            <div class="experience-item exp-animate" data-anim-delay="600">
+            <div class="experience-item exp-animate" role="listitem" data-anim-delay="600">
                 <div class="experience-marker">
                     <div class="marker-dot">
                         <div class="marker-ring"></div>
@@ -250,8 +250,19 @@
         }
     });
 
-    // Initialize Three.js holographic engine
-    import('../scripts/engines/experience-three-engine.js').then(module => {
-        new module.ExperienceThreeEngine('experience-three-container');
-    }).catch(() => {});
+    // Lazy-load Three.js engine only when section is visible
+    const expSection = document.getElementById('experience');
+    if (expSection) {
+        const threeObserver = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    import('../scripts/engines/experience-three-engine.js').then(module => {
+                        new module.ExperienceThreeEngine('experience-three-container');
+                    }).catch(() => {});
+                    obs.unobserve(entry.target);
+                }
+            });
+        }, { rootMargin: '200px' });
+        threeObserver.observe(expSection);
+    }
 </script>

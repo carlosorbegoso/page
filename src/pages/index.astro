@@ -4,19 +4,21 @@ import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
 import Experience from '../components/Experience.astro';
 import TechProjects from '../components/TechProjects.astro';
+import ArtVisualizer from '../components/ArtVisualizer.astro';
 import Contact from '../components/Contact.astro';
 import Footer from '../components/Footer.astro';
 import ScanlineOverlay from '../components/ScanlineOverlay.astro';
+import SvgCreatures from '../components/SvgCreatures.astro';
 ---
 
 <Layout>
     <Header />
-    <main id="main-content">
-        <Hero />
-        <Experience />
-        <TechProjects />
-        <Contact />
-    </main>
+    <Hero />
+    <Experience />
+    <TechProjects />
+    <ArtVisualizer />
+    <Contact />
     <Footer />
     <ScanlineOverlay />
+    <SvgCreatures />
 </Layout>

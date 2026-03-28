@@ -128,13 +128,8 @@
     color: var(--neural-purple);
 }
 
-/* Header Responsive - Hide desktop on mobile, show bottom nav */
+/* Header Responsive - handled in header.css */
 @media (max-width: 768px) {
-    /* Hide desktop header on mobile */
-    .header.header-desktop {
-        display: none !important;
-    }
-
     /* Show mobile bottom navigation */
     .mobile-bottom-nav {
         display: flex;
@@ -143,17 +138,6 @@
     /* Add bottom padding to body for mobile nav */
     body {
         padding-bottom: calc(70px + env(safe-area-inset-bottom));
-    }
-}
-
-/* Desktop styles remain unchanged above 768px */
-@media (min-width: 769px) {
-    .mobile-bottom-nav {
-        display: none !important;
-    }
-
-    .header.header-desktop {
-        display: flex;
     }
 }
 

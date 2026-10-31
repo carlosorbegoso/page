@@ -364,3 +364,58 @@ Referencias de Carlos: lusion.co y david-hckh.com (inspiración, sin copiar).
 - **Hero = el escritorio de Carlos de noche** (lámpara, monitor, ventana con la constelación, telescopio, figuras de Alfa/Burbu/caja). La placa `hero` vive en la pantalla del monitor. La cámara se aleja, gira hacia la ventana y vuela al espacio, donde sigue la constelación.
 - **Imprescindibles**: reacción fluida al cursor (arrastre en táctil), efectos cinematográficos (bloom selectivo, profundidad de campo sobre la placa activa, grano, aberración sutil), transiciones de cámara dramáticas y suaves, y sonido ambiente generativo (apagado por defecto).
 - **Reparto**: motor e integración (`src/three/` salvo `desk/` y `fx/`), artista de escenario (`src/three/desk/`), FX/shaders (`src/three/fx/`), sonido (`src/audio/`, `AudioToggle`), dirección de arte (`docs/design/desk.md`). Contratos en `src/three/contracts.ts` (`StationModule`, `FxPipeline`, `PointerField`, eventos `station:enter` y `station:progress`).
+
+---
+
+## Dirección final: "Una noche en el escritorio" (2026-10-31, aprobada por Carlos)
+
+Prevalece sobre todos los cambios de dirección anteriores. Origen: `docs/REVIEW-direccion.md`.
+
+### Idea
+Un solo entorno: el escritorio de Carlos de noche, con luz horneada. Línea argumental: "Última hora de trabajo. En el monitor, el día (banca). Bajo la lámpara, la noche (productos). Al amanecer, la ventana." **Capítulos fijados (pin)**, cada uno con un plano casi quieto; la cámara solo cambia de plano **entre** capítulos (dolly corto, deslizamiento lateral o tilt + rack focus). La acción la hacen objetos, luz y texto. **Se elimina el espacio** (vuelo por la ventana, constelación, nebulosas, órbitas, faro, "C" de estrellas); detrás del vidrio solo queda un cielo nocturno mínimo con la ciudad.
+
+### Capítulos (`data-station`)
+| Id | Plano | Acción | Texto | Transición al siguiente | Móvil |
+|---|---|---|---|---|---|
+| `intro` (carga, sin sección) | Negro | La lámpara parpadea y enciende; el monitor despierta | — | 0,8 s | Igual |
+| `hero` | Plano general frontal: mesa, monitor, ventana con ciudad, lluvia | Parallax ±1,5°, vapor de la taza, lluvia en el vidrio | Titular tecleado en el monitor (CSS3D 1:1, frontal); rol + 3 cifras; CTAs | Push-in 0,4 m + rack focus, 1,2 s | Monitor a todo el ancho |
+| `about` | El monitor llena ~70 % | Cambio de "slide" en la pantalla | Foto, bio, formación y stack en la pantalla (CSS3D frontal) | Deslizamiento lateral hacia la lámpara, 1,4 s | Monitor arriba, texto abajo |
+| `company` | Macro bajo la lámpara: peana con Alfa y sus tres figuras | Alfa gira 20°, su señal se enciende | Panel HTML anclado al lado opuesto | Rack focus | Figuras en el tercio superior |
+| `products` | Macro de cada figura, una por vez; las otras desenfocadas | La figura sube 2 cm y gira lento | Una placa por producto; **SkyMek como estrella** (captura real, más peso); Parati y Ventixs "en construcción" | Dolly 15–20 cm, 0,9 s entre productos | Una por pantalla |
+| `experience` | Tilt a la estantería: carpetas; la de TCS abierta en la mesa | Cada carpeta se ilumina al leerse | **Orden cronológico inverso**: TCS, Intercorp, Baufest; SYSARP en una línea | Tilt al teléfono, 1,0 s | Estantería arriba |
+| `contact` | El teléfono junto al teclado se enciende | Notificación + chime | Correo, LinkedIn, GitHub, X, CV en la pantalla del teléfono (CSS3D frontal) | — | Botones al pulgar |
+| `outro` | La lámpara se apaga, amanece en la ventana | Luz | Créditos en la pared (sustituyen al footer HTML) + pie técnico "Hecho con Astro + Three.js" | 2,5 s | Igual |
+
+### Texto
+- **El texto nunca rota ni reescala con la cámara.** Dos modos: (1) **CSS3D solo en superficies frontales** (monitor en `hero`/`about`, teléfono en `contact`), a 1:1 con la cámara de frente; (2) **paneles HTML 2D anclados** a un punto 3D proyectado (solo traslación en pantalla, suelto y sin caja) en `company`, `products`, `experience`, `outro`.
+- El texto entra cuando la cámara se asienta (evento `chapter:settled`), con revelado por palabras. Sin deriva continua ni resorte de proximidad en párrafos; la proximidad por letra solo en titulares cortos.
+
+### Reglas anti-mareo (obligatorias, se aplican por código en el director de cámara)
+1. Roll 0°; "arriba" = +Y del mundo; FOV fijo por dispositivo (30 desktop, 40 móvil).
+2. Por transición ≤ 45° de yaw, ≤ 25° de pitch, ≤ 1,5 m; ≤ 20°/s y ≤ 1 m/s.
+3. Transiciones de 0,9–1,4 s con `power2.inOut`; proporción quieto:movimiento ≥ 70:30 por capítulo; en táctil la transición se dispara al 50 % de visibilidad, sin scrub.
+4. Una sola fuente de movimiento a la vez: el parallax del cursor se apaga durante las transiciones; deriva en reposo ≤ 2 px; giros de objetos ≤ 0,05 rad/s; respiración de luz ≤ ±5 % en 6–8 s.
+5. Nada cruza el centro del cuadro durante una transición; DoF ≤ 600 ms y nunca sobre texto.
+6. Reduced-motion / pausa: cortes con disolvencia de 300 ms.
+
+### Contenido (estratega)
+Rol "Backend Developer · Java/Quarkus · Banca" grande desde el primer segundo y 3 cifras (+30–40 % de rendimiento, monolito → CQRS, liderazgo de un equipo de 3 / +20 % de eficiencia); experiencia en orden inverso; SkyMek como estrella; **modo lectura** con un clic (una página limpia con todo el contenido); pie técnico.
+
+### HUD
+Solo el monograma persiste; al hover/tap despliega idioma, sonido, pausa, Índice, modo lectura y CV. Sin riel de progreso sobre el contenido.
+
+### Modelos
+Carlos genera los modelos con Tripo (prompts en `docs/design/mascots.md` y `docs/design/desk.md`, actualizados al registro "pieza de escritorio ejecutivo": Alfa obsidiana con anillo de latón, Burbu cerámica mate, caja con cinta satinada, más teléfono y carpetas). Mientras tanto, versiones procedurales mejoradas con la misma interfaz y nombres de nodos.
+
+### Reparto
+| Especialista | Archivos | Tarea |
+|---|---|---|
+| Motor / director de cámara | `src/three/` (salvo `desk/`, `fx/`), `StageCanvas` | Capítulos pin, director con límites, eventos `chapter:enter/settled/progress`, texto en 2 modos, eliminar el espacio |
+| Artista de escenario | `src/three/desk/` | Sets y planos por capítulo (peana macro, estantería y carpetas, teléfono, lluvia, vapor, encendido, amanecer) |
+| FX | `src/three/fx/` | Fluido solo en lluvia/vapor/vidrio, rack focus por capítulo, sin aberración |
+| Diseñador | `docs/design/`, `tokens.css`, `plates.css` | Dirección de arte v2, mascotas re-esculpidas, prompts Tripo, escala tipográfica única |
+| Copywriter | `src/content/`, `src/i18n/`, `docs/copy/` | Rol + cifras, orden inverso, SkyMek estrella, créditos, modo lectura |
+| UI de contenido | `src/components/sections/**`, `products/`, `experience/`, `contact/`, página de modo lectura | Secciones por capítulo, nueva sección `outro`, modo lectura |
+| UI Shell | Header/HUD, Footer, StarMap, Base | HUD de monograma, quitar riel y footer plano, botón modo lectura |
+| Motion | `src/motion/`, `motion.css` | Revelados al `chapter:settled`, quitar deriva y proximidad en cuerpo |
+| Sonido | `src/audio/` | Tono de cuarto (lluvia, zumbido), tecla, "tock" de madera, chime y swell por capítulo |

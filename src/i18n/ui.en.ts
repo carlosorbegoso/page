@@ -32,6 +32,7 @@ export const en = {
   'audio.enable': 'Turn sound on',
   'audio.mute': 'Mute',
   'audio.armed': 'Sound is on: tap to resume it',
+  'audio.available': 'Sound is available',
   'hero.headline': 'By day, backends for banking. By night, products of my own.',
   'hero.ctaProducts': 'See products',
   'hero.ctaContact': 'Get in touch',

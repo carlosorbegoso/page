@@ -30,6 +30,7 @@ export const es = {
   'audio.enable': 'Activar sonido',
   'audio.mute': 'Silenciar',
   'audio.armed': 'Sonido activado: toca para reanudarlo',
+  'audio.available': 'Hay sonido disponible',
   'hero.headline': 'De día, backends para la banca. De noche, mis propios productos.',
   'hero.ctaProducts': 'Ver productos',
   'hero.ctaContact': 'Escríbeme',

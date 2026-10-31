@@ -37,8 +37,13 @@ const menuItem =
       aria-expanded="false"
       aria-controls="hud-menu"
       aria-label={t('hud.label')}
-      class="hud-control hud-icon"
+      aria-describedby="hud-audio-hint"
+      class="group hud-control hud-icon"
     >
+      <span
+        aria-hidden="true"
+        class="absolute top-2 right-2 hidden size-1.5 rounded-full bg-accent shadow-[0_0_6px_var(--color-accent)] group-data-[audio-hint]:block"
+      ></span>
       <svg viewBox="0 0 64 64" width="22" height="22" aria-hidden="true">
         <path
           d="M43.5 22.4A15 15 0 1 0 43.5 41.6"
@@ -49,6 +54,13 @@ const menuItem =
         <circle cx="47" cy="32" r="4.5" class="fill-accent"></circle>
       </svg>
     </button>
+    <span
+      id="hud-audio-hint"
+      data-hud-audio-hint
+      data-label={t('audio.available')}
+      class="sr-only"
+      aria-live="polite"
+    ></span>
     <span
       data-hud-chapter
       aria-hidden="true"
@@ -319,6 +331,42 @@ const menuItem =
       sheet?.showModal();
       indexButton.setAttribute('aria-expanded', 'true');
     });
+  }
+
+  const audioHint = document.querySelector<HTMLElement>('[data-hud-audio-hint]');
+  const audioToggle = document.querySelector<HTMLButtonElement>('[data-audio-toggle]');
+  const INVITE_HINT_MS = 10_000;
+
+  if (toggle && audioHint) {
+    let inviteTimer: number | undefined;
+    let invited = false;
+
+    const renderHint = () => {
+      const armed = audioToggle?.dataset.state === 'armed';
+      const show = armed || invited;
+      if (show) toggle.dataset.audioHint = '';
+      else delete toggle.dataset.audioHint;
+      audioHint.textContent = show ? (audioHint.dataset.label ?? '') : '';
+    };
+
+    window.addEventListener('audio:invite', () => {
+      invited = true;
+      renderHint();
+      window.clearTimeout(inviteTimer);
+      inviteTimer = window.setTimeout(() => {
+        invited = false;
+        renderHint();
+      }, INVITE_HINT_MS);
+    });
+
+    if (audioToggle) {
+      new MutationObserver(() => {
+        if (audioToggle.dataset.state === 'on') invited = false;
+        renderHint();
+      }).observe(audioToggle, { attributes: true, attributeFilter: ['data-state'] });
+    }
+
+    renderHint();
   }
 
   if (sheet) {

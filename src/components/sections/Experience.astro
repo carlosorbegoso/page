@@ -1,6 +1,8 @@
 ---
+import SectionHeader from '../ui/SectionHeader.astro';
+import TimelineItem from '../experience/TimelineItem.astro';
 import { SECTION_IDS } from '../../config/site';
-import { formatYearMonth, useTranslations, type Locale } from '../../i18n/utils';
+import { useTranslations, type Locale } from '../../i18n/utils';
 import { getExperience } from '../../lib/content';
 
 interface Props {
@@ -10,45 +12,29 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 const entries = await getExperience(locale);
+const firstYear = entries
+  .map(entry => entry.start.slice(0, 4))
+  .sort()
+  .at(0);
 ---
 
-<section id={SECTION_IDS.experience} aria-labelledby="experience-title">
-  <h2 id="experience-title">{t('experience.title')}</h2>
-  <ol>
-    {entries.map(entry => (
-      <li data-experience={entry.id}>
-        <article aria-labelledby={`experience-${entry.id}`}>
-          <h3 id={`experience-${entry.id}`}>
-            {entry.role} · {entry.company}
-          </h3>
-          {entry.client && (
-            <p>
-              {t('experience.client')}: {entry.client}
-            </p>
-          )}
-          <p>
-            <time datetime={entry.start}>{formatYearMonth(entry.start, locale)}</time> –{' '}
-            {entry.end ? (
-              <time datetime={entry.end}>{formatYearMonth(entry.end, locale)}</time>
-            ) : (
-              t('experience.present')
-            )}
-          </p>
-          <p>{entry.summary}</p>
-          {entry.highlights.length > 0 && (
-            <ul>
-              {entry.highlights.map(highlight => (
-                <li>{highlight}</li>
-              ))}
-            </ul>
-          )}
-          <ul>
-            {entry.stack.map(tech => (
-              <li>{tech}</li>
-            ))}
-          </ul>
-        </article>
-      </li>
-    ))}
-  </ol>
+<section
+  id={SECTION_IDS.experience}
+  aria-labelledby="experience-title"
+  data-stage-scene="none"
+  class="relative z-(--z-content) bg-bg px-gutter py-section"
+>
+  <div class="mx-auto flex max-w-content flex-col gap-stack">
+    <SectionHeader
+      id="experience-title"
+      eyebrow={firstYear ? `${firstYear} – ${t('experience.present')}` : undefined}
+      title={t('experience.title')}
+      subtitle={t('experience.subtitle')}
+    />
+    <ol class="mx-auto w-full max-w-[52rem] md:mx-0" role="list">
+      {entries.map(entry => (
+        <TimelineItem locale={locale} {...entry} />
+      ))}
+    </ol>
+  </div>
 </section>

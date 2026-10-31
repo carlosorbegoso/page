@@ -5,7 +5,7 @@ export const es = {
   'meta.ogTitle': 'Carlos Orbegoso: backends para la banca y productos propios',
   'meta.ogDescription':
     'De día, backends para el BCP en TCS. De noche, SkyMek, Parati y Ventixs con TUSOCIO IA, la empresa que cofundé.',
-  'meta.ogImage': 'images/og-image.jpg',
+  'meta.ogImage': 'images/og-es.jpg',
   'meta.ogImageAlt': 'Carlos Orbegoso, Backend Developer en Java y Quarkus',
   skipLink: 'Saltar al contenido',
   'nav.label': 'Navegación principal',

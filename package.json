@@ -12,7 +12,9 @@
     "check": "astro check",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "assets": "bun scripts/optimize-assets.ts",
+    "capture": "bun scripts/capture-fallbacks.ts"
   },
   "author": "Carlos Orbegoso",
   "license": "MIT",

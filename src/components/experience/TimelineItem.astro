@@ -6,6 +6,7 @@ import { formatTimelineMonth } from './dates';
 interface Props {
   locale: Locale;
   id: string;
+  order: number;
   company: string;
   client?: string;
   role: string;
@@ -16,121 +17,79 @@ interface Props {
   stack: string[];
 }
 
-const { locale, id, company, client, role, start, end, summary, highlights, stack } = Astro.props;
+const { locale, id, order, company, client, role, start, end, summary, highlights, stack } =
+  Astro.props;
 const t = useTranslations(locale);
 const isCurrent = end === null;
 const headingId = `experience-${id}`;
-const bodyId = `${headingId}-body`;
+const highlightsId = `${headingId}-highlights`;
 const stackId = `${headingId}-stack`;
 ---
 
-<li
-  class="group relative border-t border-border first:border-t-0"
+<div
+  class="plate group w-full max-w-[36rem]"
+  data-plate
+  data-plate-id={`exp-${id}`}
+  data-plate-order={order}
   data-experience={id}
   data-current={isCurrent ? '' : undefined}
 >
-  <span
-    class="absolute top-3 bottom-3 -left-5 w-0.5 rounded-pill bg-transparent transition-colors duration-(--duration-base) ease-standard group-data-active:bg-accent sm:-left-8 lg:-left-10"
-    aria-hidden="true"></span>
-  <h3 id={headingId}>
-    <button
-      type="button"
-      class="flex min-h-tap w-full items-center justify-between gap-4 py-3 text-left focus-visible:shadow-focus focus-visible:outline-none"
-      aria-expanded="true"
-      aria-controls={bodyId}
-      data-experience-trigger
-    >
-      <span class="flex min-w-0 flex-col gap-0.5">
+  <article aria-labelledby={headingId} class="flex flex-col gap-4">
+    <header class="flex flex-col gap-1.5">
+      <p class="flex items-center gap-2 text-sm font-medium tabular-nums text-text-muted">
         <span
-          class="font-display text-lg font-semibold tracking-tight text-text-muted transition-colors duration-(--duration-fast) ease-standard group-hover:text-text group-data-active:text-text md:text-xl"
-        >
-          {company}
-        </span>
-        <span class="text-sm font-medium tabular-nums text-text-muted">
-          <time datetime={start}>{formatTimelineMonth(start, locale)}</time>
-          {' – '}
-          {end ? <time datetime={end}>{formatTimelineMonth(end, locale)}</time> : t('experience.present')}
-        </span>
-      </span>
-      <span
-        class:list={[
-          'size-2.5 shrink-0 rounded-full',
-          isCurrent ? 'bg-status-live' : 'border-2 border-border-strong'
-        ]}
-        aria-hidden="true"></span>
-    </button>
-  </h3>
-
-  <div id={bodyId} role="region" aria-labelledby={headingId} class="experience-body pb-4" data-experience-body>
-    <div class="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 md:p-5">
-      <div class="flex flex-col gap-0.5">
-        <p class="font-medium text-text">{role}</p>
-        {
-          client && (
-            <p class="text-sm text-text-muted">
-              {t('experience.client')}: {client}
-            </p>
-          )
-        }
-      </div>
-
-      <p class="text-text-muted">{summary}</p>
-
+          class:list={[
+            'size-2.5 shrink-0 rounded-full',
+            isCurrent ? 'bg-status-live' : 'border-2 border-border-strong group-data-active:border-accent'
+          ]}
+          aria-hidden="true"></span>
+        <time datetime={start}>{formatTimelineMonth(start, locale)}</time>
+        {' – '}
+        {end ? <time datetime={end}>{formatTimelineMonth(end, locale)}</time> : t('experience.present')}
+      </p>
+      <h3
+        id={headingId}
+        class="font-display text-2xl font-semibold tracking-tight text-balance text-text"
+      >
+        {company}
+      </h3>
+      <p class="font-medium text-text">{role}</p>
       {
-        highlights.length > 0 && (
-          <details class="group/highlights">
-            <summary class="flex min-h-tap cursor-pointer list-none items-center gap-2 text-sm font-medium text-accent hover:text-accent-hover focus-visible:shadow-focus focus-visible:outline-none [&::-webkit-details-marker]:hidden">
-              <svg
-                viewBox="0 0 24 24"
-                width="16"
-                height="16"
-                aria-hidden="true"
-                class="shrink-0 fill-none stroke-current transition-transform duration-(--duration-fast) ease-standard group-open/highlights:rotate-90"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="m9 6 6 6-6 6" />
-              </svg>
-              {t('experience.highlights')} ({highlights.length})
-            </summary>
-            <ul class="mt-1 flex list-disc flex-col gap-2 pl-5 text-sm text-text marker:text-accent">
-              {highlights.map(highlight => (
-                <li>{highlight}</li>
-              ))}
-            </ul>
-          </details>
+        client && (
+          <p class="text-sm text-text-muted">
+            {t('experience.client')}: {client}
+          </p>
         )
       }
+    </header>
 
-      <p id={stackId} class="sr-only">{t('experience.stack')}</p>
-      <ul aria-labelledby={stackId} class="flex flex-wrap gap-2" role="list">
-        {stack.map(tech => (
-          <li>
-            <Tag>{tech}</Tag>
-          </li>
-        ))}
-      </ul>
-    </div>
-  </div>
-</li>
+    <p class="text-text-muted">{summary}</p>
 
-<style>
-  @media (prefers-reduced-motion: no-preference) {
-    :global(:root:not([data-motion='paused']):not([data-motion='reduced'])) .experience-body:not([hidden]) {
-      animation: experience-body-in var(--duration-base) var(--ease-out) both;
-    }
-  }
-
-  @keyframes experience-body-in {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
+    {
+      highlights.length > 0 && (
+        <div class="flex flex-col gap-2">
+          <p id={highlightsId} class="text-xs font-semibold tracking-caps text-text-muted uppercase">
+            {t('experience.highlights')}
+          </p>
+          <ul
+            aria-labelledby={highlightsId}
+            class="flex list-disc flex-col gap-2 pl-5 text-sm text-text marker:text-accent"
+          >
+            {highlights.map(highlight => (
+              <li>{highlight}</li>
+            ))}
+          </ul>
+        </div>
+      )
     }
 
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-</style>
+    <p id={stackId} class="sr-only">{t('experience.stack')}</p>
+    <ul aria-labelledby={stackId} class="flex flex-wrap gap-2" role="list">
+      {stack.map(tech => (
+        <li>
+          <Tag>{tech}</Tag>
+        </li>
+      ))}
+    </ul>
+  </article>
+</div>

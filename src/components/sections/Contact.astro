@@ -23,62 +23,56 @@ const socials = [
   id={SECTION_IDS.contact}
   aria-labelledby="contact-title"
   data-station="contact"
-  class="relative grid min-h-svh grid-rows-[minmax(33svh,1fr)_auto] lg:grid-rows-1"
+  class="relative flex min-h-svh flex-col items-center justify-center px-gutter py-section lg:items-end lg:pr-24"
 >
-  <div
-    class="row-start-2 mx-auto grid w-full max-w-wide px-gutter pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-10 lg:row-start-1 lg:grid-cols-12 lg:items-center lg:py-24"
-  >
-    <div
-      class="flex flex-col gap-8 rounded-xl border border-border bg-scrim p-5 shadow-lg backdrop-blur-md sm:p-8 md:max-w-2xl lg:col-span-6 lg:col-start-7 lg:p-10 xl:col-span-5 xl:col-start-8"
-    >
-      <SectionHeader id="contact-title" title={t('contact.title')} subtitle={t('contact.subtitle')}>
-        <p class="text-text-muted">{t('contact.body')}</p>
-      </SectionHeader>
+  <div class="plate @container flex w-full max-w-[36rem] flex-col gap-8" data-plate data-plate-id="contact">
+    <SectionHeader id="contact-title" title={t('contact.title')} subtitle={t('contact.subtitle')}>
+      <p class="text-text-muted">{t('contact.body')}</p>
+    </SectionHeader>
 
-      <div class="flex flex-col gap-3">
-        <p id="contact-email-label" class="text-xs font-semibold tracking-caps text-text-muted uppercase">
-          {t('contact.email')}
-        </p>
-        <Button
-          href={`mailto:${SITE.email}`}
-          variant="primary"
-          size="lg"
-          class="w-full break-all"
-          aria-describedby="contact-email-label"
+    <div class="flex flex-col gap-3">
+      <p id="contact-email-label" class="text-xs font-semibold tracking-caps text-text-muted uppercase">
+        {t('contact.email')}
+      </p>
+      <Button
+        href={`mailto:${SITE.email}`}
+        variant="primary"
+        size="lg"
+        class="w-full break-all"
+        aria-describedby="contact-email-label"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="18"
+          height="18"
+          aria-hidden="true"
+          class="shrink-0 fill-none stroke-current"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
         >
-          <svg
-            viewBox="0 0 24 24"
-            width="18"
-            height="18"
-            aria-hidden="true"
-            class="shrink-0 fill-none stroke-current"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <rect x="3" y="5" width="18" height="14" rx="2"></rect>
-            <path d="m3 7 9 6 9-6"></path>
-          </svg>
-          {SITE.email}
-        </Button>
-        <CopyEmail locale={locale} email={SITE.email} />
-      </div>
+          <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+          <path d="m3 7 9 6 9-6"></path>
+        </svg>
+        {SITE.email}
+      </Button>
+      <CopyEmail locale={locale} email={SITE.email} />
+    </div>
 
-      <div class="flex flex-col gap-3 border-t border-border pt-6">
-        <p id="contact-social-label" class="text-xs font-semibold tracking-caps text-text-muted uppercase">
-          {t('contact.social')}
-        </p>
-        <ul aria-labelledby="contact-social-label" class="grid gap-2 sm:grid-cols-3 lg:grid-cols-2" role="list">
-          {socials.map(social => (
-            <li class="lg:last:col-span-2">
-              <Button href={social.href} variant="secondary" external class="w-full">
-                {social.label}
-              </Button>
-            </li>
-          ))}
-        </ul>
-        <CvLink locale={locale} variant="ghost" class="w-full" />
-      </div>
+    <div class="flex flex-col gap-3 border-t border-border pt-6">
+      <p id="contact-social-label" class="text-xs font-semibold tracking-caps text-text-muted uppercase">
+        {t('contact.social')}
+      </p>
+      <ul aria-labelledby="contact-social-label" class="grid gap-2 @md:grid-cols-2" role="list">
+        {socials.map(social => (
+          <li class="@md:last:col-span-2">
+            <Button href={social.href} variant="secondary" external class="w-full">
+              {social.label}
+            </Button>
+          </li>
+        ))}
+      </ul>
+      <CvLink locale={locale} variant="ghost" class="w-full" />
     </div>
   </div>
 </section>

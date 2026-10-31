@@ -1,5 +1,5 @@
 ---
-import StageCanvas from '../three/StageCanvas.astro';
+import Button from '../ui/Button.astro';
 import CvLink from '../ui/CvLink.astro';
 import { SECTION_IDS } from '../../config/site';
 import { useTranslations, type Locale } from '../../i18n/utils';
@@ -14,16 +14,128 @@ const t = useTranslations(locale);
 const profile = await getProfile(locale);
 ---
 
-<section id={SECTION_IDS.hero} aria-labelledby="hero-title">
-  <StageCanvas />
-  <h1 id="hero-title">
-    {profile.name}
-    <span>{profile.role}</span>
-  </h1>
-  <p>{profile.tagline}</p>
-  <p>
-    <a href={`#${SECTION_IDS.products}`}>{t('hero.ctaProducts')}</a>
-    <a href={`#${SECTION_IDS.contact}`}>{t('hero.ctaContact')}</a>
-    <CvLink locale={locale} />
-  </p>
+<section
+  id={SECTION_IDS.hero}
+  aria-labelledby="hero-title"
+  data-stage-scene="hero"
+  class="hero relative grid min-h-[calc(100svh-var(--header-height))] grid-rows-[1fr_auto] lg:grid-rows-1"
+>
+  <div
+    class="relative z-(--z-content) row-start-2 mx-auto grid w-full max-w-wide px-gutter pb-[max(1rem,env(safe-area-inset-bottom))] lg:row-start-1 lg:grid-cols-12 lg:items-center lg:py-24"
+  >
+    <div
+      class="hero-panel rounded-xl bg-scrim p-5 backdrop-blur-md sm:p-8 lg:col-span-6 lg:p-10"
+    >
+      <h1
+        id="hero-title"
+        class="hero-enter flex flex-wrap items-baseline gap-x-2 text-sm font-medium text-text-muted"
+      >
+        <span class="font-display font-semibold text-text">{profile.name}</span>
+        <span aria-hidden="true" class="text-accent">/</span>
+        <span>{profile.role}</span>
+      </h1>
+
+      <p
+        class="hero-enter mt-3 font-display text-3xl font-semibold tracking-display text-balance text-text md:text-4xl"
+        style="--enter-delay: 60ms"
+      >
+        {t('hero.headline')}
+      </p>
+
+      <p
+        class="hero-enter mt-3 max-w-reading text-base text-text-muted md:mt-4 md:text-lg"
+        style="--enter-delay: 120ms"
+      >
+        {profile.tagline}
+      </p>
+
+      <div
+        class="hero-enter mt-5 flex flex-wrap items-center gap-3 md:mt-6"
+        style="--enter-delay: 180ms"
+      >
+        <Button href={`#${SECTION_IDS.products}`} variant="primary" size="lg" class="grow sm:grow-0">
+          {t('hero.ctaProducts')}
+        </Button>
+        <Button href={`#${SECTION_IDS.contact}`} variant="secondary" size="lg" class="grow sm:grow-0">
+          {t('hero.ctaContact')}
+        </Button>
+        <CvLink locale={locale} variant="ghost" size="lg" class="w-full sm:w-auto" />
+      </div>
+    </div>
+  </div>
+
+  <a
+    href={`#${SECTION_IDS.about}`}
+    class="hero-cue absolute bottom-6 left-1/2 z-(--z-content) hidden min-h-tap -translate-x-1/2 flex-col items-center justify-center gap-1 rounded-pill bg-scrim px-4 text-xs font-medium tracking-caps text-text-muted uppercase transition-colors duration-(--duration-fast) ease-standard hover:text-text focus-visible:shadow-focus focus-visible:outline-none lg:flex"
+  >
+    <span>{t('nav.about')}</span>
+    <svg
+      class="hero-cue-arrow"
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path d="M2 5l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+    </svg>
+  </a>
 </section>
+
+<style>
+  @keyframes hero-enter {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+
+  /* Only the delayed children animate opacity; the h1 just slides so it paints in the first frame (LCP). */
+  .hero-enter {
+    animation: hero-enter var(--duration-slow) var(--ease-out) both;
+    animation-delay: var(--enter-delay, 0ms);
+  }
+
+  h1.hero-enter {
+    animation-name: hero-slide;
+  }
+
+  @keyframes hero-slide {
+    from {
+      transform: translateY(12px);
+    }
+  }
+
+  @keyframes hero-cue {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(3px);
+    }
+  }
+
+  .hero-cue-arrow {
+    animation: hero-cue 2.4s var(--ease-in-out) infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-enter,
+    .hero-cue-arrow {
+      animation: none;
+    }
+  }
+
+  :global(:root[data-motion='paused']) .hero-enter,
+  :global(:root[data-motion='paused']) .hero-cue-arrow {
+    animation: none;
+  }
+
+  @media (forced-colors: active) {
+    .hero-panel,
+    .hero-cue {
+      border: 1px solid transparent;
+    }
+  }
+</style>

@@ -88,7 +88,8 @@
   --color-muted: var(--color-text-muted);
 
   --font-display: 'Sora', 'Sora Fallback', ui-sans-serif, system-ui, sans-serif;
-  --font-sans: 'Inter', 'Inter Fallback', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans:
+    'Inter', 'Inter Fallback', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
 
   --font-weight-regular: 400;

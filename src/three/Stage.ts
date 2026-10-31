@@ -50,6 +50,11 @@ const INTRO_SECONDS = 2.4;
 const PHONE_MONITOR_PUSH = 0.1;
 /** Sub-shots when neither the desk nor the plates say otherwise. */
 const DEFAULT_SUBS: Partial<Record<ChapterId, number>> = { products: 3 };
+/**
+ * Chapters whose text lives in anchored 2D panels: the camera breathes there. The CSS3D chapters
+ * (monitor, phone) stay still, because their 1:1 text would shimmer or slide on the glass.
+ */
+const BREATHING_CHAPTERS: ReadonlySet<ChapterId> = new Set(['company', 'products', 'experience', 'outro']);
 
 declare global {
   interface Window {
@@ -104,10 +109,13 @@ export class Stage {
   constructor(private readonly options: StageOptions) {
     this.tier = options.tier.tier;
     this.director = new CameraDirector({
-      onEnter: (id, subIndex) => window.dispatchEvent(new CustomEvent('chapter:enter', { detail: { id, subIndex } })),
+      onEnter: (id, subIndex, duration) => {
+        window.dispatchEvent(new CustomEvent('chapter:enter', { detail: { id, subIndex, duration } }));
+        this.fx?.setFocus(this.world.focus(id, subIndex));
+      },
       onSettled: (id, subIndex) => {
         window.dispatchEvent(new CustomEvent('chapter:settled', { detail: { id, subIndex } }));
-        this.fx?.setFocus(this.world.focus(id, subIndex) ?? this.director.focus.clone());
+        this.fx?.setFocus(this.world.focus(id, subIndex));
         this.invalidate();
       },
       dissolve: cut => this.dissolve(cut)
@@ -430,12 +438,15 @@ export class Stage {
     const state = this.director.state();
     if (this.world.update(dt, (now - this.clockStart) / 1000, state, this.idleMotion(), this.camera.position, this.renderer.getPixelRatio())) settling = true;
     this.plates?.update(this.camera, state, this.progress.get(state.id) ?? 0);
+    const steady = this.director.breathe(this.camera, dt, this.idleMotion() && BREATHING_CHAPTERS.has(state.id));
+    settling ||= this.director.breathing;
     if (this.fx) {
       this.fx.render(this.renderer, this.world.scene, this.camera, dt);
       settling ||= this.fx.settling ?? false;
     } else {
       this.renderer.render(this.world.scene, this.camera);
     }
+    steady();
     this.plates?.render(this.camera);
     const work = performance.now() - workStart;
     if (this.options.container.dataset.ready !== 'true') this.reveal();

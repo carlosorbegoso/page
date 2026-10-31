@@ -1,6 +1,6 @@
-import { Vector3, type PerspectiveCamera } from 'three';
+import { Quaternion, Vector3, type PerspectiveCamera } from 'three';
 import type { ChapterId, ChapterState, Shot } from './contracts';
-import { damp, power2InOut } from './scenes/common';
+import { damp } from './scenes/common';
 
 /** Anti-motion-sickness limits (PLAN, final section). Enforced here, not by convention. */
 export const CAMERA_LIMITS = {
@@ -11,11 +11,22 @@ export const CAMERA_LIMITS = {
   parallaxYawDeg: 1.5,
   parallaxPitchDeg: 0.8,
   fovDesktop: 30,
-  fovTouch: 40
+  fovTouch: 40,
+  breathMetres: 0.006,
+  breathDegrees: 0.12,
+  breathPeriodSeconds: 11
 } as const;
 
 const DEG = Math.PI / 180;
 const UP = new Vector3(0, 1, 0);
+/** Seconds for the settled breathing to fade in, so it never starts with a jump. */
+const BREATH_FADE_SECONDS = 2.5;
+
+/** Quintic smootherstep: zero velocity and acceleration at both ends, a lower peak speed than power2.inOut. */
+export function cinematicEase(t: number): number {
+  const x = Math.min(Math.max(t, 0), 1);
+  return x * x * x * (x * (x * 6 - 15) + 10);
+}
 
 export interface DirectorRequest {
   id: ChapterId;
@@ -24,7 +35,8 @@ export interface DirectorRequest {
 }
 
 export interface DirectorEvents {
-  onEnter(id: ChapterId, subIndex: number): void;
+  /** `duration` is the camera move in seconds (0 for an instant jump or a dissolve cut). */
+  onEnter(id: ChapterId, subIndex: number, duration: number): void;
   onSettled(id: ChapterId, subIndex: number): void;
   /** Reduced motion / pause: the caller dissolves and the director cuts. */
   dissolve(cut: () => void): void;
@@ -39,8 +51,8 @@ function viewAngleDeg(a: Shot, b: Shot): number {
 /**
  * Camera director: one fixed shot per chapter (or sub-shot), moves only between shots.
  * Roll is always 0 (lookAt with world +Y), FOV is fixed per device, transitions last
- * 0.9–1.4 s with power2.inOut and are lengthened so speed never exceeds 20°/s or 1 m/s.
- * Cursor parallax (≤ 1.5° yaw, ≤ 0.8° pitch) only runs while settled.
+ * 0.9–1.4 s with a quintic ease and are lengthened so speed never exceeds 20°/s or 1 m/s.
+ * Cursor parallax (≤ 1.5° yaw, ≤ 0.8° pitch) and a slow breathing drift only run while settled.
  */
 export class CameraDirector {
   private from: Shot | null = null;
@@ -53,6 +65,15 @@ export class CameraDirector {
   private parallax = { x: 0, y: 0 };
   private readonly position = new Vector3();
   private readonly target = new Vector3();
+  private breathTime = 0;
+  private breathLevel = 0;
+  private readonly heldPosition = new Vector3();
+  private readonly heldQuaternion = new Quaternion();
+  private readonly breathShift = new Vector3();
+  private readonly breathLook = new Vector3();
+  private readonly breathRight = new Vector3();
+  private readonly breathUp = new Vector3();
+  private readonly breathForward = new Vector3();
   /** Seconds the last transition would have needed at the speed limits (debug: > 1.4 means the shot pair is too far apart). */
   lastRequiredSeconds = 0;
 
@@ -98,14 +119,15 @@ export class CameraDirector {
     }
     this.previous = this.current?.id ?? null;
     this.current = next;
-    this.events.onEnter(next.id, next.subIndex);
     const start: Shot = { position: this.position.clone(), target: this.target.clone() };
     if (mode === 'instant' || !this.to) {
+      this.events.onEnter(next.id, next.subIndex, 0);
       this.jump(next.shot);
       this.settle();
       return;
     }
     if (mode === 'cut') {
+      this.events.onEnter(next.id, next.subIndex, 0);
       this.settled = false;
       this.events.dissolve(() => {
         this.jump(next.shot);
@@ -121,6 +143,7 @@ export class CameraDirector {
     this.to = next.shot;
     this.elapsed = 0;
     this.settled = false;
+    this.events.onEnter(next.id, next.subIndex, this.duration);
   }
 
   /** Refreshes the target shot of the current chapter (resize, provider changes) without moving events. */
@@ -152,7 +175,7 @@ export class CameraDirector {
     let moving = false;
     if (!this.settled && this.from && this.to) {
       this.elapsed += dt;
-      const t = power2InOut(this.elapsed / this.duration);
+      const t = cinematicEase(this.elapsed / this.duration);
       this.position.lerpVectors(this.from.position, this.to.position, t);
       this.target.lerpVectors(this.from.target, this.to.target, t);
       moving = true;
@@ -187,5 +210,54 @@ export class CameraDirector {
     camera.lookAt(this.target);
     camera.updateMatrixWorld();
     return moving;
+  }
+
+  /**
+   * Slow settled drift on top of the pose `update` applied: a small truck and dolly (≤ 6 mm) and
+   * a look offset (≤ 0.12°) on incommensurate periods ≥ 11 s, re-aimed with world +Y so roll stays
+   * 0. It fades in after the camera settles and out as soon as it moves. Returns a function that
+   * puts the camera back, so the 2D panels and the CSS3D surfaces keep the steady pose.
+   */
+  breathe(camera: PerspectiveCamera, dt: number, enabled: boolean): () => void {
+    const goal = enabled && this.settled ? 1 : 0;
+    const rate = goal > this.breathLevel || this.settled ? 1 / BREATH_FADE_SECONDS : 4;
+    this.breathLevel = Math.min(Math.max(this.breathLevel + Math.sign(goal - this.breathLevel) * rate * dt, 0), 1);
+    if (Math.abs(goal - this.breathLevel) < 0.01) this.breathLevel = goal;
+    if (this.breathLevel === 0) return () => undefined;
+    this.breathTime += dt;
+    const level = this.breathLevel * this.breathLevel * (3 - 2 * this.breathLevel);
+    const phase = (this.breathTime / CAMERA_LIMITS.breathPeriodSeconds) * Math.PI * 2;
+    const metres = CAMERA_LIMITS.breathMetres * level;
+    const look = Math.tan(CAMERA_LIMITS.breathDegrees * DEG) * level;
+
+    this.heldPosition.copy(camera.position);
+    this.heldQuaternion.copy(camera.quaternion);
+    camera.getWorldDirection(this.breathForward);
+    this.breathRight.crossVectors(this.breathForward, UP).normalize();
+    this.breathUp.crossVectors(this.breathRight, this.breathForward).normalize();
+    const distance = Math.max(camera.position.distanceTo(this.target), 0.05);
+    this.breathShift
+      .copy(this.breathRight)
+      .multiplyScalar(Math.sin(phase) * metres)
+      .addScaledVector(this.breathUp, Math.sin(phase * 0.77 + 1.3) * metres * 0.5)
+      .addScaledVector(this.breathForward, Math.sin(phase * 0.61 + 2.1) * metres * 0.6);
+    this.breathLook
+      .copy(this.target)
+      .add(this.breathShift)
+      .addScaledVector(this.breathRight, Math.sin(phase * 0.83 + 0.4) * look * distance)
+      .addScaledVector(this.breathUp, Math.sin(phase * 0.69 + 2.7) * look * distance * 0.6);
+    camera.position.add(this.breathShift);
+    camera.lookAt(this.breathLook);
+    camera.updateMatrixWorld();
+    return () => {
+      camera.position.copy(this.heldPosition);
+      camera.quaternion.copy(this.heldQuaternion);
+      camera.updateMatrixWorld();
+    };
+  }
+
+  /** True while the breathing still fades in or out (the Stage keeps rendering). */
+  get breathing(): boolean {
+    return this.breathLevel > 0;
   }
 }

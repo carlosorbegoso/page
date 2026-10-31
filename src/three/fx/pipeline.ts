@@ -127,6 +127,7 @@ class CinematicPipeline implements CinematicFx {
   private rackElapsed = RACK_SECONDS;
   private holdingFocus = false;
   private holdElapsed = 0;
+  private holdFor = HOLD_TIMEOUT_SECONDS;
   private readonly capture = new URLSearchParams(location.search).has('capture');
   private chapterEvents = false;
   private chapter = '';
@@ -194,24 +195,25 @@ class CinematicPipeline implements CinematicFx {
     this.input = new FluidPointerInput(() => this.canvas, this.tokens.pointerDamping);
     this.cleanups.push(() => this.input.dispose());
     this.cleanups.push(watchMotion(state => (this.motion = state)));
-    const listen = (type: string, handler: (id: string) => void) => {
+    const listen = (type: string, handler: (id: string, detail: { duration?: number }) => void) => {
       const listener = (event: Event) => {
-        const id = (event as CustomEvent<{ id?: string }>).detail?.id;
-        if (typeof id === 'string') handler(id);
+        const detail = (event as CustomEvent<{ id?: string; duration?: number }>).detail;
+        if (typeof detail?.id === 'string') handler(detail.id, detail);
       };
       window.addEventListener(type, listener);
       this.cleanups.push(() => window.removeEventListener(type, listener));
     };
-    listen('chapter:enter', id => {
+    listen('chapter:enter', (id, detail) => {
       this.chapterEvents = true;
       this.enterChapter(id);
       this.holdingFocus = true;
       this.holdElapsed = 0;
+      this.holdFor = typeof detail.duration === 'number' ? Math.max(detail.duration - RACK_SECONDS, 0) : HOLD_TIMEOUT_SECONDS;
     });
     listen('chapter:settled', id => {
       this.chapterEvents = true;
       this.enterChapter(id);
-      this.releaseHold();
+      if (this.holdingFocus) this.releaseHold();
     });
     listen('station:enter', id => {
       if (!this.chapterEvents) this.enterChapter(id);
@@ -375,7 +377,8 @@ class CinematicPipeline implements CinematicFx {
 
   /**
    * Rack focus: the focus distance is held while the camera travels (`chapter:enter`) and pulled to
-   * the new subject in ≤ 600 ms once it settles (`chapter:settled`). Without chapter events, a jump
+   * the new subject in ≤ 600 ms over the last stretch of the move, landing as the camera settles
+   * (`chapter:enter` carries the move's duration; without it the pull starts at `chapter:settled`). Without chapter events, a jump
    * larger than half the focus range triggers the same rack; small drifts are followed directly.
    */
   private updateFocus(camera: PerspectiveCamera, dt: number): void {
@@ -384,7 +387,7 @@ class CinematicPipeline implements CinematicFx {
     const range = this.grading.value.focusRange;
     if (this.holdingFocus) {
       this.holdElapsed += dt;
-      if (this.holdElapsed > HOLD_TIMEOUT_SECONDS) this.releaseHold();
+      if (this.holdElapsed >= Math.min(this.holdFor, HOLD_TIMEOUT_SECONDS)) this.releaseHold();
     }
     if (this.hasFocus) {
       camera.getWorldDirection(this.forward);
@@ -615,8 +618,9 @@ class CinematicPipeline implements CinematicFx {
 }
 
 /**
- * Creates the cinematic post pipeline for the night desk: selective bloom, chapter rack focus,
- * chapter grading, ACES via the renderer, vignette and grain, plus the fluid field that feeds the
+ * Creates the cinematic post pipeline for the night desk: selective bloom with an anamorphic
+ * streak, chapter rack focus, teal-orange chapter grading with contrast, ACES via the renderer,
+ * corner fringe, vignette and grain, plus the fluid field that feeds the
  * rain, steam and window-glass materials. GPU resources are built
  * lazily on the first `render`, so it can be created before the renderer exists.
  */

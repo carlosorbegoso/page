@@ -23,7 +23,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { tokenColor, tokenNumber } from '../tokens';
 import { doubleSided, OBJECT_ID, PartBuilder, type Finish } from './builder';
-import { DESK, FIGURES, GLASS_Z, LAMP, MONITOR, ROOM, TELESCOPE, WINDOW } from './layout';
+import { DESK, FIGURES, GLASS_Z, KEYBOARD_X, LAMP, MONITOR, ROOM, TELESCOPE, WINDOW } from './layout';
 
 /** Segment multiplier: 1 on `high`, lower on `mid`. */
 export type Quality = number;
@@ -236,7 +236,7 @@ export function buildWorkstation(b: PartBuilder, p: Palette, q: Quality): void {
     rotation: [0, yaw, 0]
   });
 
-  const keyboard = new Vector3(-0.1, DESK.top, 0.16);
+  const keyboard = new Vector3(KEYBOARD_X, DESK.top, 0.16);
   const kYaw = yaw * 0.5;
   const kb = new Matrix4().compose(keyboard, new Quaternion().setFromAxisAngle(UP, kYaw), new Vector3(1, 1, 1));
   b.add(new RoundedBoxGeometry(0.37, 0.009, 0.125, 2, 0.004), p.bezel, new Matrix4().multiplyMatrices(kb, new Matrix4().makeTranslation(0, 0.0045, 0)));
@@ -254,14 +254,14 @@ export function buildWorkstation(b: PartBuilder, p: Palette, q: Quality): void {
   }
   b.add(new BoxGeometry(pitch * 6 - 0.004, 0.004, keyW * 0.92), p.keys, new Matrix4().multiplyMatrices(kb, new Matrix4().makeTranslation(0, 0.011, 2 * pitch)));
 
-  b.add(new RoundedBoxGeometry(0.13, 0.005, 0.105, 2, 0.003), p.trackpad, { position: [0.17, DESK.top + 0.0025, 0.165], rotation: [0, kYaw, 0] });
+  b.add(new RoundedBoxGeometry(0.13, 0.005, 0.105, 2, 0.003), p.trackpad, { position: [KEYBOARD_X + 0.27, DESK.top + 0.0025, 0.165], rotation: [0, kYaw, 0] });
 
-  const note = new Matrix4().compose(new Vector3(0.36, DESK.top, 0.17), new Quaternion().setFromAxisAngle(UP, 0.18), new Vector3(1, 1, 1));
+  const note = new Matrix4().compose(new Vector3(0.53, DESK.top, 0.2), new Quaternion().setFromAxisAngle(UP, 0.18), new Vector3(1, 1, 1));
   b.add(new RoundedBoxGeometry(0.15, 0.012, 0.21, 1, 0.003), p.bookDark, new Matrix4().multiplyMatrices(note, new Matrix4().makeTranslation(0, 0.006, 0)));
   b.add(new BoxGeometry(0.143, 0.0125, 0.203), p.paper, new Matrix4().multiplyMatrices(note, new Matrix4().makeTranslation(0.004, 0.006, 0)));
   b.add(new BoxGeometry(0.008, 0.0135, 0.211), shade(p.pot, 0.6), new Matrix4().multiplyMatrices(note, new Matrix4().makeTranslation(0.05, 0.006, 0)));
   const pencil = new Matrix4().compose(
-    new Vector3(0.46, DESK.top + 0.004, 0.17),
+    new Vector3(0.625, DESK.top + 0.004, 0.2),
     new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2).premultiply(new Quaternion().setFromAxisAngle(UP, 0.1)),
     new Vector3(1, 1, 1)
   );
@@ -535,9 +535,9 @@ export function contactShadowSpots(): Array<{ x: number; y: number; z: number; w
   const { centre, yaw } = MONITOR;
   return [
     { x: centre.x, y: top, z: centre.z - 0.03, w: 0.36, d: 0.26, yaw },
-    { x: -0.1, y: top, z: 0.16, w: 0.44, d: 0.19, yaw: yaw * 0.5 },
-    { x: 0.17, y: top, z: 0.165, w: 0.17, d: 0.14 },
-    { x: 0.36, y: top, z: 0.17, w: 0.2, d: 0.26, yaw: 0.18 },
+    { x: KEYBOARD_X, y: top, z: 0.16, w: 0.44, d: 0.19, yaw: yaw * 0.5 },
+    { x: KEYBOARD_X + 0.27, y: top, z: 0.165, w: 0.17, d: 0.14 },
+    { x: 0.53, y: top, z: 0.2, w: 0.2, d: 0.26, yaw: 0.18 },
     { x: 0.43, y: top, z: -0.04, w: 0.12, d: 0.12 },
     { x: 0.57, y: top, z: -0.21, w: 0.2, d: 0.2 },
     { x: LAMP.base.x, y: top, z: LAMP.base.z, w: 0.2, d: 0.2 },

@@ -59,7 +59,14 @@ export interface DeskPick {
 export const DESK_PHASES = { liftOff: 0.25, window: 0.5, threshold: 0.75, space: 1 } as const;
 
 const HERO_PLATE = 'hero';
-const FALLBACK_PLATE = { desktop: [576, 430], phone: [358, 560] } as const;
+const FALLBACK_PLATE = { desktop: [1000, 560], phone: [358, 560] } as const;
+/**
+ * Width (CSS px) given to the hero plate while it sits on the landscape monitor: the display
+ * headline (up to ~92 px) needs a wide line to break in 2–3 lines instead of word by word.
+ */
+function landscapePlateWidth(viewportWidth: number): number {
+  return Math.round(Math.min(1240, Math.max(760, viewportWidth * 0.82)));
+}
 const POINTER_DAMPING = 0.06;
 /**
  * The light tokens are physical values (cd, lux); the renderer's ACES exposure (1.1) is tuned
@@ -371,6 +378,7 @@ export class DeskStation implements StationModule {
     const orientationChanged = portrait !== this.portrait;
     this.layout = layout;
     this.portrait = portrait;
+    const mounted = this.widenPlate(portrait ? null : landscapePlateWidth(width));
     const size = this.measurePlate();
     const sizeChanged = Math.abs(size[0] - this.plateSize[0]) > 1 || Math.abs(size[1] - this.plateSize[1]) > 1;
     this.plateSize = size;
@@ -388,9 +396,24 @@ export class DeskStation implements StationModule {
     };
     rect.x = (1 - rect.width) / 2;
     rect.y = (1 - rect.height) / 2;
-    drawScreen(this.screenTexture, dw / dh, rect, tokenColor('--color-monitor-glow', '#7fb8ff'));
+    drawScreen(this.screenTexture, dw / dh, mounted ? rect : null, tokenColor('--color-monitor-glow', '#7fb8ff'));
     this.bakeShadows();
     this.context.invalidate();
+  }
+
+  /**
+   * Sets `--plate-width` on the CSS3D holder of the hero plate (the holder and the plate both
+   * read it). Returns whether the plate is mounted in 3D, i.e. drawn over the screen.
+   */
+  private widenPlate(width: number | null): boolean {
+    const holder = this.plateElement?.closest<HTMLElement>('[data-station-plates]');
+    if (!holder || !document.documentElement.classList.contains('is-3d')) return false;
+    const value = width === null ? '' : `${width}px`;
+    if (holder.style.getPropertyValue('--plate-width') !== value) {
+      if (width === null) holder.style.removeProperty('--plate-width');
+      else holder.style.setProperty('--plate-width', value);
+    }
+    return true;
   }
 
   private bakeShadows(): void {

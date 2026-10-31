@@ -18,14 +18,16 @@ const MAX_PLATE_TILT = (8 * Math.PI) / 180;
 const DEG = Math.PI / 180;
 
 /**
- * On-screen size of the plate relative to 1:1. Phones read it at 1:1 (the monitor fills the
- * width). On desktop/tablet a tall plate at 1:1 would let the monitor swallow the frame, so it
- * may shrink to keep it within 56 % of the viewport height, never below 0.8 (text stays crisp:
+ * On-screen size of the plate relative to 1:1. Phones read it at 1:1 unless it is taller than two
+ * thirds of the viewport (floor 0.78). On desktop/tablet a plate at 1:1 would let the monitor
+ * swallow the frame, so it
+ * may shrink to stay within 56 % of the viewport height and width, never below 0.66 (crisp:
  * CSS3D only blurs when scaled up).
  */
-export function plateProjection(layout: DeskLayout, viewportHeight: number, plateHeight: number): number {
-  if (layout === 'phone') return 1;
-  return Math.min(1, Math.max(0.8, (0.56 * viewportHeight) / Math.max(plateHeight, 1)));
+export function plateProjection(layout: DeskLayout, viewport: { width: number; height: number }, plate: { width: number; height: number }): number {
+  if (layout === 'phone') return Math.min(1, Math.max(0.78, (0.66 * viewport.height) / Math.max(plate.height, 1)));
+  const fit = Math.min((0.56 * viewport.height) / Math.max(plate.height, 1), (0.56 * viewport.width) / Math.max(plate.width, 1));
+  return Math.min(1, Math.max(0.66, fit));
 }
 
 export interface ReadingInput {
@@ -52,16 +54,16 @@ export function readingPose(input: ReadingInput): StationCameraPose {
   const fov = layoutFov(input.layout);
   const tan = Math.tan((fov * DEG) / 2);
   const aspect = input.width / Math.max(input.height, 1);
-  const distance = (input.scale * input.height) / (2 * tan) / plateProjection(input.layout, input.height, input.plateHeight);
+  const distance = (input.scale * input.height) / (2 * tan) / plateProjection(input.layout, input, { width: input.plateWidth, height: input.plateHeight });
   const eye = input.screenCentre.clone().addScaledVector(input.screenNormal, distance);
 
   let sx = 0.5;
   let sy = 0.5;
   if (input.layout === 'desktop') {
-    const fit = ((input.plateWidth / 2) * plateProjection(input.layout, input.height, input.plateHeight) + 32) / input.width;
+    const fit = ((input.plateWidth / 2) * plateProjection(input.layout, input, { width: input.plateWidth, height: input.plateHeight }) + 32) / input.width;
     const tilt = 0.5 - Math.tan(MAX_PLATE_TILT) / (2 * aspect * tan);
     sx = Math.min(0.5, Math.max(0.38, fit, tilt));
-    sy = 0.42;
+    sy = 0.37;
   } else if (input.layout === 'phone') {
     sy = 0.57;
   }

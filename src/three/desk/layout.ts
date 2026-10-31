@@ -13,6 +13,9 @@ export const ROOM = {
   wallThickness: 0.14
 } as const;
 
+/** Keyboard group (keyboard, trackpad, notebook) centre on the desk, right of the figures. */
+export const KEYBOARD_X = 0.08;
+
 export const DESK = { width: 1.4, depth: 0.7, top: 0.74, thickness: 0.03, z: 0 } as const;
 
 export const WINDOW = { x: 0.5, y: 1.5, width: 1.6, height: 1.1, frame: 0.04, mullion: 0.5 } as const;
@@ -41,10 +44,10 @@ export const LAMP = {
 } as const;
 
 export const FIGURES = {
-  plinth: new Vector3(-0.5, DESK.top, 0.13),
-  burbu: new Vector3(-0.6, 0, 0.13),
-  alfa: new Vector3(-0.5, 0, 0.12),
-  gift: new Vector3(-0.4, 0, 0.14)
+  plinth: new Vector3(-0.34, DESK.top, 0.0),
+  burbu: new Vector3(-0.44, 0, 0.0),
+  alfa: new Vector3(-0.34, 0, -0.01),
+  gift: new Vector3(-0.24, 0, 0.01)
 } as const;
 
 export const TELESCOPE = { foot: new Vector3(1.18, 0, 0.42), headHeight: 1.08 } as const;

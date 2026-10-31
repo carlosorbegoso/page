@@ -189,41 +189,81 @@ export interface ScreenRect {
 }
 
 /**
- * Draws the monitor's picture: near-black glass, the plate's area pure black, and a soft
- * brand-blue glow around it (the "presentation" the plate floats in).
+ * Draws the monitor's picture: near-black glass with a faint, out-of-focus editor (code lines)
+ * so the screen is never a dead black slab, and, when the hero plate floats over it, a soft dark
+ * pool under the text plus a brand-blue halo around it.
  */
-export function drawScreen(texture: CanvasTexture, aspect: number, rect: ScreenRect, glow: Color): void {
+export function drawScreen(texture: CanvasTexture, aspect: number, rect: ScreenRect | null, glow: Color): void {
   const canvas = texture.image as HTMLCanvasElement;
-  const width = 512;
+  const width = 768;
   const height = Math.round(width / aspect);
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d')!;
-  ctx.fillStyle = '#020306';
+  ctx.fillStyle = '#03050a';
   ctx.fillRect(0, 0, width, height);
+  drawCode(ctx, width, height, glow, rect ? 0.22 : 0.42);
+  if (!rect) {
+    texture.needsUpdate = true;
+    return;
+  }
   const cx = (rect.x + rect.width / 2) * width;
   const cy = (rect.y + rect.height / 2) * height;
   const radius = Math.max(width, height) * 0.75;
   const halo = ctx.createRadialGradient(cx, cy, Math.min(rect.width * width, rect.height * height) * 0.3, cx, cy, radius);
-  halo.addColorStop(0, `rgba(${rgb(glow)},0.32)`);
-  halo.addColorStop(0.5, `rgba(${rgb(glow)},0.1)`);
-  halo.addColorStop(1, `rgba(${rgb(glow)},0.03)`);
+  halo.addColorStop(0, `rgba(${rgb(glow)},0.2)`);
+  halo.addColorStop(0.5, `rgba(${rgb(glow)},0.07)`);
+  halo.addColorStop(1, `rgba(${rgb(glow)},0.02)`);
   ctx.fillStyle = halo;
   ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = '#000000';
-  const r = 10;
-  const x = rect.x * width;
-  const y = rect.y * height;
-  const w = rect.width * width;
-  const h = rect.height * height;
-  ctx.beginPath();
-  ctx.roundRect(x, y, w, h, r);
-  ctx.fill();
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale((rect.width * width) / 2, (rect.height * height) / 2);
+  const pool = ctx.createRadialGradient(0, 0, 0.2, 0, 0, 1.25);
+  pool.addColorStop(0, 'rgba(2,3,6,0.9)');
+  pool.addColorStop(0.7, 'rgba(2,3,6,0.75)');
+  pool.addColorStop(1, 'rgba(2,3,6,0)');
+  ctx.fillStyle = pool;
+  ctx.fillRect(-1.4, -1.4, 2.8, 2.8);
+  ctx.restore();
   texture.needsUpdate = true;
 }
 
+function drawCode(ctx: CanvasRenderingContext2D, width: number, height: number, accent: Color, alpha: number): void {
+  let seed = 41;
+  const random = () => {
+    seed = (seed * 16807) % 2147483647;
+    return seed / 2147483647;
+  };
+  const palette = [`rgba(${rgb(accent)},${alpha})`, `rgba(155,168,187,${alpha * 0.8})`, `rgba(74,222,154,${alpha * 0.7})`, `rgba(255,226,189,${alpha * 0.6})`];
+  const margin = width * 0.06;
+  const line = height / 26;
+  ctx.save();
+  ctx.filter = `blur(${(width / 512).toFixed(1)}px)`;
+  ctx.fillStyle = `rgba(155,168,187,${alpha * 0.25})`;
+  ctx.fillRect(0, 0, width * 0.035, height);
+  ctx.fillRect(0, 0, width, line * 0.9);
+  let indent = 0;
+  for (let y = line * 1.8; y < height - line; y += line) {
+    if (random() < 0.12) {
+      indent = Math.max(0, indent - 1);
+      continue;
+    }
+    let x = margin + indent * width * 0.03;
+    const tokens = 1 + Math.floor(random() * 5);
+    for (let t = 0; t < tokens && x < width * 0.9; t++) {
+      const w = width * (0.02 + random() * 0.09);
+      ctx.fillStyle = palette[Math.floor(random() * palette.length)]!;
+      ctx.fillRect(x, y, w, line * 0.38);
+      x += w + width * 0.012;
+    }
+    if (random() < 0.25) indent = Math.min(4, indent + 1);
+  }
+  ctx.restore();
+}
+
 export function createScreenTexture(): CanvasTexture {
-  return canvasTexture(512, 288, () => undefined);
+  return canvasTexture(768, 480, () => undefined);
 }
 
 /**

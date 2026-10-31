@@ -11,7 +11,7 @@ Fecha: 2026-10-31 · Rama: `develop` · PR único `develop → main` (draft).
 |---|---|
 | Idioma | **Bilingüe**: español por defecto en `/page/`, inglés en `/page/en/`. |
 | Modelos 3D | **Generados con IA** (texto/imagen → 3D), luego limpiados y optimizados. |
-| Puesto actual | **IT Analyst en TCS · cliente BCP** (se nombra a BCP). |
+| Puesto actual | **Backend Developer en TCS · cliente BCP** (según el CV; se nombra a BCP). |
 | LinkedIn | `https://linkedin.com/in/carlos-orbergoso-loayza` |
 | Stack 3D | Three.js + glTF/GLB (Draco/Meshopt) + KTX2 + GSAP. Fijo. |
 
@@ -187,11 +187,11 @@ Hilo: *"Construyo backends sólidos para bancos de día, y productos propios con
 
 | # | Sección | Contenido | 3D |
 |---|---|---|---|
-| 1 | **Hero** | Carlos Orbegoso · Backend Developer (Java/Quarkus). Subtítulo: IT Analyst en TCS para BCP · Cofundador de TUSOCIO IA. CTAs: "Ver productos" y "Contacto". | Alfa + red de nodos. |
+| 1 | **Hero** | Carlos Orbegoso · Backend Developer (Java/Quarkus). Subtítulo: Backend Developer en TCS para BCP · Cofundador de TUSOCIO IA. CTAs: "Ver productos" y "Contacto". | Alfa + red de nodos. |
 | 2 | **Sobre mí** | Foto, resumen breve, Ingeniería de Sistemas en la UPC (10.º ciclo), stack principal (Java 17+, Quarkus, Spring Boot, microservicios, PostgreSQL, Docker/K8s, AWS). | Ninguno (fondo ambiental). |
 | 3 | **TUSOCIO IA** | La empresa: qué hace, rol de cofundador. Presenta a Alfa como marca madre. | Alfa se divide en tres. |
 | 4 | **Productos** | 3 tarjetas con estado: **SkyMek** (dueño, en producción) — SaaS de gestión de talleres automotrices → skymek.app. **Parati** (en construcción) — invitaciones digitales y mesa de regalos con aportes por Yape, crear un evento es gratis → paratipe.com. **Ventixs** (en construcción) — bot de ventas por WhatsApp → ventixs.com. Enlaces externos con `rel="noopener"` y `target="_blank"` + aviso de nueva pestaña para lectores de pantalla. | Llave/herramienta, caja de regalo, Burbu. |
-| 5 | **Experiencia** | Timeline: TCS — IT Analyst, cliente BCP (jun 2025–hoy) · Intercorp Retail — Full-stack Developer (abr 2024–jun 2025) · Baufest — Java Developer (mar 2022–feb 2024) · SYSARP — Frontend Web Developer (ene 2021–sep 2022). | Ninguno. |
+| 5 | **Experiencia** | Timeline (fuente: CV en `public/cv/Carlos-Orbegoso-CV.pdf`): TCS — Backend Developer, cliente BCP (jun 2025–hoy) · Intercorp Retail — Backend Developer (abr 2024–jun 2025) · Baufest — Backend Developer (mar 2022–feb 2024) · SYSARP — Frontend Developer (ene 2020–dic 2021). | Ninguno. |
 | 6 | **Contacto** | Email `car_11.09@hotmail.com`, LinkedIn `carlos-orbergoso-loayza`, GitHub `carlosorbegoso`, X `@carlosorbegoso`, Descargar CV. Sin formulario (no hay backend; evita spam). Botón copiar email. | Opcional: Alfa pequeño de cierre (solo desktop alto). |
 
 "Descargar CV" en Hero y Contacto con el PDF que entrega Carlos (§9).
@@ -301,7 +301,7 @@ Commits pequeños por especialista. Todo en `develop`; un único PR `develop →
 | 3 | 8 archivos sin commitear | Se commitean como legado en `develop` antes del tag `legacy-v2`. |
 | 4 | Hosting | Sigue en `carlosorbegoso.github.io/page`. |
 | 5 | Repos de GitHub | Se omiten; solo enlace al perfil. |
-| 6 | CV | Carlos entrega el PDF; se agrega "Descargar CV" en Hero y Contacto (`public/cv/`). |
+| 6 | CV | PDF entregado: `public/cv/Carlos-Orbegoso-CV.pdf`, botón "Descargar CV" en Hero y Contacto. Es la fuente de verdad de puestos y fechas. |
 | 7 | Dispositivos de prueba | Android y iPhone propios de Carlos. |
 | 8 | X/Twitter | `@carlosorbegoso` existe: se mantiene `twitter:creator` y se enlaza en Contacto. |
 

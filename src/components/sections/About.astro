@@ -238,4 +238,87 @@ const { degree, institution, status } = profile.education;
     width: 1.2cqh;
     height: 1.2cqh;
   }
+  /* Phones turn the monitor upright: everything stacks in one column with body text near 14 px. */
+  @container surface (orientation: portrait) {
+    :global(.is-3d) :is(.about-bio, .about-stack) {
+      gap: 2.5cqh;
+    }
+
+    :global(.is-3d) .about-bio :global(header) {
+      gap: 0.8cqh;
+    }
+
+    :global(.is-3d) .about-bio :global(header > p:first-child) {
+      font-size: 1.9cqh;
+    }
+
+    :global(.is-3d) .about-bio :global(h2) {
+      font-size: 6.5cqh;
+    }
+
+    :global(.is-3d) .about-bio :global(header > p:last-child) {
+      font-size: 2.6cqh;
+    }
+
+    :global(.is-3d) .about-bio__row {
+      flex-direction: column;
+      gap: 2.5cqh;
+    }
+
+    :global(.is-3d) .about-bio__photo {
+      width: 16cqh;
+    }
+
+    :global(.is-3d) .about-bio__text {
+      gap: 1.6cqh;
+      font-size: 2.45cqh;
+    }
+
+    :global(.is-3d) .about-stack {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 3cqh;
+    }
+
+    :global(.is-3d) .about-stack h3 {
+      font-size: 3.4cqh;
+    }
+
+    :global(.is-3d) .about-stack ul,
+    :global(.is-3d) .about-stack dl {
+      margin-top: 1.5cqh;
+    }
+
+    :global(.is-3d) .about-stack > section:first-child ul {
+      gap: 1.4cqh;
+      font-size: 2.1cqh;
+    }
+
+    :global(.is-3d) .about-stack > section:first-child li > span:first-child {
+      width: 1cqh;
+      height: 1cqh;
+      margin-top: 1cqh;
+    }
+
+    :global(.is-3d) .about-stack dl {
+      gap: 1.8cqh 5cqw;
+    }
+
+    :global(.is-3d) .about-stack dt {
+      font-size: 1.8cqh;
+    }
+
+    :global(.is-3d) .about-stack dd {
+      margin-top: 0.6cqh;
+    }
+
+    :global(.is-3d) .about-stack dd ul {
+      gap: 0.4cqh 3cqw;
+      font-size: 2.1cqh;
+    }
+
+    :global(.is-3d) .about-stack :global([data-tone] > span[aria-hidden]) {
+      width: 0.8cqh;
+      height: 0.8cqh;
+    }
+  }
 </style>

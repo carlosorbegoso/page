@@ -130,7 +130,7 @@
  * each section sizes its screen content in container units (cqh/cqw) of the plate.
  */
 .is-3d .plate[data-plate-mode^='surface-'] {
-  container-type: size;
+  container: surface / size;
   width: var(--surface-width, var(--plate-width));
   height: var(--surface-height, auto);
   overflow: hidden;

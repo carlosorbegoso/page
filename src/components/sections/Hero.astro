@@ -196,6 +196,80 @@ const metrics = [
     height: 3.6cqh;
   }
 
+  /* Phones turn the monitor upright: one column, sizes keep body text near 14 px. */
+  @container surface (orientation: portrait) {
+    :global(.is-3d) .hero-screen h1 {
+      gap: 0.6cqh;
+    }
+
+    :global(.is-3d) .hero-name {
+      font-size: 2.4cqh;
+    }
+
+    :global(.is-3d) .hero-role {
+      font-size: 3.3cqh;
+    }
+
+    :global(.is-3d) .hero-headline {
+      margin-top: 2.5cqh;
+      font-size: 4.6cqh;
+    }
+
+    :global(.is-3d) .hero-tagline {
+      display: none;
+    }
+
+    :global(.is-3d) .hero-metrics {
+      margin-top: 3cqh;
+    }
+
+    :global(.is-3d) .hero-metrics dl {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 2cqh;
+    }
+
+    :global(.is-3d) .hero-metrics div {
+      display: grid;
+      grid-template-columns: 38% minmax(0, 1fr);
+      align-items: baseline;
+      gap: 3cqw;
+    }
+
+    :global(.is-3d) .hero-metric-value {
+      grid-column: 1;
+      grid-row: 1;
+      font-size: 3.6cqh;
+    }
+
+    :global(.is-3d) .hero-metric-label {
+      grid-column: 2;
+      grid-row: 1;
+      font-size: 2.6cqh;
+    }
+
+    :global(.is-3d) .hero-ctas {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      justify-content: stretch;
+      gap: 1.5cqh 3cqw;
+      margin-top: 3cqh;
+    }
+
+    :global(.is-3d) .hero-ctas > :global(*) {
+      height: 7cqh;
+      padding-inline: 2cqw;
+      font-size: 2.6cqh;
+    }
+
+    :global(.is-3d) .hero-ctas > :global(:last-child) {
+      grid-column: 1 / -1;
+    }
+
+    :global(.is-3d) .hero-ctas :global(svg) {
+      width: 2.2cqh;
+      height: 2.2cqh;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .hero-enter {
       animation: none;

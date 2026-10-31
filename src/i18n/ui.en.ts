@@ -37,6 +37,7 @@ export const en = {
   'company.title': 'TUSOCIO IA',
   'company.subtitle': 'The company I co-founded to build products of our own.',
   'company.cta': 'Meet the products',
+  'company.parentBrand': 'Alfa, the parent brand',
   'products.title': 'Products',
   'products.subtitle': 'Three TUSOCIO IA products: one live, two on the way.',
   'products.status.production': 'Live',

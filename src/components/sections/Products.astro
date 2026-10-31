@@ -1,8 +1,9 @@
 ---
-import ExternalLink from '../ui/ExternalLink.astro';
+import ProductCard from '../products/ProductCard.astro';
+import SectionHeader from '../ui/SectionHeader.astro';
 import { SECTION_IDS } from '../../config/site';
 import { useTranslations, type Locale } from '../../i18n/utils';
-import { getProducts } from '../../lib/content';
+import { getProducts, getProfile } from '../../lib/content';
 
 interface Props {
   locale: Locale;
@@ -11,36 +12,106 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 const products = await getProducts(locale);
-const statusLabel = {
-  production: t('products.status.production'),
-  building: t('products.status.building')
-} as const;
+const { company } = await getProfile(locale);
 ---
 
-<section id={SECTION_IDS.products} aria-labelledby="products-title">
-  <h2 id="products-title">{t('products.title')}</h2>
-  <ul>
-    {products.map(product => (
-      <li data-product={product.id}>
-        <article aria-labelledby={`product-${product.id}`}>
-          <h3 id={`product-${product.id}`}>{product.name}</h3>
-          <p>{product.tagline}</p>
-          <p>
-            <span data-status={product.status}>{statusLabel[product.status]}</span> · {product.role}
-          </p>
-          <p>{product.description}</p>
-          {product.features.length > 0 && (
-            <ul>
-              {product.features.map(feature => (
-                <li>{feature}</li>
-              ))}
-            </ul>
-          )}
-          <ExternalLink href={product.url} locale={locale}>
-            {t('products.visit')} {new URL(product.url).hostname}
-          </ExternalLink>
-        </article>
-      </li>
-    ))}
-  </ul>
+<section
+  id={SECTION_IDS.products}
+  aria-labelledby="products-title"
+  data-stage-scene="ventures"
+  data-products-section
+  class="relative z-(--z-content) px-gutter py-section"
+>
+  <div class="mx-auto max-w-content">
+    <div class="flex flex-col gap-stack lg:max-w-[34rem] xl:max-w-reading">
+      <div class="rounded-xl bg-scrim p-5 md:p-6">
+        <SectionHeader
+          id="products-title"
+          eyebrow={company.name}
+          title={t('products.title')}
+          subtitle={t('products.subtitle')}
+        />
+      </div>
+      <ul class="flex flex-col gap-4 md:gap-5" role="list">
+        {
+          products.map(product => (
+            <li>
+              <ProductCard product={product} locale={locale} />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
 </section>
+
+<script>
+  type FocusDetail = { id: string | null };
+
+  const section = document.querySelector<HTMLElement>('[data-products-section]');
+  const cards = section
+    ? Array.from(section.querySelectorAll<HTMLElement>('[data-product]'))
+    : [];
+
+  if (section && cards.length > 0) {
+    let centeredId: string | null = null;
+    let pointedId: string | null = null;
+    let focusedId: string | null = null;
+    let sectionVisible = false;
+    let lastSent: string | null | undefined;
+
+    const publish = () => {
+      const id = sectionVisible ? (pointedId ?? focusedId ?? centeredId) : null;
+      if (id === lastSent) return;
+      lastSent = id;
+      for (const card of cards) card.toggleAttribute('data-active', card.dataset.product === id);
+      if (id) section.dataset.activeProduct = id;
+      else delete section.dataset.activeProduct;
+      window.dispatchEvent(new CustomEvent<FocusDetail>('product:focus', { detail: { id } }));
+    };
+
+    // A thin mid-viewport band: only one stacked card crosses it at a time, and the last one stays focused while the gap between cards passes.
+    const centerObserver = new IntersectionObserver(
+      entries => {
+        for (const entry of entries) {
+          const id = (entry.target as HTMLElement).dataset.product ?? null;
+          if (entry.isIntersecting) centeredId = id;
+        }
+        publish();
+      },
+      { rootMargin: '-45% 0px -45% 0px' }
+    );
+
+    const sectionObserver = new IntersectionObserver(([entry]) => {
+      sectionVisible = entry.isIntersecting;
+      if (!sectionVisible) centeredId = pointedId = focusedId = null;
+      publish();
+    });
+
+    for (const card of cards) {
+      centerObserver.observe(card);
+      const id = card.dataset.product ?? null;
+      card.addEventListener('pointerenter', event => {
+        if (event.pointerType !== 'mouse') return;
+        pointedId = id;
+        publish();
+      });
+      card.addEventListener('pointerleave', () => {
+        if (pointedId !== id) return;
+        pointedId = null;
+        publish();
+      });
+      card.addEventListener('focusin', () => {
+        focusedId = id;
+        publish();
+      });
+      card.addEventListener('focusout', event => {
+        if (card.contains(event.relatedTarget as Node | null)) return;
+        if (focusedId === id) focusedId = null;
+        publish();
+      });
+    }
+
+    sectionObserver.observe(section);
+  }
+</script>

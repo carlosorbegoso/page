@@ -17,7 +17,7 @@ const sources = (name: string) => [
 );
 ---
 
-<div data-stage data-fallback="hero" aria-hidden="true">
+<div data-stage aria-hidden="true">
   <picture data-stage-fallback="hero">
     {sources('hero').map(s => <source media={s.media} type={s.type} srcset={s.srcset} width={s.width} height={s.height} />)}
     <img
@@ -28,10 +28,6 @@ const sources = (name: string) => [
       decoding="async"
       fetchpriority="high"
     />
-  </picture>
-  <picture data-stage-fallback="products">
-    {sources('products').map(s => <source media={s.media} type={s.type} srcset={s.srcset} width={s.width} height={s.height} />)}
-    <img src={fallback('products', 375, 'webp')} alt="" width="375" height="667" decoding="async" loading="lazy" />
   </picture>
 </div>
 
@@ -64,9 +60,6 @@ const sources = (name: string) => [
     const params = new URLSearchParams(location.search);
     const capture = params.has('capture');
     const tracker = new StationTracker();
-    tracker.subscribe(active => {
-      container.dataset.fallback = active === 'company' || active === 'products' ? 'products' : 'hero';
-    });
 
     if (!capture) {
       await whenLoaded();
@@ -103,15 +96,10 @@ const sources = (name: string) => [
     z-index: var(--z-canvas);
     pointer-events: none;
     overflow: hidden;
-    background: var(--color-scene-bg);
+    background: linear-gradient(180deg, var(--color-sky-zenith), var(--color-sky-horizon));
   }
 
   [data-stage-fallback] {
-    display: none;
-  }
-
-  [data-stage][data-fallback='hero'] [data-stage-fallback='hero'],
-  [data-stage][data-fallback='products'] [data-stage-fallback='products'] {
     display: block;
     height: 100%;
   }
@@ -137,6 +125,13 @@ const sources = (name: string) => [
 
   [data-stage][data-degraded] :global([data-stage-canvas]) {
     display: none;
+  }
+
+  :global(.stage-plates) {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-content);
+    pointer-events: none;
   }
 
   @media (forced-colors: active) {

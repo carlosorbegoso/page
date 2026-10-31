@@ -1,78 +1,78 @@
-import { Vector3, type PerspectiveCamera } from 'three';
+import { PerspectiveCamera, Vector3 } from 'three';
 import type { StationId } from '../sections';
 import { layoutKind, type Pointer } from './common';
 
-/** Which side of the screen the station's object occupies on desktop (text panel goes opposite). */
+/** Side of the screen the station's celestial body occupies on desktop (plates go opposite). */
 export type Side = 'left' | 'right';
+
+/** Alfa, the star at the centre of the system. */
+export const ALFA_POSITION = new Vector3(0, 0.6, -14);
+export const EXPERIENCE_CENTRE = new Vector3(-5.5, 0.4, -21);
+export const EXPERIENCE_TILT = (18 * Math.PI) / 180;
+export const HERO_CENTRE = new Vector3(0, 0.55, 0);
+export const MONOGRAM_RADIUS = 2.2;
 
 export interface StationSpec {
   id: StationId;
-  anchor: Vector3;
+  /** Point the camera looks at when reading this station. */
+  target: Vector3;
   desktopSide: Side;
   /** View direction from the target towards the camera. */
   view: Vector3;
   /** Subject size in metres used for framing [height, width]. */
   subject: [number, number];
-  /** Fraction of the viewport height the subject should fill on desktop. */
+  /** Fraction of the viewport height the subject fills on desktop. */
   fill: number;
-  /** Target offset from the anchor (centre of the subject). */
-  centre: Vector3;
 }
 
 export const STATION_SPECS: Record<StationId, StationSpec> = {
   hero: {
     id: 'hero',
-    anchor: new Vector3(0, 0, 0),
+    target: HERO_CENTRE,
     desktopSide: 'right',
-    view: new Vector3(0.32, 0.22, 1),
-    subject: [1.25, 1],
-    fill: 0.5,
-    centre: new Vector3(0, 0.55, 0)
+    view: new Vector3(0.1, 0.04, 1),
+    subject: [MONOGRAM_RADIUS * 2.1, MONOGRAM_RADIUS * 2.1],
+    fill: 0.55
   },
   about: {
     id: 'about',
-    anchor: new Vector3(5, 0, -7),
+    target: new Vector3(5, 0.8, -7),
     desktopSide: 'left',
-    view: new Vector3(-0.45, 0.35, 1),
-    subject: [1.1, 1.7],
-    fill: 0.48,
-    centre: new Vector3(0, 0.5, 0)
+    view: new Vector3(0.35, 0.2, 1),
+    subject: [1.8, 2.6],
+    fill: 0.6
   },
   company: {
     id: 'company',
-    anchor: new Vector3(0, 0, -14),
+    target: ALFA_POSITION.clone(),
     desktopSide: 'right',
-    view: new Vector3(0.2, 0.32, 1),
-    subject: [1.45, 2.3],
-    fill: 0.55,
-    centre: new Vector3(0, 0.45, 0)
+    view: new Vector3(0.25, 0.45, 1),
+    subject: [2.4, 6],
+    fill: 0.6
   },
   products: {
     id: 'products',
-    anchor: new Vector3(0, 0, -14),
+    target: ALFA_POSITION.clone(),
     desktopSide: 'left',
-    view: new Vector3(-0.4, 0.22, 1),
-    subject: [1.45, 2.3],
-    fill: 0.55,
-    centre: new Vector3(0, 0.4, 0)
+    view: new Vector3(-0.45, 0.4, 0.85),
+    subject: [2.4, 6],
+    fill: 0.6
   },
   experience: {
     id: 'experience',
-    anchor: new Vector3(-5.5, 0, -21),
+    target: EXPERIENCE_CENTRE,
     desktopSide: 'right',
-    view: new Vector3(0.45, 0.5, 1),
-    subject: [1.2, 3.2],
-    fill: 0.5,
-    centre: new Vector3(0, 0.45, -0.2)
+    view: new Vector3(0.3, 0.7, 1),
+    subject: [2.4, 6.8],
+    fill: 0.5
   },
   contact: {
     id: 'contact',
-    anchor: new Vector3(0, 0, -28),
+    target: ALFA_POSITION.clone(),
     desktopSide: 'left',
-    view: new Vector3(-0.1, 0.15, 1),
-    subject: [1.25, 1],
-    fill: 0.64,
-    centre: new Vector3(0, 0.55, 0)
+    view: new Vector3(0.15, 0.08, -1),
+    subject: [2.6, 2.6],
+    fill: 0.6
   }
 };
 
@@ -90,22 +90,14 @@ interface ScreenFrame {
   widthFraction: number;
 }
 
-/**
- * Screen placement measured against the UI panels: desktop puts the object in the half
- * opposite the panel; below 1024 px it sits in the free band above the bottom panel.
- */
+/** Desktop: body in the half opposite the plates. Below 1024 px: body in the top third. */
 function screenFrame(spec: StationSpec, width: number): ScreenFrame {
   const kind = layoutKind(width);
   if (kind === 'desktop') {
-    return {
-      cx: spec.desktopSide === 'right' ? 0.75 : 0.25,
-      cy: 0.5,
-      heightFraction: spec.fill,
-      widthFraction: 0.4
-    };
+    return { cx: spec.desktopSide === 'right' ? 0.74 : 0.26, cy: 0.5, heightFraction: spec.fill, widthFraction: 0.42 };
   }
-  if (kind === 'tablet') return { cx: 0.5, cy: 0.3, heightFraction: spec.fill * 0.6, widthFraction: 0.7 };
-  return { cx: 0.5, cy: 0.19, heightFraction: spec.fill * 0.48, widthFraction: 0.88 };
+  if (kind === 'tablet') return { cx: 0.5, cy: 0.2, heightFraction: spec.fill * 0.42, widthFraction: 0.86 };
+  return { cx: 0.5, cy: 0.19, heightFraction: spec.fill * 0.4, widthFraction: 0.92 };
 }
 
 /** Camera pose that frames a station's subject for the current viewport. */
@@ -114,43 +106,62 @@ export function stationPose(
   camera: PerspectiveCamera,
   width: number,
   height: number,
-  overrides: { target?: Vector3; subject?: [number, number]; orbit?: Pointer; dolly?: number } = {}
+  overrides: { target?: Vector3; subject?: [number, number]; orbit?: Pointer } = {}
 ): CameraPose {
   const frame = screenFrame(spec, width);
   const [subjectHeight, subjectWidth] = overrides.subject ?? spec.subject;
   const tan = Math.tan((camera.fov * Math.PI) / 360);
   const aspect = width / height;
-  const distance =
-    Math.max(subjectHeight / (frame.heightFraction * 2 * tan), subjectWidth / (frame.widthFraction * 2 * tan * aspect)) *
-    (overrides.dolly ?? 1);
-  const target = overrides.target?.clone() ?? spec.anchor.clone().add(spec.centre);
+  const distance = Math.max(
+    subjectHeight / (frame.heightFraction * 2 * tan),
+    subjectWidth / (frame.widthFraction * 2 * tan * aspect)
+  );
+  const target = overrides.target?.clone() ?? spec.target.clone();
   const orbit = overrides.orbit ?? { x: 0, y: 0 };
-  const dir = spec.view.clone().normalize().applyAxisAngle(new Vector3(0, 1, 0), orbit.x * 0.12);
-  dir.y += orbit.y * 0.06;
+  const dir = spec.view.clone().normalize().applyAxisAngle(new Vector3(0, 1, 0), orbit.x * 0.1);
+  dir.y += orbit.y * 0.05;
   dir.normalize();
   return { position: target.clone().addScaledVector(dir, distance), target, cx: frame.cx, cy: frame.cy };
 }
 
 /** Applies a pose, shifting the projection centre so the target lands at (cx, cy) on screen. */
 export function applyPose(camera: PerspectiveCamera, pose: CameraPose, width: number, height: number): void {
-  const distance = pose.position.distanceTo(pose.target);
   camera.aspect = width / height;
   camera.position.copy(pose.position);
-  camera.near = Math.max(distance * 0.04, 0.05);
-  camera.far = distance + 40;
+  camera.near = 0.05;
+  camera.far = 60;
   camera.lookAt(pose.target);
   camera.setViewOffset(width, height, width * (0.5 - pose.cx), height * (0.5 - pose.cy), width, height);
   camera.updateProjectionMatrix();
+  camera.updateMatrixWorld();
 }
 
-/** Blends two poses; the camera lifts along an arc while flying between stations. */
+/** A detached camera configured with a pose (used to place plates for a station). */
+export function poseCamera(source: PerspectiveCamera, pose: CameraPose, width: number, height: number): PerspectiveCamera {
+  const camera = new PerspectiveCamera(source.fov, width / height, 0.05, 60);
+  applyPose(camera, pose, width, height);
+  return camera;
+}
+
+const ORBIT_RADIUS = 7;
+
+/**
+ * Blends two poses. Around Alfa the camera swings on a sphere (never through the star);
+ * elsewhere it flies straight with a gentle lift.
+ */
 export function blendPoses(a: CameraPose, b: CameraPose, t: number): CameraPose {
-  const position = a.position.clone().lerp(b.position, t);
-  position.y += Math.sin(t * Math.PI) * 0.9;
-  return {
-    position,
-    target: a.target.clone().lerp(b.target, t),
-    cx: a.cx + (b.cx - a.cx) * t,
-    cy: a.cy + (b.cy - a.cy) * t
-  };
+  const target = a.target.clone().lerp(b.target, t);
+  let position: Vector3;
+  if (a.target.distanceTo(ALFA_POSITION) < ORBIT_RADIUS && b.target.distanceTo(ALFA_POSITION) < ORBIT_RADIUS) {
+    const da = a.position.clone().sub(ALFA_POSITION);
+    const db = b.position.clone().sub(ALFA_POSITION);
+    const radius = da.length() + (db.length() - da.length()) * t;
+    const dir = da.normalize().lerp(db.normalize(), t);
+    if (dir.lengthSq() < 1e-4) dir.set(1, 0, 0);
+    position = ALFA_POSITION.clone().addScaledVector(dir.normalize(), radius);
+  } else {
+    position = a.position.clone().lerp(b.position, t);
+    position.y += Math.sin(t * Math.PI) * 1.2;
+  }
+  return { position, target, cx: a.cx + (b.cx - a.cx) * t, cy: a.cy + (b.cy - a.cy) * t };
 }

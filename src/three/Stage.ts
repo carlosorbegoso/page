@@ -15,8 +15,9 @@ import { yieldToMain } from './idle';
 import { setupInteraction } from './interaction';
 import { motionAllowed, readMotion, watchMotion, type MotionState } from './motion';
 import type { Pointer, SceneContext } from './scenes/common';
-import { isProductId, WorldScene } from './scenes/WorldScene';
-import { stationIndex, type StationId, type StationTracker } from './sections';
+import { Plates } from './plates';
+import { isProductId, WorldScene, type WorldHit } from './scenes/WorldScene';
+import { stationElement, stationIndex, type StationId, type StationTracker } from './sections';
 import { calibrateRefreshInterval, dprPolicy, DprController, FrameSampler, type Tier, type TierResult } from './tier';
 import { tokenColor, tokenNumber } from './tokens';
 
@@ -50,10 +51,11 @@ declare global {
  * adaptive resolution, motion preferences, interaction and the fallback hand-off.
  */
 export class Stage {
-  readonly camera = new PerspectiveCamera(30, 1, 0.1, 60);
+  readonly camera = new PerspectiveCamera(30, 1, 0.05, 60);
   private renderer!: WebGLRenderer;
   private canvas!: HTMLCanvasElement;
   private world!: WorldScene;
+  private plates: Plates | undefined;
   private ready = false;
   private tier: Tier;
   private running = false;
@@ -135,6 +137,7 @@ export class Stage {
     await this.renderer.compileAsync(this.world.scene, this.camera);
     await yieldToMain();
     this.initTextures();
+    if (!capture) this.mountPlates();
     this.ready = true;
 
     this.listen();
@@ -142,6 +145,58 @@ export class Stage {
     if (capture) this.options.tracker.force(capture.station);
     this.cleanups.push(this.options.tracker.subscribe(active => this.onStation(active)));
     this.invalidate();
+  }
+
+  private mountPlates(): void {
+    const plates = new Plates({
+      camera: this.camera,
+      readingPose: id => this.world.readingPose(id),
+      stationValue: () => this.station,
+      instant: () => !this.scrubAllowed,
+      onActivePlate: (station, plate) => this.onActivePlate(station, plate),
+      invalidate: () => this.invalidate()
+    });
+    if (!plates.mount()) return;
+    this.plates = plates;
+    plates.setSize(this.size.width, this.size.height);
+  }
+
+  private onActivePlate(station: StationId, plate: HTMLElement): void {
+    const id = plate.dataset.plateId ?? '';
+    if (station === 'products') {
+      const product = id.startsWith('product-') ? id.slice('product-'.length) : null;
+      const value = isProductId(product) ? product : null;
+      this.world.focusProduct(value);
+      window.dispatchEvent(new CustomEvent('product:focus', { detail: { id: value, source: 'scene' } }));
+    }
+    if (station === 'experience' && id.startsWith('exp-')) {
+      const experience = id.slice('exp-'.length);
+      this.world.focusExperience(experience);
+      window.dispatchEvent(new CustomEvent('experience:focus', { detail: { id: experience, source: 'scene' } }));
+    }
+    this.invalidate();
+  }
+
+  /** Scene navigation: scroll to the hit's plate (or section) and focus it, without a second scroll. */
+  private navigate(hit: WorldHit): void {
+    const behavior: ScrollBehavior = this.scrubAllowed ? 'smooth' : 'auto';
+    const plateId = hit.product ? `product-${hit.product}` : hit.experience ? `exp-${hit.experience}` : null;
+    const plateTop = plateId ? this.plates?.scrollTargetFor(plateId) : null;
+    if (plateTop !== null && plateTop !== undefined) {
+      if (Math.abs(plateTop - scrollY) > 4) scrollTo({ top: plateTop, behavior });
+    } else {
+      const station = hit.target.replace('#', '') as StationId;
+      const section = stationElement(station) ?? document.querySelector(hit.target);
+      section?.scrollIntoView({ behavior });
+    }
+    if (hit.product) {
+      this.world.focusProduct(hit.product);
+      window.dispatchEvent(new CustomEvent('product:focus', { detail: { id: hit.product, source: 'scene' } }));
+    }
+    if (hit.experience) {
+      this.world.focusExperience(hit.experience);
+      window.dispatchEvent(new CustomEvent('experience:focus', { detail: { id: hit.experience, source: 'scene' } }));
+    }
   }
 
   private initialStation(): number {
@@ -196,7 +251,7 @@ export class Stage {
       tier: this.tier,
       camera: this.camera,
       capture: Boolean(this.options.capture),
-      motion: () => this.idleMotion(),
+      motion: () => this.idleMotion() && performance.now() - this.lastInteraction < IDLE_WINDOW_MS,
       pointer: () => (this.finePointer && this.idleMotion() ? this.pointer : { x: 0, y: 0 }),
       environment: () => this.environment(),
       releaseEnvironment: () => release(ENV_KEY)
@@ -278,8 +333,10 @@ export class Stage {
     if (continuous && !scrolling && this.frameDivisor > 1 && this.frameCount % this.frameDivisor !== 0) return;
 
     const workStart = performance.now();
-    const settling = this.world.update(dt, (now - this.clockStart) / 1000);
+    let settling = this.world.update(dt, (now - this.clockStart) / 1000);
+    if (this.plates) settling = this.plates.update(dt) || settling;
     this.renderer.render(this.world.scene, this.camera);
+    this.plates?.render(this.camera);
     const work = performance.now() - workStart;
     if (this.options.container.dataset.ready !== 'true') this.reveal();
     this.debug?.frame(now);
@@ -324,6 +381,8 @@ export class Stage {
     if (reason === 'low') this.tier = 'low';
     this.failed = reason === 'context-lost';
     this.stop();
+    this.plates?.unmount();
+    this.plates = undefined;
     this.options.container.dataset.degraded = reason;
     this.debug?.note(`degraded: ${reason}`);
   }
@@ -337,6 +396,8 @@ export class Stage {
     this.size = { width, height };
     this.renderer.setSize(width, height, false);
     this.world?.resize(width, height);
+    this.world?.setPixelRatio(this.renderer.getPixelRatio());
+    this.plates?.setSize(width, height);
     this.invalidate();
   }
 
@@ -400,7 +461,7 @@ export class Stage {
           world: this.world,
           camera: this.camera,
           canvas: this.canvas,
-          reducedMotion: () => this.motion.reduced,
+          navigate: hit => this.navigate(hit),
           invalidate: () => this.bump()
         })
       );
@@ -417,6 +478,7 @@ export class Stage {
   dispose(): void {
     this.stop();
     for (const cleanup of this.cleanups) cleanup();
+    this.plates?.dispose();
     this.world?.dispose();
     this.debug?.dispose();
     this.renderer.dispose();

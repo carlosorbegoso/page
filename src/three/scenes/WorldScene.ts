@@ -1,54 +1,69 @@
 import {
-  Fog,
+  AmbientLight,
+  BufferGeometry,
   Group,
-  InstancedMesh,
-  Matrix4,
-  Quaternion,
+  LineBasicMaterial,
+  LineSegments,
+  PointLight,
   Scene,
-  TetrahedronGeometry,
   Vector3,
+  type Mesh,
   type MeshStandardMaterial,
-  type Object3D
+  type Object3D,
+  type Sprite
 } from 'three';
 import experienceEn from '../../content/experience/en.json';
 import experienceEs from '../../content/experience/es.json';
-import { createMascot, type Mascot, type MascotId } from '../mascots';
-import { applyMaterialTokens, surfaceMaterial } from '../mascots/materials';
-import { STATIONS, type StationId } from '../sections';
 import { yieldToMain } from '../idle';
-import { tokenColor } from '../tokens';
+import { createMascot, type Mascot, type MascotId } from '../mascots';
+import { STATIONS, type StationId } from '../sections';
+import { tokenColor, tokenNumber } from '../tokens';
+import { Beacon } from './Beacon';
 import {
-  addLights,
+  acquireGlow,
   damp,
   disposeLights,
-  layoutKind,
-  NodeNetwork,
-  shellPoints,
+  glowSprite,
+  releaseGlow,
   smoothstep,
   type SceneContext
 } from './common';
-import { StackBlocks } from './StackBlocks';
-import { applyPose, blendPoses, STATION_SPECS, stationPose, type CameraPose } from './stations';
-import { Timeline, type Milestone } from './Timeline';
+import { Nebula } from './Nebula';
+import { Monogram } from './Monogram';
+import { OrbitMilestones, type Milestone } from './OrbitMilestones';
+import { Sky } from './Sky';
+import {
+  ALFA_POSITION,
+  applyPose,
+  blendPoses,
+  EXPERIENCE_CENTRE,
+  EXPERIENCE_TILT,
+  HERO_CENTRE,
+  MONOGRAM_RADIUS,
+  STATION_SPECS,
+  stationPose,
+  type CameraPose
+} from './stations';
 
 export type ProductId = 'skymek' | 'parati' | 'ventixs';
 
-const PRODUCT_MASCOT: Record<ProductId, MascotId> = { skymek: 'tool', parati: 'gift', ventixs: 'burbu' };
-const PRODUCTS = Object.keys(PRODUCT_MASCOT) as ProductId[];
-const PRODUCT_LABEL: Record<ProductId, string> = { skymek: 'SkyMek', parati: 'Parati', ventixs: 'Ventixs' };
+interface MoonSpec {
+  mascot: MascotId;
+  label: string;
+  radius: number;
+  tilt: number;
+  phase: number;
+  period: number;
+}
 
-const TRIANGLE: Record<ProductId, Vector3> = {
-  skymek: new Vector3(-0.82, 0, 0.05),
-  parati: new Vector3(0.82, 0, 0.05),
-  ventixs: new Vector3(0, -0.2, 0.5)
+const DEG = Math.PI / 180;
+const MOONS: Record<ProductId, MoonSpec> = {
+  skymek: { mascot: 'tool', label: 'SkyMek', radius: 1.6, tilt: 6 * DEG, phase: 200 * DEG, period: 90 },
+  parati: { mascot: 'gift', label: 'Parati', radius: 2.2, tilt: -4 * DEG, phase: 320 * DEG, period: 120 },
+  ventixs: { mascot: 'burbu', label: 'Ventixs', radius: 2.8, tilt: 9 * DEG, phase: 80 * DEG, period: 150 }
 };
-const ROW: Record<ProductId, Vector3> = {
-  skymek: new Vector3(-0.78, 0, 0),
-  ventixs: new Vector3(0, 0, 0.22),
-  parati: new Vector3(0.78, 0, 0)
-};
-const ALFA_SPLIT_POSITION = new Vector3(0, 0.62, -0.6);
-const ALFA_SPLIT_SCALE = 0.58;
+const PRODUCTS = Object.keys(MOONS) as ProductId[];
+const ALFA_SCALE = 0.9;
 
 export function isProductId(value: unknown): value is ProductId {
   return value === 'skymek' || value === 'parati' || value === 'ventixs';
@@ -72,33 +87,44 @@ function milestones(): Milestone[] {
   }));
 }
 
-function readFocusedProduct(): ProductId | null {
-  const value = document.querySelector<HTMLElement>('#products')?.dataset.activeProduct;
-  return isProductId(value) ? value : null;
+function orbitPoint(spec: MoonSpec, angle: number): Vector3 {
+  return new Vector3(Math.cos(angle) * spec.radius, 0, Math.sin(angle) * spec.radius)
+    .applyAxisAngle(new Vector3(1, 0, 0), spec.tilt)
+    .add(ALFA_POSITION);
 }
 
 /**
- * The continuous 3D world: one scene, six stations along a path. `setStation(s)` takes a
- * continuous coordinate (0 = hero … 5 = contact) and the camera flies between station poses.
+ * "Constelación": deep space, the hero's monogram constellation, Alfa as the central star,
+ * the three products as orbiting moons, the experience orbit and the contact beacon.
+ * `setStation(s)` takes a continuous coordinate (0 = hero … 5 = contact).
  */
 export class WorldScene {
   readonly scene = new Scene();
-  private readonly fog = new Fog(0x0a0e14, 8, 20);
   private readonly world = new Group();
-  private network: NodeNetwork | undefined;
-  private readonly alfas: Partial<Record<'hero' | 'company' | 'contact', Mascot>> = {};
-  private readonly products = new Map<ProductId, Mascot>();
-  private stack: StackBlocks | undefined;
-  private timeline: Timeline | undefined;
-  private readonly shardGeometry = new TetrahedronGeometry(0.16, 0);
-  private shardMaterial: MeshStandardMaterial | undefined;
-  private shards: InstancedMesh | undefined;
+  private alfa: Mascot | undefined;
+  private halo: Sprite | undefined;
+  private coreGlow: Sprite | undefined;
+  private readonly moons = new Map<ProductId, Mascot>();
+  private readonly orbitGeometry = new BufferGeometry();
+  private readonly orbitMaterial = new LineBasicMaterial({ transparent: true, opacity: 0.45 });
+  private readonly activeOrbitGeometry = new BufferGeometry();
+  private readonly activeOrbitMaterial = new LineBasicMaterial({ transparent: true, opacity: 0.9 });
+  private activeOrbit: LineSegments | undefined;
+  private activeOrbitFor: ProductId | null = null;
+  private sky: Sky | undefined;
+  private monogram: Monogram | undefined;
+  private nebula: Nebula | undefined;
+  private milestonesOrbit: OrbitMilestones | undefined;
+  private beacon: Beacon | undefined;
+  private readonly starLight = new PointLight(0xcfe4ff, 18, 0, 2);
+  private readonly fill = new AmbientLight(0xffffff, 0.08);
   private readonly focusWeights: Record<ProductId, number> = { skymek: 0, parati: 0, ventixs: 0 };
-  private focusedProduct: ProductId | null = readFocusedProduct();
+  private focusedProduct: ProductId | null = null;
   private readonly focusTarget = new Vector3();
   private focusTargetReady = false;
   private hoveredKey: string | null = null;
   private station = 0;
+  private orbitTime = 0;
   private width = 1;
   private height = 1;
   private orbit = { x: 0, y: 0 };
@@ -107,86 +133,118 @@ export class WorldScene {
   constructor(private readonly context: SceneContext) {}
 
   async load(): Promise<void> {
-    await addLights(this.scene, this.context);
+    await this.addLights();
+    const glow = await acquireGlow();
     const tier = this.context.tier;
-    const [heroAlfa, companyAlfa, contactAlfa, ...products] = await Promise.all([
-      createMascot('alfa', tier),
-      createMascot('alfa', tier),
-      createMascot('alfa', tier),
-      ...PRODUCTS.map(id => createMascot(PRODUCT_MASCOT[id], tier))
+    const [alfa, ...moons] = await Promise.all([
+      createMascot('alfa', tier, { shadow: false }),
+      ...PRODUCTS.map(id => createMascot(MOONS[id].mascot, tier, { shadow: false }))
     ]);
     await yieldToMain();
-    this.alfas.hero = heroAlfa!;
-    this.alfas.company = companyAlfa!;
-    this.alfas.contact = contactAlfa!;
-    PRODUCTS.forEach((id, index) => this.products.set(id, products[index]!));
+    this.alfa = alfa!;
+    this.alfa.root.position.copy(ALFA_POSITION).add(new Vector3(0, -0.6 * ALFA_SCALE, 0));
+    this.alfa.root.scale.setScalar(ALFA_SCALE);
+    this.halo = glowSprite(glow, 0.45 * ALFA_SCALE * 2 * 4.5, 0.55);
+    this.coreGlow = glowSprite(glow, 0.45 * ALFA_SCALE * 2 * 1.6, 0.35);
+    this.halo.position.copy(ALFA_POSITION);
+    this.coreGlow.position.copy(ALFA_POSITION);
+    this.starLight.position.copy(ALFA_POSITION);
+    PRODUCTS.forEach((id, index) => this.moons.set(id, moons[index]!));
 
-    const anchor = (id: StationId) => STATION_SPECS[id].anchor;
-    heroAlfa!.root.position.copy(anchor('hero'));
-    contactAlfa!.root.position.copy(anchor('contact'));
-    contactAlfa!.root.rotation.y = -0.5;
+    const orbitPoints: Vector3[] = [];
+    for (const id of PRODUCTS) orbitPoints.push(...this.orbitSegments(MOONS[id]));
+    this.orbitGeometry.setFromPoints(orbitPoints);
+    const orbits = new LineSegments(this.orbitGeometry, this.orbitMaterial);
+    this.activeOrbit = new LineSegments(this.activeOrbitGeometry, this.activeOrbitMaterial);
+    orbits.raycast = this.activeOrbit.raycast = () => undefined;
+    this.activeOrbit.visible = false;
 
-    const points = [
-      ...shellPoints(46, 7, anchor('hero').clone().setY(0.6), [0.9, 1.8]),
-      ...shellPoints(18, 11, anchor('about').clone().setY(0.6), [1.2, 2]),
-      ...shellPoints(26, 19, anchor('company').clone().setY(0.5), [1.4, 2.3]),
-      ...shellPoints(18, 23, anchor('experience').clone().setY(0.5), [1.6, 2.4]),
-      ...shellPoints(24, 29, anchor('contact').clone().setY(0.6), [1, 1.9])
-    ];
-    for (let i = 0; i < STATIONS.length - 1; i++) {
-      const a = anchor(STATIONS[i]!);
-      const b = anchor(STATIONS[i + 1]!);
-      if (a.equals(b)) continue;
-      for (let k = 1; k < 5; k++) points.push(a.clone().lerp(b, k / 5).add(new Vector3(((k * 37) % 7) / 3 - 1, 1.2 + (k % 2) * 0.6, 0)));
-    }
-    this.network = new NodeNetwork(points, 5);
-    this.network.addTo(this.world);
-
-    this.stack = new StackBlocks();
-    this.stack.root.position.copy(anchor('about'));
-    this.timeline = new Timeline(milestones());
-    this.timeline.root.position.copy(anchor('experience'));
-    this.timeline.root.rotation.y = -0.35;
-
-    this.shardMaterial = surfaceMaterial({
-      color: '--color-alfa-body',
-      roughness: '--alfa-roughness',
-      metalness: '--alfa-metalness',
-      flatShading: true
-    });
-    this.shards = new InstancedMesh(this.shardGeometry, this.shardMaterial, PRODUCTS.length);
-    this.shards.raycast = () => undefined;
-    this.shards.frustumCulled = false;
+    const stars = tokenNumber(tier === 'high' ? '--sky-stars-high' : '--sky-stars-mid', tier === 'high' ? 6000 : 2200);
+    this.sky = new Sky(Math.round(stars), tier === 'high' ? 3 : 2, glow);
+    this.scene.background = this.sky.background;
+    this.monogram = new Monogram(MONOGRAM_RADIUS, glow);
+    this.monogram.root.position.copy(HERO_CENTRE);
+    this.nebula = new Nebula(glow);
+    this.nebula.root.position.copy(STATION_SPECS.about.target).add(new Vector3(0, -0.8, 0));
+    this.milestonesOrbit = new OrbitMilestones(milestones());
+    this.milestonesOrbit.root.position.copy(EXPERIENCE_CENTRE);
+    this.milestonesOrbit.root.rotation.x = EXPERIENCE_TILT;
+    this.beacon = new Beacon();
+    this.beacon.root.position.copy(ALFA_POSITION);
 
     this.world.add(
-      heroAlfa!.root,
-      companyAlfa!.root,
-      contactAlfa!.root,
-      this.shards,
-      this.stack.root,
-      this.timeline.root,
-      ...[...this.products.values()].map(m => m.root)
+      this.sky.root,
+      this.monogram.root,
+      this.nebula.root,
+      this.alfa.root,
+      this.halo,
+      this.coreGlow,
+      this.starLight,
+      this.fill,
+      orbits,
+      this.activeOrbit,
+      this.milestonesOrbit.root,
+      this.beacon.root,
+      ...[...this.moons.values()].map(m => m.root)
     );
     this.scene.add(this.world);
-    this.scene.fog = this.fog;
     this.applyTokens();
     this.registerPicks();
   }
 
-  private registerPicks(): void {
-    const alfaHit = (): WorldHit => ({ key: 'alfa', label: 'Alfa · TUSOCIO IA', target: '#company' });
-    for (const alfa of Object.values(this.alfas)) if (alfa) this.pickMap.set(alfa.root, alfaHit);
-    for (const [id, mascot] of this.products) {
-      this.pickMap.set(mascot.root, () => ({ key: id, label: PRODUCT_LABEL[id], target: '#products', product: id }));
+  private async addLights(): Promise<void> {
+    const environment = await this.context.environment();
+    if (environment) {
+      this.scene.environment = environment;
+      this.scene.environmentIntensity = 0.25;
+    } else {
+      this.fill.intensity = 0.18;
     }
-    const timeline = this.timeline!;
-    const milestoneHit = (instanceId?: number): WorldHit | null => {
-      const milestone = instanceId === undefined ? undefined : timeline.milestones[instanceId];
+  }
+
+  private orbitSegments(spec: MoonSpec): Vector3[] {
+    const points: Vector3[] = [];
+    const segments = 256;
+    for (let i = 0; i < segments; i++) {
+      points.push(orbitPoint(spec, (i / segments) * Math.PI * 2), orbitPoint(spec, ((i + 1) / segments) * Math.PI * 2));
+    }
+    for (let i = 0; i < 24; i++) {
+      const a = (i / 24) * Math.PI * 2;
+      const inner = { ...spec, radius: spec.radius - 0.02 };
+      const outer = { ...spec, radius: spec.radius + 0.02 };
+      points.push(orbitPoint(inner, a), orbitPoint(outer, a));
+    }
+    return points;
+  }
+
+  /** Makes the Alfa body read as a star core (white, emissive) while keeping its facets. */
+  private igniteAlfa(): void {
+    const core = tokenColor('--color-alfa-core', '#eaf4ff');
+    const intensity = tokenNumber('--alfa-core-intensity', 3.2);
+    this.alfa?.root.traverse(object => {
+      const mesh = object as Mesh;
+      if (!mesh.isMesh) return;
+      const material = mesh.material as MeshStandardMaterial;
+      if (!(material.userData as { surface?: unknown }).surface) return;
+      material.color.copy(core);
+      material.emissive.copy(core);
+      material.emissiveIntensity = intensity * 0.07;
+      material.metalness = 0;
+      material.roughness = 0.4;
+    });
+  }
+
+  private registerPicks(): void {
+    this.pickMap.set(this.alfa!.root, () => ({ key: 'alfa', label: 'Alfa · TUSOCIO IA', target: '#company' }));
+    for (const [id, moon] of this.moons) {
+      this.pickMap.set(moon.root, () => ({ key: id, label: MOONS[id].label, target: '#products', product: id }));
+    }
+    const orbit = this.milestonesOrbit!;
+    this.pickMap.set(orbit.markers, instanceId => {
+      const milestone = instanceId === undefined ? undefined : orbit.milestones[instanceId];
       if (!milestone) return null;
       return { key: `experience:${milestone.id}`, label: milestone.label, target: '#experience', experience: milestone.id };
-    };
-    this.pickMap.set(timeline.tops, milestoneHit);
-    this.pickMap.set(timeline.pillars, milestoneHit);
+    });
   }
 
   /** Objects the pointer can hit. */
@@ -207,7 +265,8 @@ export class WorldScene {
 
   setHover(hit: WorldHit | null): void {
     this.hoveredKey = hit?.key ?? null;
-    this.timeline?.hover(hit?.experience ? this.timeline.milestones.findIndex(m => m.id === hit.experience) : -1);
+    const orbit = this.milestonesOrbit;
+    orbit?.hover(hit?.experience ? orbit.milestones.findIndex(m => m.id === hit.experience) : -1);
   }
 
   focusProduct(id: ProductId | null): void {
@@ -215,7 +274,7 @@ export class WorldScene {
   }
 
   focusExperience(id: string | null): void {
-    this.timeline?.focus(id);
+    this.milestonesOrbit?.focus(id);
   }
 
   /** Continuous station coordinate: 0 = hero … STATIONS.length - 1 = contact. */
@@ -223,9 +282,18 @@ export class WorldScene {
     this.station = Math.min(Math.max(value, 0), STATIONS.length - 1);
   }
 
+  stationValue(): number {
+    return this.station;
+  }
+
   resize(width: number, height: number): void {
     this.width = width;
     this.height = height;
+  }
+
+  /** Reading pose of a station without parallax or focus (plates are placed against it). */
+  readingPose(id: StationId): CameraPose {
+    return stationPose(STATION_SPECS[id], this.context.camera, this.width, this.height);
   }
 
   /** Returns true while something is still settling (focus, hover, pointer parallax). */
@@ -233,75 +301,77 @@ export class WorldScene {
     const motion = this.context.motion();
     const instant = !motion || this.context.capture;
     const s = this.station;
-    const layout = layoutKind(this.width) === 'desktop' ? TRIANGLE : ROW;
-    const companyAnchor = STATION_SPECS.company.anchor;
     let settling = false;
-
-    const split = smoothstep(1.55, 2.7, s);
-    const morph = smoothstep(2.0, 2.85, s);
-    const companyAlfa = this.alfas.company!;
-    companyAlfa.root.position.copy(companyAnchor).addScaledVector(ALFA_SPLIT_POSITION, split);
-    companyAlfa.root.scale.setScalar(1 + (ALFA_SPLIT_SCALE - 1) * split);
+    if (motion) this.orbitTime += dt;
 
     const hoverBoost = (key: string) => (this.hoveredKey === key ? 1.5 : 1);
-    for (const alfa of Object.values(this.alfas)) {
-      alfa!.setSignal((this.focusedProduct && s > 2.5 ? 0.6 : 1) * hoverBoost('alfa'));
-      alfa!.update(time, motion);
-    }
+    this.alfa!.setSignal((this.focusedProduct && s > 2.5 && s < 3.5 ? 0.7 : 1) * hoverBoost('alfa'));
+    this.alfa!.update(time, motion);
+    const breath = motion ? Math.sin((time / 8) * Math.PI * 2) * 0.05 : 0;
+    this.halo!.material.opacity = tokenNumber('--alfa-halo-opacity', 0.55) + breath + (this.hoveredKey === 'alfa' ? 0.15 : 0);
 
-    const matrix = new Matrix4();
-    const rotation = new Quaternion();
-    const position = new Vector3();
-    const shardOrigin = companyAnchor.clone().setY(0.6);
-    const spinAxis = new Vector3(0.3, 1, 0.2).normalize();
-    PRODUCTS.forEach((id, index) => {
-      const home = companyAnchor.clone().add(layout[id]);
-      position.lerpVectors(shardOrigin, home.clone().setY(home.y + 0.3), split);
-      position.y += Math.sin(split * Math.PI) * 0.3;
-      const size = smoothstep(1.55, 1.75, s) * (1 - morph);
-      rotation.setFromAxisAngle(spinAxis, split * 4 + index * 2.1);
-      this.shards!.setMatrixAt(index, matrix.compose(position, rotation, new Vector3(size, size, size)));
-
+    const emerge = smoothstep(1.4, 2.3, s);
+    PRODUCTS.forEach(id => {
+      const spec = MOONS[id];
+      const moon = this.moons.get(id)!;
+      const home = orbitPoint(spec, spec.phase + (this.orbitTime / spec.period) * Math.PI * 2);
       const weightTarget = this.focusedProduct === id ? 1 : 0;
       const weight = instant ? weightTarget : damp(this.focusWeights[id], weightTarget, 6, dt);
       settling ||= Math.abs(weight - weightTarget) > 0.002;
       this.focusWeights[id] = weight;
-      const mascot = this.products.get(id)!;
-      mascot.root.visible = morph > 0.001;
-      mascot.root.position.set(home.x, home.y + (1 - morph) * 0.3, home.z + weight * 0.18);
-      mascot.root.scale.setScalar(Math.max(morph, 0.001) * (1 + weight * 0.15) * (this.hoveredKey === id ? 1.04 : 1));
-      mascot.root.rotation.y = (1 - morph) * 1.8;
-      mascot.setFocus(weight);
-      mascot.setSignal((this.focusedProduct && this.focusedProduct !== id ? 0.45 : 1) * hoverBoost(id));
-      mascot.update(time, motion);
+      moon.root.visible = emerge > 0.001;
+      moon.root.position.lerpVectors(ALFA_POSITION, home, emerge);
+      moon.root.position.y -= (moon.height * 0.5) * emerge;
+      moon.root.scale.setScalar(Math.max(emerge, 0.001) * (1 + weight * 0.2) * (this.hoveredKey === id ? 1.06 : 1));
+      moon.setFocus(weight);
+      moon.setSignal((this.focusedProduct && this.focusedProduct !== id ? 0.57 : 1) * hoverBoost(id));
+      moon.update(time, motion);
     });
-    this.shards!.instanceMatrix.needsUpdate = true;
-    this.shards!.visible = split > 0 && morph < 1;
+    this.orbitMaterial.opacity = tokenNumber('--orbit-opacity', 0.45) * emerge;
+    this.updateActiveOrbit(emerge);
 
-    this.stack!.update(time, motion);
-    settling ||= this.timeline!.update(dt, time, motion, instant);
+    settling = this.monogram!.update(time, motion) || settling;
+    const pointerTilt = this.context.pointer();
+    this.monogram!.tilt(pointerTilt.x, pointerTilt.y);
+    this.nebula!.update(time, motion);
+    this.beacon!.update(time, motion, this.context.camera.position);
+    this.beacon!.root.visible = s > 4.2;
 
     const pointer = this.context.pointer();
     this.orbit.x = damp(this.orbit.x, pointer.x, 4, dt);
     this.orbit.y = damp(this.orbit.y, pointer.y, 4, dt);
     settling ||= Math.abs(this.orbit.x - pointer.x) > 0.001 || Math.abs(this.orbit.y - pointer.y) > 0.001;
 
-    settling = this.updateFocusTarget(dt, instant, layout) || settling;
+    settling = this.updateFocusTarget(dt, instant) || settling;
     const index = Math.min(Math.floor(s), STATIONS.length - 2);
     const t = smoothstep(0, 1, s - index);
     const pose = blendPoses(this.poseFor(STATIONS[index]!), this.poseFor(STATIONS[index + 1]!), t);
     applyPose(this.context.camera, pose, this.width, this.height);
-    const distance = pose.position.distanceTo(pose.target);
-    this.fog.near = distance + 1.5;
-    this.fog.far = distance + 14;
+    settling ||= this.milestonesOrbit!.update(dt, time, motion, instant, this.context.camera.position);
+    this.sky!.update(time, motion, this.context.camera.position, this.pixelRatio);
     return settling;
   }
 
-  private updateFocusTarget(dt: number, instant: boolean, layout: Record<ProductId, Vector3>): boolean {
+  private updateActiveOrbit(emerge: number): void {
+    const focused = this.focusedProduct;
+    if (focused !== this.activeOrbitFor) {
+      this.activeOrbitFor = focused;
+      if (focused) this.activeOrbitGeometry.setFromPoints(this.orbitSegments(MOONS[focused]));
+    }
+    this.activeOrbit!.visible = Boolean(focused) && emerge > 0.5;
+  }
+
+  private pixelRatio = 1;
+
+  setPixelRatio(value: number): void {
+    this.pixelRatio = value;
+  }
+
+  private updateFocusTarget(dt: number, instant: boolean): boolean {
     const spec = STATION_SPECS.products;
     const goal = this.focusedProduct
-      ? spec.anchor.clone().add(layout[this.focusedProduct]).setY(layout[this.focusedProduct].y + 0.35)
-      : spec.anchor.clone().add(spec.centre);
+      ? this.moons.get(this.focusedProduct)!.root.position.clone().add(new Vector3(0, 0.3, 0))
+      : spec.target.clone();
     if (instant || !this.focusTargetReady) {
       this.focusTarget.copy(goal);
       this.focusTargetReady = true;
@@ -312,17 +382,16 @@ export class WorldScene {
       damp(this.focusTarget.y, goal.y, 4, dt),
       damp(this.focusTarget.z, goal.z, 4, dt)
     );
-    return this.focusTarget.distanceToSquared(goal) > 1e-6;
+    return this.focusTarget.distanceToSquared(goal) > 1e-5;
   }
 
   private poseFor(id: StationId): CameraPose {
     const spec = STATION_SPECS[id];
     const camera = this.context.camera;
     if (id === 'products') {
-      const focused = this.focusedProduct !== null;
       return stationPose(spec, camera, this.width, this.height, {
         target: this.focusTarget,
-        subject: focused ? [0.85, 0.95] : spec.subject,
+        subject: this.focusedProduct ? [1.3, 1.6] : spec.subject,
         orbit: this.orbit
       });
     }
@@ -330,26 +399,39 @@ export class WorldScene {
   }
 
   applyTokens(): void {
-    this.fog.color.copy(tokenColor('--color-scene-bg', '#0a0e14'));
-    for (const alfa of Object.values(this.alfas)) alfa?.applyTokens();
-    for (const mascot of this.products.values()) mascot.applyTokens();
-    if (this.shardMaterial) applyMaterialTokens(this.shardMaterial);
-    this.network?.applyTokens();
-    this.stack?.applyTokens();
-    this.timeline?.applyTokens();
+    this.alfa?.applyTokens();
+    for (const moon of this.moons.values()) moon.applyTokens();
+    this.igniteAlfa();
+    this.halo?.material.color.copy(tokenColor('--color-alfa-corona'));
+    this.coreGlow?.material.color.copy(tokenColor('--color-alfa-core'));
+    this.orbitMaterial.color.copy(tokenColor('--color-orbit'));
+    this.activeOrbitMaterial.color.copy(tokenColor('--color-orbit-active'));
+    this.activeOrbitMaterial.opacity = tokenNumber('--orbit-active-opacity', 0.9);
+    this.sky?.applyTokens();
+    if (this.sky) this.scene.background = this.sky.background;
+    this.monogram?.applyTokens();
+    this.nebula?.applyTokens();
+    this.milestonesOrbit?.applyTokens();
+    this.beacon?.applyTokens();
   }
 
   dispose(): void {
-    for (const alfa of Object.values(this.alfas)) alfa?.dispose();
-    for (const mascot of this.products.values()) mascot.dispose();
-    this.products.clear();
-    this.shards?.dispose();
-    this.shardGeometry.dispose();
-    this.shardMaterial?.dispose();
-    this.network?.dispose();
-    this.stack?.dispose();
-    this.timeline?.dispose();
+    this.alfa?.dispose();
+    for (const moon of this.moons.values()) moon.dispose();
+    this.moons.clear();
+    this.halo?.material.dispose();
+    this.coreGlow?.material.dispose();
+    this.orbitGeometry.dispose();
+    this.orbitMaterial.dispose();
+    this.activeOrbitGeometry.dispose();
+    this.activeOrbitMaterial.dispose();
+    this.sky?.dispose();
+    this.monogram?.dispose();
+    this.nebula?.dispose();
+    this.milestonesOrbit?.dispose();
+    this.beacon?.dispose();
     disposeLights(this.scene);
+    releaseGlow();
     if (this.scene.environment) this.context.releaseEnvironment();
     this.scene.clear();
   }

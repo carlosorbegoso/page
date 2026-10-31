@@ -87,10 +87,10 @@ class GltfMascot implements Mascot {
 }
 
 /** Loads a GLB mascot through the refcounted cache and adds a baked contact shadow. */
-export async function loadGltfMascot(id: MascotId, url: string, shadowSize: number): Promise<Mascot> {
+export async function loadGltfMascot(id: MascotId, url: string, shadowSize: number, withShadow = true): Promise<Mascot> {
   const gltf = await acquireGltf(url);
   const hasShadow = Boolean(gltf.scene.getObjectByName('shadow'));
-  const shadow = hasShadow ? undefined : await createContactShadow(shadowSize);
+  const shadow = hasShadow || !withShadow ? undefined : await createContactShadow(shadowSize);
   const mascot = new GltfMascot(id, gltf.scene, () => {
     shadow?.dispose();
     release(url);

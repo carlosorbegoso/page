@@ -25,6 +25,11 @@ export interface MascotRecipe<G extends Record<string, BufferGeometry>> {
   assemble: (geometries: G, root: Group) => MascotRig;
 }
 
+export interface MascotOptions {
+  /** Baked contact shadow under the mascot (off for bodies floating in space). */
+  shadow?: boolean;
+}
+
 const IDLE_TURN = 0.08;
 const FLOAT_AMPLITUDE = 0.015;
 const FLOAT_PERIOD = 6;
@@ -79,7 +84,10 @@ class RiggedMascot implements Mascot {
  * Builds a procedural mascot. Geometry is shared through the asset cache (Hero and
  * Ventures both use Alfa); materials are per instance so each scene drives its own signal.
  */
-export async function buildMascot<G extends Record<string, BufferGeometry>>(recipe: MascotRecipe<G>): Promise<Mascot> {
+export async function buildMascot<G extends Record<string, BufferGeometry>>(
+  recipe: MascotRecipe<G>,
+  options: MascotOptions = {}
+): Promise<Mascot> {
   const key = `procedural:${recipe.id}`;
   const geometries = await acquire(key, async () => recipe.geometries(), g => {
     for (const geometry of Object.values(g)) geometry.dispose();
@@ -87,10 +95,10 @@ export async function buildMascot<G extends Record<string, BufferGeometry>>(reci
   const root = new Group();
   root.name = recipe.id;
   const rig = recipe.assemble(geometries, root);
-  const shadow = await createContactShadow(recipe.shadowSize);
-  root.add(shadow.mesh);
+  const shadow = options.shadow === false ? undefined : await createContactShadow(recipe.shadowSize);
+  if (shadow) root.add(shadow.mesh);
   return new RiggedMascot(recipe.id, root, recipe.height, rig, () => {
-    shadow.dispose();
+    shadow?.dispose();
     release(key);
   });
 }

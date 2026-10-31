@@ -1,20 +1,16 @@
 import { Raycaster, Vector2, type PerspectiveCamera } from 'three';
 import type { WorldHit, WorldScene } from './scenes/WorldScene';
 
-const UI_SELECTOR = 'a, button, input, textarea, select, label, summary, [role="button"], [tabindex]:not([tabindex="-1"]), [contenteditable], [data-panel]';
+const UI_SELECTOR =
+  'a, button, input, textarea, select, label, summary, [role="button"], [tabindex]:not([tabindex="-1"]), [contenteditable], [data-panel], [data-plate]';
 
 export interface InteractionOptions {
   world: WorldScene;
   camera: PerspectiveCamera;
   canvas: HTMLCanvasElement;
-  reducedMotion: () => boolean;
+  /** Scrolls to the hit's section (or plate) and dispatches its focus event. */
+  navigate: (hit: WorldHit) => void;
   invalidate: () => void;
-}
-
-function inViewport(el: Element | null): boolean {
-  if (!el) return false;
-  const rect = el.getBoundingClientRect();
-  return rect.top < innerHeight * 0.75 && rect.bottom > innerHeight * 0.25;
 }
 
 /**
@@ -72,21 +68,7 @@ export function setupInteraction(options: InteractionOptions): () => void {
     if (event.defaultPrevented || event.button !== 0 || getSelection()?.toString()) return;
     const hit = pick(event);
     if (!hit) return;
-    const section = document.querySelector(hit.target);
-    const behavior: ScrollBehavior = options.reducedMotion() ? 'auto' : 'smooth';
-    const focusEvent = hit.product
-      ? new CustomEvent('product:focus', { detail: { id: hit.product, source: 'scene' } })
-      : hit.experience
-        ? new CustomEvent('experience:focus', { detail: { id: hit.experience, source: 'scene' } })
-        : null;
-    if (focusEvent) {
-      if (hit.product) world.focusProduct(hit.product);
-      if (hit.experience) world.focusExperience(hit.experience);
-      if (!inViewport(section)) section?.scrollIntoView({ behavior });
-      window.dispatchEvent(focusEvent);
-    } else {
-      section?.scrollIntoView({ behavior });
-    }
+    options.navigate(hit);
     options.invalidate();
   };
 

@@ -1,5 +1,10 @@
 import {
+  AdditiveBlending,
   AmbientLight,
+  CanvasTexture,
+  SRGBColorSpace,
+  Sprite,
+  SpriteMaterial,
   BufferGeometry,
   DirectionalLight,
   Float32BufferAttribute,
@@ -18,6 +23,7 @@ import {
   type Scene,
   type Texture
 } from 'three';
+import { acquire, release } from '../assets';
 import type { Tier } from '../tier';
 import { tokenColor } from '../tokens';
 
@@ -160,4 +166,42 @@ export function shellPoints(count: number, seed: number, centre: Vector3, radius
     if (point.z > 0.5) point.z *= -0.5;
     return point.add(centre);
   });
+}
+
+const GLOW_KEY = 'texture:glow';
+
+function bakeGlow(): Texture {
+  const size = 128;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d')!;
+  const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  gradient.addColorStop(0, 'rgba(255,255,255,1)');
+  gradient.addColorStop(0.18, 'rgba(255,255,255,0.55)');
+  gradient.addColorStop(0.5, 'rgba(255,255,255,0.12)');
+  gradient.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, size, size);
+  const texture = new CanvasTexture(canvas);
+  texture.colorSpace = SRGBColorSpace;
+  return texture;
+}
+
+/** Soft radial glow (halos, nebulae, star sprites), shared with refcount. */
+export function acquireGlow(): Promise<Texture> {
+  return acquire(GLOW_KEY, async () => bakeGlow(), texture => texture.dispose());
+}
+
+export function releaseGlow(): void {
+  release(GLOW_KEY);
+}
+
+/** Additive camera-facing glow sprite. */
+export function glowSprite(texture: Texture, size: number, opacity: number): Sprite {
+  const sprite = new Sprite(
+    new SpriteMaterial({ map: texture, blending: AdditiveBlending, depthWrite: false, transparent: true, opacity, fog: false })
+  );
+  sprite.scale.setScalar(size);
+  sprite.raycast = () => undefined;
+  return sprite;
 }

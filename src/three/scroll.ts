@@ -35,7 +35,7 @@ export async function setupScroll(stage: Stage): Promise<() => void> {
           value: 1,
           ease: 'none',
           onUpdate: publish,
-          scrollTrigger: { trigger: el, start: 'top bottom', end: 'top top', scrub: 0.8 }
+          scrollTrigger: { trigger: el, start: 'top bottom', end: 'top 15%', scrub: 0.8 }
         })
       );
     });

@@ -1,4 +1,3 @@
 User-agent: *
 Allow: /
-
-Sitemap: https://carlosorbegoso.github.io/page/sitemap.xml
+Sitemap: https://carlosorbegoso.github.io/page/sitemap-index.xml

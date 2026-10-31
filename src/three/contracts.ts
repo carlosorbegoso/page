@@ -104,6 +104,8 @@ export interface FxPipeline {
   setFocus(point: Vector3 | null): void;
   resize(width: number, height: number, pixelRatio: number): void;
   setTier(tier: Tier): void;
+  /** Optional: true while the pipeline still animates (fluid, focus transition); keeps the loop awake. */
+  readonly settling?: boolean;
   /** Optional: receives the shared pointer field once. */
   attachPointer?(pointer: PointerField): void;
   dispose(): void;

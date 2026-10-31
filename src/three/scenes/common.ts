@@ -135,12 +135,20 @@ export class NodeNetwork {
     this.applyTokens();
   }
 
+  private boost = 1;
+
+  /** With post-processing `toneMapped: false` is ignored: nodes need HDR intensity to stay bright. */
+  setBoost(boost: number): void {
+    this.boost = boost;
+    this.applyTokens();
+  }
+
   addTo(parent: Object3D): void {
     parent.add(this.links, this.nodes);
   }
 
   applyTokens(): void {
-    this.nodeMaterial.color.copy(tokenColor('--color-scene-node'));
+    this.nodeMaterial.color.copy(tokenColor('--color-scene-node')).multiplyScalar(this.boost ?? 1);
     this.linkMaterial.color.copy(tokenColor('--color-scene-line'));
   }
 

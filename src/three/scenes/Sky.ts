@@ -12,6 +12,7 @@ import {
   type Sprite,
   type Texture
 } from 'three';
+import { withFluidDisplacement } from '../fx/fluid';
 import { tokenColor, tokenNumber } from '../tokens';
 import { glowSprite, mulberry32 } from './common';
 
@@ -118,6 +119,7 @@ export class Sky {
       depthWrite: false,
       blending: AdditiveBlending
     });
+    withFluidDisplacement(this.material);
     const stars = new Points(this.geometry, this.material);
     stars.frustumCulled = false;
     stars.raycast = () => undefined;
@@ -130,6 +132,7 @@ export class Sky {
     this.nebulae = placements.slice(0, nebulaCount).map((dir, i) => {
       const sprite = glowSprite(glow, 32 + i * 6, opacity * 2.2);
       sprite.position.copy(dir.normalize().multiplyScalar(radius * 0.9));
+      withFluidDisplacement(sprite.material);
       return sprite;
     });
     this.root.add(stars, ...this.nebulae);

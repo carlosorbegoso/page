@@ -276,6 +276,23 @@ export class WorldScene {
     orbit?.hover(hit?.experience ? orbit.milestones.findIndex(m => m.id === hit.experience) : -1);
   }
 
+  private hoveredPosition(): Vector3 | null {
+    const key = this.hoveredKey;
+    if (!key) return null;
+    if (key === 'alfa') return ALFA_POSITION.clone();
+    if (isProductId(key)) return this.moons.get(key)?.root.getWorldPosition(new Vector3()) ?? null;
+    if (key.startsWith('experience:')) return this.milestonesOrbit?.worldPosition(key.slice('experience:'.length)) ?? null;
+    return null;
+  }
+
+  /** World position next to which a plate should rest (products: its moon; intro: Alfa). */
+  plateBody(plateId: string): Vector3 | null {
+    if (plateId === 'products-intro') return ALFA_POSITION.clone();
+    const product = plateId.startsWith('product-') ? plateId.slice('product-'.length) : null;
+    if (isProductId(product)) return this.moons.get(product)?.root.getWorldPosition(new Vector3()) ?? null;
+    return null;
+  }
+
   focusProduct(id: ProductId | null): void {
     this.focusedProduct = id;
   }
@@ -408,8 +425,14 @@ export class WorldScene {
     return blendPoses(this.poseFor(from), this.poseFor(to), easeInOut(local), index % 2 === 0 ? 1 : -1);
   }
 
-  /** World point FX should keep in focus: the camera target of the nearest station. */
+  setHdrBoost(boost: number): void {
+    this.nebula?.setBoost(boost);
+  }
+
+  /** World point FX should keep in focus: the hovered body, else the nearest station's target. */
   focusPoint(): Vector3 {
+    const hovered = this.hoveredPosition();
+    if (hovered) return hovered;
     const nearest = STATIONS[Math.max(0, Math.min(STATIONS.length - 1, Math.round(this.station)))]!;
     if (nearest === 'products' && this.focusedProduct) return this.focusTarget.clone();
     return this.readingPose(nearest).target.clone();
@@ -447,7 +470,7 @@ export class WorldScene {
     if (id === 'products') {
       return stationPose(spec, camera, this.width, this.height, {
         target: this.focusTarget,
-        subject: this.focusedProduct ? [1.3, 1.6] : spec.subject,
+        subject: this.focusedProduct ? [1.9, 2.6] : spec.subject,
         orbit: this.orbit
       });
     }

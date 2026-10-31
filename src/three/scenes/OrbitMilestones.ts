@@ -99,6 +99,12 @@ export class OrbitMilestones {
     return Math.max(0, this.milestones.findIndex(m => m.current));
   }
 
+  worldPosition(id: string): Vector3 | null {
+    const index = this.milestones.findIndex(m => m.id === id);
+    const position = this.positions[index];
+    return position ? this.root.localToWorld(position.clone()) : null;
+  }
+
   focus(id: string | null): void {
     const index = this.milestones.findIndex(m => m.id === id);
     this.focusIndex = index >= 0 ? index : this.currentIndex();

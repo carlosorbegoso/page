@@ -177,6 +177,7 @@ export class Stage {
       time: () => (performance.now() - this.clockStart) / 1000,
       pointer: () => (this.finePointer && this.idleMotion() ? this.pointer : { x: 0, y: 0 }),
       anchorFor: (station, plateId) => this.world.plateAnchor(station, plateId),
+      bodyFor: plateId => this.world.plateBody(plateId),
       onActivePlate: (station, plate) => this.onActivePlate(station, plate),
       onLayoutChange: () => {
         for (const listener of this.layoutListeners) listener();
@@ -285,7 +286,11 @@ export class Stage {
     const fx = registeredFx();
     if (fx === this.fx) return;
     this.fx = fx;
-    if (!fx) return;
+    if (!fx) {
+      this.world.setHdrBoost(1);
+      return;
+    }
+    this.world.setHdrBoost(1.6);
     fx.attachPointer?.(this.pointerField);
     fx.setTier(this.tier);
     fx.resize(this.size.width, this.size.height, this.renderer.getPixelRatio());
@@ -457,6 +462,7 @@ export class Stage {
     if (this.fx) {
       this.fx.setFocus(this.world.focusPoint());
       this.fx.render(this.renderer, this.world.scene, this.camera, dt);
+      settling ||= this.fx.settling ?? false;
     } else {
       this.renderer.render(this.world.scene, this.camera);
     }

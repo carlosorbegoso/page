@@ -1,4 +1,5 @@
 import { Group, Vector3, type Sprite, type Texture } from 'three';
+import { withFluidDisplacement } from '../fx/fluid';
 import { tokenColor } from '../tokens';
 import { glowSprite, mulberry32, NodeNetwork } from './common';
 
@@ -18,8 +19,13 @@ export class Nebula {
     this.clouds = [glowSprite(sprite, 3.6, 0.22), glowSprite(sprite, 2.6, 0.18)];
     this.clouds[0]!.position.set(-0.3, 0.9, -0.4);
     this.clouds[1]!.position.set(0.5, 0.6, 0.1);
+    for (const cloud of this.clouds) withFluidDisplacement(cloud.material);
     this.root.add(...this.clouds);
     this.applyTokens();
+  }
+
+  setBoost(boost: number): void {
+    this.network.setBoost(boost);
   }
 
   update(time: number, motion: boolean): void {

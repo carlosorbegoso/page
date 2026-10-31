@@ -357,3 +357,10 @@ Contratos de eventos en `window`: `product:focus` y `experience:focus` (`{ id }`
 - **Texto dentro del 3D**: HTML real colocado en el espacio con `CSS3DRenderer` (misma cámara que el `WebGLRenderer`). Sigue siendo texto seleccionable, con enlaces reales, legible por Google y lectores de pantalla.
 - **Contrato de placas**: cada `<section data-station>` contiene `<div class="plate" data-plate data-plate-id>` (opcionales `data-plate-anchor`, `data-plate-order`, `data-product`, `data-experience`). Con 3D (`html.is-3d`) el motor mueve las placas al espacio y las secciones quedan como espaciadores que definen el recorrido del scroll; sin 3D la página es un flujo vertical de placas sobre una imagen estática del cielo. `focusin` en una placa lleva la cámara a su estación.
 - **HUD** (monograma, idioma, pausa, Índice, mapa estelar de progreso) queda en pantalla, con estilo de observatorio.
+
+### Tercer ajuste: escritorio → constelación, nivel estudio (2026-10-31)
+
+Referencias de Carlos: lusion.co y david-hckh.com (inspiración, sin copiar).
+- **Hero = el escritorio de Carlos de noche** (lámpara, monitor, ventana con la constelación, telescopio, figuras de Alfa/Burbu/caja). La placa `hero` vive en la pantalla del monitor. La cámara se aleja, gira hacia la ventana y vuela al espacio, donde sigue la constelación.
+- **Imprescindibles**: reacción fluida al cursor (arrastre en táctil), efectos cinematográficos (bloom selectivo, profundidad de campo sobre la placa activa, grano, aberración sutil), transiciones de cámara dramáticas y suaves, y sonido ambiente generativo (apagado por defecto).
+- **Reparto**: motor e integración (`src/three/` salvo `desk/` y `fx/`), artista de escenario (`src/three/desk/`), FX/shaders (`src/three/fx/`), sonido (`src/audio/`, `AudioToggle`), dirección de arte (`docs/design/desk.md`). Contratos en `src/three/contracts.ts` (`StationModule`, `FxPipeline`, `PointerField`, eventos `station:enter` y `station:progress`).

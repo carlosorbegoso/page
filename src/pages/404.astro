@@ -1,27 +1,41 @@
 ---
 import Base from '../layouts/Base.astro';
+import Button from '../components/ui/Button.astro';
+import { SITE } from '../config/site';
 import { localeUrl, useTranslations } from '../i18n/utils';
 
 const es = useTranslations('es');
 const en = useTranslations('en');
 ---
 
-<Base
-  locale="es"
-  title={`404 · ${es('notFound.title')} / ${en('notFound.title')}`}
-  indexable={false}
->
-  <main id="main" tabindex="-1">
-    <h1>404</h1>
-    <section aria-labelledby="not-found-es">
-      <h2 id="not-found-es">{es('notFound.title')}</h2>
-      <p>{es('notFound.body')}</p>
-      <a href={localeUrl('es')}>{es('notFound.home')}</a>
-    </section>
-    <section lang="en" aria-labelledby="not-found-en">
-      <h2 id="not-found-en">{en('notFound.title')}</h2>
-      <p>{en('notFound.body')}</p>
-      <a href={localeUrl('en')}>{en('notFound.home')}</a>
-    </section>
+<Base locale="es" title={es('notFound.metaTitle')} description={es('notFound.description')} indexable={false}>
+  <main id="main" tabindex="-1" class="container-content flex min-h-dvh flex-col justify-center gap-10 py-section">
+    <a
+      href={localeUrl('es')}
+      aria-label={es('nav.home')}
+      class="inline-flex min-h-tap items-center gap-2.5 self-start rounded-md focus-visible:shadow-focus focus-visible:outline-none"
+    >
+      <svg viewBox="0 0 64 64" width="40" height="40" aria-hidden="true" class="shrink-0">
+        <rect width="64" height="64" rx="14" class="fill-surface-raised stroke-border" stroke-width="2"></rect>
+        <path d="M43.5 22.4A15 15 0 1 0 43.5 41.6" fill="none" class="stroke-text" stroke-width="8"></path>
+        <circle cx="47" cy="32" r="4.5" class="fill-accent"></circle>
+      </svg>
+      <span class="font-display text-lg font-semibold tracking-tight text-text">{SITE.name}</span>
+    </a>
+
+    <h1 class="font-display text-5xl font-semibold tracking-display text-accent">404</h1>
+
+    <div class="grid gap-6 md:grid-cols-2">
+      <section aria-labelledby="not-found-es" class="flex flex-col items-start gap-4 rounded-lg border border-border bg-surface p-6">
+        <h2 id="not-found-es" class="text-2xl font-semibold tracking-tight text-text">{es('notFound.title')}</h2>
+        <p class="text-text-muted">{es('notFound.body')}</p>
+        <Button href={localeUrl('es')} variant="primary">{es('notFound.home')}</Button>
+      </section>
+      <section lang="en" aria-labelledby="not-found-en" class="flex flex-col items-start gap-4 rounded-lg border border-border bg-surface p-6">
+        <h2 id="not-found-en" class="text-2xl font-semibold tracking-tight text-text">{en('notFound.title')}</h2>
+        <p class="text-text-muted">{en('notFound.body')}</p>
+        <Button href={localeUrl('en')} variant="secondary" hreflang="en-US">{en('notFound.home')}</Button>
+      </section>
+    </div>
   </main>
 </Base>

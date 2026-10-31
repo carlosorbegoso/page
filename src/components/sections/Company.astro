@@ -23,13 +23,12 @@ const toneFor = (id: string) => (productTones.includes(id) ? (id as ProductTone)
 <section
   id={SECTION_IDS.company}
   aria-labelledby="company-title"
-  data-stage-scene="ventures"
-  class="relative z-(--z-content) px-gutter py-section lg:flex lg:min-h-svh lg:items-center"
+  data-station="company"
+  class="relative z-(--z-content) flex min-h-svh flex-col justify-end px-gutter pt-[max(33svh,calc(var(--corner-ui-height,4.25rem)+1rem))] pb-12 lg:justify-center lg:py-[max(var(--spacing-section),calc(var(--corner-ui-height,4.75rem)+1.5rem))]"
 >
   <div class="mx-auto w-full max-w-content">
-    <div class="h-[34svh] md:h-[40svh] lg:hidden" aria-hidden="true"></div>
     <div
-      class="flex flex-col gap-6 rounded-xl bg-scrim p-5 md:p-8 lg:max-w-[34rem] xl:max-w-reading"
+      class="flex flex-col gap-6 rounded-xl border border-border bg-scrim p-5 md:p-8 lg:max-w-[34rem] lg:p-10 xl:max-w-reading"
     >
       <SectionHeader
         id="company-title"

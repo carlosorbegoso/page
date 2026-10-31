@@ -1,5 +1,6 @@
 ---
 import ProductCard from '../products/ProductCard.astro';
+import Button from '../ui/Button.astro';
 import SectionHeader from '../ui/SectionHeader.astro';
 import { SECTION_IDS } from '../../config/site';
 import { useTranslations, type Locale } from '../../i18n/utils';
@@ -13,83 +14,218 @@ const { locale } = Astro.props;
 const t = useTranslations(locale);
 const products = await getProducts(locale);
 const { company } = await getProfile(locale);
+const positionTemplate = t('products.position');
+const initialPosition = positionTemplate
+  .replace('{current}', '1')
+  .replace('{total}', String(products.length));
 ---
 
 <section
   id={SECTION_IDS.products}
   aria-labelledby="products-title"
-  data-stage-scene="ventures"
+  data-station="products"
   data-products-section
-  class="relative z-(--z-content) px-gutter py-section"
+  class="relative z-(--z-content) flex min-h-svh flex-col justify-end px-gutter pt-[max(33svh,calc(var(--corner-ui-height,4.25rem)+1rem))] pb-12 lg:justify-center lg:py-[max(var(--spacing-section),calc(var(--corner-ui-height,4.75rem)+1.5rem))]"
 >
-  <div class="mx-auto max-w-content">
-    <div class="flex flex-col gap-stack lg:max-w-[34rem] xl:max-w-reading">
-      <div class="rounded-xl bg-scrim p-5 md:p-6">
-        <SectionHeader
-          id="products-title"
-          eyebrow={company.name}
-          title={t('products.title')}
-          subtitle={t('products.subtitle')}
-        />
-      </div>
-      <ul class="flex flex-col gap-4 md:gap-5" role="list">
+  <div class="mx-auto flex w-full max-w-content lg:justify-end">
+    <div
+      class="flex w-full min-w-0 flex-col gap-6 rounded-xl border border-border bg-scrim p-4 md:p-6 lg:max-w-[34rem] lg:p-8 xl:max-w-reading"
+    >
+      <SectionHeader
+        id="products-title"
+        eyebrow={company.name}
+        title={t('products.title')}
+        subtitle={t('products.subtitle')}
+      />
+
+      <ul
+        class="products-track relative -mx-1 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain px-1 pb-1 lg:mx-0 lg:snap-none lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0"
+        role="list"
+        aria-labelledby="products-title"
+        data-products-track
+      >
         {
           products.map(product => (
-            <li>
+            <li class="w-full shrink-0 snap-center snap-always" data-products-slide>
               <ProductCard product={product} locale={locale} />
             </li>
           ))
         }
       </ul>
+
+      <div class="flex items-center justify-between gap-4 lg:hidden">
+        <Button variant="secondary" aria-label={t('products.prev')} data-products-prev disabled>
+          <svg
+            class="size-5"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M10 3.5 5.5 8l4.5 4.5" />
+          </svg>
+        </Button>
+        <div class="flex flex-col items-center gap-2">
+          <div class="flex gap-1.5" aria-hidden="true">
+            {
+              products.map((product, index) => (
+                <span
+                  class:list={[
+                    'h-1.5 rounded-full transition-[width,background-color] duration-(--duration-base) ease-standard',
+                    index === 0 ? 'w-5 bg-text' : 'w-1.5 bg-border-strong'
+                  ]}
+                  data-products-dot={product.id}
+                />
+              ))
+            }
+          </div>
+          <p
+            class="text-xs font-medium text-text-muted tabular-nums"
+            aria-live="polite"
+            data-products-position
+            data-template={positionTemplate}
+          >
+            {initialPosition}
+          </p>
+        </div>
+        <Button variant="secondary" aria-label={t('products.next')} data-products-next>
+          <svg
+            class="size-5"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M6 3.5 10.5 8 6 12.5" />
+          </svg>
+        </Button>
+      </div>
     </div>
   </div>
 </section>
 
+<style>
+  .products-track {
+    scrollbar-width: none;
+  }
+
+  .products-track::-webkit-scrollbar {
+    display: none;
+  }
+</style>
+
 <script>
-  type FocusDetail = { id: string | null };
+  type FocusDetail = { id: string | null; source?: string };
+  const SOURCE = 'products-panel';
 
   const section = document.querySelector<HTMLElement>('[data-products-section]');
-  const cards = section
-    ? Array.from(section.querySelectorAll<HTMLElement>('[data-product]'))
-    : [];
+  const track = section?.querySelector<HTMLElement>('[data-products-track]');
+  const cards = section ? Array.from(section.querySelectorAll<HTMLElement>('[data-product]')) : [];
 
-  if (section && cards.length > 0) {
-    let centeredId: string | null = null;
+  if (section && track && cards.length > 0) {
+    const ids = cards.map(card => card.dataset.product ?? '');
+    const prev = section.querySelector<HTMLButtonElement>('[data-products-prev]');
+    const next = section.querySelector<HTMLButtonElement>('[data-products-next]');
+    const position = section.querySelector<HTMLElement>('[data-products-position]');
+    const dots = Array.from(section.querySelectorAll<HTMLElement>('[data-products-dot]'));
+    const desktop = window.matchMedia('(min-width: 64rem)');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    let listCenteredId: string | null = null;
+    let slideIndex = 0;
     let pointedId: string | null = null;
     let focusedId: string | null = null;
     let sectionVisible = false;
     let lastSent: string | null | undefined;
 
-    const publish = () => {
-      const id = sectionVisible ? (pointedId ?? focusedId ?? centeredId) : null;
-      if (id === lastSent) return;
-      lastSent = id;
+    const scrollBehavior = (): ScrollBehavior => {
+      const motion = document.documentElement.dataset.motion;
+      return reducedMotion.matches || motion === 'reduced' || motion === 'paused' ? 'auto' : 'smooth';
+    };
+
+    const centeredId = () => (desktop.matches ? listCenteredId : ids[slideIndex]);
+
+    const renderCarousel = () => {
+      if (prev) prev.disabled = slideIndex === 0;
+      if (next) next.disabled = slideIndex === ids.length - 1;
+      if (position) {
+        position.textContent = (position.dataset.template ?? '')
+          .replace('{current}', String(slideIndex + 1))
+          .replace('{total}', String(ids.length));
+      }
+      dots.forEach((dot, index) => {
+        const active = index === slideIndex;
+        dot.classList.toggle('w-5', active);
+        dot.classList.toggle('bg-text', active);
+        dot.classList.toggle('w-1.5', !active);
+        dot.classList.toggle('bg-border-strong', !active);
+      });
+    };
+
+    const currentId = () =>
+      sectionVisible ? (pointedId ?? focusedId ?? centeredId() ?? null) : null;
+
+    const markActive = (id: string | null) => {
       for (const card of cards) card.toggleAttribute('data-active', card.dataset.product === id);
       if (id) section.dataset.activeProduct = id;
       else delete section.dataset.activeProduct;
-      window.dispatchEvent(new CustomEvent<FocusDetail>('product:focus', { detail: { id } }));
     };
 
-    // A thin mid-viewport band: only one stacked card crosses it at a time, and the last one stays focused while the gap between cards passes.
-    const centerObserver = new IntersectionObserver(
+    const publish = () => {
+      const id = currentId();
+      if (id === lastSent) return;
+      lastSent = id;
+      markActive(id);
+      window.dispatchEvent(
+        new CustomEvent<FocusDetail>('product:focus', { detail: { id, source: SOURCE } })
+      );
+    };
+
+    const showSlide = (index: number) => {
+      const slide = cards[index]?.parentElement;
+      if (!slide) return;
+      track.scrollTo({ left: slide.offsetLeft, behavior: scrollBehavior() });
+    };
+
+    // Thin mid-viewport band for the desktop list: the last card that crossed it stays focused while the gap passes.
+    const listObserver = new IntersectionObserver(
       entries => {
         for (const entry of entries) {
-          const id = (entry.target as HTMLElement).dataset.product ?? null;
-          if (entry.isIntersecting) centeredId = id;
+          if (entry.isIntersecting) listCenteredId = (entry.target as HTMLElement).dataset.product ?? null;
         }
         publish();
       },
       { rootMargin: '-45% 0px -45% 0px' }
     );
 
+    const slideObserver = new IntersectionObserver(
+      entries => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const index = ids.indexOf((entry.target as HTMLElement).dataset.product ?? '');
+          if (index >= 0) slideIndex = index;
+        }
+        renderCarousel();
+        publish();
+      },
+      { root: track, threshold: 0.6 }
+    );
+
     const sectionObserver = new IntersectionObserver(([entry]) => {
       sectionVisible = entry.isIntersecting;
-      if (!sectionVisible) centeredId = pointedId = focusedId = null;
+      if (!sectionVisible) listCenteredId = pointedId = focusedId = null;
       publish();
-    });
+    }, { rootMargin: '-15% 0px' });
 
     for (const card of cards) {
-      centerObserver.observe(card);
+      listObserver.observe(card);
+      slideObserver.observe(card);
       const id = card.dataset.product ?? null;
       card.addEventListener('pointerenter', event => {
         if (event.pointerType !== 'mouse') return;
@@ -111,6 +247,28 @@ const { company } = await getProfile(locale);
         publish();
       });
     }
+
+    prev?.addEventListener('click', () => showSlide(Math.max(0, slideIndex - 1)));
+    next?.addEventListener('click', () => showSlide(Math.min(ids.length - 1, slideIndex + 1)));
+    desktop.addEventListener('change', publish);
+
+    window.addEventListener('product:focus', event => {
+      const detail = (event as CustomEvent<FocusDetail>).detail;
+      if (!detail || detail.source === SOURCE) return;
+      const id = detail.id ?? null;
+      const index = id ? ids.indexOf(id) : -1;
+      if (index < 0) return;
+      lastSent = id;
+      markActive(id);
+      if (desktop.matches) {
+        listCenteredId = id;
+        cards[index].scrollIntoView({ block: 'center', behavior: scrollBehavior() });
+      } else {
+        slideIndex = index;
+        renderCarousel();
+        showSlide(index);
+      }
+    });
 
     sectionObserver.observe(section);
   }

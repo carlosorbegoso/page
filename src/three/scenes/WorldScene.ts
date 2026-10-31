@@ -78,6 +78,8 @@ export interface WorldHit {
   target: string;
   product?: ProductId;
   experience?: string;
+  /** Pick object when the hit belongs to a station module. */
+  moduleObject?: Object3D;
 }
 
 function milestones(): Milestone[] {
@@ -129,6 +131,8 @@ export class WorldScene {
   private readonly focusTarget = new Vector3();
   private focusTargetReady = false;
   private hoveredKey: string | null = null;
+  private hoveredObject: Object3D | null = null;
+  private touchYaw = 0;
   private station = 0;
   private orbitTime = 0;
   private width = 1;
@@ -254,13 +258,32 @@ export class WorldScene {
     });
   }
 
-  /** Objects the pointer can hit. */
+  /** Objects the pointer can hit (world bodies plus picks of station modules near the camera). */
   pickables(): Object3D[] {
-    return [...this.pickMap.keys()];
+    const objects = [...this.pickMap.keys()];
+    for (const [id, module] of this.modules) {
+      if (Math.abs(this.station - stationIndex(id)) > 0.6) continue;
+      for (const pick of module.picks ?? []) objects.push(pick.object3D);
+    }
+    return objects;
   }
 
   /** Resolves a raycast hit to its meaning, walking up to the registered root. */
   resolve(object: Object3D, instanceId?: number): WorldHit | null {
+    for (const module of this.modules.values()) {
+      const pick = module.resolvePick?.(object);
+      if (!pick) continue;
+      const english = document.documentElement.lang.startsWith('en');
+      const label = typeof pick.label === 'string' ? pick.label : english ? pick.label.en : pick.label.es;
+      return {
+        key: pick.key,
+        label,
+        target: pick.target,
+        product: pick.product,
+        experience: pick.experience,
+        moduleObject: pick.object3D
+      };
+    }
     let node: Object3D | null = object;
     while (node) {
       const resolver = this.pickMap.get(node);
@@ -272,6 +295,8 @@ export class WorldScene {
 
   setHover(hit: WorldHit | null): void {
     this.hoveredKey = hit?.key ?? null;
+    this.hoveredObject = hit?.moduleObject ?? null;
+    for (const module of this.modules.values()) module.setHover?.(hit?.moduleObject ?? null);
     const orbit = this.milestonesOrbit;
     orbit?.hover(hit?.experience ? orbit.milestones.findIndex(m => m.id === hit.experience) : -1);
   }
@@ -279,6 +304,7 @@ export class WorldScene {
   private hoveredPosition(): Vector3 | null {
     const key = this.hoveredKey;
     if (!key) return null;
+    if (this.hoveredObject) return this.hoveredObject.getWorldPosition(new Vector3());
     if (key === 'alfa') return ALFA_POSITION.clone();
     if (isProductId(key)) return this.moons.get(key)?.root.getWorldPosition(new Vector3()) ?? null;
     if (key.startsWith('experience:')) return this.milestonesOrbit?.worldPosition(key.slice('experience:'.length)) ?? null;
@@ -374,7 +400,12 @@ export class WorldScene {
       const progress = Math.max(-1, Math.min(1, s - stationIndex(id)));
       if (module.update(dt, time, progress)) settling = true;
     }
-    applyPose(this.context.camera, this.cameraPose(s), this.width, this.height);
+    const pose = this.cameraPose(s);
+    if (this.touchYaw !== 0 && s < 0.25) {
+      const offset = pose.position.clone().sub(pose.target).applyAxisAngle(new Vector3(0, 1, 0), (this.touchYaw * 4 * Math.PI) / 180);
+      pose.position = pose.target.clone().add(offset);
+    }
+    applyPose(this.context.camera, pose, this.width, this.height);
     settling ||= this.milestonesOrbit!.update(dt, time, motion, instant, this.context.camera.position);
     this.sky!.update(time, motion, this.context.camera.position, this.pixelRatio);
     return settling;
@@ -419,9 +450,9 @@ export class WorldScene {
     const from = STATIONS[index]!;
     const to = STATIONS[index + 1]!;
     const leaving = this.modules.get(from)?.getCameraPose?.(local);
-    if (leaving) return fromModulePose(leaving);
+    if (leaving) return this.blendOffset(fromModulePose(leaving), this.poseFor(from), this.poseFor(to), local);
     const arriving = this.modules.get(to)?.getCameraPose?.(local - 1);
-    if (arriving) return fromModulePose(arriving);
+    if (arriving) return this.blendOffset(fromModulePose(arriving), this.poseFor(from), this.poseFor(to), local);
     return blendPoses(this.poseFor(from), this.poseFor(to), easeInOut(local), index % 2 === 0 ? 1 : -1);
   }
 
@@ -436,6 +467,20 @@ export class WorldScene {
     const nearest = STATIONS[Math.max(0, Math.min(STATIONS.length - 1, Math.round(this.station)))]!;
     if (nearest === 'products' && this.focusedProduct) return this.focusTarget.clone();
     return this.readingPose(nearest).target.clone();
+  }
+
+  /**
+   * Module poses carry no view offset: ease the projection centre between the two stations'
+   * offsets so the arrival (e.g. desk → about at cx 0.26) does not jump sideways.
+   */
+  private blendOffset(pose: CameraPose, from: CameraPose, to: CameraPose, local: number): CameraPose {
+    const t = easeInOut(local);
+    return { ...pose, cx: from.cx + (to.cx - from.cx) * t, cy: from.cy + (to.cy - from.cy) * t };
+  }
+
+  /** Horizontal touch drag on the desk (−1..1 → ±4° around the camera target). */
+  setTouchYaw(value: number): void {
+    this.touchYaw = Math.max(-1, Math.min(1, value));
   }
 
   /** Station modules registered through contracts.ts (desk, …). */

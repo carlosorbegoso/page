@@ -57,6 +57,17 @@ export interface StationCameraPose {
   roll?: number;
 }
 
+/** A navigable object of a station module (raycast proxy). */
+export interface StationPick {
+  readonly object3D: Object3D;
+  readonly key: string;
+  readonly label: string | { es: string; en: string };
+  /** CSS selector of the section to navigate to. */
+  readonly target: string;
+  readonly product?: 'skymek' | 'parati' | 'ventixs';
+  readonly experience?: string;
+}
+
 /** Services the Stage gives a station module. */
 export interface StationContext {
   readonly tier: Tier;
@@ -93,6 +104,12 @@ export interface StationModule {
    * station's `readingPose`; answering for [-1, 0) owns the arrival.
    */
   getCameraPose?(progress: number): StationCameraPose | null;
+  /** Navigable objects; raycast while the camera is within ±0.6 of this station. */
+  readonly picks?: readonly StationPick[];
+  /** Resolves a raycast hit (the pick's object or a descendant) to its pick. */
+  resolvePick?(object: Object3D): StationPick | null;
+  /** Highlights a pick (its object or a descendant), or clears with null. */
+  setHover?(object: Object3D | null): void;
   dispose(): void;
 }
 

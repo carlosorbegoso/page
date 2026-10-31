@@ -14,7 +14,7 @@ import { DebugOverlay } from './debug';
 import { yieldToMain } from './idle';
 import { setupInteraction } from './interaction';
 import { motionAllowed, readMotion, watchMotion, type MotionState } from './motion';
-import type { Pointer, SceneContext } from './scenes/common';
+import { damp, smoothstep, type Pointer, type SceneContext } from './scenes/common';
 import {
   onRegistryChange,
   registeredFx,
@@ -93,6 +93,10 @@ export class Stage {
   private debug: DebugOverlay | undefined;
   private readonly cleanups: Array<() => void> = [];
   private readonly layoutListeners = new Set<() => void>();
+  private baseExposure = 1;
+  private touchStartX: number | null = null;
+  private touchYawTarget = 0;
+  private touchYaw = 0;
   private readonly motionListeners = new Set<(state: MotionState) => void>();
   private fadeTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -313,6 +317,12 @@ export class Stage {
     }
   }
 
+  /** The desk is lit for ACES at 1.1; the exposure eases to the space value on the way out. */
+  private roomExposure(): number {
+    if (!this.loadedModules.has('hero')) return 1;
+    return 1.1 - 0.1 * smoothstep(0.5, 0.85, this.station);
+  }
+
   private initialStation(): number {
     const active = this.options.tracker.active;
     return active ? stationIndex(active) : 0;
@@ -456,7 +466,11 @@ export class Stage {
     this.renderer.info.reset();
     this.pointerField.enabled = this.idleMotion();
     this.pointerField.settle(dt);
+    this.renderer.toneMappingExposure = this.baseExposure * this.roomExposure();
+    this.touchYaw = this.scrubAllowed ? damp(this.touchYaw, this.touchYawTarget, 8, dt) : 0;
+    this.world.setTouchYaw(this.touchYaw);
     let settling = this.world.update(dt, (now - this.clockStart) / 1000);
+    settling ||= Math.abs(this.touchYaw - this.touchYawTarget) > 0.001;
     if (this.plates) settling = this.plates.update(dt) || settling;
     this.publishStation();
     if (this.fx) {
@@ -535,7 +549,8 @@ export class Stage {
 
   private applyTokens(): void {
     this.renderer.setClearColor(tokenColor('--color-scene-bg', '#0a0e14'), 1);
-    this.renderer.toneMappingExposure = tokenNumber('--scene-tone-exposure', 1);
+    this.baseExposure = tokenNumber('--scene-tone-exposure', 1);
+    this.renderer.toneMappingExposure = this.baseExposure;
     this.world?.applyTokens();
   }
 
@@ -548,7 +563,21 @@ export class Stage {
     on('orientationchange', () => this.measure(true));
     on('scroll', () => this.bump());
     on('keydown', () => this.bump());
-    on('touchstart', () => this.bump());
+    on('touchstart', event => {
+      this.touchStartX = event.touches[0]?.clientX ?? null;
+      this.bump();
+    });
+    on('touchmove', event => {
+      const x = event.touches[0]?.clientX;
+      if (this.touchStartX === null || x === undefined || this.station > 0.25) return;
+      this.touchYawTarget = Math.max(-1, Math.min(1, (x - this.touchStartX) / (window.innerWidth * 0.5)));
+      this.bump();
+    });
+    on('touchend', () => {
+      this.touchStartX = null;
+      this.touchYawTarget = 0;
+      this.bump();
+    });
     if (this.finePointer && !this.options.capture) {
       on('pointermove', event => {
         this.pointer = { x: (event.clientX / window.innerWidth) * 2 - 1, y: (event.clientY / window.innerHeight) * 2 - 1 };

@@ -77,9 +77,10 @@ function createUnit(id: StationId, plates: HTMLElement[]): PlateUnit {
   holder.dataset.stationPlates = id;
   holder.className = 'stage-plates__station';
   holder.style.width = 'var(--plate-width)';
+  holder.style.transformStyle = 'preserve-3d';
   const column = document.createElement('div');
   column.className = 'stage-plates__column';
-  column.style.cssText = 'display:flex;flex-direction:column;gap:var(--plate-gap);width:100%';
+  column.style.cssText = 'display:flex;flex-direction:column;gap:var(--plate-gap);width:100%;transform-style:preserve-3d';
   column.append(...plates);
   holder.append(column);
   return { holder, column, plates, object: new CSS3DObject(holder), columnHeight: 0, offset: 0, presence: 0 };
@@ -268,7 +269,8 @@ export class Plates {
       unitScale = this.pixelUnit(depth, this.host.camera.fov);
       if (!instant) this.choreograph(unit, station, s - station.index, unitScale);
     }
-    this.finish(unit, station, distance < 0.35, unitScale, instant);
+    if (anchor) unit.object.scale.setScalar(unitScale);
+    else this.finish(unit, station, distance < 0.35, unitScale, instant);
     unit.holder.style.opacity = this.stationOpacity(distance, instant).toFixed(3);
     unit.holder.style.pointerEvents = distance < 0.35 ? 'auto' : 'none';
     this.flagColumn(station, unit, distance);

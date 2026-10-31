@@ -57,6 +57,8 @@ También pasan en 390 × 844, 1024 × 1366 y 1920 × 1080.
 
 ## Decisiones que se apartan de desk.md v2
 
+- **Monitor vertical en < 768 px**: la cabeza (`desk-monitor`, malla propia) gira 90° sobre su pivote; `getSurface('monitor')` devuelve 0.336 × 0.598 m y una escala a 0.82 de 1:1 (`PORTRAIT_SCREEN_PROJECTION`), es decir unos 395 × 703 px CSS a 390 × 844. `about` se acerca hasta que el monitor ocupa el 86 % del ancho.
+
 0. **Peana de 50 cm** (no 24): SkyMek y Parati en los extremos, Alfa atrás a la izquierda del centro y Burbu delante. Así cada macro de producto deja a las vecinas fuera de cuadro. En horizontal el texto va a la izquierda (columna del 56 %) y el sujeto en el 70 % del ancho, también en `company` y `experience`. Alfa es un torno facetado de 9 lados con anillo de latón de 1.3 mm.
 
 1. **Lámpara atrás a la derecha**: el doc pide la lámpara "atrás a la izquierda" y a la vez la peana "a la derecha, bajo su cono". Manda el cono.

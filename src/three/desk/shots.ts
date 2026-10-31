@@ -77,12 +77,20 @@ function eyeFor(focus: Vector3, heading: number, pitch: number, distance: number
   return focus.clone().addScaledVector(direction(heading, pitch), -distance);
 }
 
-/** World frame of the monitor glass. */
-export function monitorFrame(): SurfaceFrame {
+/** Below this viewport width the monitor head pivots to portrait so the screen content reads 1:1. */
+export const PORTRAIT_MONITOR_BELOW = 768;
+
+export function portraitMonitor(view: { width: number }): boolean {
+  return view.width < PORTRAIT_MONITOR_BELOW;
+}
+
+/** World frame of the monitor glass (width/height as displayed; the plate stays upright). */
+export function monitorFrame(portrait = false): SurfaceFrame {
   const quaternion = new Quaternion().setFromEuler(new Euler(MONITOR.tilt, MONITOR.yaw, 0, 'YXZ'));
   const normal = new Vector3(0, 0, 1).applyQuaternion(quaternion);
   const centre = MONITOR.centre.clone().addScaledVector(normal, MONITOR.depth / 2 + 0.0006);
-  return { centre, normal, quaternion, width: MONITOR.screen.width, height: MONITOR.screen.height };
+  const { width, height } = MONITOR.screen;
+  return { centre, normal, quaternion, width: portrait ? height : width, height: portrait ? width : height };
 }
 
 /** World frame of the phone glass (from the prop's matrix). */
@@ -110,9 +118,9 @@ function clamp(value: number, min: number, max: number): number {
  */
 export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId, Framing[]> {
   const portrait = view.width < view.height;
-  const monitor = monitorFrame();
+  const monitor = monitorFrame(portraitMonitor(view));
   const screen = monitor.centre;
-  const screenSpan = MONITOR.screen.width + MONITOR.bezel * 2;
+  const screenSpan = monitor.width + MONITOR.bezel * 2;
   /**
    * The director lays an anchored panel on the side of its anchor away from the frame centre:
    * an anchor right of centre gets the panel on its left. Subjects sit on the opposite side.
@@ -122,19 +130,19 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
   const layoutFor = (side: typeof textLeft) => ({ panel: portrait ? panelBelow : side.panel, sx: portrait ? 0.5 : side.subject });
   const subjectY = portrait ? 0.3 : 0.5;
 
-  const heroDistance = portrait ? clamp(widthFit(screenSpan, 0.94, view), 1.2, 2.3) : HERO_EYE.distanceTo(screen);
+  const heroDistance = portrait ? clamp(widthFit(screenSpan, 0.62, view), 1.2, 2.3) : HERO_EYE.distanceTo(screen);
   const hero: Framing = {
     eye: screen.clone().addScaledVector(monitor.normal, heroDistance),
     focus: screen,
     sx: portrait ? 0.5 : 0.42,
     sy: portrait ? 0.42 : 0.47
   };
-  const aboutDistance = portrait ? heroDistance * 0.94 : clamp(widthFit(screenSpan, 0.7, view), 0.7, heroDistance - 0.25);
+  const aboutDistance = portrait ? clamp(widthFit(screenSpan, 0.86, view), 0.7, heroDistance - 0.2) : clamp(widthFit(screenSpan, 0.7, view), 0.7, heroDistance - 0.25);
   const about: Framing = {
     eye: screen.clone().addScaledVector(monitor.normal, aboutDistance),
     focus: screen,
     sx: 0.5,
-    sy: portrait ? 0.3 : 0.5
+    sy: portrait ? 0.48 : 0.5
   };
 
   const alfaFocus = FIGURES.alfa.clone().add(new Vector3(0, FIGURE_HEIGHT.alfa * 0.5, 0));

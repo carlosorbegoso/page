@@ -39,6 +39,7 @@ import {
   buildDesk,
   buildFigures,
   buildLamp,
+  buildMonitorHead,
   buildOpenFolder,
   buildPhone,
   buildPlant,
@@ -53,6 +54,7 @@ import {
   SUB_SHOTS,
   framings,
   monitorFrame,
+  portraitMonitor,
   panelAnchor,
   phoneFrame,
   toShot,
@@ -70,6 +72,11 @@ import {
 const LIGHT_CALIBRATION = { lamp: 0.4, monitor: 0.16, moon: 3, fill: 5 } as const;
 /** HDR gain of the screen pictures so they stay luminous through ACES / the FX composer. */
 const SCREEN_HDR = 1.8;
+/**
+ * On phones the portrait monitor shows its content at 0.82 of 1:1: 17 px body text reads at
+ * ~14 px and the screen gains ~22 % more CSS room, so the about slides fit without overflow.
+ */
+const PORTRAIT_SCREEN_PROJECTION = 0.82;
 
 interface ChapterLight {
   lamp: number;
@@ -141,6 +148,8 @@ export class DeskSet implements ShotProvider {
   private readonly lightRig = new Group();
   private uniforms!: AtlasUniforms;
   private screen!: Mesh<PlaneGeometry, MeshBasicMaterial>;
+  private monitorHead!: Mesh;
+  private portrait: boolean | null = null;
   private screenTexture!: CanvasTexture;
   private phoneScreen!: Mesh<PlaneGeometry, MeshBasicMaterial>;
   private phoneTexture!: CanvasTexture;
@@ -195,6 +204,18 @@ export class DeskSet implements ShotProvider {
     buildRoom(statics, palette);
     buildDesk(statics, palette, q);
     buildWorkstation(statics, palette, q);
+    const head = new PartBuilder();
+    buildMonitorHead(head, palette, q);
+    const headGeometry = head.build();
+    this.monitorHead = new Mesh(headGeometry, material);
+    this.monitorHead.name = 'desk-monitor';
+    this.monitorHead.castShadow = high;
+    this.monitorHead.receiveShadow = high;
+    const pivot = monitorFrame();
+    this.monitorHead.position.copy(MONITOR.centre);
+    this.monitorHead.quaternion.copy(pivot.quaternion);
+    this.room.add(this.monitorHead);
+    this.disposables.push(headGeometry);
     buildLamp(statics, palette, q);
     buildPlant(statics, palette, q);
     buildShelves(statics, palette, q);
@@ -371,13 +392,14 @@ export class DeskSet implements ShotProvider {
    */
   getSurface(name: SurfaceName): PlateAnchor | null {
     if (!this.context) return null;
-    const frame = name === 'monitor' ? monitorFrame() : this.phoneSurface();
+    const frame = name === 'monitor' ? monitorFrame(portraitMonitor(this.viewport())) : this.phoneSurface();
     const reader: ChapterId = name === 'phone' ? 'contact' : this.chapter === 'about' ? 'about' : 'hero';
     const shot = this.getShot(reader, 0);
     const view = this.viewport();
     if (!shot || view.height <= 0) return null;
     const distance = shot.position.distanceTo(frame.centre);
-    const scale = (2 * distance * Math.tan((view.fov * Math.PI) / 360)) / view.height;
+    const projection = name === 'monitor' && portraitMonitor(view) ? PORTRAIT_SCREEN_PROJECTION : 1;
+    const scale = (2 * distance * Math.tan((view.fov * Math.PI) / 360)) / view.height * projection;
     return {
       position: frame.centre.clone().addScaledVector(frame.normal, 0.0015),
       quaternion: frame.quaternion.clone(),
@@ -445,6 +467,7 @@ export class DeskSet implements ShotProvider {
       this.subIndex = state.subIndex;
     }
     let settling = false;
+    this.syncOrientation();
     const light = CHAPTER_LIGHT[this.chapter];
     const level = this.level;
     if (this.chapter === 'intro' && motion) {
@@ -503,6 +526,22 @@ export class DeskSet implements ShotProvider {
     return settling;
   }
 
+  /** Pivots the monitor head (and its screen picture) to portrait on narrow viewports; re-bakes the shadow. */
+  private syncOrientation(): void {
+    const portrait = portraitMonitor(this.viewport());
+    if (portrait === this.portrait) return;
+    this.portrait = portrait;
+    this.monitorHead.rotation.z = 0;
+    this.monitorHead.quaternion.copy(monitorFrame().quaternion);
+    if (portrait) this.monitorHead.rotateZ(Math.PI / 2);
+    const frame = monitorFrame(portrait);
+    this.screen.geometry.dispose();
+    this.screen.geometry = new PlaneGeometry(frame.width, frame.height);
+    drawScreen(this.screenTexture, frame.width / frame.height, tokenColor('--color-monitor-glow', '#7fb8ff'));
+    if (this.context.tier === 'high') this.context.renderer.shadowMap.needsUpdate = true;
+    this.context.invalidate();
+  }
+
   private applyLevels(): void {
     const level = this.level;
     this.lamp.intensity = level.lamp * LIGHT_CALIBRATION.lamp;
@@ -542,6 +581,7 @@ export class DeskSet implements ShotProvider {
   }
 
   dispose(): void {
+    this.screen?.geometry.dispose();
     for (const item of this.disposables) item.dispose();
     this.disposables.length = 0;
     this.object3D.removeFromParent();

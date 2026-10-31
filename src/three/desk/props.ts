@@ -5,7 +5,6 @@ import {
   Color,
   ConeGeometry,
   CylinderGeometry,
-  Euler,
   ExtrudeGeometry,
   LatheGeometry,
   Matrix4,
@@ -279,7 +278,7 @@ export function buildDesk(b: PartBuilder, p: Palette, q: Quality): void {
 
 /** Monitor stand (static) and the keyboard group in front of it. */
 export function buildWorkstation(b: PartBuilder, p: Palette, q: Quality): void {
-  const { centre, yaw, tilt } = MONITOR;
+  const { centre, yaw } = MONITOR;
   const back = new Vector3(Math.sin(yaw), 0, Math.cos(yaw)).multiplyScalar(-0.075);
   const baseCentre = new Vector3(centre.x, DESK.top + 0.005, centre.z).add(back.clone().multiplyScalar(0.3));
   b.add(new RoundedBoxGeometry(0.25, 0.01, 0.18, 2, 0.0045), p.metal, { position: baseCentre.toArray(), rotation: [0, yaw, 0] });
@@ -288,13 +287,6 @@ export function buildWorkstation(b: PartBuilder, p: Palette, q: Quality): void {
     position: [columnBase.x, (DESK.top + centre.y + 0.04) / 2, columnBase.z],
     rotation: [0, yaw, 0]
   });
-  const head = new Matrix4().compose(centre, new Quaternion().setFromEuler(new Euler(tilt, yaw, 0, 'YXZ')), new Vector3(1, 1, 1));
-  const local = (x: number, y: number, z: number) => new Matrix4().multiplyMatrices(head, new Matrix4().makeTranslation(x, y, z));
-  const { width, height } = MONITOR.screen;
-  const e = MONITOR.bezel;
-  b.add(new RoundedBoxGeometry(width + 2 * e, height + 2 * e, MONITOR.depth, seg(2, q, 1), 0.003), p.bezel, head);
-  b.add(new RoundedBoxGeometry(width * 0.72, height * 0.75, 0.03, seg(3, q, 2), 0.012), p.bezel, local(0, 0, -MONITOR.depth / 2 - 0.012));
-  b.add(new RoundedBoxGeometry(0.11, 0.11, 0.012, 1, 0.004), p.metal, local(0, 0, -MONITOR.depth / 2 - 0.032));
 
   const keyboard = new Vector3(KEYBOARD.x, DESK.top, KEYBOARD.z);
   const kb = new Matrix4().compose(keyboard, new Quaternion(), new Vector3(1, 1, 1));
@@ -330,6 +322,15 @@ export function buildWorkstation(b: PartBuilder, p: Palette, q: Quality): void {
     position: [MUG.x + 0.04, MUG.y + 0.048, MUG.z],
     rotation: [0, 0, -Math.PI / 2]
   });
+}
+
+/** Monitor head (bezel, housing, VESA plate) centred on the screen, facing +Z: a separate mesh that pivots to portrait. */
+export function buildMonitorHead(b: PartBuilder, p: Palette, q: Quality): void {
+  const { width, height } = MONITOR.screen;
+  const e = MONITOR.bezel;
+  b.add(new RoundedBoxGeometry(width + 2 * e, height + 2 * e, MONITOR.depth, seg(2, q, 1), 0.003), p.bezel);
+  b.add(new RoundedBoxGeometry(width * 0.72, height * 0.75, 0.03, seg(3, q, 2), 0.012), p.bezel, { position: [0, 0, -MONITOR.depth / 2 - 0.012] });
+  b.add(new RoundedBoxGeometry(0.11, 0.11, 0.012, 1, 0.004), p.metal, { position: [0, 0, -MONITOR.depth / 2 - 0.032] });
 }
 
 /** Open TCS folder (linen boards, a few sheets) left of the keyboard. */

@@ -30,7 +30,7 @@ import { balanceGains, ChapterGrading } from './grading';
 import { GpuTimer } from './gpuTimer';
 import { guessTier, readFxTokens, tierProfile, type FxTokens, type TierProfile } from './settings';
 import { ToneCompensation } from './toneCompensation';
-import { BLOOM_DOWN_FRAG, BLOOM_UP_FRAG, COMPOSITE_FRAG, dofFrag, FULLSCREEN_VERT } from './shaders';
+import { BLOOM_DOWN_FRAG, BLOOM_UP_FRAG, COMPOSITE_FRAG, dofFrag, FULLSCREEN_VERT, STREAK_FRAG } from './shaders';
 
 export type FxFeature = 'fluid' | 'dof';
 
@@ -100,6 +100,7 @@ interface Targets {
   dof: WebGLRenderTarget | null;
   down: WebGLRenderTarget[];
   up: WebGLRenderTarget[];
+  streak: [WebGLRenderTarget, WebGLRenderTarget] | null;
 }
 
 class CinematicPipeline implements CinematicFx {
@@ -152,6 +153,12 @@ class CinematicPipeline implements CinematicFx {
     uTexel: { value: new Vector2() },
     uRadius: { value: 0.45 }
   });
+  private readonly streak = material(STREAK_FRAG, {
+    tInput: { value: null },
+    uTexel: { value: new Vector2() },
+    uStride: { value: 1 },
+    uKeep: { value: 0 }
+  });
   private dof: ShaderMaterial | null = null;
   private readonly composite = material(
     COMPOSITE_FRAG,
@@ -160,15 +167,19 @@ class CinematicPipeline implements CinematicFx {
       tDepth: { value: null },
       tDof: { value: null },
       tBloom: { value: null },
+      tStreak: { value: null },
       uNear: { value: 0.1 },
       uFar: { value: 60 },
       uFocus: { value: 5 },
       uRange: { value: 2.5 },
       uDofAmount: { value: 0 },
       uBloomStrength: { value: 0.32 },
+      uStreakStrength: { value: 0 },
+      uAberration: { value: 0 },
       uExposure: { value: 1 },
       uBalance: { value: this.balance },
       uSplit: { value: 0.2 },
+      uContrast: { value: 0 },
       uVignetteDarkness: { value: 0.3 },
       uVignetteOffset: { value: 0.32 },
       uGrain: { value: 0.035 },
@@ -296,6 +307,7 @@ class CinematicPipeline implements CinematicFx {
 
     if (targets.dof && this.dofAmount > 0.001) this.renderDof(renderer, targets, camera);
     this.renderBloom(renderer, targets);
+    this.renderStreak(renderer, targets);
 
     const u = this.composite.uniforms;
     const { tokens } = this;
@@ -303,6 +315,10 @@ class CinematicPipeline implements CinematicFx {
     u.tDepth!.value = targets.scene.depthTexture;
     u.tDof!.value = targets.dof?.texture ?? targets.scene.texture;
     u.tBloom!.value = (targets.up[0] ?? targets.down[0])!.texture;
+    u.tStreak!.value = targets.streak ? targets.streak[1].texture : (targets.up[0] ?? targets.down[0])!.texture;
+    u.uStreakStrength!.value = targets.streak ? tokens.streakStrength : 0;
+    u.uAberration!.value = tokens.aberration;
+    u.uContrast!.value = grade.contrast;
     u.uNear!.value = camera.near;
     u.uFar!.value = camera.far;
     u.uFocus!.value = this.focusDistance;
@@ -418,7 +434,7 @@ class CinematicPipeline implements CinematicFx {
     u.uRange!.value = this.grading.value.focusRange;
     (u.uTexel!.value as Vector2).set(1 / dofTarget.width, 1 / dofTarget.height);
     const bokeh = this.tokens.bokeh;
-    u.uMaxRadius!.value = (bokeh * 3 * (targets.height / 1080)) / this.profile.dofDivisor;
+    u.uMaxRadius!.value = (bokeh * this.grading.value.bokeh * 3 * (targets.height / 1080)) / this.profile.dofDivisor;
     this.timer?.begin('dof');
     this.quad.material = this.dof;
     renderer.setRenderTarget(dofTarget);
@@ -456,6 +472,29 @@ class CinematicPipeline implements CinematicFx {
     this.timer?.end();
   }
 
+  /** Two horizontal passes over the bloom's bright pass: short stride, then long stride. */
+  private renderStreak(renderer: WebGLRenderer, targets: Targets): void {
+    const pair = targets.streak;
+    const source = targets.down[0];
+    if (!pair || !source) return;
+    const u = this.streak.uniforms;
+    this.timer?.begin('streak');
+    this.quad.material = this.streak;
+    const passes: Array<[WebGLRenderTarget, WebGLRenderTarget, number, number]> = [
+      [source, pair[0], 1.5, this.tokens.streakThreshold],
+      [pair[0], pair[1], 9, 0]
+    ];
+    for (const [input, output, stride, keep] of passes) {
+      u.tInput!.value = input.texture;
+      (u.uTexel!.value as Vector2).set(1 / output.width, 1 / output.height);
+      u.uStride!.value = stride;
+      u.uKeep!.value = keep;
+      renderer.setRenderTarget(output);
+      this.quad.render(renderer);
+    }
+    this.timer?.end();
+  }
+
   private ensureTargets(renderer: WebGLRenderer): Targets {
     renderer.getDrawingBufferSize(this.bufferSize);
     const width = Math.max(1, Math.floor(this.bufferSize.x));
@@ -488,7 +527,10 @@ class CinematicPipeline implements CinematicFx {
       h = Math.max(1, Math.ceil(h / 2));
     }
     const up = down.slice(0, -1).map(t => colorTarget(t.width, t.height));
-    this.targets = { width, height, scene, dof, down, up };
+    const streakWidth = Math.ceil(width / (this.profile.bloomDivisor * 2));
+    const streakHeight = Math.ceil(height / (this.profile.bloomDivisor * 2));
+    const streak: Targets['streak'] = this.profile.streak && down.length > 0 ? [colorTarget(streakWidth, streakHeight), colorTarget(streakWidth, streakHeight)] : null;
+    this.targets = { width, height, scene, dof, down, up, streak };
     return this.targets;
   }
 
@@ -498,7 +540,7 @@ class CinematicPipeline implements CinematicFx {
     t.scene.depthTexture?.dispose();
     t.scene.dispose();
     t.dof?.dispose();
-    for (const target of [...t.down, ...t.up]) target.dispose();
+    for (const target of [...t.down, ...t.up, ...(t.streak ?? [])]) target.dispose();
     this.targets = null;
   }
 
@@ -562,6 +604,7 @@ class CinematicPipeline implements CinematicFx {
     this.timer = null;
     this.down.dispose();
     this.up.dispose();
+    this.streak.dispose();
     this.dof?.dispose();
     this.composite.dispose();
     this.quad.dispose();

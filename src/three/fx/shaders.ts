@@ -78,6 +78,35 @@ void main() {
 }
 `;
 
+/**
+ * Anamorphic streak: a wide horizontal blur of the bloom's bright pass, run twice (short then long
+ * stride) at low resolution. `uKeep` re-thresholds the first pass so only the brightest points streak.
+ */
+export const STREAK_FRAG = /* glsl */ `
+uniform sampler2D tInput;
+uniform vec2 uTexel;
+uniform float uStride;
+uniform float uKeep;
+varying vec2 vUv;
+float luma(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
+vec3 bright(vec2 uv) {
+  vec3 c = texture2D(tInput, uv).rgb;
+  return uKeep > 0.0 ? c * smoothstep(uKeep, uKeep * 1.6, luma(c)) : c;
+}
+void main() {
+  vec3 sum = bright(vUv);
+  float total = 1.0;
+  for (int i = 1; i <= 8; i++) {
+    float fi = float(i);
+    float w = exp(-fi * 0.35);
+    vec2 offset = vec2(fi * uStride * uTexel.x, 0.0);
+    sum += (bright(vUv + offset) + bright(vUv - offset)) * w;
+    total += 2.0 * w;
+  }
+  gl_FragColor = vec4(sum / total, 1.0);
+}
+`;
+
 /** Gather bokeh on a golden-angle disc; background samples are clamped to the centre CoC so they never bleed over sharp foreground. */
 export function dofFrag(taps: number): string {
   return /* glsl */ `
@@ -107,17 +136,21 @@ void main() {
 `;
 }
 
-/** Fused final pass: DoF mix, bloom, chapter grade, renderer tone mapping, vignette, grain. */
+/** Fused final pass: chromatic fringe, DoF mix, bloom and streak, chapter grade, renderer tone mapping, contrast, vignette, grain. */
 export const COMPOSITE_FRAG = /* glsl */ `
 ${COC_CHUNK}
 uniform sampler2D tScene;
 uniform sampler2D tDof;
 uniform sampler2D tBloom;
+uniform sampler2D tStreak;
 uniform float uDofAmount;
 uniform float uBloomStrength;
+uniform float uStreakStrength;
+uniform float uAberration;
 uniform float uExposure;
 uniform vec3 uBalance;
 uniform float uSplit;
+uniform float uContrast;
 uniform float uVignetteDarkness;
 uniform float uVignetteOffset;
 uniform float uGrain;
@@ -125,8 +158,10 @@ uniform float uSeed;
 varying vec2 vUv;
 
 const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
-const vec3 SHADOW_TINT = vec3(0.92, 0.98, 1.08);
-const vec3 HIGHLIGHT_TINT = vec3(1.07, 1.0, 0.9);
+const vec3 SHADOW_TINT = vec3(0.84, 1.0, 1.07);
+const vec3 HIGHLIGHT_TINT = vec3(1.1, 0.99, 0.84);
+const vec3 STREAK_TINT = vec3(0.55, 0.8, 1.25);
+const vec3 BLACK_FLOOR = vec3(0.006, 0.011, 0.016);
 
 float hash(vec2 p) {
   vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -135,7 +170,10 @@ float hash(vec2 p) {
 }
 
 void main() {
-  vec3 color = texture2D(tScene, vUv).rgb;
+  vec2 fromCentre = vUv - 0.5;
+  // Lens fringe only towards the corners: the text column and the subject stay clean.
+  vec2 fringe = fromCentre * dot(fromCentre, fromCentre) * uAberration;
+  vec3 color = vec3(texture2D(tScene, vUv + fringe).r, texture2D(tScene, vUv).g, texture2D(tScene, vUv - fringe).b);
 
   if (uDofAmount > 0.001) {
     float coc = abs(circleOfConfusion(vUv));
@@ -143,6 +181,7 @@ void main() {
   }
 
   color += texture2D(tBloom, vUv).rgb * uBloomStrength;
+  color += texture2D(tStreak, vUv).rgb * STREAK_TINT * uStreakStrength;
 
   color *= uExposure * uBalance;
   // Split toning on a Reinhard-compressed luma, so HDR highlights do not saturate the weight.
@@ -154,11 +193,14 @@ void main() {
   #include <tonemapping_fragment>
   #include <colorspace_fragment>
 
-  float d = distance(vUv, vec2(0.5));
-  gl_FragColor.rgb *= smoothstep(0.8, uVignetteOffset * 0.799, d * (uVignetteDarkness + uVignetteOffset));
+  vec3 c = gl_FragColor.rgb;
+  c = mix(c, c * c * (3.0 - 2.0 * c), uContrast);
+  c = max(c, BLACK_FLOOR * (1.0 - c));
+
+  float d = length(fromCentre);
+  c *= smoothstep(0.8, uVignetteOffset * 0.799, d * (uVignetteDarkness + uVignetteOffset));
 
   // Overlay blend with mono noise, weighted towards the shadows.
-  vec3 c = gl_FragColor.rgb;
   float n = hash(gl_FragCoord.xy + uSeed * 37.0);
   vec3 overlay = mix(2.0 * c * n, 1.0 - 2.0 * (1.0 - c) * (1.0 - n), step(0.5, c));
   float shadows = 1.0 - 0.6 * dot(c, LUMA);

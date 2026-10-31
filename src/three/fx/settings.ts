@@ -12,6 +12,10 @@ export interface FxTokens {
   vignetteOffset: number;
   bokeh: number;
   pointerDamping: number;
+  streakStrength: number;
+  streakThreshold: number;
+  /** Radial lens fringe at the corners (UV); the centre of the frame stays clean. */
+  aberration: number;
 }
 
 export function readFxTokens(): FxTokens {
@@ -24,7 +28,10 @@ export function readFxTokens(): FxTokens {
     vignetteDarkness: tokenNumber('--fx-vignette-darkness', 0.5),
     vignetteOffset: tokenNumber('--fx-vignette-offset', 0.32),
     bokeh: tokenNumber('--fx-dof-bokeh-scale', 2.5),
-    pointerDamping: tokenNumber('--fx-pointer-damping', 0.06)
+    pointerDamping: tokenNumber('--fx-pointer-damping', 0.06),
+    streakStrength: 0.3,
+    streakThreshold: 1.8,
+    aberration: 0.01
   };
 }
 
@@ -39,6 +46,7 @@ export interface TierProfile {
   dof: DofMode;
   dofDivisor: number;
   dofTaps: number;
+  streak: boolean;
   fluidSize: number;
   pressureIterations: number;
   vorticity: boolean;
@@ -56,7 +64,8 @@ const PROFILES: Record<Tier, TierProfile> = {
     bloomLevels: 5,
     dof: 'full',
     dofDivisor: 2,
-    dofTaps: 24,
+    dofTaps: 32,
+    streak: true,
     fluidSize: 256,
     pressureIterations: 10,
     vorticity: true,
@@ -71,6 +80,7 @@ const PROFILES: Record<Tier, TierProfile> = {
     dof: 'lite',
     dofDivisor: 4,
     dofTaps: 12,
+    streak: true,
     fluidSize: 128,
     pressureIterations: 6,
     vorticity: false,
@@ -90,6 +100,7 @@ function disabledProfile(): TierProfile {
     dof: 'off',
     dofDivisor: 4,
     dofTaps: 0,
+    streak: false,
     fluidSize: 0,
     pressureIterations: 0,
     vorticity: false,

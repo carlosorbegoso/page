@@ -18,7 +18,11 @@
       "role": "Co-founder",
       "tagline": "Digital invitations and gift registry",
       "description": "Digital invitations and a gift registry with contributions via Yape. Creating an event is free.",
-      "features": ["Digital invitations", "Gift registry with Yape contributions", "Creating an event is free"]
+      "features": [
+        "Digital invitations",
+        "Gift registry with Yape contributions",
+        "Creating an event is free"
+      ]
     },
     {
       "id": "ventixs",

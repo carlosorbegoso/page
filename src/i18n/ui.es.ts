@@ -4,7 +4,7 @@ export const es = {
     'Backend Developer en Java y Quarkus en TCS para BCP. Cofundador de TUSOCIO IA, la empresa detrás de SkyMek, Parati y Ventixs.',
   'meta.ogImage': 'images/og-image.jpg',
   'meta.ogImageAlt': 'Carlos Orbegoso, Backend Developer',
-  'skipLink': 'Saltar al contenido',
+  skipLink: 'Saltar al contenido',
   'nav.label': 'Navegación principal',
   'nav.about': 'Sobre mí',
   'nav.company': 'TUSOCIO IA',

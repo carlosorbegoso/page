@@ -20,29 +20,27 @@ const statusLabel = {
 <section id={SECTION_IDS.products} aria-labelledby="products-title">
   <h2 id="products-title">{t('products.title')}</h2>
   <ul>
-    {
-      products.map(product => (
-        <li data-product={product.id}>
-          <article aria-labelledby={`product-${product.id}`}>
-            <h3 id={`product-${product.id}`}>{product.name}</h3>
-            <p>{product.tagline}</p>
-            <p>
-              <span data-status={product.status}>{statusLabel[product.status]}</span> · {product.role}
-            </p>
-            <p>{product.description}</p>
-            {product.features.length > 0 && (
-              <ul>
-                {product.features.map(feature => (
-                  <li>{feature}</li>
-                ))}
-              </ul>
-            )}
-            <ExternalLink href={product.url} locale={locale}>
-              {t('products.visit')} {new URL(product.url).hostname}
-            </ExternalLink>
-          </article>
-        </li>
-      ))
-    }
+    {products.map(product => (
+      <li data-product={product.id}>
+        <article aria-labelledby={`product-${product.id}`}>
+          <h3 id={`product-${product.id}`}>{product.name}</h3>
+          <p>{product.tagline}</p>
+          <p>
+            <span data-status={product.status}>{statusLabel[product.status]}</span> · {product.role}
+          </p>
+          <p>{product.description}</p>
+          {product.features.length > 0 && (
+            <ul>
+              {product.features.map(feature => (
+                <li>{feature}</li>
+              ))}
+            </ul>
+          )}
+          <ExternalLink href={product.url} locale={locale}>
+            {t('products.visit')} {new URL(product.url).hostname}
+          </ExternalLink>
+        </article>
+      </li>
+    ))}
   </ul>
 </section>

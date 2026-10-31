@@ -23,13 +23,11 @@ const links = [
   <a href={`${home}#${SECTION_IDS.hero}`}>{SITE.name}</a>
   <nav aria-label={t('nav.label')}>
     <ul>
-      {
-        links.map(link => (
-          <li>
-            <a href={`#${link.id}`}>{link.label}</a>
-          </li>
-        ))
-      }
+      {links.map(link => (
+        <li>
+          <a href={`#${link.id}`}>{link.label}</a>
+        </li>
+      ))}
     </ul>
   </nav>
   <LangSwitch locale={locale} />

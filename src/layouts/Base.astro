@@ -27,7 +27,10 @@ const description = Astro.props.description ?? t('meta.description');
 const site = Astro.site!;
 const absolute = (path: string) => new URL(path, site).href;
 const canonical = absolute(Astro.url.pathname);
-const alternates = LOCALES.map(l => ({ hreflang: LOCALE_TAGS[l].bcp47, href: absolute(localeUrl(l)) }));
+const alternates = LOCALES.map(l => ({
+  hreflang: LOCALE_TAGS[l].bcp47,
+  href: absolute(localeUrl(l))
+}));
 const xDefault = absolute(localeUrl(DEFAULT_LOCALE));
 const ogImage = absolute(withBase(t('meta.ogImage')));
 const homeUrl = absolute(localeUrl(locale));
@@ -52,7 +55,16 @@ const jsonLd = {
       },
       worksFor: { '@type': 'Organization', name: 'Tata Consultancy Services' },
       sameAs: [SITE.social.linkedin, SITE.social.github, SITE.social.x],
-      knowsAbout: ['Java', 'Quarkus', 'Spring Boot', 'Microservices', 'PostgreSQL', 'Docker', 'Kubernetes', 'AWS']
+      knowsAbout: [
+        'Java',
+        'Quarkus',
+        'Spring Boot',
+        'Microservices',
+        'PostgreSQL',
+        'Docker',
+        'Kubernetes',
+        'AWS'
+      ]
     },
     {
       '@type': 'Organization',
@@ -83,37 +95,35 @@ const jsonLd = {
     <meta name="author" content={SITE.name} />
     <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
     <link rel="manifest" href={withBase('manifest.json')} />
-    {
-      indexable ? (
-        <>
-          <link rel="canonical" href={canonical} />
-          {alternates.map(alt => (
-            <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
-          ))}
-          <link rel="alternate" hreflang="x-default" href={xDefault} />
-          <meta property="og:type" content="website" />
-          <meta property="og:url" content={canonical} />
-          <meta property="og:site_name" content={SITE.name} />
-          <meta property="og:title" content={title} />
-          <meta property="og:description" content={description} />
-          <meta property="og:image" content={ogImage} />
-          <meta property="og:image:type" content="image/jpeg" />
-          <meta property="og:image:alt" content={t('meta.ogImageAlt')} />
-          <meta property="og:locale" content={LOCALE_TAGS[locale].og} />
-          {LOCALES.filter(l => l !== locale).map(l => (
-            <meta property="og:locale:alternate" content={LOCALE_TAGS[l].og} />
-          ))}
-          <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:creator" content={SITE.handle} />
-          <meta name="twitter:title" content={title} />
-          <meta name="twitter:description" content={description} />
-          <meta name="twitter:image" content={ogImage} />
-          <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
-        </>
-      ) : (
-        <meta name="robots" content="noindex" />
-      )
-    }
+    {indexable ? (
+      <>
+        <link rel="canonical" href={canonical} />
+        {alternates.map(alt => (
+          <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
+        ))}
+        <link rel="alternate" hreflang="x-default" href={xDefault} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:site_name" content={SITE.name} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:image:type" content="image/jpeg" />
+        <meta property="og:image:alt" content={t('meta.ogImageAlt')} />
+        <meta property="og:locale" content={LOCALE_TAGS[locale].og} />
+        {LOCALES.filter(l => l !== locale).map(l => (
+          <meta property="og:locale:alternate" content={LOCALE_TAGS[l].og} />
+        ))}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:creator" content={SITE.handle} />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={ogImage} />
+        <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
+      </>
+    ) : (
+      <meta name="robots" content="noindex" />
+    )}
   </head>
   <body>
     <SkipLink label={t('skipLink')} />

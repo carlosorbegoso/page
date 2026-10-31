@@ -6,7 +6,11 @@ const es = useTranslations('es');
 const en = useTranslations('en');
 ---
 
-<Base locale="es" title={`404 · ${es('notFound.title')} / ${en('notFound.title')}`} indexable={false}>
+<Base
+  locale="es"
+  title={`404 · ${es('notFound.title')} / ${en('notFound.title')}`}
+  indexable={false}
+>
   <main id="main" tabindex="-1">
     <h1>404</h1>
     <section aria-labelledby="not-found-es">

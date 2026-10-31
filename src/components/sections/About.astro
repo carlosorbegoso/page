@@ -22,26 +22,26 @@ const profile = await getProfile(locale);
     loading="lazy"
     decoding="async"
   />
-  {profile.summary.map(paragraph => <p>{paragraph}</p>)}
+  {profile.summary.map(paragraph => (
+    <p>{paragraph}</p>
+  ))}
   <h3>{t('about.education')}</h3>
   <p>
     {profile.education.degree} · {profile.education.institution} · {profile.education.status}
   </p>
   <h3>{t('about.stack')}</h3>
   <dl>
-    {
-      profile.stack.map(group => (
-        <>
-          <dt>{group.category}</dt>
-          <dd>
-            <ul>
-              {group.items.map(item => (
-                <li>{item}</li>
-              ))}
-            </ul>
-          </dd>
-        </>
-      ))
-    }
+    {profile.stack.map(group => (
+      <>
+        <dt>{group.category}</dt>
+        <dd>
+          <ul>
+            {group.items.map(item => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        </dd>
+      </>
+    ))}
   </dl>
 </section>

@@ -23,7 +23,10 @@
     ]
   },
   "stack": [
-    { "category": "Backend", "items": ["Java 17+", "Quarkus", "Spring Boot", "Microservicios", "APIs REST"] },
+    {
+      "category": "Backend",
+      "items": ["Java 17+", "Quarkus", "Spring Boot", "Microservicios", "APIs REST"]
+    },
     { "category": "DevOps y cloud", "items": ["Docker", "Kubernetes", "AWS", "CI/CD"] },
     { "category": "Bases de datos", "items": ["PostgreSQL", "MongoDB", "Redis"] }
   ]

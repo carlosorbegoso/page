@@ -23,15 +23,15 @@ const socials = [
     <li>
       {t('contact.email')}: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
     </li>
-    {
-      socials.map(social => (
-        <li>
-          <ExternalLink href={social.href} locale={locale}>
-            {social.label}
-          </ExternalLink>
-        </li>
-      ))
-    }
-    <li><CvLink locale={locale} /></li>
+    {socials.map(social => (
+      <li>
+        <ExternalLink href={social.href} locale={locale}>
+          {social.label}
+        </ExternalLink>
+      </li>
+    ))}
+    <li>
+      <CvLink locale={locale} />
+    </li>
   </ul>
 </section>

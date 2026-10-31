@@ -8,16 +8,8 @@
       "start": "2025-06",
       "end": null,
       "summary": "Desarrollo de soluciones empresariales y microservicios con Spring Boot y Quarkus para BCP. Arquitecturas cloud-native y optimización de rendimiento en sistemas de gran escala.",
-      "highlights": [
-        "Soluciones de nivel empresarial",
-        "Arquitectura cloud-native"
-      ],
-      "stack": [
-        "Spring Boot",
-        "Quarkus",
-        "Microservicios",
-        "Cloud native"
-      ]
+      "highlights": ["Soluciones de nivel empresarial", "Arquitectura cloud-native"],
+      "stack": ["Spring Boot", "Quarkus", "Microservicios", "Cloud native"]
     },
     {
       "id": "intercorp-retail",
@@ -26,16 +18,8 @@
       "start": "2024-04",
       "end": "2025-06",
       "summary": "Desarrollo de servicios backend para soluciones de retail. Aplicaciones escalables para uno de los grupos de retail más grandes del Perú.",
-      "highlights": [
-        "Desarrollo backend",
-        "Integración de sistemas de retail"
-      ],
-      "stack": [
-        "Java",
-        "SQL",
-        "Spring Boot",
-        "APIs REST"
-      ]
+      "highlights": ["Desarrollo backend", "Integración de sistemas de retail"],
+      "stack": ["Java", "SQL", "Spring Boot", "APIs REST"]
     },
     {
       "id": "baufest",
@@ -49,13 +33,7 @@
         "Dashboards de observabilidad",
         "Implementación de seguridad"
       ],
-      "stack": [
-        "Java",
-        "Microservicios",
-        "New Relic",
-        "Docker",
-        "SQL Server"
-      ]
+      "stack": ["Java", "Microservicios", "New Relic", "Docker", "SQL Server"]
     },
     {
       "id": "sysarp",
@@ -64,16 +42,8 @@
       "start": "2020-01",
       "end": "2021-12",
       "summary": "Diseño y desarrollo de aplicaciones web intuitivas, con código limpio, optimización de carga y compatibilidad entre navegadores y dispositivos.",
-      "highlights": [
-        "Desarrollo de aplicaciones web",
-        "Optimización de rendimiento"
-      ],
-      "stack": [
-        "JavaScript",
-        "Java",
-        "HTML/CSS",
-        "Diseño responsive"
-      ]
+      "highlights": ["Desarrollo de aplicaciones web", "Optimización de rendimiento"],
+      "stack": ["JavaScript", "Java", "HTML/CSS", "Diseño responsive"]
     }
   ]
 }

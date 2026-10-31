@@ -18,7 +18,11 @@
       "role": "Cofundador",
       "tagline": "Invitaciones digitales y mesa de regalos",
       "description": "Invitaciones digitales y mesa de regalos con aportes por Yape. Crear un evento es gratis.",
-      "features": ["Invitaciones digitales", "Mesa de regalos con aportes por Yape", "Crear un evento es gratis"]
+      "features": [
+        "Invitaciones digitales",
+        "Mesa de regalos con aportes por Yape",
+        "Crear un evento es gratis"
+      ]
     },
     {
       "id": "ventixs",

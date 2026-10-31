@@ -46,6 +46,8 @@ export interface PlateHost {
   /** Module-provided anchor for a plate (desk monitor, …). */
   anchorFor(station: StationId, plateId: string): PlateAnchor | null;
   onActivePlate(station: StationId, plate: HTMLElement): void;
+  /** Section heights changed (plate content resized): scroll triggers must be refreshed. */
+  onLayoutChange(): void;
   invalidate(): void;
 }
 
@@ -75,6 +77,7 @@ export class Plates {
   constructor(private readonly host: PlateHost) {
     this.resizeObserver = new ResizeObserver(() => {
       this.measure();
+      this.host.onLayoutChange();
       this.host.invalidate();
     });
   }
@@ -139,7 +142,7 @@ export class Plates {
   unmount(): void {
     this.resizeObserver.disconnect();
     this.renderer.domElement.removeEventListener('focusin', this.onFocusIn);
-    for (const { plate, parent, next } of this.origins) {
+    for (const { plate, parent, next } of [...this.origins].reverse()) {
       plate.removeAttribute('data-active');
       plate.removeAttribute('data-dormant');
       plate.style.removeProperty('opacity');

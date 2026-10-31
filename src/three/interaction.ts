@@ -2,7 +2,7 @@ import { Raycaster, Vector2, type PerspectiveCamera } from 'three';
 import type { WorldHit, WorldScene } from './scenes/WorldScene';
 
 const UI_SELECTOR =
-  'a, button, input, textarea, select, label, summary, [role="button"], [tabindex]:not([tabindex="-1"]), [contenteditable], [data-panel], [data-plate]';
+  'a, button, input, textarea, select, label, summary, [role="button"], [tabindex]:not([tabindex="-1"]), [contenteditable], [data-panel], [data-plate], [data-station-plates]';
 
 export interface InteractionOptions {
   world: WorldScene;

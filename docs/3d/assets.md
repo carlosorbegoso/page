@@ -53,7 +53,7 @@ Hoy son **procedurales** (`src/three/mascots/*`), según `docs/design/mascots.md
 3. `brew install ktx` (KTX-Software) y `bun run assets`. Genera `public/models/<id>.high.<hash>.glb` (≤ 25 k tris, 1024 px) y `<id>.mid.<hash>.glb` (≤ 8 k tris, 512 px), copia el transcoder Basis a `public/decoders/basis/` y reescribe `src/three/models.generated.ts`.
 4. Nada más: `createMascot()` elige la variante por tier **antes del fetch** y usa el GLB si está en el manifiesto. Las escenas no cambian.
 
-Pipeline verificado con un GLB sintético (esfera de 28.8 k tris): `high` 25 k tris / 106 KB, `mid` 8 k tris / 30 KB, carga correcta en runtime (28 843 tris en `renderer.info`). Sin `ktx` instalado las texturas conservan su formato (aviso en consola).
+Pipeline verificado con un GLB sintético (esfera de 28.8 k tris): `high` ≤ 25 k tris (≈ 100 KB), `mid` 8 k tris / 30 KB, carga correcta en runtime (28 843 tris en `renderer.info`). Sin `ktx` instalado las texturas conservan su formato (aviso en consola).
 
 ### Checklist de intake por modelo
 

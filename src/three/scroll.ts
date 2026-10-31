@@ -45,8 +45,15 @@ export async function setupScroll(stage: Stage): Promise<() => void> {
 
   build();
   const offMotion = stage.onMotionChange(() => build());
+  let refreshTimer: ReturnType<typeof setTimeout> | undefined;
+  const offLayout = stage.onLayoutChange(() => {
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(() => ScrollTrigger.refresh(), 100);
+  });
   return () => {
     offMotion();
+    offLayout();
+    clearTimeout(refreshTimer);
     for (const tween of tweens) tween.kill();
   };
 }

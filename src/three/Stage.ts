@@ -92,6 +92,7 @@ export class Stage {
   private station = 0;
   private debug: DebugOverlay | undefined;
   private readonly cleanups: Array<() => void> = [];
+  private readonly layoutListeners = new Set<() => void>();
   private readonly motionListeners = new Set<(state: MotionState) => void>();
   private fadeTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -176,6 +177,9 @@ export class Stage {
       pointer: () => (this.finePointer && this.idleMotion() ? this.pointer : { x: 0, y: 0 }),
       anchorFor: (station, plateId) => this.world.plateAnchor(station, plateId),
       onActivePlate: (station, plate) => this.onActivePlate(station, plate),
+      onLayoutChange: () => {
+        for (const listener of this.layoutListeners) listener();
+      },
       invalidate: () => this.invalidate()
     });
     if (!plates.mount()) return;
@@ -322,6 +326,12 @@ export class Stage {
     this.running = true;
     this.lastFrame = -1;
     this.renderer.setAnimationLoop(now => this.frame(now));
+  }
+
+  /** Called when plate heights change the page layout (debounce on the listener side). */
+  onLayoutChange(listener: () => void): () => void {
+    this.layoutListeners.add(listener);
+    return () => this.layoutListeners.delete(listener);
   }
 
   onMotionChange(listener: (state: MotionState) => void): () => void {

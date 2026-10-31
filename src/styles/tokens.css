@@ -252,8 +252,8 @@
   }
 }
 
-/* Same overrides behind the visible "pause animation" control (WCAG 2.2.2), which sets data-motion on <html>. */
-:root[data-motion='reduced'] {
+/* Same overrides behind the visible "pause animation" control (WCAG 2.2.2), which sets data-motion="paused" on <html>. */
+:root[data-motion='paused'] {
   --duration-instant: 0.01ms;
   --duration-fast: 0.01ms;
   --duration-base: 0.01ms;
@@ -261,9 +261,9 @@
   --duration-scene: 0.01ms;
 }
 
-:root[data-motion='reduced'] *,
-:root[data-motion='reduced'] ::before,
-:root[data-motion='reduced'] ::after {
+:root[data-motion='paused'] *,
+:root[data-motion='paused'] ::before,
+:root[data-motion='paused'] ::after {
   animation-duration: 0.01ms !important;
   animation-iteration-count: 1 !important;
   transition-duration: 0.01ms !important;

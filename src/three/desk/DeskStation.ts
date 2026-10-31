@@ -5,7 +5,6 @@ import {
   HemisphereLight,
   Mesh,
   MeshBasicMaterial,
-  MeshStandardMaterial,
   Object3D,
   PCFShadowMap,
   PlaneGeometry,
@@ -99,7 +98,6 @@ export class DeskStation implements StationModule {
   private readonly monitorPivot = new Group();
   private readonly monitorBezel = new Group();
   private lights!: Lights;
-  private atlas!: MeshStandardMaterial;
   private uniforms!: AtlasUniforms;
   private screen!: Mesh<PlaneGeometry, MeshBasicMaterial>;
   private screenTexture!: CanvasTexture;
@@ -138,7 +136,6 @@ export class DeskStation implements StationModule {
       [0, DESK.z, DESK.width / 2, DESK.depth / 2],
       DESK.top
     );
-    this.atlas = material;
     this.uniforms = uniforms;
     this.environment = bakeNightEnvironment(context.renderer);
     material.envMap = this.environment;

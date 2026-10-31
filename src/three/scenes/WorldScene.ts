@@ -341,7 +341,8 @@ export class WorldScene {
 
     settling = this.monogram!.update(time, motion) || settling;
     const pointerTilt = this.context.pointer();
-    this.monogram!.tilt(pointerTilt.x, pointerTilt.y);
+    this.monogram!.orient(this.poseFor('hero').position, pointerTilt.x, pointerTilt.y);
+    this.milestonesOrbit!.root.visible = s > 2.5;
     this.nebula!.update(time, motion);
     this.beacon!.update(time, motion, this.context.camera.position);
     this.beacon!.root.visible = s > 4.2;
@@ -424,9 +425,23 @@ export class WorldScene {
     return this.modules.get(station)?.getPlateAnchor?.(plateId) ?? null;
   }
 
+  /**
+   * Hero pose shifted sideways so Alfa, far behind, shows up in the opening of the "C"
+   * (similar triangles: offset = opening × (distance to Alfa) / (Alfa depth behind the C)).
+   */
+  private heroPose(): CameraPose {
+    const pose = stationPose(STATION_SPECS.hero, this.context.camera, this.width, this.height, { orbit: this.orbit });
+    const distance = pose.position.distanceTo(pose.target);
+    const depth = pose.target.z - ALFA_POSITION.z;
+    const offset = (MONOGRAM_RADIUS * 0.92 * (depth + distance)) / depth;
+    pose.position.set(pose.target.x + offset + this.orbit.x * 0.3, pose.target.y + distance * 0.03 - this.orbit.y * 0.2, pose.target.z + distance);
+    return pose;
+  }
+
   private poseFor(id: StationId): CameraPose {
     const custom = this.modules.get(id)?.getCameraPose?.(0);
     if (custom) return fromModulePose(custom);
+    if (id === 'hero') return this.heroPose();
     const spec = STATION_SPECS[id];
     const camera = this.context.camera;
     if (id === 'products') {

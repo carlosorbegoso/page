@@ -36,7 +36,7 @@ const VERTEX = /* glsl */ `
     vColor = color * wave;
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
     gl_Position = projectionMatrix * mv;
-    gl_PointSize = size * pixelRatio * 2.0;
+    gl_PointSize = size * pixelRatio * 3.2;
   }
 `;
 
@@ -45,8 +45,8 @@ const FRAGMENT = /* glsl */ `
   void main() {
     vec2 p = gl_PointCoord - 0.5;
     float d = dot(p, p) * 4.0;
-    float core = exp(-d * 6.0);
-    float halo = exp(-d * 1.6) * 0.35;
+    float core = exp(-d * 3.5);
+    float halo = exp(-d * 1.2) * 0.3;
     gl_FragColor = vec4(vColor * (core + halo), 1.0);
   }
 `;

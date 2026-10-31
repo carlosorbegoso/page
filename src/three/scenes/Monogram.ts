@@ -43,7 +43,7 @@ export class Monogram {
     });
     this.starGeometry.setFromPoints(stars);
     this.starMaterial = new PointsMaterial({
-      size: 7,
+      size: 9,
       sizeAttenuation: false,
       map: glow,
       transparent: true,
@@ -61,6 +61,7 @@ export class Monogram {
     this.nodeCore = glowSprite(glow, radius * 0.08, 1);
     this.node.position.set(radius * 0.92, 0, 0);
     this.nodeCore.position.copy(this.node.position);
+    this.node.visible = this.nodeCore.visible = false;
     this.root.add(line, points, this.node, this.nodeCore);
     this.applyTokens();
   }
@@ -78,9 +79,16 @@ export class Monogram {
     return progress < 1;
   }
 
-  /** Small pointer-driven tilt (±3°), fine pointers only (the caller passes 0 otherwise). */
-  tilt(x: number, y: number): void {
-    this.root.rotation.set(-y * 0.05, x * 0.05, 0);
+  /** Faces the hero camera, plus a small pointer-driven tilt (±3°, fine pointers only). */
+  orient(camera: Vector3, x: number, y: number): void {
+    this.root.lookAt(camera);
+    this.root.rotateX(-y * 0.05);
+    this.root.rotateY(x * 0.05);
+  }
+
+  /** World position of the opening of the "C" (where Alfa should appear from the hero). */
+  opening(): Vector3 {
+    return this.root.localToWorld(new Vector3(this.radius * 0.92, 0, 0));
   }
 
   applyTokens(): void {

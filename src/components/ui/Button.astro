@@ -11,6 +11,7 @@ interface Props extends Omit<HTMLAttributes<'a'>, 'href' | 'download' | 'type' |
   size?: Size;
   external?: boolean;
   download?: boolean | string;
+  disabled?: boolean;
   /** Button type when rendered as `<button>`; MIME type hint (e.g. `application/pdf`) when rendered as a link. */
   type?: 'button' | 'submit' | 'reset' | (string & {});
 }
@@ -22,6 +23,7 @@ const {
   external = false,
   download,
   type,
+  disabled,
   class: className,
   rel,
   ...attrs
@@ -71,6 +73,7 @@ const linkRel = external ? ['noopener', 'noreferrer', rel].filter(Boolean).join(
   ) : (
     <button
       type={(type ?? 'button') as 'button' | 'submit' | 'reset'}
+      disabled={disabled}
       class:list={classes}
       {...(attrs as HTMLAttributes<'button'>)}
     >

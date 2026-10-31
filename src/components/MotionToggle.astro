@@ -4,10 +4,11 @@ import { useTranslations, type Locale } from '../i18n/utils';
 interface Props {
   locale: Locale;
   display?: 'icon' | 'full';
+  floating?: boolean;
   class?: string;
 }
 
-const { locale, display = 'icon', class: className } = Astro.props;
+const { locale, display = 'icon', floating = false, class: className } = Astro.props;
 const t = useTranslations(locale);
 const iconOnly = display === 'icon';
 ---
@@ -20,8 +21,11 @@ const iconOnly = display === 'icon';
   aria-label={iconOnly ? t('motion.pause') : undefined}
   title={iconOnly ? t('motion.pause') : undefined}
   class:list={[
-    'group inline-flex min-h-tap min-w-tap items-center justify-center gap-2 rounded-md border border-transparent text-sm font-medium text-text-muted',
+    'group inline-flex min-h-tap min-w-tap items-center justify-center gap-2 rounded-md border text-sm font-medium',
     'transition-colors duration-(--duration-fast) ease-standard hover:bg-surface hover:text-text',
+    floating
+      ? 'border-border bg-scrim text-text shadow-md backdrop-blur-md hover:border-border-strong'
+      : 'border-transparent text-text-muted',
     'focus-visible:shadow-focus focus-visible:outline-none',
     !iconOnly && 'w-full justify-start border-border px-4',
     className

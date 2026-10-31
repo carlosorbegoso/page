@@ -1,6 +1,8 @@
 ---
 import LangSwitch from './LangSwitch.astro';
 import MotionToggle from './MotionToggle.astro';
+import CopyEmail from './contact/CopyEmail.astro';
+import CvLink from './ui/CvLink.astro';
 import { SECTION_IDS, SITE } from '../config/site';
 import { localeUrl, useTranslations, type Locale } from '../i18n/utils';
 
@@ -11,151 +13,173 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 const home = localeUrl(locale);
-const links = [
+const sections = [
+  { id: SECTION_IDS.hero, label: t('nav.hero') },
   { id: SECTION_IDS.about, label: t('nav.about') },
   { id: SECTION_IDS.company, label: t('nav.company') },
   { id: SECTION_IDS.products, label: t('nav.products') },
   { id: SECTION_IDS.experience, label: t('nav.experience') },
   { id: SECTION_IDS.contact, label: t('nav.contact') }
 ];
+const chrome =
+  'border border-border bg-scrim text-text shadow-md backdrop-blur-md transition-colors duration-(--duration-fast) ease-standard hover:border-border-strong hover:bg-surface focus-visible:shadow-focus focus-visible:outline-none';
 ---
 
-<header
-  class="fixed inset-x-0 top-0 z-(--z-header) h-(--header-height) border-b border-border bg-scrim backdrop-blur-md"
->
-  <div class="container-content flex h-full items-center justify-between gap-3">
-    <a
-      href={`${home}#${SECTION_IDS.hero}`}
-      aria-label={t('nav.home')}
-      class="-ms-1.5 inline-flex min-h-tap items-center gap-2.5 rounded-md px-1.5 focus-visible:shadow-focus focus-visible:outline-none"
-    >
-      <svg viewBox="0 0 64 64" width="32" height="32" aria-hidden="true" class="shrink-0">
-        <rect width="64" height="64" rx="14" class="fill-surface-raised stroke-border" stroke-width="2"></rect>
-        <path d="M43.5 22.4A15 15 0 1 0 43.5 41.6" fill="none" class="stroke-text" stroke-width="8"></path>
-        <circle cx="47" cy="32" r="4.5" class="fill-accent"></circle>
-      </svg>
-      <span class="font-display text-base font-semibold tracking-tight whitespace-nowrap text-text md:hidden lg:inline">
-        {SITE.name}
-      </span>
-    </a>
-
-    <nav aria-label={t('nav.label')} class="hidden md:block">
-      <ul class="flex items-center gap-1">
-        {
-          links.map(link => (
-            <li>
-              <a
-                href={`#${link.id}`}
-                data-nav-link={link.id}
-                class:list={[
-                  'relative inline-flex min-h-tap items-center rounded-md px-3 text-sm font-medium text-text-muted',
-                  'transition-colors duration-(--duration-fast) ease-standard hover:text-text',
-                  'focus-visible:shadow-focus focus-visible:outline-none',
-                  'after:absolute after:inset-x-3 after:bottom-1.5 after:h-0.5 after:origin-center after:scale-x-0 after:rounded-full after:bg-accent after:transition-transform after:duration-(--duration-base) after:ease-standard',
-                  'aria-[current=true]:text-text aria-[current=true]:after:scale-x-100'
-                ]}
-              >
-                {link.label}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </nav>
-
-    <div class="flex items-center gap-2">
-      <div class="hidden md:flex"><MotionToggle locale={locale} /></div>
-      <LangSwitch locale={locale} compact />
-      <button
-        type="button"
-        data-menu-open
-        aria-expanded="false"
-        aria-controls="mobile-menu"
-        aria-label={t('nav.openMenu')}
-        class="inline-flex min-h-tap min-w-tap items-center justify-center rounded-md border border-border text-text transition-colors duration-(--duration-fast) ease-standard hover:bg-surface focus-visible:shadow-focus focus-visible:outline-none md:hidden"
-      >
-        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" class="fill-none stroke-current" stroke-width="2" stroke-linecap="round">
-          <path d="M4 7h16M4 12h16M4 17h16"></path>
-        </svg>
-      </button>
-    </div>
-  </div>
-</header>
-
-<dialog
-  id="mobile-menu"
-  data-menu
-  aria-label={t('nav.label')}
+<a
+  href={`${home}#${SECTION_IDS.hero}`}
+  aria-label={t('nav.home')}
   class:list={[
-    'mobile-sheet fixed inset-x-0 top-auto bottom-0 m-0 max-h-[85dvh] w-full max-w-none overflow-y-auto rounded-t-xl border border-b-0 border-border bg-surface-raised p-0 text-text shadow-lg md:hidden',
-    'backdrop:bg-scrim'
+    'fixed top-[max(0.75rem,env(safe-area-inset-top))] left-[max(0.75rem,env(safe-area-inset-left))] z-(--z-header) inline-flex size-tap items-center justify-center rounded-md md:top-5 md:left-5',
+    chrome
   ]}
 >
-  <div class="flex flex-col gap-4 px-gutter pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
-    <div class="flex items-center justify-between">
-      <span class="mx-auto h-1 w-10 rounded-full bg-border-strong" aria-hidden="true"></span>
-    </div>
+  <svg viewBox="0 0 64 64" width="28" height="28" aria-hidden="true">
+    <path
+      d="M43.5 22.4A15 15 0 1 0 43.5 41.6"
+      fill="none"
+      class="stroke-text"
+      stroke-width="8"
+    ></path>
+    <circle cx="47" cy="32" r="4.5" class="fill-accent"></circle>
+  </svg>
+</a>
+
+<div class="fixed top-[max(0.75rem,env(safe-area-inset-top))] right-[max(0.75rem,env(safe-area-inset-right))] z-(--z-header) flex items-center gap-2 md:top-5 md:right-5">
+  <LangSwitch locale={locale} compact class="bg-scrim shadow-md backdrop-blur-md" />
+  <MotionToggle locale={locale} floating />
+  <button
+    type="button"
+    data-index-open
+    aria-expanded="false"
+    aria-controls="section-index"
+    aria-haspopup="dialog"
+    class:list={[
+      'inline-flex min-h-tap items-center gap-2 rounded-md px-3 text-sm font-medium',
+      chrome
+    ]}
+  >
+    <svg
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      aria-hidden="true"
+      class="fill-none stroke-current"
+      stroke-width="2"
+      stroke-linecap="round"
+    >
+      <path d="M4 7h16M4 12h16M4 17h10"></path>
+    </svg>
+    <span>{t('nav.index')}</span>
+  </button>
+</div>
+
+<dialog
+  id="section-index"
+  data-index
+  aria-labelledby="section-index-title"
+  class:list={[
+    'index-sheet m-0 w-full max-w-none overflow-y-auto border border-border bg-surface-raised p-0 text-text shadow-lg backdrop:bg-scrim',
+    'fixed inset-x-0 top-auto bottom-0 max-h-[85dvh] rounded-t-xl border-b-0',
+    'md:inset-y-0 md:right-0 md:left-auto md:h-dvh md:max-h-none md:w-[24rem] md:rounded-none md:rounded-l-xl md:border-e-0 md:border-b'
+  ]}
+>
+  <div class="flex min-h-full flex-col gap-5 px-gutter pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] md:px-6 md:pt-6">
+    <span
+      class="mx-auto h-1 w-10 rounded-full bg-border-strong md:hidden"
+      aria-hidden="true"
+    ></span>
     <div class="flex items-center justify-between gap-3">
-      <span class="font-display text-lg font-semibold tracking-tight">{SITE.name}</span>
+      <h2 id="section-index-title" class="font-display text-xl font-semibold tracking-tight">
+        {t('nav.index')}
+      </h2>
       <button
         type="button"
-        data-menu-close
-        aria-label={t('nav.closeMenu')}
-        class="inline-flex min-h-tap min-w-tap items-center justify-center rounded-md border border-border text-text transition-colors duration-(--duration-fast) ease-standard hover:bg-surface focus-visible:shadow-focus focus-visible:outline-none"
+        data-index-close
+        aria-label={t('nav.closeIndex')}
+        class="inline-flex size-tap items-center justify-center rounded-md border border-border text-text transition-colors duration-(--duration-fast) ease-standard hover:bg-surface focus-visible:shadow-focus focus-visible:outline-none"
       >
-        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" class="fill-none stroke-current" stroke-width="2" stroke-linecap="round">
+        <svg
+          viewBox="0 0 24 24"
+          width="22"
+          height="22"
+          aria-hidden="true"
+          class="fill-none stroke-current"
+          stroke-width="2"
+          stroke-linecap="round"
+        >
           <path d="M6 6l12 12M18 6 6 18"></path>
         </svg>
       </button>
     </div>
+
     <nav aria-label={t('nav.label')}>
-      <ul class="flex flex-col gap-1">
-        {
-          links.map(link => (
-            <li>
-              <a
-                href={`#${link.id}`}
-                data-nav-link={link.id}
-                data-menu-link
-                class:list={[
-                  'flex min-h-12 items-center rounded-md border-s-2 border-transparent px-4 text-base font-medium text-text-muted',
-                  'transition-colors duration-(--duration-fast) ease-standard hover:bg-surface hover:text-text',
-                  'focus-visible:shadow-focus focus-visible:outline-none',
-                  'aria-[current=true]:border-accent aria-[current=true]:bg-accent-soft aria-[current=true]:text-text'
-                ]}
+      <ol class="flex flex-col gap-1">
+        {sections.map((section, index) => (
+          <li>
+            <a
+              href={`#${section.id}`}
+              data-index-link={section.id}
+              class:list={[
+                'group flex min-h-12 items-center gap-3 rounded-md border-s-2 border-transparent px-4 text-base font-medium text-text-muted',
+                'transition-colors duration-(--duration-fast) ease-standard hover:bg-surface hover:text-text',
+                'focus-visible:shadow-focus focus-visible:outline-none',
+                'aria-[current=true]:border-accent aria-[current=true]:bg-accent-soft aria-[current=true]:text-text'
+              ]}
+            >
+              <span
+                class="font-mono text-xs text-text-subtle tabular-nums group-aria-[current=true]:text-accent"
+                aria-hidden="true"
               >
-                {link.label}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              {section.label}
+            </a>
+          </li>
+        ))}
+      </ol>
     </nav>
-    <div class="flex flex-col gap-2 border-t border-border pt-4">
-      <MotionToggle locale={locale} display="full" />
-      <LangSwitch locale={locale} class="w-full justify-start" />
-    </div>
+
+    <section
+      aria-labelledby="index-actions"
+      class="mt-auto flex flex-col gap-3 border-t border-border pt-5"
+    >
+      <h3
+        id="index-actions"
+        class="font-sans text-xs font-semibold tracking-caps text-text-muted uppercase"
+      >
+        {t('nav.quickActions')}
+      </h3>
+      <CopyEmail locale={locale} email={SITE.email} />
+      <CvLink locale={locale} size="lg" class="w-full" />
+    </section>
   </div>
 </dialog>
 
 <style>
-  .mobile-sheet {
-    transform: translateY(100%);
+  .index-sheet {
+    --sheet-offset: translateY(100%);
+    transform: var(--sheet-offset);
     transition:
       transform var(--duration-slow) var(--ease-out),
       overlay var(--duration-slow) allow-discrete,
       display var(--duration-slow) allow-discrete;
   }
 
-  .mobile-sheet[open] {
-    transform: translateY(0);
-
-    @starting-style {
-      transform: translateY(100%);
+  @media (width >= 48rem) {
+    .index-sheet {
+      --sheet-offset: translateX(100%);
     }
   }
 
-  .mobile-sheet::backdrop {
+  .index-sheet[open] {
+    transform: none;
+
+    @starting-style {
+      transform: var(--sheet-offset);
+    }
+  }
+
+  .index-sheet::backdrop {
     opacity: 0;
     transition:
       opacity var(--duration-slow) var(--ease-out),
@@ -163,7 +187,7 @@ const links = [
       display var(--duration-slow) allow-discrete;
   }
 
-  .mobile-sheet[open]::backdrop {
+  .index-sheet[open]::backdrop {
     opacity: 1;
 
     @starting-style {
@@ -171,7 +195,7 @@ const links = [
     }
   }
 
-  :global(html:has(.mobile-sheet[open])) {
+  :global(html:has(.index-sheet[open])) {
     overflow: hidden;
   }
 </style>
@@ -179,8 +203,8 @@ const links = [
 <script>
   import { SECTION_IDS } from '../config/site';
 
-  const sheet = document.querySelector<HTMLDialogElement>('[data-menu]');
-  const openButton = document.querySelector<HTMLButtonElement>('[data-menu-open]');
+  const sheet = document.querySelector<HTMLDialogElement>('[data-index]');
+  const openButton = document.querySelector<HTMLButtonElement>('[data-index-open]');
 
   if (sheet && openButton) {
     openButton.addEventListener('click', () => {
@@ -189,32 +213,27 @@ const links = [
     });
 
     sheet.addEventListener('close', () => openButton.setAttribute('aria-expanded', 'false'));
-
-    sheet.querySelector('[data-menu-close]')?.addEventListener('click', () => sheet.close());
-
+    sheet.querySelector('[data-index-close]')?.addEventListener('click', () => sheet.close());
     sheet.addEventListener('click', event => {
       if (event.target === sheet) sheet.close();
     });
 
-    for (const link of sheet.querySelectorAll('[data-menu-link]')) {
+    for (const link of sheet.querySelectorAll('[data-index-link]')) {
       link.addEventListener('click', () => sheet.close());
     }
-
-    matchMedia('(width >= 48rem)').addEventListener('change', event => {
-      if (event.matches && sheet.open) sheet.close();
-    });
   }
 
-  const navLinks = [...document.querySelectorAll<HTMLAnchorElement>('[data-nav-link]')];
+  const indexLinks = [...document.querySelectorAll<HTMLAnchorElement>('[data-index-link]')];
   const sections = Object.values(SECTION_IDS)
     .map(id => document.getElementById(id))
     .filter((section): section is HTMLElement => section !== null);
 
   function setActive(id: string | null) {
-    for (const link of navLinks) {
-      if (link.dataset.navLink === id) link.setAttribute('aria-current', 'true');
+    for (const link of indexLinks) {
+      if (link.dataset.indexLink === id) link.setAttribute('aria-current', 'true');
       else link.removeAttribute('aria-current');
     }
+    window.dispatchEvent(new CustomEvent('section:active', { detail: { id } }));
   }
 
   if ('IntersectionObserver' in window && sections.length > 0) {
@@ -226,9 +245,9 @@ const links = [
           else visible.delete(entry.target.id);
         }
         const current = sections.find(section => visible.has(section.id));
-        setActive(current?.id ?? null);
+        if (current) setActive(current.id);
       },
-      { rootMargin: '-40% 0px -55% 0px' }
+      { rootMargin: '-45% 0px -50% 0px' }
     );
     for (const section of sections) observer.observe(section);
   }

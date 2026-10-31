@@ -1,17 +1,18 @@
 @import 'tailwindcss';
 @import './tokens.css';
 
+/* Height reserved by the floating corner controls (Header.astro); sections pad their top by it. */
 :root {
-  --header-height: 3.5rem;
+  --corner-ui-height: calc(max(0.75rem, env(safe-area-inset-top)) + var(--spacing-tap) + 0.75rem);
 
   @media (width >= 48rem) {
-    --header-height: 4rem;
+    --corner-ui-height: calc(1.25rem + var(--spacing-tap) + 0.75rem);
   }
 }
 
 @layer base {
   html {
-    scroll-padding-top: calc(var(--header-height) + 0.5rem);
+    scroll-padding-top: var(--corner-ui-height);
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
@@ -26,7 +27,7 @@
   body {
     min-height: 100dvh;
     overflow-x: clip;
-    background-color: var(--color-background);
+    background-color: var(--color-scene-bg);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     font-size: var(--text-base);

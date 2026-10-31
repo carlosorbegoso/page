@@ -1,0 +1,54 @@
+<div
+  data-scene-tooltip
+  aria-hidden="true"
+  hidden
+  class="pointer-events-none fixed top-0 left-0 z-(--z-header) rounded-sm border border-border-strong bg-surface-raised px-2.5 py-1 text-sm font-medium whitespace-nowrap text-text shadow-md"
+></div>
+<p data-scene-live class="sr-only" aria-live="polite"></p>
+
+<script>
+  const tooltip = document.querySelector<HTMLElement>('[data-scene-tooltip]');
+  const live = document.querySelector<HTMLElement>('[data-scene-live]');
+  const finePointer = matchMedia('(pointer: fine)');
+  const OFFSET = 16;
+
+  if (tooltip && live) {
+    let label: string | null = null;
+    let x = 0;
+    let y = 0;
+    let frame = 0;
+
+    function place() {
+      frame = 0;
+      if (!tooltip) return;
+      const { width, height } = tooltip.getBoundingClientRect();
+      const left = Math.min(x + OFFSET, innerWidth - width - 8);
+      const top = y + OFFSET + height > innerHeight - 8 ? y - OFFSET - height : y + OFFSET;
+      tooltip.style.transform = `translate3d(${Math.round(left)}px, ${Math.round(top)}px, 0)`;
+    }
+
+    addEventListener(
+      'pointermove',
+      event => {
+        x = event.clientX;
+        y = event.clientY;
+        if (label && !frame) frame = requestAnimationFrame(place);
+      },
+      { passive: true }
+    );
+
+    addEventListener('scene:hover', event => {
+      const next = (event as CustomEvent<{ label: string | null }>).detail?.label ?? null;
+      if (next === label) return;
+      label = next;
+      if (label) live.textContent = label;
+      if (!finePointer.matches || !label) {
+        tooltip.hidden = true;
+        return;
+      }
+      tooltip.textContent = label;
+      tooltip.hidden = false;
+      place();
+    });
+  }
+</script>

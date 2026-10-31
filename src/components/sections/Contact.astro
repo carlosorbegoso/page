@@ -22,19 +22,19 @@ const socials = [
 <section
   id={SECTION_IDS.contact}
   aria-labelledby="contact-title"
-  data-stage-scene="none"
-  class="relative z-(--z-content) bg-surface px-gutter py-section"
+  data-station="contact"
+  class="relative grid min-h-svh grid-rows-[minmax(33svh,1fr)_auto] lg:grid-rows-1"
 >
   <div
-    class="mx-auto grid max-w-content gap-stack lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] lg:items-center lg:gap-16"
+    class="row-start-2 mx-auto grid w-full max-w-wide px-gutter pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-10 lg:row-start-1 lg:grid-cols-12 lg:items-center lg:py-24"
   >
-    <SectionHeader id="contact-title" title={t('contact.title')} subtitle={t('contact.subtitle')}>
-      <p class="text-text-muted">{t('contact.body')}</p>
-    </SectionHeader>
-
     <div
-      class="flex w-full max-w-reading flex-col gap-6 rounded-xl border border-border bg-surface-raised p-5 md:p-6 lg:max-w-none"
+      class="flex flex-col gap-8 rounded-xl border border-border bg-scrim p-5 shadow-lg backdrop-blur-md sm:p-8 md:max-w-2xl lg:col-span-6 lg:col-start-7 lg:p-10 xl:col-span-5 xl:col-start-8"
     >
+      <SectionHeader id="contact-title" title={t('contact.title')} subtitle={t('contact.subtitle')}>
+        <p class="text-text-muted">{t('contact.body')}</p>
+      </SectionHeader>
+
       <div class="flex flex-col gap-3">
         <p id="contact-email-label" class="text-xs font-semibold tracking-caps text-text-muted uppercase">
           {t('contact.email')}

@@ -21,20 +21,117 @@ const firstYear = entries
 <section
   id={SECTION_IDS.experience}
   aria-labelledby="experience-title"
-  data-stage-scene="none"
-  class="relative z-(--z-content) bg-bg px-gutter py-section"
+  data-station="experience"
+  data-experience-station
+  class="relative lg:h-[300svh]"
 >
-  <div class="mx-auto flex max-w-content flex-col gap-stack">
-    <SectionHeader
-      id="experience-title"
-      eyebrow={firstYear ? `${firstYear} – ${t('experience.present')}` : undefined}
-      title={t('experience.title')}
-      subtitle={t('experience.subtitle')}
-    />
-    <ol class="mx-auto w-full max-w-[52rem] md:mx-0" role="list">
-      {entries.map(entry => (
-        <TimelineItem locale={locale} {...entry} />
-      ))}
-    </ol>
+  <div
+    class="grid min-h-svh grid-rows-[minmax(33svh,1fr)_auto] lg:sticky lg:top-0 lg:h-svh lg:grid-rows-1"
+  >
+    <div
+      class="row-start-2 mx-auto grid w-full max-w-wide px-gutter pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-10 lg:row-start-1 lg:grid-cols-12 lg:items-center lg:py-8"
+    >
+      <div
+        class="flex flex-col gap-6 rounded-xl border border-border bg-scrim p-5 shadow-lg backdrop-blur-md sm:p-8 md:max-w-2xl lg:col-span-6 lg:max-h-[calc(100svh-4rem)] lg:overflow-y-auto lg:p-10 xl:col-span-5"
+      >
+        <SectionHeader
+          id="experience-title"
+          eyebrow={firstYear ? `${firstYear} – ${t('experience.present')}` : undefined}
+          title={t('experience.title')}
+          subtitle={t('experience.subtitle')}
+        />
+        <ol class="flex flex-col" role="list" data-experience-list>
+          {entries.map(entry => (
+            <TimelineItem locale={locale} {...entry} />
+          ))}
+        </ol>
+      </div>
+    </div>
   </div>
 </section>
+
+<script>
+  const SOURCE = 'experience-panel';
+  const section = document.querySelector<HTMLElement>('[data-experience-station]');
+  const items = section ? Array.from(section.querySelectorAll<HTMLElement>('[data-experience]')) : [];
+
+  if (section && items.length > 0) {
+    const desktop = window.matchMedia('(min-width: 1024px)');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let activeId: string | null = null;
+    let frame = 0;
+
+    const prefersInstantScroll = () =>
+      reducedMotion.matches || document.documentElement.dataset.motion === 'paused';
+
+    const activate = (id: string | null, announce: boolean) => {
+      if (id === activeId) return;
+      activeId = id;
+      for (const item of items) {
+        const isActive = item.dataset.experience === id;
+        item.toggleAttribute('data-active', isActive);
+        item.querySelector('[data-experience-trigger]')?.setAttribute('aria-expanded', String(isActive));
+        const body = item.querySelector<HTMLElement>('[data-experience-body]');
+        if (body) body.hidden = !isActive;
+      }
+      if (announce && id) {
+        window.dispatchEvent(new CustomEvent('experience:focus', { detail: { id, source: SOURCE } }));
+      }
+    };
+
+    const scrollRange = () => Math.max(section.offsetHeight - window.innerHeight, 1);
+
+    const syncWithScroll = () => {
+      frame = 0;
+      if (!desktop.matches) return;
+      const progress = Math.min(Math.max(-section.getBoundingClientRect().top / scrollRange(), 0), 0.9999);
+      const item = items[Math.floor(progress * items.length)];
+      activate(item.dataset.experience ?? null, true);
+    };
+
+    const scrollToItem = (index: number) => {
+      const sectionTop = section.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({
+        top: sectionTop + (scrollRange() * (index + 0.5)) / items.length,
+        behavior: prefersInstantScroll() ? 'auto' : 'smooth'
+      });
+    };
+
+    const show = (id: string, announce: boolean) => {
+      const index = items.findIndex(item => item.dataset.experience === id);
+      if (index < 0) return;
+      if (desktop.matches) scrollToItem(index);
+      else activate(id, announce);
+    };
+
+    items.forEach((item, index) => {
+      item.querySelector('[data-experience-trigger]')?.addEventListener('click', () => {
+        const id = item.dataset.experience ?? null;
+        if (desktop.matches) scrollToItem(index);
+        else activate(id === activeId ? null : id, true);
+      });
+    });
+
+    window.addEventListener('experience:focus', event => {
+      const detail = (event as CustomEvent<{ id?: string; source?: string }>).detail;
+      if (!detail?.id || detail.source === SOURCE) return;
+      show(detail.id, false);
+    });
+
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (!frame) frame = window.requestAnimationFrame(syncWithScroll);
+      },
+      { passive: true }
+    );
+
+    desktop.addEventListener('change', () => {
+      if (desktop.matches) syncWithScroll();
+      else if (!activeId) activate(items[0].dataset.experience ?? null, false);
+    });
+
+    activate(items[0].dataset.experience ?? null, false);
+    syncWithScroll();
+  }
+</script>

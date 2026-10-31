@@ -20,80 +20,89 @@ const { locale, id, company, client, role, start, end, summary, highlights, stac
 const t = useTranslations(locale);
 const isCurrent = end === null;
 const headingId = `experience-${id}`;
-const highlightsId = `${headingId}-highlights`;
+const bodyId = `${headingId}-body`;
 const stackId = `${headingId}-stack`;
 ---
 
 <li
-  class="timeline-item reveal relative pb-10 pl-8 last:pb-0 md:grid md:grid-cols-[9rem_1fr] md:gap-x-12 md:pl-0 lg:grid-cols-[11rem_1fr]"
+  class="group relative border-t border-border first:border-t-0"
   data-experience={id}
   data-current={isCurrent ? '' : undefined}
 >
   <span
-    class="timeline-line absolute top-4 bottom-0 left-[calc(0.375rem-1px)] w-0.5 bg-border-strong md:left-[calc(9rem+1.5rem-1px)] lg:left-[calc(11rem+1.5rem-1px)]"
+    class="absolute top-3 bottom-3 -left-5 w-0.5 rounded-pill bg-transparent transition-colors duration-(--duration-base) ease-standard group-data-active:bg-accent sm:-left-8 lg:-left-10"
     aria-hidden="true"></span>
-  <span
-    class:list={[
-      'absolute top-1.5 left-0 size-3 rounded-full md:left-[calc(9rem+1.5rem-0.375rem)] lg:left-[calc(11rem+1.5rem-0.375rem)]',
-      isCurrent
-        ? 'bg-status-live shadow-[0_0_0_4px_var(--color-bg)]'
-        : 'border-2 border-border-strong bg-bg'
-    ]}
-    aria-hidden="true"></span>
+  <h3 id={headingId}>
+    <button
+      type="button"
+      class="flex min-h-tap w-full items-center justify-between gap-4 py-3 text-left focus-visible:shadow-focus focus-visible:outline-none"
+      aria-expanded="true"
+      aria-controls={bodyId}
+      data-experience-trigger
+    >
+      <span class="flex min-w-0 flex-col gap-0.5">
+        <span
+          class="font-display text-lg font-semibold tracking-tight text-text-muted transition-colors duration-(--duration-fast) ease-standard group-hover:text-text group-data-active:text-text md:text-xl"
+        >
+          {company}
+        </span>
+        <span class="text-sm font-medium tabular-nums text-text-muted">
+          <time datetime={start}>{formatTimelineMonth(start, locale)}</time>
+          {' – '}
+          {end ? <time datetime={end}>{formatTimelineMonth(end, locale)}</time> : t('experience.present')}
+        </span>
+      </span>
+      <span
+        class:list={[
+          'size-2.5 shrink-0 rounded-full',
+          isCurrent ? 'bg-status-live' : 'border-2 border-border-strong'
+        ]}
+        aria-hidden="true"></span>
+    </button>
+  </h3>
 
-  <p
-    class:list={[
-      'mb-3 text-sm font-medium tabular-nums md:mb-0 md:pt-0.5 md:text-right',
-      isCurrent ? 'text-text' : 'text-text-muted'
-    ]}
-  >
-    <time datetime={start}>{formatTimelineMonth(start, locale)}</time>
-    {' – '}
-    {end ? <time datetime={end}>{formatTimelineMonth(end, locale)}</time> : t('experience.present')}
-  </p>
+  <div id={bodyId} role="region" aria-labelledby={headingId} class="experience-body pb-4" data-experience-body>
+    <div class="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 md:p-5">
+      <div class="flex flex-col gap-0.5">
+        <p class="font-medium text-text">{role}</p>
+        {
+          client && (
+            <p class="text-sm text-text-muted">
+              {t('experience.client')}: {client}
+            </p>
+          )
+        }
+      </div>
 
-  <article
-    aria-labelledby={headingId}
-    class:list={[
-      'flex min-w-0 flex-col gap-4 rounded-lg border bg-surface p-5 md:p-6',
-      isCurrent ? 'border-border-strong' : 'border-border'
-    ]}
-  >
-    <header class="flex flex-col gap-1">
-      <h3 id={headingId} class="font-display text-xl font-semibold tracking-tight text-text">
-        {company}
-      </h3>
-      <p class="font-medium text-text">{role}</p>
+      <p class="text-text-muted">{summary}</p>
+
       {
-        client && (
-          <p class="text-sm text-text-muted">
-            {t('experience.client')}: {client}
-          </p>
+        highlights.length > 0 && (
+          <details class="group/highlights">
+            <summary class="flex min-h-tap cursor-pointer list-none items-center gap-2 text-sm font-medium text-accent hover:text-accent-hover focus-visible:shadow-focus focus-visible:outline-none [&::-webkit-details-marker]:hidden">
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                aria-hidden="true"
+                class="shrink-0 fill-none stroke-current transition-transform duration-(--duration-fast) ease-standard group-open/highlights:rotate-90"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="m9 6 6 6-6 6" />
+              </svg>
+              {t('experience.highlights')} ({highlights.length})
+            </summary>
+            <ul class="mt-1 flex list-disc flex-col gap-2 pl-5 text-sm text-text marker:text-accent">
+              {highlights.map(highlight => (
+                <li>{highlight}</li>
+              ))}
+            </ul>
+          </details>
         )
       }
-    </header>
 
-    <p class="text-text-muted">{summary}</p>
-
-    {
-      highlights.length > 0 && (
-        <div class="flex flex-col gap-2">
-          <p id={highlightsId} class="text-xs font-semibold tracking-caps text-text-muted uppercase">
-            {t('experience.highlights')}
-          </p>
-          <ul
-            aria-labelledby={highlightsId}
-            class="flex list-disc flex-col gap-2 pl-5 text-sm text-text marker:text-accent"
-          >
-            {highlights.map(highlight => (
-              <li>{highlight}</li>
-            ))}
-          </ul>
-        </div>
-      )
-    }
-
-    <div class="flex flex-col gap-2">
       <p id={stackId} class="sr-only">{t('experience.stack')}</p>
       <ul aria-labelledby={stackId} class="flex flex-wrap gap-2" role="list">
         {stack.map(tech => (
@@ -103,29 +112,20 @@ const stackId = `${headingId}-stack`;
         ))}
       </ul>
     </div>
-  </article>
+  </div>
 </li>
 
 <style>
-  .timeline-item:last-child .timeline-line {
-    display: none;
-  }
-
-  /* Gated so a scroll-driven timeline never runs under reduced motion: view() animations ignore the global 0.01ms duration override. */
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      :global(:root:not([data-motion='paused']):not([data-motion='reduced'])) .reveal {
-        animation: timeline-reveal linear both;
-        animation-timeline: view();
-        animation-range: entry 0% entry 40%;
-      }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(:root:not([data-motion='paused']):not([data-motion='reduced'])) .experience-body:not([hidden]) {
+      animation: experience-body-in var(--duration-base) var(--ease-out) both;
     }
   }
 
-  @keyframes timeline-reveal {
+  @keyframes experience-body-in {
     from {
       opacity: 0;
-      transform: translateY(12px);
+      transform: translateY(8px);
     }
 
     to {

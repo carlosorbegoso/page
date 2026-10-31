@@ -1,6 +1,7 @@
 ---
 import LangSwitch from './LangSwitch.astro';
 import MotionToggle from './MotionToggle.astro';
+import AudioToggle from './AudioToggle.astro';
 import CopyEmail from './contact/CopyEmail.astro';
 import CvLink from './ui/CvLink.astro';
 import { SECTION_IDS, SITE } from '../config/site';
@@ -42,6 +43,7 @@ const sections = [
 <div class="fixed top-[max(0.5rem,env(safe-area-inset-top))] right-[max(0.5rem,env(safe-area-inset-right))] z-(--z-header) flex items-center gap-1 md:top-4 md:right-4">
   <LangSwitch locale={locale} compact hud />
   <MotionToggle locale={locale} floating />
+  <AudioToggle locale={locale} />
   <button
     type="button"
     data-index-open

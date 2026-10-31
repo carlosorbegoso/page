@@ -82,6 +82,30 @@
   --color-tool-body: #8c97a8;
   --color-tool-band: #f0a43c;
 
+  --color-sky-zenith: #04060b;
+  --color-sky-horizon: #0a0e14;
+  --color-sky-nebula-blue: #1b3a6b;
+  --color-sky-nebula-violet: #2b2150;
+  --color-sky-nebula-teal: #0e3a40;
+  --color-star-hot: #bfd6ff;
+  --color-star-white: #f3f6ff;
+  --color-star-warm: #ffe2bd;
+  --color-star-ember: #ffb98f;
+  --color-alfa-core: #eaf4ff;
+  --color-alfa-corona: #5aa9ff;
+  --color-orbit: #2a3b57;
+  --color-orbit-active: #5aa9ff;
+  --color-constellation-line: #5aa9ff;
+  --color-milestone: #6a7b94;
+  --color-milestone-current: #4ade9a;
+  --color-beacon: #8cc8ff;
+
+  --color-plate: rgb(11 16 25 / 0.94);
+  --color-plate-solid: #0b1019;
+  --color-plate-border: #2a3b57;
+  --color-plate-border-active: #3d5a85;
+  --color-plate-glow: rgb(90 169 255 / 0.16);
+
   /* Stub names kept as aliases: global.css and SkipLink (not owned by design) still use them. */
   --color-background: var(--color-bg);
   --color-foreground: var(--color-text);
@@ -186,10 +210,41 @@
   --tool-metalness: 0.85;
   --tool-band-roughness: 0.45;
   --tool-band-metalness: 0.2;
+
+  --plate-width: 36rem;
+  --plate-padding: clamp(1.5rem, 1rem + 2.2vw, 2.75rem);
+  --plate-radius: 1.25rem;
+  --plate-gap: clamp(0.875rem, 0.7rem + 0.6vw, 1.25rem);
+  --plate-signal-width: 3rem;
+  --plate-signal-width-active: 6rem;
+  --plate-dormant-opacity: 0;
+
+  --sky-radius: 48;
+  --sky-stars-high: 6000;
+  --sky-stars-mid: 2200;
+  --sky-star-size-min: 0.6;
+  --sky-star-size-max: 2.4;
+  --sky-twinkle-period: 7;
+  --sky-twinkle-amplitude: 0.18;
+  --sky-nebula-opacity: 0.14;
+  --alfa-core-intensity: 3.2;
+  --alfa-halo-scale: 4.5;
+  --alfa-halo-opacity: 0.55;
+  --orbit-opacity: 0.45;
+  --orbit-active-opacity: 0.9;
+  --constellation-line-opacity: 0.35;
+  --beacon-period: 6;
 }
 
-/* Light is opt-in only: the hero LCP fallback image is captured on the dark background (PLAN §3.4) and the budget allows one set. */
-:root[data-theme='light'] {
+@media (width < 48rem) {
+  :root {
+    --plate-width: min(92vw, 26rem);
+    --plate-radius: 1rem;
+  }
+}
+
+/* Light is opt-in and only for the flat fallback: the constellation (is-3d) is deep space by definition, and the hero LCP image is captured dark (PLAN §3.4). */
+:root[data-theme='light']:not(.is-3d) {
   color-scheme: light;
 
   --color-bg: #f5f7fa;
@@ -230,6 +285,12 @@
   --color-tool-band: #d98a1f;
 
   --shadow-color: rgb(16 24 40 / 0.14);
+
+  --color-plate: rgb(255 255 255 / 0.96);
+  --color-plate-solid: #ffffff;
+  --color-plate-border: #d9dfe8;
+  --color-plate-border-active: #7a8699;
+  --color-plate-glow: rgb(10 85 189 / 0.1);
   --scene-tone-exposure: 0.9;
 }
 

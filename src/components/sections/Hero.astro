@@ -13,6 +13,11 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 const profile = await getProfile(locale);
+const metrics = [
+  { value: t('hero.metrics.performance.value'), label: t('hero.metrics.performance.label') },
+  { value: t('hero.metrics.cqrs.value'), label: t('hero.metrics.cqrs.label') },
+  { value: t('hero.metrics.team.value'), label: t('hero.metrics.team.label') }
+];
 ---
 
 <section
@@ -21,36 +26,54 @@ const profile = await getProfile(locale);
   data-station="hero"
   class="flex min-h-svh flex-col items-center justify-center px-gutter py-section"
 >
-  <div class="plate p-(--plate-padding)" data-plate data-plate-id="hero" data-plate-anchor="left">
+  <div
+    class="plate p-(--plate-padding)"
+    data-plate
+    data-plate-id="hero"
+    data-plate-mode="surface-monitor"
+  >
     <div class="@container flex flex-col">
-      <h1
-        id="hero-title"
-        data-depth="40"
-        data-signal
-        class="hero-enter flex flex-wrap items-baseline gap-x-2 text-sm font-medium text-text-muted"
-      >
-        <KineticText class="font-display font-semibold text-text" text={profile.name} split="chars" />
-        <span aria-hidden="true" class="text-accent">/</span>
-        <KineticText text={profile.role} delay={180} />
+      <h1 id="hero-title" class="hero-enter flex flex-col gap-3">
+        <span class="text-sm font-medium tracking-caps text-text-muted uppercase" data-signal>
+          <KineticText text={profile.name} split="chars" />
+        </span>
+        <span class="plate-display font-display text-3xl font-semibold tracking-display text-balance text-text @md:text-4xl">
+          <KineticText text={profile.role} delay={120} />
+        </span>
       </h1>
 
       <p
-        class="plate-display hero-enter mt-4 font-display text-3xl font-semibold tracking-display text-balance text-text @md:text-4xl"
+        class="hero-enter mt-5 max-w-measure font-display text-xl text-balance text-text @md:text-2xl"
         style="--enter-delay: 60ms"
-        data-depth="10"
       >
-        <KineticText text={t('hero.headline')} split="chars" delay={120} shine />
+        <KineticText text={t('hero.headline')} type delay={360} />
       </p>
 
-      <p
-        class="hero-enter mt-4 text-base text-pretty text-text-muted @md:text-lg"
-        style="--enter-delay: 120ms"
-        data-depth="-30"
-      >
-        <KineticText text={profile.tagline} split="lines" delay={420} />
+      <p class="hero-enter mt-3 text-sm text-pretty text-text-muted @md:text-base" style="--enter-delay: 120ms">
+        {profile.tagline}
       </p>
 
-      <div class="hero-enter mt-6 grid grid-cols-2 gap-3" data-kinetic-cascade data-depth="60" style="--enter-delay: 180ms; --k-cascade-delay: 640ms">
+      <section aria-labelledby="hero-metrics" class="hero-enter mt-6" style="--enter-delay: 160ms">
+        <h2 id="hero-metrics" class="sr-only">{t('hero.metrics.label')}</h2>
+        <dl class="grid gap-4 @md:grid-cols-3" data-kinetic-cascade style="--k-cascade-delay: 520ms">
+          {
+            metrics.map(metric => (
+              <div class="flex flex-col-reverse gap-1">
+                <dt class="text-xs text-pretty text-text-muted">{metric.label}</dt>
+                <dd class="font-display text-xl font-semibold tracking-tight text-text tabular-nums" data-signal>
+                  <KineticText text={metric.value} counts />
+                </dd>
+              </div>
+            ))
+          }
+        </dl>
+      </section>
+
+      <div
+        class="hero-enter mt-6 grid grid-cols-2 gap-3"
+        data-kinetic-cascade
+        style="--enter-delay: 200ms; --k-cascade-delay: 640ms"
+      >
         <Button href={`#${SECTION_IDS.products}`} variant="primary" size="lg" class="px-3!">
           {t('hero.ctaProducts')}
         </Button>
@@ -85,6 +108,11 @@ const profile = await getProfile(locale);
 
   h1.hero-enter {
     animation-name: hero-slide;
+  }
+
+  /* On the monitor the engine owns the reveal (chapter:settled); a CSS slide would move text on a 1:1 surface. */
+  :global(.is-3d) .hero-enter {
+    animation: none;
   }
 
   @media (prefers-reduced-motion: reduce) {

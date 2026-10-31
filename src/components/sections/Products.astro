@@ -1,6 +1,5 @@
 ---
 import ProductCard from '../products/ProductCard.astro';
-import SectionHeader from '../ui/SectionHeader.astro';
 import { SECTION_IDS } from '../../config/site';
 import { useTranslations, type Locale } from '../../i18n/utils';
 import { getProducts, getProfile } from '../../lib/content';
@@ -11,7 +10,9 @@ interface Props {
 
 const { locale } = Astro.props;
 const t = useTranslations(locale);
-const products = await getProducts(locale);
+const products = (await getProducts(locale)).toSorted(
+  (a, b) => Number(b.featured === true) - Number(a.featured === true)
+);
 const { company } = await getProfile(locale);
 ---
 
@@ -20,21 +21,22 @@ const { company } = await getProfile(locale);
   aria-labelledby="products-title"
   data-station="products"
   data-products-section
-  class="relative z-(--z-content) flex flex-col items-center gap-6 px-gutter py-section"
+  class="relative z-(--z-content) flex flex-col items-center gap-stack px-gutter py-section"
 >
-  <div class="plate" data-plate data-plate-id="products-intro">
-    <div class="p-5 md:p-6">
-      <SectionHeader
-        id="products-title"
-        eyebrow={company.name}
-        title={t('products.title')}
-        subtitle={t('products.subtitle')}
-      />
-    </div>
-  </div>
-  {products.map(product => (
-    <ProductCard product={product} locale={locale} />
-  ))}
+  {
+    products.map((product, index) => (
+      <ProductCard product={product} locale={locale} order={index}>
+        {index === 0 && (
+          <>
+            <h2 id="products-title" class="sr-only">{t('products.title')}</h2>
+            <p class="text-xs font-semibold tracking-caps text-accent uppercase" aria-hidden="true">
+              {company.name} · {t('products.title')}
+            </p>
+          </>
+        )}
+      </ProductCard>
+    ))
+  }
 </section>
 
 <script>

@@ -1,0 +1,56 @@
+---
+import ExternalLink from '../ui/ExternalLink.astro';
+import { SITE } from '../../config/site';
+import { useTranslations, type Locale } from '../../i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const year = new Date().getFullYear();
+---
+
+<section
+  id="outro"
+  aria-labelledby="outro-title"
+  data-station="outro"
+  class="outro relative flex min-h-svh flex-col items-center justify-center px-gutter py-section"
+>
+  <div
+    class="plate p-(--plate-padding)"
+    data-plate
+    data-plate-id="outro"
+    data-plate-mode="anchored"
+    data-plate-anchor="outro"
+  >
+    <div class="flex max-w-measure flex-col gap-4">
+      <p class="text-xs font-semibold tracking-caps text-accent uppercase">{t('outro.label')}</p>
+      <h2 id="outro-title" class="font-display text-3xl font-semibold tracking-display text-balance text-text">
+        {t('outro.title')}
+      </h2>
+      <p class="text-base text-pretty text-text-muted">{t('outro.body')}</p>
+      <p class="flex flex-wrap items-baseline gap-x-3 gap-y-1 pt-2 text-xs text-text-subtle">
+        <span>{t('outro.tech')}</span>
+        <span aria-hidden="true">·</span>
+        <ExternalLink
+          href={SITE.social.github}
+          locale={locale}
+          class="underline decoration-accent/50 underline-offset-4 hover:text-text"
+        >
+          {t('outro.source')}
+        </ExternalLink>
+        <span aria-hidden="true">·</span>
+        <span>© {year} {SITE.name} · TUSOCIO IA S.A.C.</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Without 3D the HTML footer already closes the page; the credits only make sense as the closing shot. */
+  :global(html:not(.is-3d)) .outro {
+    display: none;
+  }
+</style>

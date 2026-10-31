@@ -53,7 +53,7 @@ const screenshot =
   data-product={product.id}
   data-featured={featured ? '' : undefined}
 >
-  <div class="flex max-w-[60ch] flex-col gap-4 md:gap-5">
+  <div class="flex max-w-measure flex-col gap-4 md:gap-5">
     <slot />
 
     <header class="flex flex-col gap-2">
@@ -62,7 +62,7 @@ const screenshot =
         id={titleId}
         class:list={[
           'flex items-center gap-3 font-display font-semibold tracking-display text-text',
-          featured ? 'text-4xl' : 'text-2xl'
+          featured ? 'plate-display text-4xl' : 'text-2xl'
         ]}
       >
         <span class:list={['size-2.5 shrink-0 rounded-full', dot]} aria-hidden="true"></span>

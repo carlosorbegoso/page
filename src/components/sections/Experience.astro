@@ -12,8 +12,8 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 const entries = await getExperience(locale);
-const chronological = [...entries].sort((a, b) => a.start.localeCompare(b.start));
-const firstYear = chronological.at(0)?.start.slice(0, 4);
+const newestFirst = entries.toSorted((a, b) => b.start.localeCompare(a.start));
+const firstYear = newestFirst.at(-1)?.start.slice(0, 4);
 ---
 
 <section
@@ -21,19 +21,23 @@ const firstYear = chronological.at(0)?.start.slice(0, 4);
   aria-labelledby="experience-title"
   data-station="experience"
   data-experience-station
-  class="relative flex min-h-svh flex-col items-center gap-stack px-gutter py-section lg:items-start"
+  class="relative flex min-h-svh flex-col items-center gap-stack px-gutter py-section"
 >
-  <div class="plate w-full max-w-[36rem] p-(--plate-padding)" data-plate data-plate-id="experience-intro" data-plate-order="0">
-    <SectionHeader
-      id="experience-title"
-      eyebrow={firstYear ? `${firstYear} – ${t('experience.present')}` : undefined}
-      title={t('experience.title')}
-      subtitle={t('experience.subtitle')}
-    />
-  </div>
-  {chronological.map((entry, index) => (
-    <TimelineItem locale={locale} order={index + 1} {...entry} />
-  ))}
+  {
+    newestFirst.map((entry, index) => (
+      <TimelineItem locale={locale} order={index} {...entry}>
+        {index === 0 && (
+          <SectionHeader
+            id="experience-title"
+            eyebrow={firstYear ? `${firstYear} – ${t('experience.present')}` : undefined}
+            title={t('experience.title')}
+            subtitle={t('experience.subtitle')}
+            class="mb-2"
+          />
+        )}
+      </TimelineItem>
+    ))
+  }
 </section>
 
 <script>

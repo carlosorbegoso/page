@@ -27,7 +27,13 @@ const { degree, institution, status } = profile.education;
   data-station="about"
   class="flex min-h-svh flex-col items-center justify-center gap-stack px-gutter py-section"
 >
-  <div class="plate p-(--plate-padding)" data-plate data-plate-id="about-bio" data-plate-anchor="right">
+  <div
+    class="plate p-(--plate-padding)"
+    data-plate
+    data-plate-id="about-bio"
+    data-plate-mode="surface-monitor"
+    data-plate-order="0"
+  >
     <div class="@container flex flex-col gap-6">
       <SectionHeader
         id="about-title"
@@ -48,14 +54,20 @@ const { degree, institution, status } = profile.education;
           decoding="async"
           class="aspect-square w-28 rounded-lg border border-border object-cover @md:w-36"
         />
-        <div class="flex flex-col gap-4 text-base text-text-muted" data-depth="-30">
+        <div class="flex flex-col gap-4 text-base text-text-muted">
           {body.map(paragraph => <p class="text-pretty">{paragraph}</p>)}
         </div>
       </div>
     </div>
   </div>
 
-  <div class="plate p-(--plate-padding)" data-plate data-plate-id="about-stack" data-plate-anchor="right">
+  <div
+    class="plate p-(--plate-padding)"
+    data-plate
+    data-plate-id="about-stack"
+    data-plate-mode="surface-monitor"
+    data-plate-order="1"
+  >
     <div class="@container flex flex-col gap-6">
       <section aria-labelledby="about-education">
         <h3
@@ -64,7 +76,7 @@ const { degree, institution, status } = profile.education;
         >
           {t('about.education')}
         </h3>
-        <ul class="mt-4 flex flex-col gap-4 text-sm text-text-muted" data-kinetic-cascade data-depth="-15">
+        <ul class="mt-4 flex flex-col gap-4 text-sm text-text-muted" data-kinetic-cascade>
           <li class="flex gap-3">
             <span class="mt-2 size-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true"></span>
             <span>
@@ -96,7 +108,7 @@ const { degree, institution, status } = profile.education;
                   {group.category}
                 </dt>
                 <dd class="mt-2">
-                  <ul class="flex flex-wrap gap-2" data-kinetic-cascade data-depth="30">
+                  <ul class="flex flex-wrap gap-2" data-kinetic-cascade>
                     {group.items.map(item => (
                       <li>
                         <Tag>{item}</Tag>

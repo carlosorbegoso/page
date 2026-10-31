@@ -44,7 +44,7 @@ const hostname = new URL(product.url).hostname;
   <div class="relative flex flex-col gap-4 overflow-hidden rounded-[inherit] p-5 md:gap-5 md:p-6">
     <span class="product-plate__bar absolute inset-x-0 top-0 h-0.5" aria-hidden="true"></span>
 
-    <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-2" data-depth="30">
       <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
         <h3
           id={titleId}
@@ -61,10 +61,10 @@ const hostname = new URL(product.url).hostname;
       <p class="text-base font-medium text-text">{product.tagline}</p>
     </div>
 
-    <p class="text-sm text-pretty text-text-muted">{product.description}</p>
+    <p class="text-sm text-pretty text-text-muted" data-depth="-30">{product.description}</p>
 
     {product.features.length > 0 && (
-      <ul class="flex flex-col gap-2 text-sm text-text-muted" role="list" data-kinetic-cascade>
+      <ul class="flex flex-col gap-2 text-sm text-text-muted" role="list" data-kinetic-cascade data-depth="-10">
         {product.features.map(feature => (
           <li class="flex items-start gap-2.5">
             <span
@@ -77,7 +77,7 @@ const hostname = new URL(product.url).hostname;
       </ul>
     )}
 
-    <div class="flex flex-col gap-4 border-t border-border pt-4">
+    <div class="flex flex-col gap-4 border-t border-border pt-4" data-depth="50">
       <dl class="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
         <dt class="text-xs font-semibold tracking-caps text-text-subtle uppercase">
           {t('products.role')}

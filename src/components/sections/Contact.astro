@@ -63,7 +63,7 @@ const socials = [
       <p id="contact-social-label" class="text-xs font-semibold tracking-caps text-text-muted uppercase">
         {t('contact.social')}
       </p>
-      <ul aria-labelledby="contact-social-label" class="grid gap-2 @md:grid-cols-2" role="list">
+      <ul aria-labelledby="contact-social-label" class="grid gap-2 @md:grid-cols-2" role="list" data-kinetic-cascade data-depth="40">
         {socials.map(social => (
           <li class="@md:last:col-span-2">
             <Button href={social.href} variant="secondary" external class="w-full">

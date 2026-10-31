@@ -48,7 +48,7 @@ const { degree, institution, status } = profile.education;
           decoding="async"
           class="aspect-square w-28 rounded-lg border border-border object-cover @md:w-36"
         />
-        <div class="flex flex-col gap-4 text-base text-text-muted">
+        <div class="flex flex-col gap-4 text-base text-text-muted" data-depth="-30">
           {body.map(paragraph => <p class="text-pretty">{paragraph}</p>)}
         </div>
       </div>
@@ -64,7 +64,7 @@ const { degree, institution, status } = profile.education;
         >
           {t('about.education')}
         </h3>
-        <ul class="mt-4 flex flex-col gap-4 text-sm text-text-muted" data-kinetic-cascade>
+        <ul class="mt-4 flex flex-col gap-4 text-sm text-text-muted" data-kinetic-cascade data-depth="-15">
           <li class="flex gap-3">
             <span class="mt-2 size-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true"></span>
             <span>
@@ -96,7 +96,7 @@ const { degree, institution, status } = profile.education;
                   {group.category}
                 </dt>
                 <dd class="mt-2">
-                  <ul class="flex flex-wrap gap-2" data-kinetic-cascade>
+                  <ul class="flex flex-wrap gap-2" data-kinetic-cascade data-depth="30">
                     {group.items.map(item => (
                       <li>
                         <Tag>{item}</Tag>

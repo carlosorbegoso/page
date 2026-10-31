@@ -67,6 +67,7 @@ const linkRel = external ? ['noopener', 'noreferrer', rel].filter(Boolean).join(
       download={download}
       type={type}
       data-magnetic
+      data-variant={variant}
       {...attrs}
     >
       <span class="magnetic__inner" data-magnetic-inner><slot /></span>
@@ -78,6 +79,7 @@ const linkRel = external ? ['noopener', 'noreferrer', rel].filter(Boolean).join(
       disabled={disabled}
       class:list={classes}
       data-magnetic
+      data-variant={variant}
       {...(attrs as HTMLAttributes<'button'>)}
     >
       <span class="magnetic__inner" data-magnetic-inner><slot /></span>

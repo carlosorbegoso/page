@@ -37,7 +37,7 @@ const stackId = `${headingId}-stack`;
   data-current={isCurrent ? '' : undefined}
 >
   <article aria-labelledby={headingId} class="flex flex-col gap-4">
-    <header class="flex flex-col gap-1.5">
+    <header class="flex flex-col gap-1.5" data-depth="30">
       <p class="flex items-center gap-2 text-sm font-medium tabular-nums text-text-muted">
         <span
           class:list={[
@@ -53,7 +53,7 @@ const stackId = `${headingId}-stack`;
         id={headingId}
         class="font-display text-2xl font-semibold tracking-tight text-balance text-text"
       >
-        <KineticText text={company} />
+        <KineticText text={company} split="chars" />
       </h3>
       <p class="font-medium text-text">{role}</p>
       {
@@ -65,7 +65,7 @@ const stackId = `${headingId}-stack`;
       }
     </header>
 
-    <p class="text-text-muted">{summary}</p>
+    <p class="text-text-muted" data-depth="-30">{summary}</p>
 
     {
       highlights.length > 0 && (
@@ -103,7 +103,7 @@ const stackId = `${headingId}-stack`;
     }
 
     <p id={stackId} class="sr-only">{t('experience.stack')}</p>
-    <ul aria-labelledby={stackId} class="flex flex-wrap gap-2" role="list" data-kinetic-cascade>
+    <ul aria-labelledby={stackId} class="flex flex-wrap gap-2" role="list" data-kinetic-cascade data-depth="40">
       {stack.map(tech => (
         <li>
           <Tag>{tech}</Tag>

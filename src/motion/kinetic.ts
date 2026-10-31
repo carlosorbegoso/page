@@ -1,3 +1,4 @@
+import { refreshProximity } from './proximity';
 import { graphemes, splitWords, type SplitMode } from './split';
 
 declare global {
@@ -53,7 +54,7 @@ function buildSplit(el: HTMLElement, mode: SplitMode): void {
 /** SectionHeader is owned by the UI layer, so its title and eyebrow are split here with the same markup KineticText emits. */
 function enhanceSectionHeaders(): void {
   for (const title of document.querySelectorAll<HTMLElement>('[data-plate] header > h2:not([data-kinetic])')) {
-    if (title.children.length === 0) buildSplit(title, 'words');
+    if (title.children.length === 0) buildSplit(title, 'chars');
   }
   for (const eyebrow of document.querySelectorAll<HTMLElement>(
     '[data-plate] header > p.uppercase:first-child:not([data-kinetic])'
@@ -71,9 +72,11 @@ function indexCascades(): void {
   }
 }
 
+/** Line index per word: staggers `lines` mode and gives each line its own depth in 3D. */
 function measureLines(root: HTMLElement): void {
   const words = Array.from(root.querySelectorAll<HTMLElement>('.k-w'));
   const tops = words.map(word => word.offsetTop);
+  const byLine = root.dataset.kinetic === 'lines';
   let line = -1;
   let previous = Number.NEGATIVE_INFINITY;
   tops.forEach((top, i) => {
@@ -81,7 +84,8 @@ function measureLines(root: HTMLElement): void {
       line += 1;
       previous = top;
     }
-    words[i]!.style.setProperty('--k-i', String(line));
+    words[i]!.style.setProperty('--k-line', String(line));
+    if (byLine) words[i]!.style.setProperty('--k-i', String(line));
   });
 }
 
@@ -118,7 +122,7 @@ function settle(root: HTMLElement): void {
 }
 
 function watchSettle(root: HTMLElement): void {
-  if (!root.hasAttribute('data-kinetic-shine')) return;
+  if (root.dataset.kinetic === undefined) return;
   const units = root.querySelectorAll<HTMLElement>('.k-i');
   const last = units[units.length - 1];
   if (!last || !allowed()) return settle(root);
@@ -133,7 +137,7 @@ function watchSettle(root: HTMLElement): void {
 
 function revealRoot(root: HTMLElement, animate: boolean): void {
   if (root.dataset.reveal === 'in') return;
-  if (root.dataset.kinetic === 'lines') measureLines(root);
+  if (root.dataset.kinetic && root.dataset.kinetic !== 'block') measureLines(root);
   root.dataset.reveal = 'in';
   if (root.dataset.kineticCount !== undefined) {
     if (animate) runCount(root);
@@ -162,8 +166,14 @@ function collect(): void {
   }
 }
 
+function setLive(owner: HTMLElement, live: boolean): void {
+  if (owner.hasAttribute('data-motion-live') === live) return;
+  owner.toggleAttribute('data-motion-live', live);
+  refreshProximity();
+}
+
 function setPlate(owner: HTMLElement, revealed: boolean, live: boolean): void {
-  owner.toggleAttribute('data-motion-live', live && allowed());
+  setLive(owner, live && allowed());
   const animate = allowed();
   for (const root of groups.get(owner) ?? []) {
     if (revealed) revealRoot(root, animate);
@@ -178,7 +188,7 @@ function evaluate3d(owner: HTMLElement): void {
   const stationActive = active || siblings.some(el => el.hasAttribute('data-active'));
   if (dormant) setPlate(owner, false, false);
   else if (stationActive) setPlate(owner, true, active);
-  else owner.toggleAttribute('data-motion-live', false);
+  else setLive(owner, false);
 }
 
 const intersection = new IntersectionObserver(
@@ -187,7 +197,7 @@ const intersection = new IntersectionObserver(
     for (const entry of entries) {
       const owner = entry.target as HTMLElement;
       if (entry.isIntersecting) setPlate(owner, true, true);
-      else owner.toggleAttribute('data-motion-live', false);
+      else setLive(owner, false);
     }
   },
   { threshold: 0.15, rootMargin: '0px 0px -8% 0px' }
@@ -222,7 +232,7 @@ function applyMode(): void {
 
 function revealEverything(): void {
   for (const [owner, roots] of groups) {
-    owner.removeAttribute('data-motion-live');
+    setLive(owner, false);
     for (const root of roots) revealRoot(root, false);
   }
 }

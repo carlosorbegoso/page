@@ -88,14 +88,13 @@
     min-width: 0;
     max-width: 100%;
     translate: var(--mx, 0px) var(--my, 0px);
-    transition: translate var(--duration-slow) var(--ease-out);
   }
 
   [data-magnetic] {
     position: relative;
   }
 
-  [data-magnetic]::after {
+  [data-magnetic]:not([data-variant='ghost'])::after {
     content: '';
     position: absolute;
     inset-inline: 1rem;
@@ -198,7 +197,7 @@
 }
 
 /* Continuous micro-life, only on the plate being read. */
-:root.k-armed .plate[data-motion-live]::after {
+:root.k-armed:not(.is-3d) .plate[data-motion-live]::after {
   opacity: 0.9;
   animation: k-signal 7s var(--ease-in-out) infinite alternate;
 }
@@ -207,28 +206,176 @@
   animation: k-cursor 1.6s var(--ease-in-out) infinite alternate;
 }
 
-/* The shine needs the words free of transforms and clips (they would isolate the glyphs from background-clip), hence data-settled. */
+/* Once the entrance is over the mask goes away, so hover lifts and the shine are never cut. */
+:root.k-armed .kinetic[data-settled] .k-w {
+  clip-path: none;
+}
+
+/* Idle drift: every word floats on its own slow path (±3 px, ±0.5°), phases spread by index so the block never looks glued. */
+:root.k-armed [data-motion-live] .kinetic:not([data-kinetic-variant='type']) .k-w {
+  --k-dx: calc(sin(calc(var(--k-i, 0) * 73deg + 20deg)) * 3px);
+  --k-dy: calc(cos(calc(var(--k-i, 0) * 41deg)) * 2.5px);
+  --k-rot: calc(sin(calc(var(--k-i, 0) * 29deg + 50deg)) * 0.5deg);
+
+  animation: k-drift calc(6s + (sin(calc(var(--k-i, 0) * 57deg)) + 1) * 2.5s) var(--ease-in-out)
+    calc(var(--k-i, 0) * -1.37s) infinite alternate;
+}
+
+:root.k-armed [data-motion-live] [data-kinetic-cascade] > * {
+  --k-orbit: calc(1.5px + (sin(calc(var(--k-i, 0) * 61deg)) + 1) * 0.75px);
+
+  animation: k-orbit calc(9s + (cos(calc(var(--k-i, 0) * 47deg)) + 1) * 3s) linear calc(var(--k-i, 0) * -2.1s)
+    infinite;
+}
+
+/* Depth layers. preserve-3d has to run unbroken from the CSS3D camera down to every layer, so it is set on the engine's station holder and column and on each ancestor of a layer. */
+:root.is-3d :is(.stage-plates__station, .stage-plates__column),
+:root.is-3d [data-plate] :is(div, header, section, article, ul, ol, li, dl, dd, p, h1, h2, h3, a, span):has([data-depth], .k-w, [data-kinetic-cascade]),
+:root.is-3d [data-plate] :is([data-depth], .kinetic, .kinetic__visual, [data-kinetic-cascade]) {
+  transform-style: preserve-3d;
+}
+
+:root.is-3d [data-plate] :is(.kinetic, .kinetic__visual) {
+  display: inline-block;
+}
+
+:root.is-3d [data-plate] .product-plate > div {
+  overflow: visible;
+}
+
+[data-depth] {
+  --depth: 0px;
+}
+
+[data-depth='-50'] { --depth: -50px; }
+[data-depth='-30'] { --depth: -30px; }
+[data-depth='-15'] { --depth: -15px; }
+[data-depth='-10'] { --depth: -10px; }
+[data-depth='10'] { --depth: 10px; }
+[data-depth='20'] { --depth: 20px; }
+[data-depth='30'] { --depth: 30px; }
+[data-depth='40'] { --depth: 40px; }
+[data-depth='50'] { --depth: 50px; }
+[data-depth='60'] { --depth: 60px; }
+
+/* Chrome paints the desk station's layers in reverse depth order (its plate sits at a ~3e-4 world scale, which breaks the 3D sort): there, layers go to -Z so they still paint over the pool. Remove once the hero anchor is fixed in the engine. */
+:root.is-3d [data-plate] {
+  --k-zsign: 1;
+}
+
+:root.is-3d [data-station-plates='hero'] [data-plate] {
+  --k-zsign: -1;
+}
+
+/* Every layer stays in front of the plate plane (the dark pool behind the text lives there): --depth is relative, the base sits 50px out. */
+:root.is-3d [data-plate] [data-depth] {
+  translate: 0 0 calc((var(--depth) + 50px) * var(--k-zsign));
+}
+
+/* SectionHeader belongs to the UI layer, so its layers are addressed by position. */
+:root.is-3d [data-plate] header > p:first-child:not(:only-child) {
+  translate: 0 0 calc(90px * var(--k-zsign));
+}
+
+:root.is-3d [data-plate] header > h2 {
+  translate: 0 0 calc(50px * var(--k-zsign));
+}
+
+:root.is-3d [data-plate] header > h2 ~ p {
+  translate: 0 0 calc(30px * var(--k-zsign));
+}
+
+:root.is-3d [data-plate] .kinetic[data-settled] .k-w {
+  transform-style: preserve-3d;
+  translate: 0 0 calc((sin(calc(var(--k-line, 0) * 97deg + 15deg)) + 1) * 6px * var(--k-zsign));
+}
+
+:root.is-3d [data-plate] [data-kinetic-cascade] > * {
+  transform-style: preserve-3d;
+}
+
+:root.is-3d.k-armed [data-motion-live] [data-kinetic-cascade] > * {
+  --k-fan: calc((sin(calc(var(--k-i, 0) * 67deg + 10deg)) + 1) * 8px * var(--k-zsign));
+}
+
+/* Hover. */
+[data-kinetic-cascade] > li > * {
+  transition: translate var(--duration-base) var(--ease-out);
+}
+
+:root.k-armed [data-kinetic-cascade] > li:hover > * {
+  translate: 0 -2px;
+}
+
+[data-magnetic]:hover .magnetic__inner {
+  scale: 1.035;
+}
+
+.magnetic__inner {
+  transition:
+    translate var(--duration-slow) var(--ease-out),
+    scale var(--duration-base) var(--ease-out);
+}
+
+.plate a:not([data-magnetic]) {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0 1px;
+  transition: background-size var(--duration-base) var(--ease-out);
+}
+
+.plate a:not([data-magnetic]):is(:hover, :focus-visible) {
+  background-size: 100% 1px;
+}
+
+/* Light that runs letter by letter across the settled headline. Flat page only: in 3D the plate's dark text halo would paint over clipped glyphs. */
 @supports (background-clip: text) or (-webkit-background-clip: text) {
-  :root.k-armed .kinetic[data-kinetic-shine][data-settled] {
+  :root.k-armed:not(.is-3d) .kinetic[data-kinetic-shine][data-settled] .k-i {
     background-image: linear-gradient(
       100deg,
-      var(--color-text) 0 42%,
+      var(--color-text) 0 40%,
       var(--color-accent-hover) 50%,
-      var(--color-text) 58% 100%
+      var(--color-text) 60% 100%
     );
     background-size: 300% 100%;
     background-position: 100% 0;
     -webkit-background-clip: text;
     background-clip: text;
-    animation: k-shine 16s var(--ease-in-out) 1.2s infinite;
-  }
-
-  :root.k-armed .kinetic[data-kinetic-shine][data-settled] .k-i {
     color: transparent;
+    animation: k-shine 14s linear calc(1.2s + var(--k-c, var(--k-i, 0)) * 35ms) infinite;
+  }
+}
+
+@keyframes k-drift {
+  from {
+    transform: translate(calc(var(--k-dx) * -1), calc(var(--k-dy) * -1)) rotate(calc(var(--k-rot) * -1));
   }
 
-  :root.k-armed .kinetic[data-kinetic-shine][data-settled] .k-w {
-    clip-path: none;
+  to {
+    transform: translate(var(--k-dx), var(--k-dy)) rotate(var(--k-rot));
+  }
+}
+
+@keyframes k-orbit {
+  0% {
+    transform: translate3d(var(--k-orbit), 0, var(--k-fan, 0px));
+  }
+
+  25% {
+    transform: translate3d(0, var(--k-orbit), var(--k-fan, 0px));
+  }
+
+  50% {
+    transform: translate3d(calc(var(--k-orbit) * -1), 0, var(--k-fan, 0px));
+  }
+
+  75% {
+    transform: translate3d(0, calc(var(--k-orbit) * -1), var(--k-fan, 0px));
+  }
+
+  100% {
+    transform: translate3d(var(--k-orbit), 0, var(--k-fan, 0px));
   }
 }
 
@@ -257,7 +404,7 @@
     background-position: 100% 0;
   }
 
-  45%,
+  9%,
   100% {
     background-position: 0% 0;
   }
@@ -269,11 +416,8 @@
     display: none;
   }
 
-  :root.k-armed .kinetic[data-kinetic-shine][data-settled] {
-    background: none;
-  }
-
   :root.k-armed .kinetic[data-kinetic-shine][data-settled] .k-i {
+    background: none;
     color: inherit;
   }
 }

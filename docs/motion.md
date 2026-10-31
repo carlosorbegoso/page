@@ -61,9 +61,20 @@ Marcado generado (en el servidor):
 | `data-kinetic-cascade` | `ul`/contenedor | Los hijos aparecen en cascada (8 px + opacidad, 40 ms entre hijos, retardo `--k-cascade-delay`, por defecto 160 ms). Tags del stack, tecnologías, features de producto, CTAs del hero. |
 | `data-kinetic-count="30"` | span `aria-hidden` con la cifra (va acompañado de una copia `sr-only`) | Cuenta de 0 al valor al revelar (1.4 s, `easeOutQuart`, 220 ms de retardo). Ancho fijo `--k-digits` en `ch` + `tabular-nums`: sin saltos de layout. `splitCounts()` en `src/motion/split.ts` detecta cifras seguidas de `%`. |
 | `data-magnetic` / `data-magnetic-inner` | `Button.astro` | Solo `pointer: fine`: el **hijo interno** sigue al cursor dentro de la caja del botón (máx. 6 px X / 4 px Y, `translate`, rAF). Hover y `:focus-visible`: línea inferior que se dibuja (`scale` 0→1 desde la izquierda); con teclado la línea es más gruesa y el contenido sube 1 px, además del anillo de foco. |
-| `--signal-progress` | `.plate` (propiedad registrada `<number>`) | Recorre 0→1→0 en 7 s (`--ease-in-out`, `alternate`) en placas `data-motion-live`; mueve un destello del acento por el borde superior (`.plate::after`). `plates.css` queda intacto. |
+| `--signal-progress` | `.plate` (propiedad registrada `<number>`) | Solo en la página plana: recorre 0→1→0 en 7 s en placas `data-motion-live` y mueve un destello del acento por el borde superior (`.plate::after`). |
+| `data-depth="-50…60"` | bloques de la placa | En `.is-3d`, capa a `translateZ((depth + 50px) × --k-zsign)`: todo queda delante del plano de la placa (donde vive el pozo oscuro). Los títulos, eyebrows y subtítulos de `SectionHeader` se colocan por posición (90/50/30 px). Cada línea del titular lleva un desfase extra de 0–12 px y los tags un abanico de 0–16 px. `preserve-3d` se encadena desde `.stage-plates__station`/`__column` hasta cada capa. |
+| `--k-zsign` | placa | `-1` en la estación `hero`: Chrome pinta esas capas en orden de profundidad invertido (la placa del escritorio va a escala ≈3e-4), así que allí van a −Z. Quitarlo cuando se arregle el anclaje del hero en el motor. |
 
-## 4. Timings
+## 4. Vida e interacción (`src/motion/proximity.ts`)
+
+- **Proximidad** (solo `pointer: fine`): en las placas `data-motion-live`, las unidades cercanas al cursor se elevan, se separan y crecen (caracteres: radio 96 px, 6 px, 3 px, ×1.12; palabras: 130 px, 2 px, 1.2 px, ×1.015) con un resorte (rigidez 170, amortiguación 19). Los centros salen del rect de cada palabra (proyectado por CSS3D) más el offset del carácter cacheado: una lectura por palabra y frame, todas antes de escribir. Usa `transform` en `.k-i` (la entrada usa `translate`, así no chocan). Sin `translateZ`, para no cruzar el pozo. Máximo 200 unidades.
+- **Deriva en reposo**: cada palabra flota sola (±3 px, ±0.5°, 6–11 s, fases por índice con `sin()`). Los tags y elementos en cascada orbitan 1.5–3 px.
+- **Ola**: al entrar el ratón en un `h2`/`h3` de placa, sus letras suben 0.14em en ola (28 ms entre letras). Se hace con WAAPI `translate` y `composite: 'add'`.
+- **Táctil**: al tocar una placa viva, onda desde el punto de contacto sobre las unidades a menos de 220 px.
+- **Hover**: tags suben 2 px; el contenido del botón crece ×1.035 además del magnetismo y la línea de luz (no en `ghost`, que ya tiene subrayado); los enlaces de texto dibujan un subrayado.
+- **Brillo**: por carácter, con un retardo de 35 ms entre letras; solo en la página plana (en 3D el halo oscuro del texto taparía el degradado).
+
+## 5. Timings
 
 | Uso | Valor | Token |
 |---|---|---|
@@ -73,13 +84,13 @@ Marcado generado (en el servidor):
 | Cascada | 400 ms | `--duration-slow`, `--ease-out` |
 | Cursor | 1.6 s alterno, opacidad 0.65 ↔ 0.12 | `--ease-in-out` |
 | Señal del borde | 7 s alterno | `--ease-in-out` |
-| Brillo del titular | ciclo de 16 s (cruza en el primer 45 %), empieza 1.2 s tras asentarse | `--ease-in-out` |
+| Brillo del titular | ciclo de 14 s por letra (cruza en el primer 9 %), empieza 1.2 s tras asentarse + 35 ms × letra | `linear` |
 
 Con `prefers-reduced-motion` todos los tokens `--duration-*` ya valen `0.01ms` (`tokens.css`), y además no hay estados ocultos.
 
 Desviación consciente de `identity.md` §5 («desplazamiento máximo 12–16 px»): las palabras suben su propia altura, pero dentro de una máscara, así que el ojo ve una emergencia y no un desplazamiento de bloque. Los bloques y cascadas sí respetan 8–12 px.
 
-## 5. Rendimiento
+## 6. Rendimiento
 
 - JS: `kinetic.ts` (con `split.ts`) ≈ 2.0 KB gzip minificado y `magnetic.ts` ≈ 0.5 KB, módulos de Astro (diferidos), sin dependencias ni GSAP.
 - Sin layout thrash: las lecturas (`offsetTop` en `lines`, `getBoundingClientRect` del botón al entrar) se hacen una vez y en bloque; los contadores solo cambian el texto de un span de ancho fijo.

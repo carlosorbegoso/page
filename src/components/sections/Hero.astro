@@ -25,6 +25,8 @@ const profile = await getProfile(locale);
     <div class="@container flex flex-col">
       <h1
         id="hero-title"
+        data-depth="40"
+        data-signal
         class="hero-enter flex flex-wrap items-baseline gap-x-2 text-sm font-medium text-text-muted"
       >
         <KineticText class="font-display font-semibold text-text" text={profile.name} split="chars" />
@@ -33,20 +35,22 @@ const profile = await getProfile(locale);
       </h1>
 
       <p
-        class="hero-enter mt-4 font-display text-3xl font-semibold tracking-display text-balance text-text @md:text-4xl"
+        class="plate-display hero-enter mt-4 font-display text-3xl font-semibold tracking-display text-balance text-text @md:text-4xl"
         style="--enter-delay: 60ms"
+        data-depth="10"
       >
-        <KineticText text={t('hero.headline')} delay={120} shine />
+        <KineticText text={t('hero.headline')} split="chars" delay={120} shine />
       </p>
 
       <p
         class="hero-enter mt-4 text-base text-pretty text-text-muted @md:text-lg"
         style="--enter-delay: 120ms"
+        data-depth="-30"
       >
         <KineticText text={profile.tagline} split="lines" delay={420} />
       </p>
 
-      <div class="hero-enter mt-6 grid grid-cols-2 gap-3" data-kinetic-cascade style="--enter-delay: 180ms; --k-cascade-delay: 640ms">
+      <div class="hero-enter mt-6 grid grid-cols-2 gap-3" data-kinetic-cascade data-depth="60" style="--enter-delay: 180ms; --k-cascade-delay: 640ms">
         <Button href={`#${SECTION_IDS.products}`} variant="primary" size="lg" class="px-3!">
           {t('hero.ctaProducts')}
         </Button>

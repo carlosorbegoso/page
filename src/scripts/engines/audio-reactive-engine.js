@@ -318,6 +318,7 @@ export class AudioReactiveEngine {
     setHeroEngine(e) { this.heroEngine = e; }
     setConnectedParticlesEngine(e) { this.connectedParticlesEngine = e; }
     setVisualEngine(e) { this.visualEngine = e; }
+    setCursorEngine(e) { this.cursorEngine = e; }
 
     // ─── Start / Stop ───────────────────────────────────────────────────────
 
@@ -392,6 +393,7 @@ export class AudioReactiveEngine {
             // Three.js engines
             this.feedHeroEngine();
             this.feedConnectedParticles();
+            this.feedCursorEngine();
 
             this.hueOffset += 0.4;
         }
@@ -1030,6 +1032,12 @@ export class AudioReactiveEngine {
         // Stars brightness with treble
         if (h.ambientStars?.material?.uniforms?.pixelRatio) {
             h.ambientStars.material.uniforms.pixelRatio.value = h.renderer.getPixelRatio() * (1 + treble * 0.7);
+        }
+    }
+
+    feedCursorEngine() {
+        if (this.cursorEngine?.setAudioData) {
+            this.cursorEngine.setAudioData(this.vol, this.bands, this.pulse);
         }
     }
 

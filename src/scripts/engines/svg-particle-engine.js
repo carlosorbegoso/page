@@ -1,312 +1,407 @@
 /**
- * SVG Particle Engine
- * Converts SVG paths into interactive particles on Canvas
- * Particles react to audio (microphone) and mouse interaction
- * Inspired by Frank's Laboratory - adapted for Neural Mindscape
+ * SVG Particle Engine - Frank's Laboratory style
+ * Multiple bezier bar shapes per animal on layered canvases
+ * Each shape has its own center, rotation, and bezier params
  */
 
 import { log } from '../utils/logger.js';
 
-class Particle {
-    constructor(x, y, color) {
-        this.originX = x;
-        this.originY = y;
-        this.x = Math.random() * window.innerWidth;
-        this.y = Math.random() * window.innerHeight;
+// Each animal has multiple "shapes" - each shape is a set of rotating bezier bars
+// that form a specific part of the animal (tail, ears, shell, wings, etc.)
+const ANIMAL_SHAPES = {
+    snail: [
+        { // Shell spiral
+            cx: -70, cy: 50, count: 255, spacing: 0.9,
+            rotate: 0.043, bx: -0.5, bOff: -150, bEnd: 50,
+            dotThreshold: 170, hueStart: 180, hueStep: 1.4,
+            layer: 'bars'
+        },
+        { // Antenna rays
+            cx: 40, cy: -60, count: 80, spacing: 0.6,
+            rotate: 0.08, bx: -0.3, bOff: -80, bEnd: 30,
+            dotThreshold: 60, hueStart: 120, hueStep: 2,
+            layer: 'lines'
+        }
+    ],
+    fox: [
+        { // Big fluffy tail - huge, fills right side behind the body
+            cx: 80, cy: 50, count: 255, spacing: 0.9,
+            rotate: 0.043, bx: -0.5, bOff: -150, bEnd: 50,
+            dotThreshold: 170, hueStart: 300, hueStep: 1.4,
+            layer: 'bars'
+        },
+        { // Left ear - pointed, goes up-left
+            cx: -30, cy: -100, count: 120, spacing: 0.7,
+            rotate: 0.055, bx: -0.4, bOff: -100, bEnd: 35,
+            dotThreshold: 90, hueStart: 30, hueStep: 2.0,
+            layer: 'bars'
+        },
+        { // Right ear - pointed, goes up-right
+            cx: 50, cy: -100, count: 120, spacing: 0.7,
+            rotate: -0.055, bx: -0.4, bOff: -100, bEnd: 35,
+            dotThreshold: 90, hueStart: 60, hueStep: 2.0,
+            layer: 'lines'
+        }
+    ],
+    owl: [
+        { // Left wing - large fan spread
+            cx: -100, cy: 30, count: 255, spacing: 0.9,
+            rotate: 0.030, bx: -0.6, bOff: -170, bEnd: 45,
+            dotThreshold: 170, hueStart: 120, hueStep: 1.2,
+            layer: 'bars'
+        },
+        { // Right wing
+            cx: 100, cy: 30, count: 255, spacing: 0.9,
+            rotate: -0.030, bx: -0.6, bOff: -170, bEnd: 45,
+            dotThreshold: 170, hueStart: 200, hueStep: 1.2,
+            layer: 'bars'
+        },
+        { // Head plumes / horns
+            cx: 0, cy: -110, count: 100, spacing: 0.6,
+            rotate: 0.06, bx: -0.3, bOff: -80, bEnd: 25,
+            dotThreshold: 70, hueStart: 60, hueStep: 2.5,
+            layer: 'lines'
+        }
+    ],
+    deer: [
+        { // Left antler - tall and branching
+            cx: -50, cy: -100, count: 200, spacing: 0.9,
+            rotate: 0.038, bx: -0.45, bOff: -150, bEnd: 35,
+            dotThreshold: 140, hueStart: 160, hueStep: 1.5,
+            layer: 'bars'
+        },
+        { // Right antler
+            cx: 50, cy: -100, count: 200, spacing: 0.9,
+            rotate: -0.038, bx: -0.45, bOff: -150, bEnd: 35,
+            dotThreshold: 140, hueStart: 200, hueStep: 1.5,
+            layer: 'bars'
+        },
+        { // Body shimmer
+            cx: 0, cy: 60, count: 80, spacing: 0.6,
+            rotate: 0.065, bx: -0.3, bOff: -70, bEnd: 25,
+            dotThreshold: 60, hueStart: 40, hueStep: 2.5,
+            layer: 'lines'
+        }
+    ],
+    moth: [
+        { // Left wing - big butterfly spread
+            cx: -90, cy: 0, count: 255, spacing: 0.8,
+            rotate: 0.030, bx: -0.6, bOff: -170, bEnd: 45,
+            dotThreshold: 170, hueStart: 30, hueStep: 1.3,
+            layer: 'bars'
+        },
+        { // Right wing
+            cx: 90, cy: 0, count: 255, spacing: 0.8,
+            rotate: -0.030, bx: -0.6, bOff: -170, bEnd: 45,
+            dotThreshold: 170, hueStart: 280, hueStep: 1.3,
+            layer: 'bars'
+        },
+        { // Antenna feathers
+            cx: 0, cy: -90, count: 80, spacing: 0.5,
+            rotate: 0.08, bx: -0.25, bOff: -60, bEnd: 20,
+            dotThreshold: 60, hueStart: 50, hueStep: 3,
+            layer: 'lines'
+        }
+    ],
+    seahorse: [
+        { // Big curled tail spiral
+            cx: -60, cy: 60, count: 255, spacing: 0.9,
+            rotate: 0.043, bx: -0.55, bOff: -150, bEnd: 50,
+            dotThreshold: 170, hueStart: 140, hueStep: 1.5,
+            layer: 'bars'
+        },
+        { // Crown/dorsal fin
+            cx: 20, cy: -80, count: 100, spacing: 0.6,
+            rotate: 0.055, bx: -0.35, bOff: -90, bEnd: 30,
+            dotThreshold: 75, hueStart: 180, hueStep: 2.0,
+            layer: 'lines'
+        }
+    ],
+    bat: [
+        { // Left wing - wide membrane
+            cx: -120, cy: 10, count: 255, spacing: 0.9,
+            rotate: 0.025, bx: -0.7, bOff: -200, bEnd: 40,
+            dotThreshold: 170, hueStart: 260, hueStep: 1.1,
+            layer: 'bars'
+        },
+        { // Right wing
+            cx: 120, cy: 10, count: 255, spacing: 0.9,
+            rotate: -0.025, bx: -0.7, bOff: -200, bEnd: 40,
+            dotThreshold: 170, hueStart: 300, hueStep: 1.1,
+            layer: 'bars'
+        }
+    ],
+    chameleon: [
+        { // Big curled tail
+            cx: -70, cy: 50, count: 255, spacing: 0.9,
+            rotate: 0.043, bx: -0.5, bOff: -140, bEnd: 50,
+            dotThreshold: 170, hueStart: 80, hueStep: 1.5,
+            layer: 'bars'
+        },
+        { // Head crest fan
+            cx: 50, cy: -80, count: 120, spacing: 0.6,
+            rotate: 0.06, bx: -0.35, bOff: -90, bEnd: 30,
+            dotThreshold: 85, hueStart: 30, hueStep: 2.2,
+            layer: 'lines'
+        }
+    ],
+    dinosaur: [
+        { // Back spines - tall ridge
+            cx: -30, cy: -70, count: 255, spacing: 0.9,
+            rotate: 0.035, bx: -0.5, bOff: -160, bEnd: 45,
+            dotThreshold: 170, hueStart: 200, hueStep: 1.3,
+            layer: 'bars'
+        },
+        { // Tail sweep
+            cx: -80, cy: 60, count: 150, spacing: 0.8,
+            rotate: 0.045, bx: -0.4, bOff: -110, bEnd: 35,
+            dotThreshold: 110, hueStart: 100, hueStep: 1.6,
+            layer: 'lines'
+        }
+    ],
+    anglerfish: [
+        { // Light lure - radiating glow
+            cx: 50, cy: -70, count: 200, spacing: 0.8,
+            rotate: 0.038, bx: -0.5, bOff: -140, bEnd: 40,
+            dotThreshold: 150, hueStart: 20, hueStep: 1.8,
+            layer: 'bars'
+        },
+        { // Body/fin rays
+            cx: -50, cy: 40, count: 180, spacing: 0.9,
+            rotate: 0.040, bx: -0.45, bOff: -120, bEnd: 40,
+            dotThreshold: 130, hueStart: 180, hueStep: 1.4,
+            layer: 'lines'
+        }
+    ],
+};
+
+class Bar {
+    constructor(x, y, width, height, color, index, shape) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
         this.color = color;
-        this.size = Math.random() * 2.5 + 0.5;
-        this.baseSize = this.size;
-        this.vx = 0;
-        this.vy = 0;
-        this.ease = Math.random() * 0.05 + 0.02;
-        this.friction = 0.92;
-        this.dx = 0;
-        this.dy = 0;
-        this.distance = 0;
-        this.force = 0;
-        this.angle = 0;
+        this.index = index;
+        this.shape = shape;
     }
 
-    update(mouse, audioData) {
-        // Mouse repulsion
-        this.dx = mouse.x - this.x;
-        this.dy = mouse.y - this.y;
-        this.distance = Math.sqrt(this.dx * this.dx + this.dy * this.dy);
-
-        if (this.distance < mouse.radius) {
-            this.force = (mouse.radius - this.distance) / mouse.radius;
-            this.angle = Math.atan2(this.dy, this.dx);
-            this.vx -= Math.cos(this.angle) * this.force * 6;
-            this.vy -= Math.sin(this.angle) * this.force * 6;
-        }
-
-        // Audio reaction - particles vibrate based on frequency
-        if (audioData) {
-            const audioForce = audioData.volume * 8;
-            const bassForce = audioData.bass * 15;
-            const randomAngle = Math.random() * Math.PI * 2;
-            this.vx += Math.cos(randomAngle) * audioForce * 0.3;
-            this.vy += Math.sin(randomAngle) * audioForce * 0.3;
-
-            // Bass makes particles expand outward from center
-            const centerDx = this.x - this.originX;
-            const centerDy = this.y - this.originY;
-            const centerDist = Math.sqrt(centerDx * centerDx + centerDy * centerDy) || 1;
-            this.vx += (centerDx / centerDist) * bassForce * 0.2;
-            this.vy += (centerDy / centerDist) * bassForce * 0.2;
-
-            // Size pulses with treble
-            this.size = this.baseSize + audioData.treble * 3;
+    update(input) {
+        const sound = input * 300;
+        if (sound > this.height) {
+            this.height = sound;
         } else {
-            this.size = this.baseSize;
+            this.height -= this.height * 0.03;
         }
-
-        // Spring back to origin
-        this.vx += (this.originX - this.x) * this.ease;
-        this.vy += (this.originY - this.y) * this.ease;
-
-        // Apply friction
-        this.vx *= this.friction;
-        this.vy *= this.friction;
-
-        // Update position
-        this.x += this.vx;
-        this.y += this.vy;
     }
 
-    draw(ctx, globalAlpha) {
-        ctx.globalAlpha = globalAlpha;
-        ctx.fillStyle = this.color;
+    draw(ctx) {
+        const s = this.shape;
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = this.width;
+        ctx.save();
+        ctx.rotate(this.index * s.rotate);
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-    }
-}
+        ctx.bezierCurveTo(
+            this.x / 2, this.y / 2,
+            this.height * s.bx + s.bOff,
+            this.height + s.bEnd,
+            this.x, this.y
+        );
+        ctx.stroke();
 
-class Microphone {
-    constructor(fftSize = 512) {
-        this.initialized = false;
-        this.audioContext = null;
-        this.analyser = null;
-        this.dataArray = null;
-        this.frequencyData = null;
-        this.fftSize = fftSize;
-        this.stream = null;
-    }
-
-    async init() {
-        try {
-            this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const source = this.audioContext.createMediaStreamSource(this.stream);
-            this.analyser = this.audioContext.createAnalyser();
-            this.analyser.fftSize = this.fftSize;
-            this.analyser.smoothingTimeConstant = 0.85;
-            const bufferLength = this.analyser.frequencyBinCount;
-            this.dataArray = new Uint8Array(bufferLength);
-            this.frequencyData = new Uint8Array(bufferLength);
-            source.connect(this.analyser);
-            this.initialized = true;
-            return true;
-        } catch (err) {
-            log.warn('Microphone not available:', err.message);
-            return false;
+        if (this.index > s.dotThreshold) {
+            ctx.beginPath();
+            ctx.arc(
+                this.x,
+                this.y + 10 + this.height / 2 + this.height * 0.1,
+                this.height * 0.05,
+                0, Math.PI * 2
+            );
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y + 10);
+            ctx.lineTo(this.x, this.y + 10 + this.height / 2);
+            ctx.stroke();
         }
-    }
-
-    getData() {
-        if (!this.initialized) return null;
-
-        this.analyser.getByteTimeDomainData(this.dataArray);
-        this.analyser.getByteFrequencyData(this.frequencyData);
-
-        // Volume
-        let sum = 0;
-        for (let i = 0; i < this.dataArray.length; i++) {
-            const val = this.dataArray[i] / 128 - 1;
-            sum += val * val;
-        }
-        const volume = Math.sqrt(sum / this.dataArray.length);
-
-        // Frequency bands
-        const len = this.frequencyData.length;
-        const third = Math.floor(len / 3);
-        let bass = 0, mid = 0, treble = 0;
-        for (let i = 0; i < third; i++) bass += this.frequencyData[i];
-        for (let i = third; i < third * 2; i++) mid += this.frequencyData[i];
-        for (let i = third * 2; i < len; i++) treble += this.frequencyData[i];
-
-        return {
-            volume,
-            bass: bass / (third * 255),
-            mid: mid / (third * 255),
-            treble: treble / ((len - third * 2) * 255)
-        };
-    }
-
-    dispose() {
-        if (this.stream) this.stream.getTracks().forEach(t => t.stop());
-        if (this.audioContext && this.audioContext.state !== 'closed') this.audioContext.close();
-        this.initialized = false;
+        ctx.restore();
     }
 }
 
 export class SvgParticleEngine {
     constructor() {
-        this.canvas = null;
-        this.ctx = null;
-        this.particles = [];
-        this.mouse = { x: -1000, y: -1000, radius: 120 };
-        this.microphone = null;
-        this.audioActive = false;
+        this.canvasBars = null;
+        this.canvasLines = null;
+        this.ctxBars = null;
+        this.ctxLines = null;
+        this.svgElement = null;
+        this.shapes = []; // Array of { bars: Bar[], shape: config }
         this.animationId = null;
         this.isRunning = false;
-        this.currentSvg = null;
-        this.hueRotation = 0;
-        this.smoothAudio = { volume: 0, bass: 0, mid: 0, treble: 0 };
+        this.time = 0;
         this.containerEl = null;
-        this.scanCanvas = null;
-        this.scanCtx = null;
-        this.gap = 3; // pixel gap for scanning - lower = more particles
     }
 
     async init(containerId) {
-        this.containerEl = document.getElementById(containerId);
-        if (!this.containerEl) {
-            log.warn(`SVG Particle container #${containerId} not found`);
+        try {
+            this.containerEl = document.getElementById(containerId);
+            if (!this.containerEl) return false;
+
+            // Canvas for connection lines (behind)
+            this.canvasLines = document.createElement('canvas');
+            this.canvasLines.classList.add('svg-particle-canvas');
+            this.canvasLines.style.zIndex = '0';
+            this.containerEl.appendChild(this.canvasLines);
+            this.ctxLines = this.canvasLines.getContext('2d');
+
+            // Canvas for bars (front, with goo filter)
+            this.canvasBars = document.createElement('canvas');
+            this.canvasBars.classList.add('svg-particle-canvas');
+            this.canvasBars.style.zIndex = '1';
+            this.containerEl.appendChild(this.canvasBars);
+            this.ctxBars = this.canvasBars.getContext('2d');
+
+            this.resize();
+            window.addEventListener('resize', () => this.resize());
+            return true;
+        } catch (error) {
+            log.error('SvgParticleEngine init error:', error);
             return false;
         }
-
-        // Main canvas
-        this.canvas = document.createElement('canvas');
-        this.canvas.classList.add('svg-particle-canvas');
-        this.containerEl.appendChild(this.canvas);
-        this.ctx = this.canvas.getContext('2d', { willReadFrequently: false });
-
-        // Hidden canvas for scanning SVG
-        this.scanCanvas = document.createElement('canvas');
-        this.scanCtx = this.scanCanvas.getContext('2d', { willReadFrequently: true });
-
-        this.resize();
-        this._onResize = () => this.resize();
-        this._onMouseMove = (e) => {
-            const rect = this.canvas.getBoundingClientRect();
-            this.mouse.x = e.clientX - rect.left;
-            this.mouse.y = e.clientY - rect.top;
-        };
-        this._onMouseLeave = () => {
-            this.mouse.x = -1000;
-            this.mouse.y = -1000;
-        };
-        this._onTouchMove = (e) => {
-            const rect = this.canvas.getBoundingClientRect();
-            this.mouse.x = e.touches[0].clientX - rect.left;
-            this.mouse.y = e.touches[0].clientY - rect.top;
-        };
-        this._onTouchEnd = () => {
-            this.mouse.x = -1000;
-            this.mouse.y = -1000;
-        };
-
-        window.addEventListener('resize', this._onResize);
-        this.canvas.addEventListener('mousemove', this._onMouseMove);
-        this.canvas.addEventListener('mouseleave', this._onMouseLeave);
-        this.canvas.addEventListener('touchmove', this._onTouchMove, { passive: true });
-        this.canvas.addEventListener('touchend', this._onTouchEnd);
-
-        return true;
     }
 
     resize() {
-        if (!this.canvas || !this.containerEl) return;
-        this.canvas.width = this.containerEl.offsetWidth;
-        this.canvas.height = this.containerEl.offsetHeight;
+        if (!this.containerEl) return;
+        const w = this.containerEl.offsetWidth;
+        const h = this.containerEl.offsetHeight;
+        if (this.canvasBars) { this.canvasBars.width = w; this.canvasBars.height = h; }
+        if (this.canvasLines) { this.canvasLines.width = w; this.canvasLines.height = h; }
+    }
 
-        // Rebuild particles if we have a loaded SVG
-        if (this.currentSvg) {
-            this._buildParticles();
+    createBarsForShape(shapeCfg) {
+        const bars = [];
+        for (let i = 1; i < shapeCfg.count; i++) {
+            const hue = shapeCfg.hueStart + i * shapeCfg.hueStep;
+            const color = `hsl(${hue % 360}, 100%, 55%)`;
+            bars.push(new Bar(0, i * shapeCfg.spacing, 0.5, 0, color, i, shapeCfg));
         }
+        return bars;
     }
 
     async loadSvg(svgUrl) {
         try {
+            // Clean up previous
+            if (this.svgElement) { this.svgElement.remove(); this.svgElement = null; }
+
+            // Get animal name and config
+            const name = svgUrl.split('/').pop().replace('.svg', '');
+            const shapeConfigs = ANIMAL_SHAPES[name] || ANIMAL_SHAPES.snail;
+
+            // Create bars for each shape
+            this.shapes = shapeConfigs.map(cfg => ({
+                config: cfg,
+                bars: this.createBarsForShape(cfg),
+            }));
+
+            // Load and display SVG
             const response = await fetch(svgUrl);
+            if (!response.ok) return false;
             const svgText = await response.text();
 
-            // Parse SVG and render to hidden canvas
-            const img = new Image();
-            const blob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
+            const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml');
+            const svg = doc.querySelector('svg');
+            if (!svg) return false;
 
-            return new Promise((resolve) => {
-                img.onload = () => {
-                    this.currentSvg = img;
-                    URL.revokeObjectURL(url);
-                    this._buildParticles();
-                    resolve(true);
-                };
-                img.onerror = () => {
-                    URL.revokeObjectURL(url);
-                    log.error('Failed to load SVG');
-                    resolve(false);
-                };
-                img.src = url;
+            svg.style.cssText = `
+                position: absolute;
+                top: 50%; left: 50%;
+                transform: translate(-50%, -50%);
+                width: min(280px, 50%);
+                height: auto;
+                z-index: 2;
+                pointer-events: none;
+            `;
+
+            // Unique neon gradient per animal
+            const SVG_COLORS = {
+                snail:      ['#00ffff', '#00bbff', '#0066ff', '#4400ff'],
+                fox:        ['#ff44aa', '#ff6b35', '#ffaa00', '#ff4466'],
+                owl:        ['#00ffaa', '#00ddff', '#4488ff', '#8844ff'],
+                deer:       ['#00bbff', '#00ffdd', '#44ffaa', '#00ff88'],
+                moth:       ['#ff88cc', '#ff44aa', '#cc44ff', '#8844ff'],
+                seahorse:   ['#00ff88', '#00ffcc', '#00ddff', '#0088ff'],
+                bat:        ['#8844ff', '#aa44ff', '#ff44ff', '#ff44aa'],
+                chameleon:  ['#44ff44', '#aaff00', '#ffff00', '#ff8800'],
+                dinosaur:   ['#00ffaa', '#00aaff', '#4444ff', '#8800ff'],
+                anglerfish: ['#ff6600', '#ff4400', '#ff0066', '#aa00ff'],
+            };
+            const colors = SVG_COLORS[name] || SVG_COLORS.snail;
+
+            const defs = svg.querySelector('defs');
+            if (defs) {
+                defs.querySelectorAll('linearGradient, radialGradient').forEach(grad => {
+                    grad.innerHTML = `
+                        <stop offset="0%" stop-color="${colors[0]}"/>
+                        <stop offset="30%" stop-color="${colors[1]}"/>
+                        <stop offset="60%" stop-color="${colors[2]}"/>
+                        <stop offset="100%" stop-color="${colors[3]}"/>
+                    `;
+                });
+            }
+
+            // Stroke-dash animation
+            svg.querySelectorAll('path').forEach(p => {
+                p.style.strokeDasharray = '1500';
+                p.style.strokeDashoffset = '1500';
+                p.style.animation = 'svgArtDraw 5s ease-in-out infinite';
             });
-        } catch (err) {
-            log.error('Error loading SVG:', err);
+
+            if (!document.getElementById('svg-art-draw-kf')) {
+                const style = document.createElement('style');
+                style.id = 'svg-art-draw-kf';
+                style.textContent = `
+                    @keyframes svgArtDraw {
+                        0% { stroke-dashoffset: 1500; }
+                        50% { stroke-dashoffset: 0; }
+                        100% { stroke-dashoffset: -1500; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            this.containerEl.appendChild(document.importNode(svg, true));
+            this.svgElement = this.containerEl.querySelector('svg');
+            return true;
+        } catch (error) {
+            log.error('Error loading SVG:', error);
             return false;
         }
     }
 
-    _buildParticles() {
-        if (!this.currentSvg || !this.scanCanvas) return;
+    generateAudio(count) {
+        const samples = [];
+        for (let i = 0; i < count; i++) {
+            const t = i / count;
+            const f1 = Math.sin(this.time * 2.0 + t * 12) * 0.35;
+            const f2 = Math.sin(this.time * 3.5 + t * 8) * 0.25;
+            const f3 = Math.cos(this.time * 1.3 + t * 15) * 0.15;
+            const noise = (Math.random() - 0.5) * 0.04;
+            const beat1 = Math.pow(Math.max(0, Math.sin(this.time * 1.8)), 10) * 0.5;
+            const beat2 = Math.pow(Math.max(0, Math.sin(this.time * 0.7 + 1.2)), 14) * 0.35;
 
-        const cw = this.canvas.width;
-        const ch = this.canvas.height;
+            let value = Math.abs(f1 + f2 + f3 + noise + beat1 + beat2);
+            if (i < count * 0.1) value *= 1.6;
+            else if (i < count * 0.2) value *= 1.3;
 
-        // Scale SVG to fit canvas with padding
-        const padding = 0.15;
-        const maxW = cw * (1 - padding * 2);
-        const maxH = ch * (1 - padding * 2);
-        const scale = Math.min(maxW / this.currentSvg.width, maxH / this.currentSvg.height);
-        const sw = this.currentSvg.width * scale;
-        const sh = this.currentSvg.height * scale;
-        const offsetX = (cw - sw) / 2;
-        const offsetY = (ch - sh) / 2;
-
-        // Draw SVG to scan canvas
-        this.scanCanvas.width = cw;
-        this.scanCanvas.height = ch;
-        this.scanCtx.clearRect(0, 0, cw, ch);
-        this.scanCtx.drawImage(this.currentSvg, offsetX, offsetY, sw, sh);
-
-        // Scan pixels to create particles
-        const imageData = this.scanCtx.getImageData(0, 0, cw, ch);
-        const data = imageData.data;
-        this.particles = [];
-
-        const gap = this.gap;
-        for (let y = 0; y < ch; y += gap) {
-            for (let x = 0; x < cw; x += gap) {
-                const idx = (y * cw + x) * 4;
-                const alpha = data[idx + 3];
-                if (alpha > 128) {
-                    const r = data[idx];
-                    const g = data[idx + 1];
-                    const b = data[idx + 2];
-                    const color = `rgb(${r},${g},${b})`;
-                    this.particles.push(new Particle(x, y, color));
-                }
-            }
+            samples.push(Math.min(value, 1));
         }
-
-        log.info(`SVG Particle Engine: ${this.particles.length} particles created`);
+        return samples;
     }
 
     start() {
         if (this.isRunning) return;
         this.isRunning = true;
-        this._animate();
+        this.animate();
     }
 
     stop() {
@@ -317,83 +412,47 @@ export class SvgParticleEngine {
         }
     }
 
-    async toggleAudio() {
-        if (this.audioActive) {
-            this.audioActive = false;
-            if (this.microphone) {
-                this.microphone.dispose();
-                this.microphone = null;
-            }
-            return false;
-        }
-
-        this.microphone = new Microphone(512);
-        const success = await this.microphone.init();
-        if (success) {
-            this.audioActive = true;
-            return true;
-        }
-        return false;
-    }
-
-    _animate() {
+    animate() {
         if (!this.isRunning) return;
+        this.animationId = requestAnimationFrame(() => this.animate());
 
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.time += 0.018;
+        const w = this.canvasBars.width;
+        const h = this.canvasBars.height;
 
-        // Get audio data
-        let audioData = null;
-        if (this.audioActive && this.microphone) {
-            const raw = this.microphone.getData();
-            if (raw) {
-                // Smooth
-                this.smoothAudio.volume = this.smoothAudio.volume * 0.8 + raw.volume * 0.2;
-                this.smoothAudio.bass = this.smoothAudio.bass * 0.75 + raw.bass * 0.25;
-                this.smoothAudio.mid = this.smoothAudio.mid * 0.8 + raw.mid * 0.2;
-                this.smoothAudio.treble = this.smoothAudio.treble * 0.8 + raw.treble * 0.2;
-                audioData = this.smoothAudio;
-            }
+        this.ctxBars.clearRect(0, 0, w, h);
+        this.ctxLines.clearRect(0, 0, w, h);
+
+        // Draw each shape
+        for (const { config, bars } of this.shapes) {
+            const ctx = config.layer === 'lines' ? this.ctxLines : this.ctxBars;
+            const samples = this.generateAudio(config.count);
+
+            ctx.save();
+            ctx.translate(w / 2 + config.cx, h / 2 + config.cy);
+
+            bars.forEach((bar, i) => {
+                bar.update(samples[i] || 0);
+                bar.draw(ctx);
+            });
+
+            ctx.restore();
         }
 
-        // Dynamic glow based on audio
-        if (audioData && audioData.volume > 0.02) {
-            const glowIntensity = Math.min(audioData.volume * 40, 20);
-            this.ctx.shadowBlur = glowIntensity;
-            this.ctx.shadowColor = `hsla(${180 + this.hueRotation}, 80%, 60%, 0.5)`;
-            this.hueRotation = (this.hueRotation + audioData.mid * 3) % 360;
-        } else {
-            this.ctx.shadowBlur = 0;
+        // Pulse SVG
+        if (this.svgElement) {
+            const mainSamples = this.generateAudio(50);
+            const avg = mainSamples.reduce((a, b) => a + b, 0) / 50;
+            const scale = 1 + avg * 0.4;
+            this.svgElement.style.transform = `translate(-50%, -50%) scale(${scale})`;
         }
-
-        // Update and draw particles
-        const globalAlpha = 0.9;
-        for (let i = 0; i < this.particles.length; i++) {
-            this.particles[i].update(this.mouse, audioData);
-            this.particles[i].draw(this.ctx, globalAlpha);
-        }
-
-        this.ctx.globalAlpha = 1;
-        this.ctx.shadowBlur = 0;
-
-        this.animationId = requestAnimationFrame(() => this._animate());
     }
 
     dispose() {
         this.stop();
-        if (this.microphone) {
-            this.microphone.dispose();
-            this.microphone = null;
-        }
-        window.removeEventListener('resize', this._onResize);
-        if (this.canvas) {
-            this.canvas.removeEventListener('mousemove', this._onMouseMove);
-            this.canvas.removeEventListener('mouseleave', this._onMouseLeave);
-            this.canvas.removeEventListener('touchmove', this._onTouchMove);
-            this.canvas.removeEventListener('touchend', this._onTouchEnd);
-            this.canvas.remove();
-        }
-        this.particles = [];
-        this.canvas = null;
-        this.ctx = null;
+        this.svgElement?.remove();
+        this.canvasBars?.remove();
+        this.canvasLines?.remove();
+        this.shapes = [];
     }
 }

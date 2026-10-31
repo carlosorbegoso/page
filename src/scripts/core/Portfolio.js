@@ -120,6 +120,7 @@ export class Portfolio {
             if (this.heroEngine) this.audioEngine.setHeroEngine(this.heroEngine);
             if (this.connectedParticlesEngine) this.audioEngine.setConnectedParticlesEngine(this.connectedParticlesEngine);
             if (this.visualEngine) this.audioEngine.setVisualEngine(this.visualEngine);
+            if (this.cursorEngine) this.audioEngine.setCursorEngine(this.cursorEngine);
             this.autoStartAudio();
         } catch (error) {
             log.error('Error initializing Audio Reactive Engine:', error);

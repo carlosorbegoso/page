@@ -4,11 +4,15 @@
 ---
 
 <section id="art" class="art-visualizer section">
-    <div class="art-visualizer__header">
-        <h2 class="art-visualizer__title">
-            <span class="art-visualizer__title-accent">&lt;</span>Interactive Art<span class="art-visualizer__title-accent">/&gt;</span>
-        </h2>
-        <p class="art-visualizer__subtitle">Move your mouse over the particles. Enable audio for sound-reactive mode.</p>
+    <div class="container">
+        <div class="section-header">
+            <div class="section-badge">
+                <i class="fas fa-palette" aria-hidden="true"></i>
+                <span>Creative Lab</span>
+            </div>
+            <h2 class="section-title gradient-text-animated">Audio Reactive Art</h2>
+            <p class="section-subtitle">Interactive SVG visualizer - select an animal and watch it come alive</p>
+        </div>
     </div>
 
     <div class="art-visualizer__stage" id="art-stage">
@@ -37,12 +41,28 @@
                 <span class="art-shape-btn__icon">🦋</span>
                 <span class="art-shape-btn__label">Moth</span>
             </button>
+            <button class="art-shape-btn" data-svg="seahorse" aria-label="Seahorse">
+                <span class="art-shape-btn__icon">🐴</span>
+                <span class="art-shape-btn__label">Seahorse</span>
+            </button>
+            <button class="art-shape-btn" data-svg="bat" aria-label="Bat">
+                <span class="art-shape-btn__icon">🦇</span>
+                <span class="art-shape-btn__label">Bat</span>
+            </button>
+            <button class="art-shape-btn" data-svg="chameleon" aria-label="Chameleon">
+                <span class="art-shape-btn__icon">🦎</span>
+                <span class="art-shape-btn__label">Chameleon</span>
+            </button>
+            <button class="art-shape-btn" data-svg="dinosaur" aria-label="Dinosaur">
+                <span class="art-shape-btn__icon">🦕</span>
+                <span class="art-shape-btn__label">Dinosaur</span>
+            </button>
+            <button class="art-shape-btn" data-svg="anglerfish" aria-label="Anglerfish">
+                <span class="art-shape-btn__icon">🐟</span>
+                <span class="art-shape-btn__label">Anglerfish</span>
+            </button>
         </div>
 
-        <button class="art-audio-btn" id="art-audio-toggle" aria-label="Toggle audio reactivity">
-            <i class="fas fa-microphone-slash" id="art-audio-icon"></i>
-            <span id="art-audio-label">Enable Audio</span>
-        </button>
     </div>
 </section>
 
@@ -51,33 +71,6 @@
         position: relative;
         padding: var(--section-padding-y) 0;
         overflow: hidden;
-    }
-
-    .art-visualizer__header {
-        text-align: center;
-        margin-bottom: 2rem;
-        padding: 0 var(--container-padding);
-    }
-
-    .art-visualizer__title {
-        font-family: var(--font-mono);
-        font-size: clamp(1.5rem, 4vw, 2.5rem);
-        font-weight: 700;
-        color: var(--text-primary);
-        margin-bottom: 0.75rem;
-    }
-
-    .art-visualizer__title-accent {
-        color: var(--neural-purple);
-        opacity: 0.6;
-    }
-
-    .art-visualizer__subtitle {
-        font-size: 0.9rem;
-        color: var(--text-secondary);
-        max-width: 500px;
-        margin: 0 auto;
-        opacity: 0.7;
     }
 
     .art-visualizer__stage {
@@ -100,7 +93,7 @@
     :global(.svg-particle-canvas) {
         width: 100%;
         height: 100%;
-        cursor: none;
+        cursor: crosshair;
     }
 
     .art-visualizer__controls {
@@ -116,6 +109,9 @@
     .art-visualizer__shapes {
         display: flex;
         gap: 0.5rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 700px;
     }
 
     .art-shape-btn {
@@ -174,40 +170,6 @@
         color: var(--neural-primary);
     }
 
-    .art-audio-btn {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.65rem 1.25rem;
-        border-radius: 50px;
-        border: 1px solid rgba(255, 138, 92, 0.2);
-        background: rgba(255, 138, 92, 0.06);
-        color: rgba(255, 255, 255, 0.6);
-        font-size: 0.8rem;
-        font-family: var(--font-primary);
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .art-audio-btn:hover {
-        border-color: rgba(255, 138, 92, 0.4);
-        background: rgba(255, 138, 92, 0.12);
-        color: var(--neural-spark);
-    }
-
-    .art-audio-btn.listening {
-        border-color: var(--neural-spark);
-        background: rgba(255, 138, 92, 0.15);
-        color: var(--neural-spark);
-        box-shadow: 0 0 20px rgba(255, 138, 92, 0.2);
-    }
-
-    [data-theme="light"] .art-audio-btn {
-        border-color: rgba(255, 138, 92, 0.25);
-        background: rgba(255, 138, 92, 0.05);
-        color: rgba(30, 41, 59, 0.6);
-    }
 
     @media (max-width: 768px) {
         .art-visualizer__stage {
@@ -241,7 +203,7 @@
         const success = await engine.init('art-stage');
         if (!success) return;
 
-        await engine.loadSvg(`${basePath}/svg-art/${currentSvg}.svg`);
+        await engine.loadSvg(`${basePath}/svg/${currentSvg}.svg`);
         engine.start();
     }
 
@@ -256,26 +218,8 @@
             shapeBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
-            await engine.loadSvg(`${basePath}/svg-art/${svgName}.svg`);
+            await engine.loadSvg(`${basePath}/svg/${svgName}.svg`);
         });
-    });
-
-    // Audio toggle
-    const audioBtn = document.getElementById('art-audio-toggle');
-    const audioIcon = document.getElementById('art-audio-icon');
-    const audioLabel = document.getElementById('art-audio-label');
-
-    audioBtn?.addEventListener('click', async () => {
-        const isActive = await engine.toggleAudio();
-        if (isActive) {
-            audioBtn.classList.add('listening');
-            if (audioIcon) audioIcon.className = 'fas fa-microphone';
-            if (audioLabel) audioLabel.textContent = 'Listening...';
-        } else {
-            audioBtn.classList.remove('listening');
-            if (audioIcon) audioIcon.className = 'fas fa-microphone-slash';
-            if (audioLabel) audioLabel.textContent = 'Enable Audio';
-        }
     });
 
     // Use IntersectionObserver to only run when visible

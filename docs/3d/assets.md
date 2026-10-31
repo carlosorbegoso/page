@@ -103,6 +103,8 @@ Pipeline verificado con un GLB sintético (esfera de 28.8 k tris): `high` ≤ 25
 | experience | 16–19 | 3.2–4.2 k |
 | contact | 24–29 | 3.6–4.8 k |
 
+Con el pipeline FX del especialista registrado (`src/three/fx`, todas las pasadas sumadas: `renderer.info.autoReset = false`): hero 24 · about 24 · company 34 · products 28 · experience 27 · contact 37 draw calls (objetivo < 50 cumplido).
+
 FPS: p75 16.7 ms (60 fps) en desktop `high` y 30 fps en reposo / 60 en scroll con `mid` (375×667, DPR 2 del emulador) en el M4. **No representa un móvil real**: QA debe medir en el Android y el iPhone de Carlos con `?debug` (métricas en `localStorage['stage:metrics']`).
 
 ## 5. Modos de prueba

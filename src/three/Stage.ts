@@ -133,6 +133,7 @@ export class Stage {
       powerPreference: 'high-performance',
       preserveDrawingBuffer: Boolean(capture)
     });
+    this.renderer.info.autoReset = false;
     this.renderer.toneMapping = ACESFilmicToneMapping;
     this.renderer.outputColorSpace = SRGBColorSpace;
     this.renderer.setPixelRatio(capture ? window.devicePixelRatio || 1 : this.dpr.value);
@@ -447,6 +448,7 @@ export class Stage {
     if (continuous && !scrolling && this.frameDivisor > 1 && this.frameCount % this.frameDivisor !== 0) return;
 
     const workStart = performance.now();
+    this.renderer.info.reset();
     this.pointerField.enabled = this.idleMotion();
     this.pointerField.settle(dt);
     let settling = this.world.update(dt, (now - this.clockStart) / 1000);

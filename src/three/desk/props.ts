@@ -85,6 +85,7 @@ export interface Palette {
   toolBody: Finish;
   toolBand: Finish;
   toolSignal: Finish;
+  toolStand: Finish;
   folders: Record<FolderId, Finish>;
   label: Finish;
   phone: Finish;
@@ -96,9 +97,20 @@ export interface Palette {
  */
 const PERCEIVED_TO_ALBEDO = { wall: 3.5, floor: 2 } as const;
 
+/** One finish family for the collectibles (matte ceramic, satin glaze, brass accents), so they read as a designed set. */
+const COLLECTIBLE = { matte: 0.62, satin: 0.4 } as const;
+
+/** Brand colour as a glaze: desaturated by `mute` (0–1) and scaled in value. */
+function ceramic(color: Color, mute: number, value: number): Color {
+  const hsl = { h: 0, s: 0, l: 0 };
+  color.getHSL(hsl);
+  return new Color().setHSL(hsl.h, hsl.s * (1 - mute), Math.min(hsl.l * value, 0.85));
+}
+
 /** Room finishes read from the design tokens (desk.md §2–3, mascots.md §2). */
 export function readPalette(): Palette {
   const c = (token: string, fallback: string) => tokenColor(token, fallback);
+  const brass: Finish = { color: c('--color-desk-brass', '#b08a4a'), roughness: 0.38, metalness: 1 };
   return {
     wall: { color: c('--color-desk-wall', '#121722').multiplyScalar(PERCEIVED_TO_ALBEDO.wall), roughness: 0.95, metalness: 0 },
     floor: { color: c('--color-desk-floor', '#17140f').multiplyScalar(PERCEIVED_TO_ALBEDO.floor), roughness: 0.7, metalness: 0, grain: 0.7 },
@@ -123,45 +135,18 @@ export function readPalette(): Palette {
     telescope: { color: c('--color-telescope', '#c9ced6'), roughness: 0.3, metalness: 0.1 },
     telescopeBrass: { color: c('--color-telescope-brass', '#b08a4a'), roughness: 0.35, metalness: 1 },
     lens: { color: new Color(0.01, 0.015, 0.03), roughness: 0.05, metalness: 0.4 },
-    alfaBody: {
-      color: c('--color-alfa-body', '#10131a'),
-      roughness: tokenNumber('--alfa-roughness', 0.15),
-      metalness: tokenNumber('--alfa-metalness', 0)
-    },
-    alfaRing: {
-      color: c('--color-alfa-ring', '#b08a4a'),
-      roughness: tokenNumber('--alfa-ring-roughness', 0.3),
-      metalness: tokenNumber('--alfa-ring-metalness', 1)
-    },
+    alfaBody: { color: c('--color-alfa-body', '#10131a'), roughness: COLLECTIBLE.satin, metalness: 0 },
+    alfaRing: brass,
     alfaSignal: { color: c('--color-alfa-signal', '#5aa9ff'), roughness: 0.4, metalness: 0, emissive: tokenNumber('--alfa-signal-intensity', 1) },
-    burbuBody: {
-      color: c('--color-burbu-body', '#1f6e52'),
-      roughness: tokenNumber('--burbu-roughness', 0.75),
-      metalness: tokenNumber('--burbu-metalness', 0)
-    },
-    burbuSignal: { color: c('--color-burbu-signal', '#3fcf8e'), roughness: 0.4, metalness: 0, emissive: tokenNumber('--burbu-signal-intensity', 0.8) },
-    giftBody: {
-      color: c('--color-gift-body', '#2a3142'),
-      roughness: tokenNumber('--gift-roughness', 0.4),
-      metalness: tokenNumber('--gift-metalness', 0)
-    },
-    giftRibbon: {
-      color: c('--color-gift-ribbon', '#f28ba0'),
-      roughness: tokenNumber('--gift-ribbon-roughness', 0.35),
-      metalness: tokenNumber('--gift-ribbon-metalness', 0.05)
-    },
-    giftSeam: { color: c('--color-gift-ribbon', '#f28ba0'), roughness: 0.4, metalness: 0, emissive: 0.4 },
-    toolBody: {
-      color: c('--color-tool-body', '#8c97a8'),
-      roughness: tokenNumber('--tool-roughness', 0.38),
-      metalness: tokenNumber('--tool-metalness', 1)
-    },
-    toolBand: {
-      color: c('--color-tool-band', '#f0a43c'),
-      roughness: tokenNumber('--tool-band-roughness', 0.4),
-      metalness: tokenNumber('--tool-band-metalness', 0.6)
-    },
-    toolSignal: { color: c('--color-tool-band', '#f0a43c'), roughness: 0.4, metalness: 0, emissive: 0.8 },
+    burbuBody: { color: ceramic(c('--color-burbu-body', '#1f6e52'), 0.72, 1.35), roughness: COLLECTIBLE.matte, metalness: 0 },
+    burbuSignal: { color: ceramic(c('--color-burbu-signal', '#3fcf8e'), 0.35, 1), roughness: 0.4, metalness: 0, emissive: 0.55 },
+    giftBody: { color: ceramic(c('--color-gift-body', '#2a3142'), 0.3, 1.25), roughness: COLLECTIBLE.matte, metalness: 0 },
+    giftRibbon: { color: ceramic(c('--color-gift-ribbon', '#f28ba0'), 0.55, 0.85), roughness: COLLECTIBLE.satin, metalness: 0 },
+    giftSeam: brass,
+    toolBody: { color: c('--color-desk-ceramic', '#e6e0d4').multiplyScalar(0.62), roughness: COLLECTIBLE.matte, metalness: 0 },
+    toolBand: brass,
+    toolStand: { color: c('--color-alfa-body', '#10131a').multiplyScalar(1.6), roughness: COLLECTIBLE.satin, metalness: 0 },
+    toolSignal: { color: c('--color-tool-band', '#f0a43c'), roughness: 0.4, metalness: 0, emissive: 0.6 },
     folders: {
       sysarp: { color: c('--color-folder-sysarp', '#7e776a'), roughness: 0.85, metalness: 0 },
       baufest: { color: c('--color-folder-baufest', '#4a5847'), roughness: 0.85, metalness: 0 },
@@ -570,10 +555,8 @@ export function buildFigures(b: PartBuilder, p: Palette, q: Quality): void {
     [0.009, 0.119],
     [0, 0.122]
   ].map(([r, y]) => new Vector2(r!, y!));
-  const body = new LatheGeometry(silhouette, 9).toNonIndexed().scale(1, 1, 0.82);
-  body.deleteAttribute('normal');
+  const body = new LatheGeometry(silhouette, seg(32, q, 18)).scale(1, 1, 0.82);
   body.deleteAttribute('uv');
-  body.computeVertexNormals();
   b.add(body, p.alfaBody, { position: alfa.toArray(), rotation: [0, 0.2, 0] }, OBJECT_ID.alfa);
   const ringY = alfa.y + 0.066;
   const ring = new TorusGeometry(0.0335, 0.0013, 8, seg(72, q, 32)).scale(1, 0.82, 1);
@@ -615,8 +598,8 @@ export function buildFigures(b: PartBuilder, p: Palette, q: Quality): void {
   }
 
   const tool = FIGURES.skymek;
-  const base = new Matrix4().compose(tool, new Quaternion().setFromAxisAngle(UP, 1.05), new Vector3(1, 1, 1));
-  b.add(new RoundedBoxGeometry(0.04, 0.015, 0.02, 2, 0.002), p.wood, new Matrix4().multiplyMatrices(base, new Matrix4().makeTranslation(-0.035, 0.0075, 0)), OBJECT_ID.skymek);
+  const base = new Matrix4().compose(tool, new Quaternion().setFromAxisAngle(UP, -0.35), new Vector3(1, 1, 1));
+  b.add(new RoundedBoxGeometry(0.1, 0.012, 0.02, 2, 0.004), p.toolStand, new Matrix4().multiplyMatrices(base, new Matrix4().makeTranslation(-0.004, 0.006, -0.002)), OBJECT_ID.skymek);
   const wrench = new ExtrudeGeometry(wrenchShapes(), {
     depth: 0.005,
     bevelEnabled: true,
@@ -625,13 +608,14 @@ export function buildFigures(b: PartBuilder, p: Palette, q: Quality): void {
     bevelSegments: 2,
     curveSegments: seg(16, q, 8)
   }).translate(-0.055, 0, -0.0025);
+  /** Stands on edge in the cradle, leaning back a little, so the camera reads its silhouette instead of a flat bar. */
   const lean = new Matrix4().multiplyMatrices(
     base,
-    new Matrix4().compose(new Vector3(0, 0.012, 0), new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), -0.24).multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2)), new Vector3(1, 1, 1))
+    new Matrix4().compose(new Vector3(0, 0.03, 0), new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), -0.05).multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -0.28)), new Vector3(1, 1, 1))
   );
   b.add(wrench, p.toolBody, lean, OBJECT_ID.skymek);
-  b.add(new BoxGeometry(0.014, 0.0065, 0.009), p.toolBand, new Matrix4().multiplyMatrices(lean, new Matrix4().makeTranslation(-0.004, 0, 0)), OBJECT_ID.skymek);
-  b.add(new BoxGeometry(0.05, 0.001, 0.0062), p.toolSignal, new Matrix4().multiplyMatrices(lean, new Matrix4().makeTranslation(0.0, 0.0015, 0)), OBJECT_ID.skymek);
+  b.add(new BoxGeometry(0.014, 0.0158, 0.0072), p.toolBand, new Matrix4().multiplyMatrices(lean, new Matrix4().makeTranslation(-0.004, 0, 0)), OBJECT_ID.skymek);
+  b.add(new BoxGeometry(0.05, 0.0012, 0.0068), p.toolSignal, new Matrix4().multiplyMatrices(lean, new Matrix4().makeTranslation(0.0, 0.0042, 0)), OBJECT_ID.skymek);
 }
 
 /** Rectangles (centre x/z and size) that receive a soft contact shadow, in room space. */

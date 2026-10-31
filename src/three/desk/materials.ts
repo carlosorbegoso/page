@@ -5,9 +5,11 @@ import {
   Color,
   Mesh,
   MeshBasicMaterial,
+  MeshDepthMaterial,
   MeshStandardMaterial,
   PlaneGeometry,
   PMREMGenerator,
+  RGBADepthPacking,
   Scene,
   SRGBColorSpace,
   Vector3,
@@ -46,6 +48,21 @@ varying vec4 vPbr;
 varying float vOid;
 varying vec3 vRoomPosition;
 varying vec3 vRoomNormal;
+`;
+
+const FIGURE_YAW = /* glsl */ `
+int figure = int(oid + 0.5) - 1;
+float figureYaw = figure >= 0 && figure < ${FIGURE_SLOTS} ? uFigYaw[figure] : 0.0;
+float yawC = cos(figureYaw);
+float yawS = sin(figureYaw);
+`;
+
+const FIGURE_TRANSFORM = /* glsl */ `
+if (figure >= 0 && figure < ${FIGURE_SLOTS}) {
+  vec3 pivot = uFigPivot[figure];
+  vec3 q = transformed - pivot;
+  transformed = vec3(yawC * q.x + yawS * q.z, q.y, -yawS * q.x + yawC * q.z) + pivot + vec3(0.0, uFigLift[figure], 0.0);
+}
 `;
 
 const FRAGMENT_DECLARATIONS = /* glsl */ `
@@ -131,21 +148,10 @@ export function createAtlasMaterial(
       .replace(
         '#include <beginnormal_vertex>',
         `#include <beginnormal_vertex>
-        int figure = int(oid + 0.5) - 1;
-        float figureYaw = figure >= 0 && figure < ${FIGURE_SLOTS} ? uFigYaw[figure] : 0.0;
-        float yawC = cos(figureYaw);
-        float yawS = sin(figureYaw);
+        ${FIGURE_YAW}
         objectNormal = vec3(yawC * objectNormal.x + yawS * objectNormal.z, objectNormal.y, -yawS * objectNormal.x + yawC * objectNormal.z);`
       )
-      .replace(
-        '#include <begin_vertex>',
-        `#include <begin_vertex>
-        if (figure >= 0 && figure < ${FIGURE_SLOTS}) {
-          vec3 pivot = uFigPivot[figure];
-          vec3 q = transformed - pivot;
-          transformed = vec3(yawC * q.x + yawS * q.z, q.y, -yawS * q.x + yawC * q.z) + pivot + vec3(0.0, uFigLift[figure], 0.0);
-        }`
-      )
+      .replace('#include <begin_vertex>', `#include <begin_vertex>\n${FIGURE_TRANSFORM}`)
       .replace(
         '#include <color_vertex>',
         '#include <color_vertex>\nvPbr = pbr;\nvOid = oid;\nvRoomPosition = position;\nvRoomNormal = normal;'
@@ -172,6 +178,29 @@ export function createAtlasMaterial(
   };
   material.customProgramCacheKey = () => 'desk-atlas-v2';
   return { material, uniforms };
+}
+
+/**
+ * Shadow depth material for the atlas mesh: applies the same figure lift and turn, so the lamp's
+ * shadow follows a lifted or turning figure instead of staying at its rest pose.
+ */
+export function createAtlasDepthMaterial(uniforms: AtlasUniforms): MeshDepthMaterial {
+  const material = new MeshDepthMaterial({ depthPacking: RGBADepthPacking });
+  material.onBeforeCompile = shader => {
+    Object.assign(shader.uniforms, { uFigPivot: uniforms.uFigPivot, uFigLift: uniforms.uFigLift, uFigYaw: uniforms.uFigYaw });
+    shader.vertexShader = shader.vertexShader
+      .replace(
+        '#include <common>',
+        `#include <common>
+uniform vec3 uFigPivot[${FIGURE_SLOTS}];
+uniform float uFigLift[${FIGURE_SLOTS}];
+uniform float uFigYaw[${FIGURE_SLOTS}];
+attribute float oid;`
+      )
+      .replace('#include <begin_vertex>', `#include <begin_vertex>\n${FIGURE_YAW}\n${FIGURE_TRANSFORM}`);
+  };
+  material.customProgramCacheKey = () => 'desk-atlas-depth-v1';
+  return material;
 }
 
 /** A material that renders nothing but still lets the raycaster hit its mesh. */
@@ -322,7 +351,7 @@ export function bakeNightEnvironment(renderer: WebGLRenderer): Texture {
     disposables.push(geometry, material);
   };
   const shellGeometry = new BoxGeometry(6, 3, 6);
-  const shellMaterial = new MeshBasicMaterial({ color: tokenColor('--color-moonlight', '#9db8e8').multiplyScalar(0.35), side: BackSide });
+  const shellMaterial = new MeshBasicMaterial({ color: tokenColor('--color-moonlight', '#9db8e8').multiplyScalar(0.12), side: BackSide });
   scene.add(new Mesh(shellGeometry, shellMaterial));
   disposables.push(shellGeometry, shellMaterial);
   patch(tokenColor('--color-moonlight', '#9db8e8'), 3, [2.2, 1.4], [0.6, 0.4, -2.9], [0, 0, 0]);

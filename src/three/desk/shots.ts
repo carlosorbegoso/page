@@ -156,24 +156,24 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
   };
 
   /**
-   * Each product in macro, right of its text, close enough that the neighbours (≥ 15 cm away on
-   * the plinth) fall outside the frame instead of behind the text; Burbu is shot from the left so
-   * Alfa, behind it, swings out.
+   * Each product as a collectible on its plinth, right of its text. The camera looks along the
+   * plinth at an angle so the neighbours recede in depth and the rack focus softens them.
    */
-  const productSetup: Record<(typeof PRODUCT_FIGURES)[number], { side: typeof textLeft; heading: number; distance: number }> = {
-    skymek: { side: textLeft, heading: 0, distance: 0.24 },
-    parati: { side: textLeft, heading: 0, distance: 0.2 },
-    ventixs: { side: textLeft, heading: 18, distance: 0.2 }
+  const productSetup: Record<(typeof PRODUCT_FIGURES)[number], { side: typeof textLeft; heading: number; pitch: number; distance: number }> = {
+    skymek: { side: textLeft, heading: 14, pitch: -10, distance: 0.44 },
+    /** Steeper, so the mug in front of Parati drops below the frame. */
+    parati: { side: textLeft, heading: -12, pitch: -17, distance: 0.42 },
+    ventixs: { side: textLeft, heading: 6, pitch: -10, distance: 0.4 }
   };
   const products = PRODUCT_FIGURES.map<Framing>(id => {
     const focus = FIGURES[id].clone().add(new Vector3(0, FIGURE_HEIGHT[id] * 0.5, 0));
     const setup = productSetup[id];
     const layout = layoutFor(setup.side);
     return {
-      eye: eyeFor(focus, portrait ? 0 : setup.heading, -14, portrait ? 0.34 : setup.distance),
+      eye: eyeFor(focus, portrait ? 0 : setup.heading, portrait ? -14 : setup.pitch, portrait ? 0.34 : setup.distance),
       focus,
       sx: layout.sx,
-      sy: subjectY,
+      sy: portrait ? subjectY : 0.56,
       panel: { name: `product-${id}`, ...layout.panel }
     };
   });

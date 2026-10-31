@@ -59,9 +59,9 @@ export const PLINTH = { centre: new Vector3(0.42, DESK.top, -0.13), width: 0.5, 
 const plinthTop = PLINTH.centre.y + PLINTH.height;
 const onPlinth = (x: number, z: number) => new Vector3(PLINTH.centre.x + x, plinthTop, PLINTH.centre.z + z);
 
-/** Base centres of the collectibles: SkyMek and Parati at the ends, Alfa (tallest) back left of centre, Burbu front right of it. */
+/** Base centres of the collectibles: SkyMek and Parati at the ends, Alfa (tallest) at the back near the centre, Burbu in front right of it. */
 export const FIGURES = {
-  alfa: onPlinth(-0.09, -0.024),
+  alfa: onPlinth(-0.03, -0.028),
   skymek: onPlinth(-0.19, 0.008),
   parati: onPlinth(0.19, -0.006),
   ventixs: onPlinth(0.035, 0.018)

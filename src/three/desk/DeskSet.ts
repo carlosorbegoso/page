@@ -20,10 +20,12 @@ import {
 import type { ChapterId, ChapterState, PlateAnchor, Shot, ShotProvider, StationContext, StationPick, SurfaceName } from '../contracts';
 import { tokenColor, tokenNumber } from '../tokens';
 import { createBackdrop, createRainGlass, createSteam, type Backdrop, type RainGlass, type Steam } from './atmosphere';
+import { createLampBeam, type LampBeam } from './beam';
 import { OBJECT_ID, PartBuilder } from './builder';
-import { DESK, FIGURE_HEIGHT, FIGURES, FOLDERS, LAMP, MONITOR, PHONE, PRODUCT_FIGURES, ROOM, WINDOW, folderCentre, type FigureId } from './layout';
+import { DESK, FIGURE_HEIGHT, FIGURES, FOLDER, FOLDERS, GLASS_Z, LAMP, MONITOR, PHONE, PRODUCT_FIGURES, ROOM, WINDOW, folderCentre, type FigureId } from './layout';
 import {
   bakeNightEnvironment,
+  createAtlasDepthMaterial,
   createAtlasMaterial,
   createContactShadowTexture,
   createPhoneTexture,
@@ -69,7 +71,7 @@ import {
  * readable moon rim and a fill that keeps the walls off pure black. The monitor is a soft cold
  * point light in front of the glass (a RectAreaLight's LTC tables would triple the chunk).
  */
-const LIGHT_CALIBRATION = { lamp: 0.4, monitor: 0.16, moon: 3, fill: 5 } as const;
+const LIGHT_CALIBRATION = { lamp: 0.4, monitor: 0.16, moon: 3, fill: 2.5, shelf: 9 } as const;
 /** HDR gain of the screen pictures so they stay luminous through ACES / the FX composer. */
 const SCREEN_HDR = 1.8;
 /**
@@ -82,26 +84,28 @@ interface ChapterLight {
   lamp: number;
   monitor: number;
   moon: number;
+  /** Moonlight through the window raking the shelf spines (experience only). */
+  shelf: number;
 }
 
 /** Light per chapter (desk.md §5): lamp in cd, monitor in nits, window light in lux. */
 const CHAPTER_LIGHT: Record<ChapterId, ChapterLight> = {
-  intro: { lamp: 28, monitor: 5, moon: 0.45 },
-  hero: { lamp: 28, monitor: 5, moon: 0.45 },
-  about: { lamp: 18, monitor: 6, moon: 0.45 },
-  company: { lamp: 32, monitor: 2, moon: 0.45 },
-  products: { lamp: 32, monitor: 2, moon: 0.45 },
-  experience: { lamp: 22, monitor: 2, moon: 0.45 },
-  contact: { lamp: 20, monitor: 1, moon: 0.45 },
-  outro: { lamp: 0, monitor: 0.6, moon: 1.2 }
+  intro: { lamp: 28, monitor: 5, moon: 0.7, shelf: 0 },
+  hero: { lamp: 28, monitor: 5, moon: 0.7, shelf: 0 },
+  about: { lamp: 18, monitor: 6, moon: 0.6, shelf: 0 },
+  company: { lamp: 16, monitor: 2, moon: 0.8, shelf: 0 },
+  products: { lamp: 15, monitor: 2, moon: 0.8, shelf: 0 },
+  experience: { lamp: 22, monitor: 5, moon: 0.9, shelf: 1 },
+  contact: { lamp: 20, monitor: 1, moon: 0.7, shelf: 0 },
+  outro: { lamp: 0, monitor: 0.6, moon: 1.2, shelf: 0 }
 };
 
 const FIGURE_ORDER: readonly FigureId[] = ['alfa', 'ventixs', 'parati', 'skymek'];
 const ALFA_TURN = 20 * (Math.PI / 180);
 const MAX_TURN_SPEED = 0.05;
-const FIGURE_LIFT = 0.02;
+const FIGURE_LIFT = 0.012;
 /** Warm bounce on the focused figure (desk.md §5: +10 %), as self-illumination of its albedo. */
-const FOCUS_BOUNCE = 0.12;
+const FOCUS_BOUNCE = 0.03;
 
 const LABELS: Record<string, { es: string; en: string }> = {
   alfa: { es: 'Alfa · TUSOCIO IA', en: 'Alfa · TUSOCIO IA' },
@@ -157,6 +161,7 @@ export class DeskSet implements ShotProvider {
   private backdrop!: Backdrop;
   private glass!: RainGlass;
   private steam: Steam | null = null;
+  private beam!: LampBeam;
   private environment: Texture | null = null;
   private readonly disposables: Array<{ dispose(): void }> = [];
   private readonly proxies = new Map<string, Mesh>();
@@ -164,17 +169,19 @@ export class DeskSet implements ShotProvider {
   private monitorLight!: PointLight;
   private moon!: DirectionalLight;
   private fill!: HemisphereLight;
+  private shelfLight!: SpotLight;
   private moonNight!: Color;
   private moonDawn!: Color;
   private triangles = 0;
   private chapter: ChapterId = 'intro';
   private subIndex = 0;
   private introStart = -1;
-  private readonly level = { lamp: 0, monitor: 0, moon: 0.45, dawn: 0, phone: 0, alfaSignal: 1, alfaYaw: 0 };
+  private readonly level = { lamp: 0, monitor: 0, moon: 0.45, shelf: 0, dawn: 0, phone: 0, alfaSignal: 1, alfaYaw: 0 };
   private readonly figureLift = new Map<FigureId, number>(FIGURE_ORDER.map(id => [id, 0]));
   private readonly figureYaw = new Map<FigureId, number>(FIGURE_ORDER.map(id => [id, 0]));
   private readonly folderGlow = new Map<string, number>(FOLDERS.map(id => [id, 0]));
   private phoneNotified = false;
+  private shadowPose = '';
   private hoverId = -1;
   private hoverMix = 0;
 
@@ -197,7 +204,7 @@ export class DeskSet implements ShotProvider {
     FIGURE_ORDER.forEach((id, index) => uniforms.uFigPivot.value[index]!.copy(FIGURES[id]));
     this.environment = bakeNightEnvironment(context.renderer);
     material.envMap = this.environment;
-    material.envMapIntensity = 1;
+    material.envMapIntensity = 0.8;
     this.disposables.push(material, this.environment);
 
     const statics = new PartBuilder();
@@ -230,6 +237,10 @@ export class DeskSet implements ShotProvider {
     roomMesh.name = 'desk-room';
     roomMesh.castShadow = high;
     roomMesh.receiveShadow = high;
+    if (high) {
+      roomMesh.customDepthMaterial = createAtlasDepthMaterial(uniforms);
+      this.disposables.push(roomMesh.customDepthMaterial);
+    }
     this.room.add(roomMesh);
     this.disposables.push(geometry);
 
@@ -246,6 +257,15 @@ export class DeskSet implements ShotProvider {
     this.buildContactShadows();
     this.buildPicks();
     this.buildLights(high);
+    this.beam = createLampBeam({
+      apex: this.lamp.position.clone(),
+      aim: LAMP.aim.clone(),
+      angle: tokenNumber('--lamp-angle', 0.62) * 0.55,
+      color: tokenColor('--color-lamp', '#ffb566'),
+      motes: high ? 160 : 0
+    });
+    this.room.add(this.beam.group);
+    this.disposables.push(this.beam);
     if (high) {
       const renderer = context.renderer;
       renderer.shadowMap.enabled = true;
@@ -360,7 +380,10 @@ export class DeskSet implements ShotProvider {
     this.moon.position.set(WINDOW.x + 1.2, WINDOW.y + 1.6, ROOM.back - 3);
     this.moon.target.position.set(0, 0.6, 0.8);
     this.fill = new HemisphereLight(0x1b2436, 0x0a0806, tokenNumber('--desk-ambient-intensity', 0.08) * LIGHT_CALIBRATION.fill);
-    this.lightRig.add(this.lamp, this.lamp.target, this.monitorLight, this.moon, this.moon.target, this.fill);
+    this.shelfLight = new SpotLight(this.moonNight.clone(), 0, 0, 0.42, 0.85, 2);
+    this.shelfLight.position.set(WINDOW.x - 0.3, WINDOW.y + 0.35, GLASS_Z + 0.08);
+    this.shelfLight.target.position.copy(folderCentre('intercorp')).add(new Vector3(FOLDER.depth / 2, 0, 0));
+    this.lightRig.add(this.lamp, this.lamp.target, this.monitorLight, this.moon, this.moon.target, this.fill, this.shelfLight, this.shelfLight.target);
   }
 
   private viewport(): Viewport {
@@ -481,6 +504,8 @@ export class DeskSet implements ShotProvider {
       level.monitor = damp(level.monitor, light.monitor, 5, step);
     }
     level.moon = damp(level.moon, light.moon, 1.6, step);
+    level.shelf = damp(level.shelf, light.shelf, 3, step);
+    settling ||= Math.abs(level.shelf - light.shelf) > 0.005;
     level.dawn = damp(level.dawn, this.chapter === 'outro' ? 1 : 0, 1.6, step);
     level.phone = damp(level.phone, this.chapter === 'contact' ? 1 : 0, 6, step);
     level.alfaSignal = damp(level.alfaSignal, this.chapter === 'company' ? 1.6 : 1, 2, step);
@@ -498,6 +523,13 @@ export class DeskSet implements ShotProvider {
       const yaw = this.figureYaw.get(id)!;
       this.figureYaw.set(id, id === focused && motion ? yaw + MAX_TURN_SPEED * dt : towards(yaw, 0, MAX_TURN_SPEED * step));
       if (id === focused && motion) settling = true;
+    }
+    if (this.context.tier === 'high') {
+      const posed = this.figurePose();
+      if (posed !== this.shadowPose) {
+        this.shadowPose = posed;
+        this.context.renderer.shadowMap.needsUpdate = true;
+      }
     }
     const folder = this.chapter === 'experience' ? EXPERIENCE_ORDER[Math.min(this.subIndex, EXPERIENCE_ORDER.length - 1)] : null;
     for (const id of FOLDERS) {
@@ -520,10 +552,18 @@ export class DeskSet implements ShotProvider {
       this.glass.setTime(time);
       this.backdrop.setTime(time);
       this.steam?.setTime(time);
+      this.beam.setTime(time);
       settling = true;
     }
     this.applyLevels();
     return settling;
+  }
+
+  /** Rounded lift and turn of the figures: the lamp shadow is re-rendered only when it changes. */
+  private figurePose(): string {
+    const parts = [Math.round(this.level.alfaYaw * 200)];
+    for (const id of PRODUCT_FIGURES) parts.push(Math.round((this.figureLift.get(id) ?? 0) * 2000), Math.round((this.figureYaw.get(id) ?? 0) * 200));
+    return parts.join(',');
   }
 
   /** Pivots the monitor head (and its screen picture) to portrait on narrow viewports; re-bakes the shadow. */
@@ -547,12 +587,15 @@ export class DeskSet implements ShotProvider {
     this.lamp.intensity = level.lamp * LIGHT_CALIBRATION.lamp;
     this.monitorLight.intensity = level.monitor * LIGHT_CALIBRATION.monitor;
     this.moon.intensity = level.moon * LIGHT_CALIBRATION.moon;
+    this.shelfLight.intensity = level.shelf * LIGHT_CALIBRATION.shelf;
     this.moon.color.copy(this.moonNight).lerp(this.moonDawn, level.dawn * 0.7);
     this.fill.intensity = tokenNumber('--desk-ambient-intensity', 0.08) * LIGHT_CALIBRATION.fill * (1 + level.dawn * 1.5);
     this.screen.material.color.setScalar(SCREEN_HDR * Math.min(level.monitor / 5, 1.2));
     this.phoneScreen.material.color.setScalar(0.06 + level.phone * SCREEN_HDR * 0.9);
     this.backdrop.setDawn(level.dawn);
     this.glass.setLampReflection(Math.min(level.lamp / 28, 1));
+    this.beam.setLevel(Math.min(level.lamp / 28, 1.2));
+    this.beam.setPixelScale(this.context.renderer.domElement.height, this.viewport().fov);
     this.steam?.setStrength(this.chapter === 'hero' || this.chapter === 'about' || this.chapter === 'intro' ? 0.22 : 0.1);
     const uniforms = this.uniforms;
     FIGURE_ORDER.forEach((id, index) => {

@@ -4,6 +4,7 @@ import { layoutKind, smoothstep, damp } from './scenes/common';
 import { poseCamera, STATION_SPECS, type CameraPose } from './scenes/stations';
 import { STATIONS, stationElement, stationIndex, type StationId } from './sections';
 import { Scene } from 'three';
+import type { PlateAnchor } from './contracts';
 
 type Anchor = 'left' | 'right' | 'center';
 
@@ -36,6 +37,14 @@ export interface PlateHost {
   readingPose(id: StationId): CameraPose;
   stationValue(): number;
   instant(): boolean;
+  /** Idle motion allowed (false under reduced motion, pause or capture). */
+  motion(): boolean;
+  /** Seconds since boot. */
+  time(): number;
+  /** Normalised pointer (-1..1, +Y down), zero when not a fine pointer. */
+  pointer(): { x: number; y: number };
+  /** Module-provided anchor for a plate (desk monitor, …). */
+  anchorFor(station: StationId, plateId: string): PlateAnchor | null;
   onActivePlate(station: StationId, plate: HTMLElement): void;
   invalidate(): void;
 }
@@ -196,20 +205,28 @@ export class Plates {
       settling ||= Math.abs(station.offset - targetOffset) > 0.5;
       station.column.style.transform = `translate3d(0, ${(-station.offset).toFixed(1)}px, 0)`;
 
-      const reading = poseCamera(camera, this.host.readingPose(station.id), this.width, this.height);
-      const depth = reading.position.distanceTo(this.host.readingPose(station.id).target) * 0.82;
-      const sx = this.screenX(station) / this.width;
-      const fixed = this.place(reading, sx, window.cy, depth);
-      const glued = this.place(camera, sx, window.cy, depth);
-      const glue = instant ? (distance < 0.5 ? 1 : 0) : 1 - smoothstep(0, 0.6, distance);
-      station.object.position.lerpVectors(fixed.position, glued.position, glue);
-      station.object.quaternion.slerpQuaternions(fixed.quaternion, glued.quaternion, glue);
-      if (!instant && layoutKind(this.width) === 'desktop') {
-        const tilt = Math.max(-1, Math.min(1, s - station.index)) * (8 * Math.PI) / 180;
-        station.object.rotateY(station.anchor === 'left' ? tilt : -tilt);
+      const readingPose = this.host.readingPose(station.id);
+      const reading = poseCamera(camera, readingPose, this.width, this.height);
+      const anchor = this.host.anchorFor(station.id, station.plates[0]?.dataset.plateId ?? '');
+      let unit: number;
+      if (anchor) {
+        station.object.position.copy(anchor.position);
+        station.object.quaternion.copy(anchor.quaternion);
+        const anchorDepth = anchor.position.distanceTo(reading.position);
+        unit = anchor.scale ?? (2 * anchorDepth * Math.tan((reading.fov * Math.PI) / 360)) / this.height;
+      } else {
+        const depth = reading.position.distanceTo(readingPose.target) * 0.82;
+        const sx = this.screenX(station) / this.width;
+        const fixed = this.place(reading, sx, window.cy, depth);
+        const glued = this.place(camera, sx, window.cy, depth);
+        const glue = instant ? (distance < 0.5 ? 1 : 0) : 1 - smoothstep(0, 0.6, distance);
+        station.object.position.lerpVectors(fixed.position, glued.position, glue);
+        station.object.quaternion.slerpQuaternions(fixed.quaternion, glued.quaternion, glue);
+        unit = (2 * depth * Math.tan((camera.fov * Math.PI) / 360)) / this.height;
+        if (!instant) this.choreograph(station, s - station.index, unit);
       }
-      const unit = (2 * depth * Math.tan((camera.fov * Math.PI) / 360)) / this.height;
-      station.object.scale.setScalar(unit);
+      if (!instant && this.host.motion()) this.animateLife(station, distance < 0.35, unit);
+      station.object.scale.setScalar(unit * (this.breath(station, distance < 0.35)));
 
       const opacity = instant ? (distance < 0.5 ? 1 : 0) : 1 - smoothstep(0.15, 0.7, distance);
       station.holder.style.opacity = opacity.toFixed(3);
@@ -218,6 +235,37 @@ export class Plates {
       this.updatePlates(station, active, distance);
     }
     return settling;
+  }
+
+  /** Arrival/departure: plates fly in from depth, turn and settle; leaving they tilt and recede. */
+  private choreograph(station: StationPlates, offset: number, unit: number): void {
+    const amount = Math.min(Math.abs(offset), 1);
+    if (amount < 1e-3) return;
+    const eased = amount * amount * (3 - 2 * amount);
+    const side = station.anchor === 'left' ? 1 : -1;
+    const direction = Math.sign(offset) || 1;
+    station.object.translateZ(-eased * 900 * unit);
+    station.object.translateY(-direction * eased * 120 * unit);
+    station.object.rotateY(side * direction * eased * 0.42);
+    station.object.rotateX(direction * eased * 0.12);
+  }
+
+  /** Idle life: slow bob/drift and 1–3° sway with phase per station, plus a pointer tilt. */
+  private animateLife(station: StationPlates, active: boolean, unit: number): void {
+    const t = this.host.time();
+    const phase = station.index * 1.7;
+    const pointer = this.host.pointer();
+    station.object.translateY(Math.sin(t * 0.55 + phase) * 7 * unit);
+    station.object.translateX(Math.sin(t * 0.37 + phase * 1.3) * 5 * unit);
+    const strength = active ? 1 : 0.5;
+    station.object.rotateX(Math.sin(t * 0.43 + phase) * 0.018 + pointer.y * 0.05 * strength);
+    station.object.rotateY(Math.sin(t * 0.31 + phase * 0.7) * 0.026 + pointer.x * 0.07 * strength);
+    station.object.rotateZ(Math.sin(t * 0.27 + phase * 1.9) * 0.01);
+  }
+
+  private breath(station: StationPlates, active: boolean): number {
+    if (!active || this.host.instant() || !this.host.motion()) return 1;
+    return 1 + Math.sin((this.host.time() / 6) * Math.PI * 2 + station.index) * 0.006;
   }
 
   private place(camera: PerspectiveCamera, sx: number, sy: number, depth: number): { position: Vector3; quaternion: Quaternion } {

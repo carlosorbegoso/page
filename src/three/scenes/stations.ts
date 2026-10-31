@@ -81,7 +81,13 @@ export interface CameraPose {
   target: Vector3;
   cx: number;
   cy: number;
+  /** Vertical FOV in degrees (default 30). */
+  fov?: number;
+  /** Roll in radians around the view axis. */
+  roll?: number;
 }
+
+export const DEFAULT_FOV = 30;
 
 interface ScreenFrame {
   cx: number;
@@ -127,10 +133,12 @@ export function stationPose(
 /** Applies a pose, shifting the projection centre so the target lands at (cx, cy) on screen. */
 export function applyPose(camera: PerspectiveCamera, pose: CameraPose, width: number, height: number): void {
   camera.aspect = width / height;
+  camera.fov = pose.fov ?? DEFAULT_FOV;
   camera.position.copy(pose.position);
   camera.near = 0.05;
   camera.far = 60;
   camera.lookAt(pose.target);
+  if (pose.roll) camera.rotateZ(pose.roll);
   camera.setViewOffset(width, height, width * (0.5 - pose.cx), height * (0.5 - pose.cy), width, height);
   camera.updateProjectionMatrix();
   camera.updateMatrixWorld();
@@ -145,11 +153,18 @@ export function poseCamera(source: PerspectiveCamera, pose: CameraPose, width: n
 
 const ORBIT_RADIUS = 7;
 
+/** Quintic ease-in-out (smootherstep). */
+export function easeInOut(t: number): number {
+  const x = Math.min(Math.max(t, 0), 1);
+  return x * x * x * (x * (x * 6 - 15) + 10);
+}
+
 /**
  * Blends two poses. Around Alfa the camera swings on a sphere (never through the star);
- * elsewhere it flies straight with a gentle lift.
+ * elsewhere it flies straight with a gentle lift. Mid-flight the FOV breathes and the camera
+ * rolls slightly in the direction of travel.
  */
-export function blendPoses(a: CameraPose, b: CameraPose, t: number): CameraPose {
+export function blendPoses(a: CameraPose, b: CameraPose, t: number, rollDirection = 1): CameraPose {
   const target = a.target.clone().lerp(b.target, t);
   let position: Vector3;
   if (a.target.distanceTo(ALFA_POSITION) < ORBIT_RADIUS && b.target.distanceTo(ALFA_POSITION) < ORBIT_RADIUS) {
@@ -163,5 +178,15 @@ export function blendPoses(a: CameraPose, b: CameraPose, t: number): CameraPose 
     position = a.position.clone().lerp(b.position, t);
     position.y += Math.sin(t * Math.PI) * 1.2;
   }
-  return { position, target, cx: a.cx + (b.cx - a.cx) * t, cy: a.cy + (b.cy - a.cy) * t };
+  const arc = Math.sin(t * Math.PI);
+  const fovA = a.fov ?? DEFAULT_FOV;
+  const fovB = b.fov ?? DEFAULT_FOV;
+  return {
+    position,
+    target,
+    cx: a.cx + (b.cx - a.cx) * t,
+    cy: a.cy + (b.cy - a.cy) * t,
+    fov: fovA + (fovB - fovA) * t + arc * 3,
+    roll: (a.roll ?? 0) + ((b.roll ?? 0) - (a.roll ?? 0)) * t + arc * 0.045 * rollDirection
+  };
 }

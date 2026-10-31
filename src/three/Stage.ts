@@ -15,9 +15,18 @@ import { yieldToMain } from './idle';
 import { setupInteraction } from './interaction';
 import { motionAllowed, readMotion, watchMotion, type MotionState } from './motion';
 import type { Pointer, SceneContext } from './scenes/common';
+import {
+  onRegistryChange,
+  registeredFx,
+  registeredStations,
+  type FxPipeline,
+  type StationContext,
+  type StationModule
+} from './contracts';
 import { Plates } from './plates';
+import { StagePointer } from './pointer';
 import { isProductId, WorldScene, type WorldHit } from './scenes/WorldScene';
-import { stationElement, stationIndex, type StationId, type StationTracker } from './sections';
+import { STATIONS, stationElement, stationIndex, type StationId, type StationTracker } from './sections';
 import { calibrateRefreshInterval, dprPolicy, DprController, FrameSampler, type Tier, type TierResult } from './tier';
 import { tokenColor, tokenNumber } from './tokens';
 
@@ -56,6 +65,11 @@ export class Stage {
   private canvas!: HTMLCanvasElement;
   private world!: WorldScene;
   private plates: Plates | undefined;
+  private fx: FxPipeline | null = null;
+  private readonly loadedModules = new Map<StationId, StationModule>();
+  private readonly pointerField = new StagePointer();
+  private nearestStation: StationId | null = null;
+  private lastPublishedProgress = Number.NaN;
   private ready = false;
   private tier: Tier;
   private running = false;
@@ -127,9 +141,13 @@ export class Stage {
     this.measure(true);
     await yieldToMain();
 
+    await this.loadExtensions();
     this.world = new WorldScene(this.context());
     await this.world.load();
     await yieldToMain();
+    await this.syncModules();
+    this.cleanups.push(onRegistryChange(() => void this.syncModules()));
+    this.attachFx();
     this.station = capture ? Math.max(0, stationIndex(capture.station) + capture.progress - 1) : this.initialStation();
     this.world.setStation(this.station);
     this.world.resize(this.size.width, this.size.height);
@@ -153,6 +171,10 @@ export class Stage {
       readingPose: id => this.world.readingPose(id),
       stationValue: () => this.station,
       instant: () => !this.scrubAllowed,
+      motion: () => this.context().motion(),
+      time: () => (performance.now() - this.clockStart) / 1000,
+      pointer: () => (this.finePointer && this.idleMotion() ? this.pointer : { x: 0, y: 0 }),
+      anchorFor: (station, plateId) => this.world.plateAnchor(station, plateId),
       onActivePlate: (station, plate) => this.onActivePlate(station, plate),
       invalidate: () => this.invalidate()
     });
@@ -196,6 +218,88 @@ export class Stage {
     if (hit.experience) {
       this.world.focusExperience(hit.experience);
       window.dispatchEvent(new CustomEvent('experience:focus', { detail: { id: hit.experience, source: 'scene' } }));
+    }
+  }
+
+  /** Imports the optional desk / FX entry points (they register through contracts.ts). */
+  private async loadExtensions(): Promise<void> {
+    const entries = import.meta.glob<{ default?: () => unknown }>(['./desk/index.ts', './fx/index.ts']);
+    for (const [path, load] of Object.entries(entries)) {
+      try {
+        const module = await load();
+        if (typeof module.default === 'function') await module.default();
+      } catch (error) {
+        console.error('[stage] extension failed', path, error);
+      }
+      await yieldToMain();
+    }
+  }
+
+  private stationContext(): StationContext {
+    return {
+      tier: this.tier,
+      renderer: this.renderer,
+      camera: this.camera,
+      scene: this.world.scene,
+      pointer: this.pointerField,
+      capture: Boolean(this.options.capture),
+      motion: () => this.context().motion(),
+      readingPose: id => {
+        const pose = this.world.readingPose(id);
+        return { position: pose.position, target: pose.target, fov: pose.fov, roll: pose.roll };
+      },
+      invalidate: () => this.invalidate()
+    };
+  }
+
+  /** Loads newly registered station modules, removes unregistered ones. */
+  private async syncModules(): Promise<void> {
+    const registered = registeredStations();
+    for (const [id, module] of this.loadedModules) {
+      if (registered.get(id) === module) continue;
+      module.object3D.removeFromParent();
+      module.dispose();
+      this.loadedModules.delete(id);
+    }
+    for (const [id, module] of registered) {
+      if (this.loadedModules.get(id) === module) continue;
+      try {
+        await module.load(this.stationContext());
+        this.world.scene.add(module.object3D);
+        this.loadedModules.set(id, module);
+      } catch (error) {
+        console.error('[stage] station module failed', id, error);
+      }
+    }
+    this.world.setModules(this.loadedModules);
+    this.attachFx();
+    this.invalidate();
+  }
+
+  private attachFx(): void {
+    const fx = registeredFx();
+    if (fx === this.fx) return;
+    this.fx = fx;
+    if (!fx) return;
+    fx.attachPointer?.(this.pointerField);
+    fx.setTier(this.tier);
+    fx.resize(this.size.width, this.size.height, this.renderer.getPixelRatio());
+  }
+
+  /** Publishes station:enter / station:progress for audio and other listeners. */
+  private publishStation(): void {
+    const nearest = STATIONS[Math.max(0, Math.min(STATIONS.length - 1, Math.round(this.station)))]!;
+    const progress = Math.max(-1, Math.min(1, this.station - stationIndex(nearest)));
+    if (nearest !== this.nearestStation) {
+      const previous = this.nearestStation ? this.loadedModules.get(this.nearestStation) : undefined;
+      previous?.leave();
+      this.loadedModules.get(nearest)?.enter();
+      this.nearestStation = nearest;
+      window.dispatchEvent(new CustomEvent('station:enter', { detail: { id: nearest } }));
+    }
+    if (progress !== this.lastPublishedProgress) {
+      this.lastPublishedProgress = progress;
+      window.dispatchEvent(new CustomEvent('station:progress', { detail: { id: nearest, progress } }));
     }
   }
 
@@ -333,9 +437,17 @@ export class Stage {
     if (continuous && !scrolling && this.frameDivisor > 1 && this.frameCount % this.frameDivisor !== 0) return;
 
     const workStart = performance.now();
+    this.pointerField.enabled = this.idleMotion();
+    this.pointerField.settle(dt);
     let settling = this.world.update(dt, (now - this.clockStart) / 1000);
     if (this.plates) settling = this.plates.update(dt) || settling;
-    this.renderer.render(this.world.scene, this.camera);
+    this.publishStation();
+    if (this.fx) {
+      this.fx.setFocus(this.world.focusPoint());
+      this.fx.render(this.renderer, this.world.scene, this.camera, dt);
+    } else {
+      this.renderer.render(this.world.scene, this.camera);
+    }
     this.plates?.render(this.camera);
     const work = performance.now() - workStart;
     if (this.options.container.dataset.ready !== 'true') this.reveal();
@@ -379,6 +491,7 @@ export class Stage {
   /** Stops 3D and leaves the static fallback visible (slow device or lost context). */
   degrade(reason: 'low' | 'context-lost'): void {
     if (reason === 'low') this.tier = 'low';
+    this.fx?.setTier(this.tier);
     this.failed = reason === 'context-lost';
     this.stop();
     this.plates?.unmount();
@@ -398,6 +511,7 @@ export class Stage {
     this.world?.resize(width, height);
     this.world?.setPixelRatio(this.renderer.getPixelRatio());
     this.plates?.setSize(width, height);
+    this.fx?.resize(width, height, this.renderer.getPixelRatio());
     this.invalidate();
   }
 
@@ -420,6 +534,8 @@ export class Stage {
     if (this.finePointer && !this.options.capture) {
       on('pointermove', event => {
         this.pointer = { x: (event.clientX / window.innerWidth) * 2 - 1, y: (event.clientY / window.innerHeight) * 2 - 1 };
+        const rect = this.canvas.getBoundingClientRect();
+        this.pointerField.move(event.clientX - rect.left, event.clientY - rect.top, rect.width, rect.height, this.camera, this.world.focusPoint());
         if (this.idleMotion()) this.bump();
       });
     }
@@ -479,6 +595,8 @@ export class Stage {
     this.stop();
     for (const cleanup of this.cleanups) cleanup();
     this.plates?.dispose();
+    for (const module of this.loadedModules.values()) module.dispose();
+    this.fx?.dispose();
     this.world?.dispose();
     this.debug?.dispose();
     this.renderer.dispose();

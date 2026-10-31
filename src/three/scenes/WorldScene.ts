@@ -16,7 +16,8 @@ import experienceEn from '../../content/experience/en.json';
 import experienceEs from '../../content/experience/es.json';
 import { yieldToMain } from '../idle';
 import { createMascot, type Mascot, type MascotId } from '../mascots';
-import { STATIONS, type StationId } from '../sections';
+import type { PlateAnchor, StationCameraPose, StationModule } from '../contracts';
+import { STATIONS, stationIndex, type StationId } from '../sections';
 import { tokenColor, tokenNumber } from '../tokens';
 import { Beacon } from './Beacon';
 import {
@@ -36,6 +37,7 @@ import {
   ALFA_POSITION,
   applyPose,
   blendPoses,
+  easeInOut,
   EXPERIENCE_CENTRE,
   EXPERIENCE_TILT,
   HERO_CENTRE,
@@ -87,6 +89,10 @@ function milestones(): Milestone[] {
   }));
 }
 
+function fromModulePose(pose: StationCameraPose): CameraPose {
+  return { position: pose.position, target: pose.target, cx: 0.5, cy: 0.5, fov: pose.fov, roll: pose.roll };
+}
+
 function orbitPoint(spec: MoonSpec, angle: number): Vector3 {
   return new Vector3(Math.cos(angle) * spec.radius, 0, Math.sin(angle) * spec.radius)
     .applyAxisAngle(new Vector3(1, 0, 0), spec.tilt)
@@ -128,6 +134,7 @@ export class WorldScene {
   private width = 1;
   private height = 1;
   private orbit = { x: 0, y: 0 };
+  private modules: ReadonlyMap<StationId, StationModule> = new Map();
   private readonly pickMap = new Map<Object3D, (instanceId?: number) => WorldHit | null>();
 
   constructor(private readonly context: SceneContext) {}
@@ -293,6 +300,8 @@ export class WorldScene {
 
   /** Reading pose of a station without parallax or focus (plates are placed against it). */
   readingPose(id: StationId): CameraPose {
+    const custom = this.modules.get(id)?.getCameraPose?.(0);
+    if (custom) return fromModulePose(custom);
     return stationPose(STATION_SPECS[id], this.context.camera, this.width, this.height);
   }
 
@@ -343,10 +352,11 @@ export class WorldScene {
     settling ||= Math.abs(this.orbit.x - pointer.x) > 0.001 || Math.abs(this.orbit.y - pointer.y) > 0.001;
 
     settling = this.updateFocusTarget(dt, instant) || settling;
-    const index = Math.min(Math.floor(s), STATIONS.length - 2);
-    const t = smoothstep(0, 1, s - index);
-    const pose = blendPoses(this.poseFor(STATIONS[index]!), this.poseFor(STATIONS[index + 1]!), t);
-    applyPose(this.context.camera, pose, this.width, this.height);
+    for (const [id, module] of this.modules) {
+      const progress = Math.max(-1, Math.min(1, s - stationIndex(id)));
+      if (module.update(dt, time, progress)) settling = true;
+    }
+    applyPose(this.context.camera, this.cameraPose(s), this.width, this.height);
     settling ||= this.milestonesOrbit!.update(dt, time, motion, instant, this.context.camera.position);
     this.sky!.update(time, motion, this.context.camera.position, this.pixelRatio);
     return settling;
@@ -385,7 +395,38 @@ export class WorldScene {
     return this.focusTarget.distanceToSquared(goal) > 1e-5;
   }
 
+  private cameraPose(s: number): CameraPose {
+    const index = Math.min(Math.floor(s), STATIONS.length - 2);
+    const local = s - index;
+    const from = STATIONS[index]!;
+    const to = STATIONS[index + 1]!;
+    const leaving = this.modules.get(from)?.getCameraPose?.(local);
+    if (leaving) return fromModulePose(leaving);
+    const arriving = this.modules.get(to)?.getCameraPose?.(local - 1);
+    if (arriving) return fromModulePose(arriving);
+    return blendPoses(this.poseFor(from), this.poseFor(to), easeInOut(local), index % 2 === 0 ? 1 : -1);
+  }
+
+  /** World point FX should keep in focus: the camera target of the nearest station. */
+  focusPoint(): Vector3 {
+    const nearest = STATIONS[Math.max(0, Math.min(STATIONS.length - 1, Math.round(this.station)))]!;
+    if (nearest === 'products' && this.focusedProduct) return this.focusTarget.clone();
+    return this.readingPose(nearest).target.clone();
+  }
+
+  /** Station modules registered through contracts.ts (desk, …). */
+  setModules(modules: ReadonlyMap<StationId, StationModule>): void {
+    this.modules = modules;
+  }
+
+  /** Module-provided anchor for a plate, if its station module defines one. */
+  plateAnchor(station: StationId, plateId: string): PlateAnchor | null {
+    return this.modules.get(station)?.getPlateAnchor?.(plateId) ?? null;
+  }
+
   private poseFor(id: StationId): CameraPose {
+    const custom = this.modules.get(id)?.getCameraPose?.(0);
+    if (custom) return fromModulePose(custom);
     const spec = STATION_SPECS[id];
     const camera = this.context.camera;
     if (id === 'products') {

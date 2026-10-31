@@ -1,0 +1,29 @@
+---
+import { LOCALE_TAGS, localeUrl, otherLocale, useTranslations, type Locale } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const target = otherLocale(locale);
+const t = useTranslations(locale);
+---
+
+<a
+  href={localeUrl(target)}
+  hreflang={LOCALE_TAGS[target].bcp47}
+  lang={target}
+  data-lang-switch
+  aria-label={`${t('lang.label')}: ${t('lang.switchTo')}`}
+>
+  {t('lang.switchTo')}
+</a>
+
+<script>
+  for (const link of document.querySelectorAll<HTMLAnchorElement>('[data-lang-switch]')) {
+    link.addEventListener('click', () => {
+      link.hash = location.hash;
+    });
+  }
+</script>

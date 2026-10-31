@@ -1,0 +1,16 @@
+---
+import { withBase } from '../../i18n/utils';
+---
+
+<div data-stage aria-hidden="true">
+  <picture data-stage-fallback>
+    <img
+      src={withBase('fallback/hero-placeholder.svg')}
+      alt=""
+      width="1200"
+      height="800"
+      decoding="async"
+      fetchpriority="high"
+    />
+  </picture>
+</div>

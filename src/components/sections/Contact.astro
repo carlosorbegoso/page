@@ -1,0 +1,37 @@
+---
+import ExternalLink from '../ui/ExternalLink.astro';
+import CvLink from '../ui/CvLink.astro';
+import { SECTION_IDS, SITE } from '../../config/site';
+import { useTranslations, type Locale } from '../../i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const socials = [
+  { label: 'LinkedIn', href: SITE.social.linkedin },
+  { label: 'GitHub', href: SITE.social.github },
+  { label: `X ${SITE.handle}`, href: SITE.social.x }
+];
+---
+
+<section id={SECTION_IDS.contact} aria-labelledby="contact-title">
+  <h2 id="contact-title">{t('contact.title')}</h2>
+  <ul>
+    <li>
+      {t('contact.email')}: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+    </li>
+    {
+      socials.map(social => (
+        <li>
+          <ExternalLink href={social.href} locale={locale}>
+            {social.label}
+          </ExternalLink>
+        </li>
+      ))
+    }
+    <li><CvLink locale={locale} /></li>
+  </ul>
+</section>

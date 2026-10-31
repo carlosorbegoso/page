@@ -1,0 +1,19 @@
+---
+import { SECTION_IDS } from '../../config/site';
+import { useTranslations, type Locale } from '../../i18n/utils';
+import { getProfile } from '../../lib/content';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const { company } = await getProfile(locale);
+---
+
+<section id={SECTION_IDS.company} aria-labelledby="company-title">
+  <h2 id="company-title">{t('company.title')}</h2>
+  <p>{company.role} · {company.legalName}</p>
+  {company.summary.map(paragraph => <p>{paragraph}</p>)}
+</section>

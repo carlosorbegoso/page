@@ -1,0 +1,30 @@
+{
+  "name": "Carlos Orbegoso",
+  "role": "Backend Developer (Java/Quarkus)",
+  "tagline": "At TCS for BCP (Banco de Crédito del Perú) · Co-founder of TUSOCIO IA",
+  "location": "Lima, Peru",
+  "summary": [
+    "I build solid backends for banks by day and my own products with my company by night.",
+    "I specialize in Java, Quarkus and Spring Boot microservices, REST APIs and cloud-native architectures."
+  ],
+  "photoAlt": "Photo of Carlos Orbegoso",
+  "education": {
+    "institution": "Universidad Peruana de Ciencias Aplicadas (UPC)",
+    "degree": "Systems Engineering",
+    "status": "10th semester"
+  },
+  "company": {
+    "name": "TUSOCIO IA",
+    "legalName": "TUSOCIO IA S.A.C.",
+    "role": "Co-founder",
+    "summary": [
+      "TUSOCIO IA builds digital products for small businesses and people: management software, event tools and sales automation.",
+      "As co-founder I lead the architecture and development of the products."
+    ]
+  },
+  "stack": [
+    { "category": "Backend", "items": ["Java 17+", "Quarkus", "Spring Boot", "Microservices", "REST APIs"] },
+    { "category": "DevOps & cloud", "items": ["Docker", "Kubernetes", "AWS", "CI/CD"] },
+    { "category": "Databases", "items": ["PostgreSQL", "MongoDB", "Redis"] }
+  ]
+}

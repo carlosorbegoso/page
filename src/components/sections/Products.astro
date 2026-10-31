@@ -1,0 +1,48 @@
+---
+import ExternalLink from '../ui/ExternalLink.astro';
+import { SECTION_IDS } from '../../config/site';
+import { useTranslations, type Locale } from '../../i18n/utils';
+import { getProducts } from '../../lib/content';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const products = await getProducts(locale);
+const statusLabel = {
+  production: t('products.status.production'),
+  building: t('products.status.building')
+} as const;
+---
+
+<section id={SECTION_IDS.products} aria-labelledby="products-title">
+  <h2 id="products-title">{t('products.title')}</h2>
+  <ul>
+    {
+      products.map(product => (
+        <li data-product={product.id}>
+          <article aria-labelledby={`product-${product.id}`}>
+            <h3 id={`product-${product.id}`}>{product.name}</h3>
+            <p>{product.tagline}</p>
+            <p>
+              <span data-status={product.status}>{statusLabel[product.status]}</span> · {product.role}
+            </p>
+            <p>{product.description}</p>
+            {product.features.length > 0 && (
+              <ul>
+                {product.features.map(feature => (
+                  <li>{feature}</li>
+                ))}
+              </ul>
+            )}
+            <ExternalLink href={product.url} locale={locale}>
+              {t('products.visit')} {new URL(product.url).hostname}
+            </ExternalLink>
+          </article>
+        </li>
+      ))
+    }
+  </ul>
+</section>

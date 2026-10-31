@@ -1,0 +1,56 @@
+---
+import { SECTION_IDS } from '../../config/site';
+import { formatYearMonth, useTranslations, type Locale } from '../../i18n/utils';
+import { getExperience } from '../../lib/content';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const entries = await getExperience(locale);
+---
+
+<section id={SECTION_IDS.experience} aria-labelledby="experience-title">
+  <h2 id="experience-title">{t('experience.title')}</h2>
+  <ol>
+    {
+      entries.map(entry => (
+        <li data-experience={entry.id}>
+          <article aria-labelledby={`experience-${entry.id}`}>
+            <h3 id={`experience-${entry.id}`}>
+              {entry.role} · {entry.company}
+            </h3>
+            {entry.client && (
+              <p>
+                {t('experience.client')}: {entry.client}
+              </p>
+            )}
+            <p>
+              <time datetime={entry.start}>{formatYearMonth(entry.start, locale)}</time> –{' '}
+              {entry.end ? (
+                <time datetime={entry.end}>{formatYearMonth(entry.end, locale)}</time>
+              ) : (
+                t('experience.present')
+              )}
+            </p>
+            <p>{entry.summary}</p>
+            {entry.highlights.length > 0 && (
+              <ul>
+                {entry.highlights.map(highlight => (
+                  <li>{highlight}</li>
+                ))}
+              </ul>
+            )}
+            <ul>
+              {entry.stack.map(tech => (
+                <li>{tech}</li>
+              ))}
+            </ul>
+          </article>
+        </li>
+      ))
+    }
+  </ol>
+</section>

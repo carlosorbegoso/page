@@ -1,0 +1,47 @@
+---
+import { SECTION_IDS } from '../../config/site';
+import { useTranslations, withBase, type Locale } from '../../i18n/utils';
+import { getProfile } from '../../lib/content';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const profile = await getProfile(locale);
+---
+
+<section id={SECTION_IDS.about} aria-labelledby="about-title">
+  <h2 id="about-title">{t('about.title')}</h2>
+  <img
+    src={withBase('images/profile.jpeg')}
+    alt={profile.photoAlt}
+    width="640"
+    height="641"
+    loading="lazy"
+    decoding="async"
+  />
+  {profile.summary.map(paragraph => <p>{paragraph}</p>)}
+  <h3>{t('about.education')}</h3>
+  <p>
+    {profile.education.degree} · {profile.education.institution} · {profile.education.status}
+  </p>
+  <h3>{t('about.stack')}</h3>
+  <dl>
+    {
+      profile.stack.map(group => (
+        <>
+          <dt>{group.category}</dt>
+          <dd>
+            <ul>
+              {group.items.map(item => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </dd>
+        </>
+      ))
+    }
+  </dl>
+</section>

@@ -1,0 +1,29 @@
+---
+import StageCanvas from '../three/StageCanvas.astro';
+import CvLink from '../ui/CvLink.astro';
+import { SECTION_IDS } from '../../config/site';
+import { useTranslations, type Locale } from '../../i18n/utils';
+import { getProfile } from '../../lib/content';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const profile = await getProfile(locale);
+---
+
+<section id={SECTION_IDS.hero} aria-labelledby="hero-title">
+  <StageCanvas />
+  <h1 id="hero-title">
+    {profile.name}
+    <span>{profile.role}</span>
+  </h1>
+  <p>{profile.tagline}</p>
+  <p>
+    <a href={`#${SECTION_IDS.products}`}>{t('hero.ctaProducts')}</a>
+    <a href={`#${SECTION_IDS.contact}`}>{t('hero.ctaContact')}</a>
+    <CvLink locale={locale} />
+  </p>
+</section>

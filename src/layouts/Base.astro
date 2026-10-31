@@ -1,0 +1,122 @@
+---
+import '../styles/global.css';
+import SkipLink from '../components/SkipLink.astro';
+import { SITE } from '../config/site';
+import {
+  LOCALES,
+  LOCALE_TAGS,
+  DEFAULT_LOCALE,
+  localeUrl,
+  useTranslations,
+  withBase,
+  type Locale
+} from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+  title?: string;
+  description?: string;
+  indexable?: boolean;
+}
+
+const { locale, indexable = true } = Astro.props;
+const t = useTranslations(locale);
+const title = Astro.props.title ?? t('meta.title');
+const description = Astro.props.description ?? t('meta.description');
+
+const site = Astro.site!;
+const absolute = (path: string) => new URL(path, site).href;
+const canonical = absolute(Astro.url.pathname);
+const alternates = LOCALES.map(l => ({ hreflang: LOCALE_TAGS[l].bcp47, href: absolute(localeUrl(l)) }));
+const xDefault = absolute(localeUrl(DEFAULT_LOCALE));
+const ogImage = absolute(withBase(t('meta.ogImage')));
+const homeUrl = absolute(localeUrl(locale));
+
+const personId = `${xDefault}#person`;
+const organizationId = `${xDefault}#organization`;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Person',
+      '@id': personId,
+      name: SITE.name,
+      url: homeUrl,
+      image: absolute(withBase('images/profile.jpeg')),
+      jobTitle: 'Backend Developer',
+      email: `mailto:${SITE.email}`,
+      address: { '@type': 'PostalAddress', addressLocality: 'Lima', addressCountry: 'PE' },
+      alumniOf: {
+        '@type': 'CollegeOrUniversity',
+        name: 'Universidad Peruana de Ciencias Aplicadas (UPC)'
+      },
+      worksFor: { '@type': 'Organization', name: 'Tata Consultancy Services' },
+      sameAs: [SITE.social.linkedin, SITE.social.github, SITE.social.x],
+      knowsAbout: ['Java', 'Quarkus', 'Spring Boot', 'Microservices', 'PostgreSQL', 'Docker', 'Kubernetes', 'AWS']
+    },
+    {
+      '@type': 'Organization',
+      '@id': organizationId,
+      name: 'TUSOCIO IA',
+      legalName: 'TUSOCIO IA S.A.C.',
+      founder: { '@id': personId },
+      makesOffer: [
+        { name: 'SkyMek', url: 'https://skymek.app' },
+        { name: 'Parati', url: 'https://paratipe.com' },
+        { name: 'Ventixs', url: 'https://ventixs.com' }
+      ].map(product => ({
+        '@type': 'Offer',
+        itemOffered: { '@type': 'SoftwareApplication', ...product }
+      }))
+    }
+  ]
+};
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={SITE.name} />
+    <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
+    <link rel="manifest" href={withBase('manifest.json')} />
+    {
+      indexable ? (
+        <>
+          <link rel="canonical" href={canonical} />
+          {alternates.map(alt => (
+            <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
+          ))}
+          <link rel="alternate" hreflang="x-default" href={xDefault} />
+          <meta property="og:type" content="website" />
+          <meta property="og:url" content={canonical} />
+          <meta property="og:site_name" content={SITE.name} />
+          <meta property="og:title" content={title} />
+          <meta property="og:description" content={description} />
+          <meta property="og:image" content={ogImage} />
+          <meta property="og:image:type" content="image/jpeg" />
+          <meta property="og:image:alt" content={t('meta.ogImageAlt')} />
+          <meta property="og:locale" content={LOCALE_TAGS[locale].og} />
+          {LOCALES.filter(l => l !== locale).map(l => (
+            <meta property="og:locale:alternate" content={LOCALE_TAGS[l].og} />
+          ))}
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:creator" content={SITE.handle} />
+          <meta name="twitter:title" content={title} />
+          <meta name="twitter:description" content={description} />
+          <meta name="twitter:image" content={ogImage} />
+          <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
+        </>
+      ) : (
+        <meta name="robots" content="noindex" />
+      )
+    }
+  </head>
+  <body>
+    <SkipLink label={t('skipLink')} />
+    <slot />
+  </body>
+</html>

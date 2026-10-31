@@ -1,0 +1,34 @@
+{
+  "entries": [
+    {
+      "id": "skymek",
+      "name": "SkyMek",
+      "url": "https://skymek.app",
+      "status": "production",
+      "role": "Dueño",
+      "tagline": "Gestión de talleres automotrices",
+      "description": "SaaS para que los talleres automotrices gestionen órdenes de trabajo, clientes y vehículos.",
+      "features": []
+    },
+    {
+      "id": "parati",
+      "name": "Parati",
+      "url": "https://paratipe.com",
+      "status": "building",
+      "role": "Cofundador",
+      "tagline": "Invitaciones digitales y mesa de regalos",
+      "description": "Invitaciones digitales y mesa de regalos con aportes por Yape. Crear un evento es gratis.",
+      "features": ["Invitaciones digitales", "Mesa de regalos con aportes por Yape", "Crear un evento es gratis"]
+    },
+    {
+      "id": "ventixs",
+      "name": "Ventixs",
+      "url": "https://ventixs.com",
+      "status": "building",
+      "role": "Cofundador",
+      "tagline": "Bot de ventas por WhatsApp",
+      "description": "Bot que atiende y vende por WhatsApp para pequeños negocios.",
+      "features": []
+    }
+  ]
+}

@@ -71,8 +71,6 @@
   --color-ventixs-soft: #0e2a1f;
 
   --color-scene-bg: #0a0e14;
-  --color-scene-line: #24344d;
-  --color-scene-node: #5aa9ff;
   --color-alfa-body: #2b3a52;
   --color-alfa-signal: #5aa9ff;
   --color-burbu-body: #1f6e52;
@@ -84,24 +82,6 @@
 
   --color-sky-zenith: #04060b;
   --color-sky-horizon: #0a0e14;
-  --color-sky-nebula-blue: #1b3a6b;
-  --color-sky-nebula-violet: #2b2150;
-  --color-sky-nebula-teal: #0e3a40;
-  --color-star-hot: #bfd6ff;
-  --color-star-white: #f3f6ff;
-  --color-star-warm: #ffe2bd;
-  --color-star-ember: #ffb98f;
-  --color-star: var(--color-star-white);
-  --color-star-dim: var(--color-milestone);
-  --color-star-glow: var(--color-alfa-corona);
-  --color-alfa-core: #eaf4ff;
-  --color-alfa-corona: #5aa9ff;
-  --color-orbit: #2a3b57;
-  --color-orbit-active: #5aa9ff;
-  --color-constellation-line: #5aa9ff;
-  --color-milestone: #6a7b94;
-  --color-milestone-current: #4ade9a;
-  --color-beacon: #8cc8ff;
 
   --color-desk-wall: #121722;
   --color-desk-floor: #17140f;
@@ -115,6 +95,20 @@
   --color-desk-paper: #d8d2c4;
   --color-window-frame: #1a1f29;
   --color-window-glass: #0b1220;
+  --color-desk-brass: #b08a4a;
+  --color-folder-tcs: #33405a;
+  --color-folder-intercorp: #6b4a35;
+  --color-folder-baufest: #4a5847;
+  --color-folder-sysarp: #7e776a;
+  --color-phone-body: #15181e;
+  --color-phone-screen: #05070b;
+  --color-city-silhouette: #0d121b;
+  --color-city-sodium: #e8a25a;
+  --color-city-led: #8fb4e8;
+  --color-rain: #9db8e8;
+  --color-dawn-low: #e9a47a;
+  --color-dawn-high: #6f86ae;
+  --color-screen-bg: #0b0f16;
   --color-telescope: #c9ced6;
   --color-telescope-brass: #b08a4a;
   --color-monitor-bezel: #0c0f14;
@@ -123,11 +117,9 @@
   --color-lamp-shade: #1d222b;
   --color-moonlight: #9db8e8;
 
-  --color-plate: rgb(11 16 25 / 0.94);
   --color-plate-solid: #0b1019;
   --color-plate-border: #2a3b57;
   --color-plate-border-active: #3d5a85;
-  --color-plate-glow: rgb(90 169 255 / 0.16);
   --color-plate-pool: rgb(4 6 11 / 0.85);
   --color-plate-pool-edge: rgb(4 6 11 / 0.7);
 
@@ -166,8 +158,14 @@
   --text-5xl--line-height: 1.04;
   --text-6xl: clamp(3rem, 2.0833rem + 4.0741vw, 5.75rem);
   --text-6xl--line-height: 1;
+  --text-display: clamp(2.75rem, 1.5rem + 4.6875vw, 6rem);
+  --text-display--line-height: 1;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.6;
+  --text-meta: 0.8125rem;
+  --text-meta--line-height: 1.4;
 
-  --tracking-display: -0.025em;
+  --tracking-display: -0.03em;
   --tracking-tight: -0.012em;
   --tracking-normal: 0em;
   --tracking-caps: 0.08em;
@@ -183,6 +181,7 @@
   --spacing-tap: 2.75rem;
 
   --container-reading: 40rem;
+  --container-measure: 60ch;
   --container-content: 72rem;
   --container-wide: 80rem;
 
@@ -240,31 +239,13 @@
 
   --plate-width: 36rem;
   --plate-padding: clamp(1.25rem, 0.9rem + 1.6vw, 2rem);
-  --plate-signal-inset: 1.5rem;
   --plate-radius: 1.25rem;
-  --plate-gap: clamp(0.875rem, 0.7rem + 0.6vw, 1.25rem);
   --plate-signal-width: 3rem;
   --plate-signal-width-active: 6rem;
   --plate-dormant-opacity: 0;
   --plate-pool-inset: -35% -30%;
   --plate-text-halo:
     0 0 1px rgb(4 6 11 / 0.9), 0 0 6px rgb(4 6 11 / 0.85), 0 0 18px rgb(4 6 11 / 0.7);
-
-  --sky-radius: 48;
-  --sky-stars-high: 6000;
-  --sky-stars-mid: 2200;
-  --sky-star-size-min: 0.6;
-  --sky-star-size-max: 2.4;
-  --sky-twinkle-period: 7;
-  --sky-twinkle-amplitude: 0.18;
-  --sky-nebula-opacity: 0.14;
-  --alfa-core-intensity: 3.2;
-  --alfa-halo-scale: 4.5;
-  --alfa-halo-opacity: 0.55;
-  --orbit-opacity: 0.45;
-  --orbit-active-opacity: 0.9;
-  --constellation-line-opacity: 0.35;
-  --beacon-period: 6;
 
   --lamp-intensity: 28;
   --lamp-angle: 0.62;
@@ -278,7 +259,7 @@
   --fx-grain: 0.035;
   --fx-vignette-darkness: 0.5;
   --fx-vignette-offset: 0.32;
-  --fx-chromatic-offset: 0.0006;
+  --fx-chromatic-offset: 0;
   --fx-dof-bokeh-scale: 2.5;
   --fx-pointer-damping: 0.06;
 }
@@ -290,7 +271,7 @@
   }
 }
 
-/* Light is opt-in and only for the flat fallback: the constellation (is-3d) is deep space by definition, and the hero LCP image is captured dark (PLAN §3.4). */
+/* Light is opt-in and only for the flat fallback: the 3D desk is a night scene by definition, and the hero LCP image is captured dark (PLAN §3.4). */
 :root[data-theme='light']:not(.is-3d) {
   color-scheme: light;
 
@@ -321,8 +302,6 @@
   --color-ventixs-soft: #e3f4ea;
 
   --color-scene-bg: #f5f7fa;
-  --color-scene-line: #c3cddb;
-  --color-scene-node: #0a55bd;
   --color-alfa-body: #3a4b66;
   --color-alfa-signal: #2f86f0;
   --color-burbu-body: #2a8a64;
@@ -333,11 +312,9 @@
 
   --shadow-color: rgb(16 24 40 / 0.14);
 
-  --color-plate: rgb(255 255 255 / 0.96);
   --color-plate-solid: #ffffff;
   --color-plate-border: #d9dfe8;
   --color-plate-border-active: #7a8699;
-  --color-plate-glow: rgb(10 85 189 / 0.1);
   --scene-tone-exposure: 0.9;
 }
 

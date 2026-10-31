@@ -7,6 +7,7 @@
     width: 100%;
     max-width: var(--plate-width);
     color: var(--color-text);
+    text-align: start;
   }
 
   html:not(.is-3d) .plate {
@@ -34,17 +35,17 @@
   }
 
   .plate[data-plate-accent='live'] {
-    --plate-accent: var(--color-milestone-current);
+    --plate-accent: var(--color-status-live);
   }
 
+  /* Block, not inline: the signal sits above the eyebrow so every line keeps the same left edge. */
   .plate :is(p:has(+ h1, + h2, + h3), [data-signal])::before {
     content: '';
-    display: inline-block;
+    display: block;
     width: var(--plate-signal-width);
     height: 2px;
-    margin-inline-end: 0.75rem;
+    margin-block-end: 0.75rem;
     border-radius: 2px;
-    vertical-align: middle;
     background-color: var(--plate-accent);
     transition:
       width var(--duration-slow) var(--ease-out),
@@ -56,23 +57,61 @@
   }
 }
 
-/* Unlayered on purpose: loose 3D text must win over the card utilities the sections ship for the flat fallback. */
+/* Unlayered on purpose: the 3D type scale must win over the card utilities the sections ship for the flat fallback. */
 .is-3d .plate {
-  width: var(--plate-width);
   max-width: none;
   border: 0;
   border-radius: 0;
   background: none;
   box-shadow: none;
-  transform-style: preserve-3d;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  text-shadow: var(--plate-text-halo);
   transition: visibility 0s linear;
 }
 
-/* A large, edgeless pool of darkness behind the block keeps AA over Alfa's halo; it must never read as a rectangle. */
-.is-3d .plate::before {
+.is-3d .plate p:has(+ h1, + h2, + h3) {
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--text-meta--line-height);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.is-3d .plate :is(h1, h2) {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-display);
+}
+
+.is-3d .plate h3 {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--text-2xl--line-height);
+  letter-spacing: var(--tracking-tight);
+}
+
+.is-3d .plate p:not(:has(+ h1, + h2, + h3)) {
+  max-width: var(--container-measure);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}
+
+.is-3d .plate:not([data-plate-mode^='surface-']) {
+  width: var(--plate-width);
+  text-shadow: var(--plate-text-halo);
+}
+
+.is-3d .plate:not([data-plate-mode^='surface-']) :is(h2, .plate-display),
+.is-3d .plate[data-plate-mode='surface-monitor'] :is(h1, h2, .plate-display) {
+  font-size: var(--text-display);
+  line-height: var(--text-display--line-height);
+}
+
+/* An edgeless pool of darkness behind loose text keeps AA over the lit scene; it must never read as a rectangle. */
+.is-3d .plate:not([data-plate-mode^='surface-'])::before {
   content: '';
   position: absolute;
   inset: var(--plate-pool-inset);
@@ -87,27 +126,38 @@
   );
 }
 
-.is-3d .plate :is(h1, h2) {
-  font-family: var(--font-display);
-  letter-spacing: var(--tracking-display);
+.is-3d .plate[data-plate-mode^='surface-'] {
+  width: var(--surface-width, var(--plate-width));
+  height: var(--surface-height, auto);
+  overflow: hidden;
+  background-color: var(--color-screen-bg);
+  text-shadow: none;
+  -webkit-font-smoothing: antialiased;
 }
 
-.is-3d .plate h2 {
-  font-size: var(--text-4xl);
-  line-height: var(--text-4xl--line-height);
+.is-3d .plate[data-plate-mode='surface-monitor'] {
+  padding: clamp(1.5rem, 4%, 3.5rem) clamp(1.75rem, 6%, 4.5rem);
 }
 
-.is-3d .plate .plate-display {
-  font-size: var(--text-6xl);
-  line-height: var(--text-6xl--line-height);
-  letter-spacing: var(--tracking-display);
+.is-3d .plate[data-plate-mode='surface-phone'] {
+  padding: 2.75rem 1.25rem 1.5rem;
+  border-radius: 1.75rem;
+}
+
+.is-3d .plate[data-plate-mode='surface-phone'] :is(h1, h2) {
+  font-size: var(--text-2xl);
+  line-height: var(--text-2xl--line-height);
+}
+
+.is-3d .plate[data-plate-mode='surface-phone'] p:not(:has(+ h1, + h2, + h3)) {
+  font-size: 0.9375rem;
 }
 
 .is-3d .plate[data-active] :is(p:has(+ h1, + h2, + h3), [data-signal])::before {
   box-shadow: 0 0 12px 1px var(--plate-accent);
 }
 
-/* Fade the children, not the plate: opacity below 1 on a preserve-3d parent flattens its 3D children. */
+/* Fade the children, not the plate: opacity below 1 on a CSS3D plate flattens its children's depth. */
 .is-3d .plate > * {
   transition: opacity var(--duration-slow) var(--ease-standard);
 }

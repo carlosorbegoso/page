@@ -1,6 +1,10 @@
 ---
+import { Picture } from 'astro:assets';
+import SectionHeader from '../ui/SectionHeader.astro';
+import Tag from '../ui/Tag.astro';
+import photo from '../../assets/profile.jpeg';
 import { SECTION_IDS } from '../../config/site';
-import { useTranslations, withBase, type Locale } from '../../i18n/utils';
+import { useTranslations, type Locale } from '../../i18n/utils';
 import { getProfile } from '../../lib/content';
 
 interface Props {
@@ -10,38 +14,103 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 const profile = await getProfile(locale);
+
+/* The last summary paragraph holds the CIBERTEC and Alura credentials, so it moves into the education list. */
+const body = profile.summary.slice(0, -1);
+const credentials = profile.summary.slice(-1);
+const { degree, institution, status } = profile.education;
 ---
 
-<section id={SECTION_IDS.about} aria-labelledby="about-title">
-  <h2 id="about-title">{t('about.title')}</h2>
-  <img
-    src={withBase('images/profile.jpeg')}
-    alt={profile.photoAlt}
-    width="640"
-    height="641"
-    loading="lazy"
-    decoding="async"
-  />
-  {profile.summary.map(paragraph => (
-    <p>{paragraph}</p>
-  ))}
-  <h3>{t('about.education')}</h3>
-  <p>
-    {profile.education.degree} · {profile.education.institution} · {profile.education.status}
-  </p>
-  <h3>{t('about.stack')}</h3>
-  <dl>
-    {profile.stack.map(group => (
-      <>
-        <dt>{group.category}</dt>
-        <dd>
-          <ul>
-            {group.items.map(item => (
-              <li>{item}</li>
-            ))}
+<section
+  id={SECTION_IDS.about}
+  aria-labelledby="about-title"
+  class="relative z-(--z-content) bg-bg py-section"
+>
+  <div class="mx-auto w-full max-w-content px-gutter">
+    <SectionHeader
+      id="about-title"
+      eyebrow={profile.location}
+      title={t('about.title')}
+      subtitle={t('about.subtitle')}
+    />
+
+    <div class="mt-stack grid gap-stack lg:grid-cols-12 lg:gap-x-12">
+      <div class="flex flex-col gap-6 md:flex-row md:items-start lg:col-span-6 lg:flex-col">
+        <Picture
+          src={photo}
+          formats={['avif', 'webp']}
+          widths={[192, 320, 480, 640]}
+          sizes="(min-width: 1024px) 18rem, (min-width: 768px) 12rem, 8rem"
+          alt={profile.photoAlt}
+          loading="lazy"
+          decoding="async"
+          class="aspect-square w-32 shrink-0 rounded-lg border border-border object-cover md:w-48 lg:w-72"
+        />
+        <div class="flex max-w-reading flex-col gap-4 text-base text-text-muted">
+          {body.map(paragraph => <p class="text-pretty">{paragraph}</p>)}
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-stack lg:col-span-6">
+        <section
+          aria-labelledby="about-education"
+          class="rounded-lg border border-border bg-surface p-5 sm:p-6"
+        >
+          <h3
+            id="about-education"
+            class="font-display text-xl font-semibold tracking-tight text-text"
+          >
+            {t('about.education')}
+          </h3>
+          <ul class="mt-4 flex flex-col gap-4 text-sm text-text-muted">
+            <li class="flex gap-3">
+              <span class="mt-2 size-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true"></span>
+              <span>
+                <span class="block font-medium text-text">{degree}</span>
+                <span class="block">{institution}</span>
+                <span class="block text-text-subtle">{status}</span>
+              </span>
+            </li>
+            {
+              credentials.map(item => (
+                <li class="flex gap-3">
+                  <span class="mt-2 size-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+                  <span class="text-pretty">{item}</span>
+                </li>
+              ))
+            }
           </ul>
-        </dd>
-      </>
-    ))}
-  </dl>
+        </section>
+
+        <section
+          aria-labelledby="about-stack"
+          class="rounded-lg border border-border bg-surface p-5 sm:p-6"
+        >
+          <h3 id="about-stack" class="font-display text-xl font-semibold tracking-tight text-text">
+            {t('about.stack')}
+          </h3>
+          <dl class="mt-4 grid gap-4 sm:grid-cols-2">
+            {
+              profile.stack.map(group => (
+                <div>
+                  <dt class="text-xs font-semibold tracking-caps text-text-muted uppercase">
+                    {group.category}
+                  </dt>
+                  <dd class="mt-2">
+                    <ul class="flex flex-wrap gap-2">
+                      {group.items.map(item => (
+                        <li>
+                          <Tag>{item}</Tag>
+                        </li>
+                      ))}
+                    </ul>
+                  </dd>
+                </div>
+              ))
+            }
+          </dl>
+        </section>
+      </div>
+    </div>
+  </div>
 </section>

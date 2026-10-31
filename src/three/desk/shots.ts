@@ -170,7 +170,7 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
     const setup = productSetup[id];
     const layout = layoutFor(setup.side);
     return {
-      eye: eyeFor(focus, portrait ? 0 : setup.heading, portrait ? -14 : setup.pitch, portrait ? 0.34 : setup.distance),
+      eye: eyeFor(focus, portrait ? setup.heading * 0.5 : setup.heading, portrait ? -24 : setup.pitch, portrait ? 0.5 : setup.distance),
       focus,
       sx: layout.sx,
       sy: portrait ? subjectY : 0.56,

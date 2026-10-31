@@ -603,7 +603,7 @@ export class DeskSet implements ShotProvider {
       uniforms.uFigYaw.value[index] = id === 'alfa' ? level.alfaYaw : (this.figureYaw.get(id) ?? 0);
     });
     uniforms.uSignal.value[OBJECT_ID.alfa] = level.alfaSignal;
-    for (const id of FOLDERS) uniforms.uGlow.value[OBJECT_ID[id]] = (this.folderGlow.get(id) ?? 0) * 0.55;
+    for (const id of FOLDERS) uniforms.uGlow.value[OBJECT_ID[id]] = (this.folderGlow.get(id) ?? 0) * 0.32;
     for (const id of PRODUCT_FIGURES) uniforms.uGlow.value[OBJECT_ID[id]] = ((this.figureLift.get(id) ?? 0) / FIGURE_LIFT) * FOCUS_BOUNCE;
     uniforms.uGlow.value[OBJECT_ID.openFolder] = (this.folderGlow.get('tcs') ?? 0) * 0.25;
     uniforms.uHoverMix.value = this.hoverMix;

@@ -17,7 +17,18 @@ const DEG = Math.PI / 180;
 /** Sub-shot order inside `experience` (reverse chronological, PLAN "Contenido"). */
 export const EXPERIENCE_ORDER = ['tcs', 'intercorp', 'baufest', 'sysarp'] as const satisfies readonly FolderId[];
 
-export const SUB_SHOTS: Partial<Record<ChapterId, number>> = { products: PRODUCT_FIGURES.length, experience: EXPERIENCE_ORDER.length };
+export const SUB_SHOTS: Partial<Record<ChapterId, number>> = { about: 2, products: PRODUCT_FIGURES.length, experience: EXPERIENCE_ORDER.length };
+
+/** `data-plate-anchor` names of the experience panels (content ids). */
+const EXPERIENCE_ANCHOR: Record<(typeof EXPERIENCE_ORDER)[number], string> = {
+  tcs: 'exp-tcs',
+  intercorp: 'exp-intercorp-retail',
+  baufest: 'exp-baufest',
+  sysarp: 'exp-sysarp'
+};
+
+/** Director limits between consecutive shots (src/three/director.ts: 1.4 s at 20°/s and 1 m/s). */
+export const SHOT_LIMITS = { degrees: 28, metres: 1.4 } as const;
 
 /** Anchor names for the 2D panels (`data-plate-anchor`). */
 export const ANCHOR_NAMES = [
@@ -26,7 +37,7 @@ export const ANCHOR_NAMES = [
   'product-parati',
   'product-ventixs',
   'exp-tcs',
-  'exp-intercorp',
+  'exp-intercorp-retail',
   'exp-baufest',
   'exp-sysarp',
   'outro'
@@ -95,7 +106,7 @@ function clamp(value: number, min: number, max: number): number {
 /**
  * Every chapter's framing for a viewport. Landscape follows desk.md §5 (subject on one half,
  * panel column on the other); portrait puts the subject in the top third and panels below.
- * Consecutive shots respect the PLAN limits (≤ 45° yaw, ≤ 25° pitch, ≤ 1.5 m): see `checkShots`.
+ * Consecutive shots stay within the director's limits (`SHOT_LIMITS`): see `checkShots`.
  */
 export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId, Framing[]> {
   const portrait = view.width < view.height;
@@ -147,24 +158,24 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
     if (id === 'tcs') {
       const focus = OPEN_FOLDER.centre.clone().add(new Vector3(0, 0.01, 0));
       return {
-        eye: eyeFor(focus, -20, -22, portrait ? 1.05 : 0.85),
+        eye: eyeFor(focus, -24, -18, portrait ? 1.05 : 0.85),
         focus,
         sx: portrait ? 0.5 : 0.36,
         sy: portrait ? 0.32 : 0.56,
-        panel: { name: 'exp-tcs', ...panel }
+        panel: { name: EXPERIENCE_ANCHOR.tcs, ...panel }
       };
     }
     const focus = folderSpine(id);
     return {
-      eye: eyeFor(focus, -34, 3, portrait ? 1.9 : 1.7),
+      eye: eyeFor(focus, -34, 3, portrait ? 1.24 : 1.3),
       focus,
       sx: subjectX,
       sy: portrait ? 0.3 : 0.5,
-      panel: { name: `exp-${id}`, ...panel }
+      panel: { name: EXPERIENCE_ANCHOR[id], ...panel }
     };
   });
 
-  const phoneDistance = portrait ? clamp(widthFit(0.075, 0.9, view), 0.22, 0.5) : 0.45;
+  const phoneDistance = portrait ? clamp(widthFit(0.075, 0.9, view), 0.36, 0.5) : 0.42;
   const contact: Framing = {
     eye: phone.centre.clone().addScaledVector(phone.normal, phoneDistance),
     focus: phone.centre,
@@ -174,7 +185,7 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
 
   const back = hero.eye.clone().sub(screen).normalize();
   const outro: Framing = {
-    eye: hero.eye.clone().addScaledVector(back, 0.2),
+    eye: screen.clone().addScaledVector(back, Math.min(heroDistance + 0.2, 1.75)),
     focus: screen,
     sx: hero.sx,
     sy: hero.sy,
@@ -186,7 +197,7 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
     }
   };
 
-  return { intro: [hero], hero: [hero], about: [about], company: [company], products, experience, contact: [contact], outro: [outro] };
+  return { intro: [hero], hero: [hero], about: [about, about], company: [company], products, experience, contact: [contact], outro: [outro] };
 }
 
 /** Camera target that puts `framing.focus` at (sx, sy) on screen, with roll 0. */
@@ -230,6 +241,8 @@ export interface ShotCheck {
   to: string;
   yaw: number;
   pitch: number;
+  /** Angle between the two view directions (what the director limits). */
+  angle: number;
   distance: number;
   ok: boolean;
 }
@@ -257,7 +270,10 @@ export function checkShots(view: Viewport, phone: SurfaceFrame): ShotCheck[] {
     const yaw = Math.abs(angleB.heading - angleA.heading);
     const pitch = Math.abs(angleB.pitch - angleA.pitch);
     const distance = a.position.distanceTo(b.position);
-    result.push({ from: fromName, to: toName, yaw, pitch, distance, ok: yaw <= 45 && pitch <= 25 && distance <= 1.5 });
+    const da = a.target.clone().sub(a.position).normalize();
+    const db = b.target.clone().sub(b.position).normalize();
+    const angle = Math.acos(Math.min(1, Math.max(-1, da.dot(db)))) / DEG;
+    result.push({ from: fromName, to: toName, yaw, pitch, angle, distance, ok: angle <= SHOT_LIMITS.degrees && distance <= SHOT_LIMITS.metres });
   }
   return result;
 }

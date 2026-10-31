@@ -2,7 +2,7 @@ import { ACESFilmicToneMapping, Color, PerspectiveCamera, Scene, SRGBColorSpace,
 import { CSS3DObject, CSS3DRenderer } from 'three/addons/renderers/CSS3DRenderer.js';
 import type { ChapterId, PointerField, StationCameraPose, StationContext, SurfaceName, Tier } from '../contracts';
 import { DeskSet } from './DeskSet';
-import { checkShots, monitorFrame, type ShotCheck } from './shots';
+import { checkShots, type ShotCheck } from './shots';
 
 export interface DeskPreviewOptions {
   tier?: Tier;
@@ -110,13 +110,13 @@ export async function mountDeskPreview(container: HTMLElement, options: DeskPrev
       if (!anchor) return;
       const element = document.createElement('div');
       element.innerHTML = html;
-      const frame = monitorFrame();
-      const pixels = name === 'monitor' ? 720 : 300;
-      element.style.cssText = `width:${pixels}px;color:#e9eef5;font-family:Sora,system-ui;background:#0b0f16;padding:24px;box-sizing:border-box`;
+      const scale = anchor.scale ?? 0.001;
+      const size = anchor.size ?? { width: 0.5, height: 0.3 };
+      element.style.cssText = `width:${Math.round(size.width / scale)}px;height:${Math.round(size.height / scale)}px;color:#e9eef5;font-family:Sora,system-ui;background:#0b0f16;padding:24px;box-sizing:border-box;overflow:hidden`;
       plate = new CSS3DObject(element);
       plate.position.copy(anchor.position);
       plate.quaternion.copy(anchor.quaternion);
-      plate.scale.setScalar((name === 'monitor' ? frame.width : 0.065) / pixels);
+      plate.scale.setScalar(scale);
       cssScene.add(plate);
     },
     checks: () => checkShots({ width, height, fov }, set['phoneSurface']()),

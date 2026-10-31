@@ -115,11 +115,11 @@ void main() {
     vec3 night = mix(uHorizon * 1.6, uZenith, h);
     vec3 dawn = mix(uDawnLow, uDawnHigh, smoothstep(0.2, 0.75, vUv.y));
     vec3 sky = mix(night, dawn, uDawn);
-    float glow = exp(-pow((vUv.y - 0.3) * 5.0, 2.0)) * 0.05 * (1.0 - uDawn);
+    float glow = exp(-pow((vUv.y - 0.3) * 5.0, 2.0)) * 0.006 * (1.0 - uDawn);
     gl_FragColor = vec4(sky + vec3(0.9, 0.6, 0.35) * glow, 1.0);
   } else {
     float row = 3.0 - vLayer;
-    vec2 uv = vec2(vUv.x, (row + vUv.y) / 3.0);
+    vec2 uv = vec2(vUv.x, (row + clamp(vUv.y, 0.01, 0.985)) / 3.0);
     vec4 city = texture2D(uCity, uv);
     if (city.a < 0.02) discard;
     float haze = vLayer < 1.5 ? 0.55 : (vLayer < 2.5 ? 0.3 : 0.08);

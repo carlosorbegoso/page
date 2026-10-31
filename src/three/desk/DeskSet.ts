@@ -362,10 +362,26 @@ export class DeskSet implements ShotProvider {
     return SUB_SHOTS[chapter] ?? 1;
   }
 
+  /**
+   * CSS3D surface with a fixed `scale` (1 CSS px = 1 screen px from the shot that reads it:
+   * `hero`/`about` for the monitor, `contact` for the phone) and its physical `size`, so the
+   * engine can size the plate to the glass.
+   */
   getSurface(name: SurfaceName): PlateAnchor | null {
     if (!this.context) return null;
     const frame = name === 'monitor' ? monitorFrame() : this.phoneSurface();
-    return { position: frame.centre.clone().addScaledVector(frame.normal, 0.0015), quaternion: frame.quaternion.clone() };
+    const reader: ChapterId = name === 'phone' ? 'contact' : this.chapter === 'about' ? 'about' : 'hero';
+    const shot = this.getShot(reader, 0);
+    const view = this.viewport();
+    if (!shot || view.height <= 0) return null;
+    const distance = shot.position.distanceTo(frame.centre);
+    const scale = (2 * distance * Math.tan((view.fov * Math.PI) / 360)) / view.height;
+    return {
+      position: frame.centre.clone().addScaledVector(frame.normal, 0.0015),
+      quaternion: frame.quaternion.clone(),
+      scale,
+      size: { width: frame.width, height: frame.height }
+    };
   }
 
   getAnchor(name: string): Vector3 | null {

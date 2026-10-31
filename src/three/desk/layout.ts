@@ -75,10 +75,11 @@ export const OPEN_FOLDER = { centre: new Vector3(-0.46, DESK.top, 0.17), width: 
 
 /** Phone on a small walnut stand, right of the keyboard; its glass is the `phone` surface. */
 export const PHONE = {
-  base: new Vector3(0.5, DESK.top, 0.19),
-  yaw: -0.08,
+  base: new Vector3(0.52, DESK.top, 0.24),
+  /** Turned towards the room's left so the `contact` shot stays within the turn limit from the shelf. */
+  yaw: 0.26,
   /** Angle of the glass from vertical (the shot looks down at it frontally). */
-  lean: 0.36,
+  lean: 0.28,
   size: { width: 0.071, height: 0.147, depth: 0.008 },
   screen: { width: 0.065, height: 0.14 }
 } as const;
@@ -90,7 +91,7 @@ export const SHELF = {
   x: ROOM.left,
   depth: 0.3,
   length: 0.92,
-  z: 0.2,
+  z: 0.02,
   boards: [1.05, 1.42, 1.85] as const
 } as const;
 

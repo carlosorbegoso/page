@@ -46,8 +46,8 @@ const { degree, institution, status } = profile.education;
         <Picture
           src={photo}
           formats={['avif', 'webp']}
-          widths={[192, 320, 480]}
-          sizes="(min-width: 768px) 9rem, 7rem"
+          widths={[320, 480, 720]}
+          sizes="(min-width: 768px) 22rem, 12rem"
           alt={profile.photoAlt}
           loading="lazy"
           pictureAttributes={{ class: 'shrink-0' }}
@@ -238,6 +238,154 @@ const { degree, institution, status } = profile.education;
     width: 1.2cqh;
     height: 1.2cqh;
   }
+  /* Landscape screen as an editorial spread: tall photo on the left, statement and story beside it. */
+  @container surface (orientation: landscape) {
+    :global(.is-3d) .about-bio {
+      display: grid;
+      grid-template-columns: 30cqw minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
+      align-content: stretch;
+      gap: 0 5cqw;
+    }
+
+    :global(.is-3d) .about-bio__row {
+      display: contents;
+    }
+
+    :global(.is-3d) .about-bio :global(picture) {
+      grid-column: 1;
+      grid-row: 1 / span 2;
+      height: 100%;
+    }
+
+    :global(.is-3d) .about-bio__photo {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      border-radius: 0.6cqh;
+      object-position: 50% 30%;
+      mask-image: linear-gradient(90deg, #000 70%, transparent);
+    }
+
+    :global(.is-3d) .about-bio :global(header) {
+      grid-column: 2;
+      align-self: end;
+      max-width: none;
+      gap: 1.6cqh;
+    }
+
+    :global(.is-3d) .about-bio :global(h2) {
+      font-size: 3.4cqh;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--color-text-muted);
+    }
+
+    :global(.is-3d) .about-bio :global(header > p:last-of-type) {
+      font-family: var(--font-display);
+      font-size: 8cqh;
+      font-weight: 600;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--color-text);
+      text-wrap: balance;
+    }
+
+    :global(.is-3d) .about-bio__text {
+      grid-column: 2;
+      align-self: start;
+      margin-top: 5cqh;
+      padding-top: 4cqh;
+      border-top: 1px solid rgb(255 255 255 / 0.1);
+      gap: 2.2cqh;
+      font-size: 3.4cqh;
+      line-height: 1.45;
+    }
+
+    /* Spec sheet: education as a headline, the stack as ruled rows of plain text instead of bullets. */
+    :global(.is-3d) .about-stack {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 2fr);
+      gap: 0 6cqw;
+    }
+
+    :global(.is-3d) .about-stack h3 {
+      font-family: var(--font-sans);
+      font-size: 2.8cqh;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+
+    :global(.is-3d) .about-stack > section:first-child ul {
+      margin-top: 4cqh;
+      gap: 4cqh;
+    }
+
+    :global(.is-3d) .about-stack > section:first-child li > span:first-child {
+      display: none;
+    }
+
+    :global(.is-3d) .about-stack > section:first-child li:first-child > span:last-child > span:first-child {
+      margin-bottom: 1.2cqh;
+      font-family: var(--font-display);
+      font-size: 6cqh;
+      font-weight: 600;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+
+    :global(.is-3d) .about-stack > section:first-child li + li {
+      padding-top: 3cqh;
+      border-top: 1px solid rgb(255 255 255 / 0.1);
+      font-size: 2.9cqh;
+    }
+
+    :global(.is-3d) .about-stack dl {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 3cqh;
+    }
+
+    :global(.is-3d) .about-stack dl > div {
+      display: grid;
+      grid-template-columns: 22cqw minmax(0, 1fr);
+      align-items: baseline;
+      padding-block: 2.1cqh;
+      border-top: 1px solid rgb(255 255 255 / 0.08);
+    }
+
+    :global(.is-3d) .about-stack dl > div:last-child {
+      border-bottom: 1px solid rgb(255 255 255 / 0.08);
+    }
+
+    :global(.is-3d) .about-stack dt {
+      font-size: 2.5cqh;
+      letter-spacing: 0.12em;
+    }
+
+    :global(.is-3d) .about-stack dd {
+      margin-top: 0;
+    }
+
+    :global(.is-3d) .about-stack dd ul {
+      gap: 0.4cqh 0;
+      font-size: 3.2cqh;
+      color: var(--color-text);
+    }
+
+    :global(.is-3d) .about-stack dd li:not(:last-child)::after {
+      content: '/';
+      margin-inline: 1.4cqw;
+      color: var(--color-text-subtle);
+    }
+
+    :global(.is-3d) .about-stack :global([data-tone] > span[aria-hidden]) {
+      display: none;
+    }
+  }
+
   /* Phones turn the monitor upright: everything stacks in one column with body text near 14 px. */
   @container surface (orientation: portrait) {
     :global(.is-3d) :is(.about-bio, .about-stack) {

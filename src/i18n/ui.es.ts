@@ -4,7 +4,7 @@ export const es = {
     'Backend Developer en Lima. Modernizo servicios del BCP con Java y Quarkus en TCS y construyo SkyMek, Parati y Ventixs con TUSOCIO IA.',
   'meta.ogTitle': 'Carlos Orbegoso: backends para la banca y productos propios',
   'meta.ogDescription':
-    'De día, backends para el BCP en TCS. De noche, SkyMek, Parati y Ventixs con TUSOCIO IA, la empresa que cofundé.',
+    'De día, backends para el BCP en TCS. De noche, SkyMek, Parati y Ventixs con TUSOCIO IA, la empresa que fundé con dos amigos.',
   'meta.ogImage': 'images/og-es.jpg',
   'meta.ogImageAlt': 'Carlos Orbegoso, Backend Developer en Java y Quarkus',
   skipLink: 'Saltar al contenido',
@@ -50,7 +50,7 @@ export const es = {
   'about.education': 'Formación',
   'about.stack': 'Stack principal',
   'company.title': 'TUSOCIO IA',
-  'company.subtitle': 'La empresa que cofundé para construir productos propios.',
+  'company.subtitle': 'La empresa que fundé con dos amigos para crear productos propios.',
   'company.cta': 'Conoce los productos',
   'company.parentBrand': 'Alfa, la marca madre',
   'products.title': 'Productos',

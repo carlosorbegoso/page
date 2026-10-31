@@ -21,20 +21,20 @@
       "id": "parati",
       "name": "Parati",
       "url": "https://paratipe.com",
-      "status": "building",
+      "status": "production",
       "role": "Cofundador",
       "tagline": "Invitaciones digitales y mesa de regalos",
-      "description": "Invitaciones digitales con mesa de regalos: tus invitados aportan por Yape y crear un evento es gratis. Aún en construcción.",
+      "description": "Invitaciones digitales con mesa de regalos: tus invitados aportan por Yape y crear un evento es gratis.",
       "features": []
     },
     {
       "id": "ventixs",
       "name": "Ventixs",
       "url": "https://ventixs.com",
-      "status": "building",
+      "status": "production",
       "role": "Cofundador",
       "tagline": "Bot de ventas por WhatsApp",
-      "description": "Un bot de ventas para WhatsApp, el canal donde tus clientes ya conversan. Aún en construcción.",
+      "description": "Un bot que atiende y vende por WhatsApp, el canal donde tus clientes ya conversan.",
       "features": []
     }
   ]

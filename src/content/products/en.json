@@ -21,20 +21,20 @@
       "id": "parati",
       "name": "Parati",
       "url": "https://paratipe.com",
-      "status": "building",
+      "status": "production",
       "role": "Co-founder",
       "tagline": "Digital invitations and gift registry",
-      "description": "Digital invitations with a gift registry: guests chip in via Yape, and creating an event is free. Still in development.",
+      "description": "Digital invitations with a gift registry: guests chip in via Yape, and creating an event is free.",
       "features": []
     },
     {
       "id": "ventixs",
       "name": "Ventixs",
       "url": "https://ventixs.com",
-      "status": "building",
+      "status": "production",
       "role": "Co-founder",
       "tagline": "WhatsApp sales bot",
-      "description": "A sales bot for WhatsApp, where your customers already chat. Still in development.",
+      "description": "A bot that answers and sells on WhatsApp, where your customers already chat.",
       "features": []
     }
   ]

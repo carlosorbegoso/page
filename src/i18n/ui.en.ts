@@ -6,7 +6,7 @@ export const en = {
     'Lima-based backend developer. I modernize BCP services with Java and Quarkus at TCS and build SkyMek, Parati and Ventixs with TUSOCIO IA.',
   'meta.ogTitle': 'Carlos Orbegoso: banking backends and products of my own',
   'meta.ogDescription':
-    'By day, backends for BCP at TCS. By night, SkyMek, Parati and Ventixs with TUSOCIO IA, the company I co-founded.',
+    'By day, backends for BCP at TCS. By night, SkyMek, Parati and Ventixs with TUSOCIO IA, the company I started with two friends.',
   'meta.ogImage': 'images/og-en.jpg',
   'meta.ogImageAlt': 'Carlos Orbegoso, Java and Quarkus Backend Developer',
   skipLink: 'Skip to content',
@@ -51,7 +51,7 @@ export const en = {
   'about.education': 'Education',
   'about.stack': 'Main stack',
   'company.title': 'TUSOCIO IA',
-  'company.subtitle': 'The company I co-founded to build products of our own.',
+  'company.subtitle': 'The company I started with two friends to build products of our own.',
   'company.cta': 'Meet the products',
   'company.parentBrand': 'Alfa, the parent brand',
   'products.title': 'Products',

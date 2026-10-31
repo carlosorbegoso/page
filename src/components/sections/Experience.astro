@@ -23,7 +23,7 @@ const firstYear = chronological.at(0)?.start.slice(0, 4);
   data-experience-station
   class="relative flex min-h-svh flex-col items-center gap-stack px-gutter py-section lg:items-start"
 >
-  <div class="plate w-full max-w-[36rem]" data-plate data-plate-id="experience-intro" data-plate-order="0">
+  <div class="plate w-full max-w-[36rem] p-(--plate-padding)" data-plate data-plate-id="experience-intro" data-plate-order="0">
     <SectionHeader
       id="experience-title"
       eyebrow={firstYear ? `${firstYear} – ${t('experience.present')}` : undefined}

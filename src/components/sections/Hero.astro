@@ -131,30 +131,34 @@ const metrics = [
   }
 
   :global(.is-3d) .hero-name {
-    font-size: 3.6cqh;
+    font-size: 3.4cqh;
     line-height: 1.3;
   }
 
   :global(.is-3d) .hero-role {
-    font-size: 6.4cqh;
-    line-height: 1.15;
+    font-size: 4.6cqh;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--color-text-muted);
   }
 
   :global(.is-3d) .hero-headline {
-    max-width: none;
-    margin-top: 4cqh;
-    font-size: 9cqh;
-    line-height: 1.1;
+    max-width: 92%;
+    margin-top: 4.5cqh;
+    font-size: 11.5cqh;
+    font-weight: 600;
+    line-height: 1.04;
+    letter-spacing: -0.02em;
   }
 
   :global(.is-3d) .hero-tagline {
-    margin-top: 2.5cqh;
-    font-size: 3.6cqh;
-    line-height: 1.3;
+    display: none;
   }
 
   :global(.is-3d) .hero-metrics {
-    margin-top: 5cqh;
+    margin-top: 6cqh;
+    padding-top: 4cqh;
+    border-top: 1px solid rgb(255 255 255 / 0.1);
   }
 
   :global(.is-3d) .hero-metrics dl {
@@ -162,33 +166,52 @@ const metrics = [
     gap: 0 5cqw;
   }
 
+  /* Column-reverse packs from the bottom by default, which dropped values with shorter labels. */
   :global(.is-3d) .hero-metrics div {
+    justify-content: flex-end;
     gap: 0.8cqh;
   }
 
   :global(.is-3d) .hero-metric-value {
-    font-size: 6cqh;
+    font-size: 5.6cqh;
+    white-space: nowrap;
     line-height: 1.1;
   }
 
+  :global(.is-3d) .hero-metric-value::before {
+    display: none;
+  }
+
   :global(.is-3d) .hero-metric-label {
-    font-size: 3.2cqh;
+    font-size: 3.1cqh;
     line-height: 1.3;
   }
 
   :global(.is-3d) .hero-ctas {
     grid-template-columns: repeat(3, auto);
     justify-content: start;
-    gap: 3cqw;
-    margin-top: 5cqh;
+    align-items: center;
+    gap: 5cqw;
+    margin-top: 6cqh;
   }
 
+  /* On a screen the actions read as links, not web pills. */
   :global(.is-3d) .hero-ctas > :global(*) {
     grid-column: auto;
     min-height: 0;
-    height: 10cqh;
-    padding-inline: 3.5cqw;
-    font-size: 3.6cqh;
+    height: auto;
+    padding: 0 0 0.6cqh;
+    border: 0;
+    border-bottom: 1px solid rgb(255 255 255 / 0.25);
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    font-size: 3.4cqh;
+    color: var(--color-text);
+  }
+
+  :global(.is-3d) .hero-ctas > :global(:first-child) {
+    border-bottom-color: var(--color-accent);
   }
 
   :global(.is-3d) .hero-ctas :global(svg) {
@@ -239,6 +262,7 @@ const metrics = [
       grid-column: 1;
       grid-row: 1;
       font-size: 3.6cqh;
+      white-space: normal;
     }
 
     :global(.is-3d) .hero-metric-label {

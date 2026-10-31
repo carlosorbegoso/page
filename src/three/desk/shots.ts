@@ -130,7 +130,9 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
   const layoutFor = (side: typeof textLeft) => ({ panel: portrait ? panelBelow : side.panel, sx: portrait ? 0.5 : side.subject });
   const subjectY = portrait ? 0.3 : 0.5;
 
-  const heroDistance = portrait ? clamp(widthFit(screenSpan, 0.62, view), 1.2, 2.3) : HERO_EYE.distanceTo(screen);
+  const heroDistance = portrait
+    ? clamp(widthFit(screenSpan, 0.62, view), 1.2, 2.3)
+    : clamp(widthFit(screenSpan, 0.5, view), 1.05, HERO_EYE.distanceTo(screen));
   const hero: Framing = {
     eye: screen.clone().addScaledVector(monitor.normal, heroDistance),
     focus: screen,

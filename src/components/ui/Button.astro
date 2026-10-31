@@ -65,9 +65,10 @@ const linkRel = external ? ['noopener', 'noreferrer', rel].filter(Boolean).join(
       rel={linkRel}
       download={download}
       type={type}
+      data-magnetic
       {...attrs}
     >
-      <slot />
+      <span class="magnetic__inner" data-magnetic-inner><slot /></span>
       {external && <span class="sr-only">{t('link.newTab')}</span>}
     </a>
   ) : (
@@ -75,9 +76,14 @@ const linkRel = external ? ['noopener', 'noreferrer', rel].filter(Boolean).join(
       type={(type ?? 'button') as 'button' | 'submit' | 'reset'}
       disabled={disabled}
       class:list={classes}
+      data-magnetic
       {...(attrs as HTMLAttributes<'button'>)}
     >
-      <slot />
+      <span class="magnetic__inner" data-magnetic-inner><slot /></span>
     </button>
   )
 }
+
+<script>
+  import '../../motion/magnetic';
+</script>

@@ -1,0 +1,279 @@
+/* Kinetic layer: life inside the plates. Hidden states only exist under html.k-armed, which JS adds and removes, so without JS (or with reduced motion / pause) every text is plainly visible. */
+
+@property --signal-progress {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+:root {
+  --k-rise: calc(var(--duration-scene) * 0.9);
+  --k-exit: var(--duration-base);
+  --k-stagger-words: 42ms;
+  --k-stagger-chars: 22ms;
+  --k-stagger-type: 26ms;
+  --k-stagger-lines: 120ms;
+  --k-stagger-cascade: 40ms;
+  --k-blur: 6px;
+}
+
+@layer components {
+  .kinetic {
+    --k-delay: 0ms;
+    --k-stagger: var(--k-stagger-words);
+  }
+
+  .kinetic[data-kinetic='chars'] {
+    --k-stagger: var(--k-stagger-chars);
+  }
+
+  .kinetic[data-kinetic='lines'] {
+    --k-stagger: var(--k-stagger-lines);
+  }
+
+  .kinetic[data-kinetic-variant='type'] {
+    --k-stagger: var(--k-stagger-type);
+  }
+
+  .k-w {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .k-i {
+    display: inline-block;
+    --k-n: min(var(--k-i, 0), 14);
+  }
+
+  .k-c {
+    --k-n: min(var(--k-c, 0), 40);
+  }
+
+  [data-kinetic-count] {
+    display: inline-block;
+    min-width: calc(var(--k-digits, 1) * 1ch);
+    font-variant-numeric: tabular-nums;
+    text-align: end;
+  }
+
+  [data-kinetic-cursor]::after {
+    content: '_';
+    content: '_' / '';
+    margin-inline-start: 0.2em;
+    color: var(--color-accent);
+    opacity: 0.6;
+  }
+
+  .plate::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    inset-inline: var(--plate-radius);
+    height: 1px;
+    background-image: linear-gradient(90deg, transparent, var(--plate-accent), transparent);
+    background-repeat: no-repeat;
+    background-size: 7rem 1px;
+    background-position-x: calc(var(--signal-progress) * 100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-slow) var(--ease-standard);
+  }
+
+  .magnetic__inner {
+    display: inline-flex;
+    flex-wrap: inherit;
+    align-items: center;
+    justify-content: center;
+    gap: inherit;
+    min-width: 0;
+    max-width: 100%;
+    translate: var(--mx, 0px) var(--my, 0px);
+    transition: translate var(--duration-slow) var(--ease-out);
+  }
+
+  [data-magnetic] {
+    position: relative;
+  }
+
+  [data-magnetic]::after {
+    content: '';
+    position: absolute;
+    inset-inline: 1rem;
+    bottom: 0.5rem;
+    height: 1px;
+    border-radius: 1px;
+    background-color: currentColor;
+    opacity: 0.5;
+    scale: 0 1;
+    transform-origin: left center;
+    pointer-events: none;
+    transition: scale var(--duration-base) var(--ease-out);
+  }
+
+  [data-magnetic]:hover::after,
+  [data-magnetic]:focus-visible::after {
+    scale: 1 1;
+  }
+
+  [data-magnetic]:focus-visible::after {
+    opacity: 0.85;
+    height: 2px;
+  }
+
+  [data-magnetic]:focus-visible .magnetic__inner {
+    translate: 0 -1px;
+  }
+}
+
+/* Hidden ("not yet revealed") states. */
+:root.k-armed .kinetic:not([data-reveal='in']) .k-i {
+  opacity: 0;
+  translate: calc(min(var(--k-i, 0), 6) * 0.04em) 115%;
+  filter: blur(var(--k-blur));
+  transition:
+    opacity var(--k-exit) var(--ease-in),
+    translate var(--k-exit) var(--ease-in),
+    filter var(--k-exit) var(--ease-in);
+}
+
+:root.k-armed .kinetic[data-kinetic='chars']:not([data-reveal='in']) .k-c {
+  translate: calc(var(--k-ci, 0) * 0.06em) 115%;
+}
+
+:root.k-armed .kinetic[data-kinetic-variant='type']:not([data-reveal='in']) .k-i {
+  translate: none;
+  filter: none;
+}
+
+:root.k-armed .kinetic[data-kinetic='block']:not([data-reveal='in']) {
+  opacity: 0;
+  translate: 0 12px;
+  filter: blur(4px);
+  transition:
+    opacity var(--k-exit) var(--ease-in),
+    translate var(--k-exit) var(--ease-in),
+    filter var(--k-exit) var(--ease-in);
+}
+
+:root.k-armed [data-kinetic-cascade]:not([data-reveal='in']) > * {
+  opacity: 0;
+  translate: 0 8px;
+  transition:
+    opacity var(--k-exit) var(--ease-in),
+    translate var(--k-exit) var(--ease-in);
+}
+
+/* Each word is masked by its own box (with room for accents and descenders); the shine lifts the mask once settled, since clipped glyphs escape background-clip. */
+:root.k-armed .kinetic:not([data-kinetic-variant='type']) .k-w {
+  clip-path: inset(-0.14em -0.2em -0.24em -0.2em);
+}
+
+/* Revealed. */
+:root.k-armed .kinetic[data-reveal='in'] .k-i {
+  --k-wait: calc(var(--k-delay) + var(--k-n) * var(--k-stagger));
+
+  transition:
+    opacity calc(var(--k-rise) * 0.8) var(--ease-out) var(--k-wait),
+    translate var(--k-rise) var(--ease-out) var(--k-wait),
+    filter calc(var(--k-rise) * 0.7) var(--ease-out) var(--k-wait);
+}
+
+:root.k-armed .kinetic[data-kinetic-variant='type'][data-reveal='in'] .k-i {
+  transition: opacity var(--duration-instant) linear var(--k-wait);
+}
+
+:root.k-armed .kinetic[data-kinetic='block'][data-reveal='in'] {
+  transition:
+    opacity var(--k-rise) var(--ease-out) var(--k-delay),
+    translate var(--k-rise) var(--ease-out) var(--k-delay),
+    filter var(--k-rise) var(--ease-out) var(--k-delay);
+}
+
+:root.k-armed [data-kinetic-cascade][data-reveal='in'] > * {
+  --k-wait: calc(var(--k-cascade-delay, 160ms) + min(var(--k-i, 0), 16) * var(--k-stagger-cascade));
+
+  transition:
+    opacity var(--duration-slow) var(--ease-out) var(--k-wait),
+    translate var(--duration-slow) var(--ease-out) var(--k-wait);
+}
+
+/* Continuous micro-life, only on the plate being read. */
+:root.k-armed .plate[data-motion-live]::after {
+  opacity: 0.9;
+  animation: k-signal 7s var(--ease-in-out) infinite alternate;
+}
+
+:root.k-armed [data-motion-live] [data-kinetic-cursor][data-reveal='in']::after {
+  animation: k-cursor 1.6s var(--ease-in-out) infinite alternate;
+}
+
+/* The shine needs the words free of transforms and clips (they would isolate the glyphs from background-clip), hence data-settled. */
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  :root.k-armed .kinetic[data-kinetic-shine][data-settled] {
+    background-image: linear-gradient(
+      100deg,
+      var(--color-text) 0 42%,
+      var(--color-accent-hover) 50%,
+      var(--color-text) 58% 100%
+    );
+    background-size: 300% 100%;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: k-shine 16s var(--ease-in-out) 1.2s infinite;
+  }
+
+  :root.k-armed .kinetic[data-kinetic-shine][data-settled] .k-i {
+    color: transparent;
+  }
+
+  :root.k-armed .kinetic[data-kinetic-shine][data-settled] .k-w {
+    clip-path: none;
+  }
+}
+
+@keyframes k-signal {
+  from {
+    --signal-progress: 0;
+  }
+
+  to {
+    --signal-progress: 1;
+  }
+}
+
+@keyframes k-cursor {
+  from {
+    opacity: 0.65;
+  }
+
+  to {
+    opacity: 0.12;
+  }
+}
+
+@keyframes k-shine {
+  0% {
+    background-position: 100% 0;
+  }
+
+  45%,
+  100% {
+    background-position: 0% 0;
+  }
+}
+
+@media (forced-colors: active) {
+  .plate::after,
+  [data-magnetic]::after {
+    display: none;
+  }
+
+  :root.k-armed .kinetic[data-kinetic-shine][data-settled] {
+    background: none;
+  }
+
+  :root.k-armed .kinetic[data-kinetic-shine][data-settled] .k-i {
+    color: inherit;
+  }
+}

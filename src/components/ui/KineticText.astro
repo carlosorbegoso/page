@@ -1,0 +1,83 @@
+---
+import type { HTMLTag } from 'astro/types';
+import { firstInRequest } from '../../motion/once';
+import { splitWords, type SplitMode } from '../../motion/split';
+
+interface Props {
+  /** Element to render (default `span`, so it can live inside headings and paragraphs). */
+  as?: HTMLTag;
+  /** Text to animate. When omitted, the default slot is used if it is plain text. */
+  text?: string;
+  split?: SplitMode;
+  /** Extra delay before the first unit, in ms. */
+  delay?: number;
+  /** Slow highlight that drifts across the text once it has settled (headlines only). */
+  shine?: boolean;
+  class?: string;
+}
+
+const { as: Tag = 'span', text, split = 'words', delay = 0, shine = false, class: className } = Astro.props;
+
+const slotted = text ?? (Astro.slots.has('default') ? await Astro.slots.render('default') : '');
+const plain = text !== undefined || !/[<&]/.test(slotted);
+const words = plain ? splitWords(slotted) : [];
+const emitArming = firstInRequest(Astro.request);
+
+let charStart = 0;
+const units = words.map((word, wordIndex) => {
+  const unit = { ...word, wordIndex, charStart };
+  charStart += word.chars.length;
+  return unit;
+});
+---
+
+{
+  emitArming && (
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        if (root.dataset.motion === 'paused') return;
+        root.classList.add('k-armed');
+        setTimeout(() => {
+          if (!window.__kinetic) root.classList.remove('k-armed');
+        }, 4000);
+      })();
+    </script>
+  )
+}
+{
+  plain ? (
+    <Tag
+      class:list={['kinetic', className]}
+      data-kinetic={split}
+      data-kinetic-shine={shine ? '' : undefined}
+      style={delay ? `--k-delay: ${delay}ms` : undefined}
+    >
+      <span class="sr-only select-none">{words.map(w => w.text).join(' ')}</span>
+      <span class="kinetic__visual" aria-hidden="true">
+        {units.map((unit, i) => (
+          <>
+            <span class="k-w" style={`--k-i: ${unit.wordIndex}`}>
+              {split === 'chars' ? (
+                unit.chars.map((char, c) => (
+                  <span class="k-i k-c" style={`--k-c: ${unit.charStart + c}; --k-ci: ${c}`}>
+                    {char}
+                  </span>
+                ))
+              ) : (
+                <span class="k-i">{unit.text}</span>
+              )}
+            </span>
+            {i < units.length - 1 && ' '}
+          </>
+        ))}
+      </span>
+    </Tag>
+  ) : (
+    <Tag class:list={['kinetic', className]} data-kinetic="block" set:html={slotted} />
+  )
+}
+
+<script>
+  import '../../motion/kinetic';
+</script>

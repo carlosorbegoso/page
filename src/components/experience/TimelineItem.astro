@@ -1,5 +1,7 @@
 ---
 import Tag from '../ui/Tag.astro';
+import KineticText from '../ui/KineticText.astro';
+import { splitCounts } from '../../motion/split';
 import { useTranslations, type Locale } from '../../i18n/utils';
 import { formatTimelineMonth } from './dates';
 
@@ -51,7 +53,7 @@ const stackId = `${headingId}-stack`;
         id={headingId}
         class="font-display text-2xl font-semibold tracking-tight text-balance text-text"
       >
-        {company}
+        <KineticText text={company} />
       </h3>
       <p class="font-medium text-text">{role}</p>
       {
@@ -76,7 +78,24 @@ const stackId = `${headingId}-stack`;
             class="flex list-disc flex-col gap-2 pl-5 text-sm text-text marker:text-accent"
           >
             {highlights.map(highlight => (
-              <li>{highlight}</li>
+              <li>
+                {splitCounts(highlight).map(part =>
+                  part.count === undefined ? (
+                    part.text
+                  ) : (
+                    <>
+                      <span class="sr-only select-none">{part.text}</span>
+                      <span
+                        aria-hidden="true"
+                        data-kinetic-count={part.count}
+                        style={`--k-digits: ${part.text.length}`}
+                      >
+                        {part.text}
+                      </span>
+                    </>
+                  )
+                )}
+              </li>
             ))}
           </ul>
         </div>
@@ -84,7 +103,7 @@ const stackId = `${headingId}-stack`;
     }
 
     <p id={stackId} class="sr-only">{t('experience.stack')}</p>
-    <ul aria-labelledby={stackId} class="flex flex-wrap gap-2" role="list">
+    <ul aria-labelledby={stackId} class="flex flex-wrap gap-2" role="list" data-kinetic-cascade>
       {stack.map(tech => (
         <li>
           <Tag>{tech}</Tag>

@@ -46,7 +46,7 @@ const toneFor = (id: string) => (productTones.includes(id) ? (id as ProductTone)
           <span class="size-2.5 shrink-0 rounded-full bg-accent" aria-hidden="true"></span>
           {t('company.parentBrand')}
         </p>
-        <ul class="flex flex-wrap gap-2" role="list">
+        <ul class="flex flex-wrap gap-2" role="list" data-kinetic-cascade>
           {products.map(product => (
             <li>
               <Tag tone={toneFor(product.id)}>{product.name}</Tag>

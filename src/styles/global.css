@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import './tokens.css';
 @import './plates.css';
+@import './motion.css';
 
 /* Height reserved by the floating corner controls (Header.astro); sections pad their top by it. */
 :root {

@@ -1,6 +1,7 @@
 ---
 import Button from '../ui/Button.astro';
 import CvLink from '../ui/CvLink.astro';
+import KineticText from '../ui/KineticText.astro';
 import { SECTION_IDS } from '../../config/site';
 import { useTranslations, type Locale } from '../../i18n/utils';
 import { getProfile } from '../../lib/content';
@@ -26,26 +27,26 @@ const profile = await getProfile(locale);
         id="hero-title"
         class="hero-enter flex flex-wrap items-baseline gap-x-2 text-sm font-medium text-text-muted"
       >
-        <span class="font-display font-semibold text-text">{profile.name}</span>
+        <KineticText class="font-display font-semibold text-text" text={profile.name} split="chars" />
         <span aria-hidden="true" class="text-accent">/</span>
-        <span>{profile.role}</span>
+        <KineticText text={profile.role} delay={180} />
       </h1>
 
       <p
         class="hero-enter mt-4 font-display text-3xl font-semibold tracking-display text-balance text-text @md:text-4xl"
         style="--enter-delay: 60ms"
       >
-        {t('hero.headline')}
+        <KineticText text={t('hero.headline')} delay={120} shine />
       </p>
 
       <p
         class="hero-enter mt-4 text-base text-pretty text-text-muted @md:text-lg"
         style="--enter-delay: 120ms"
       >
-        {profile.tagline}
+        <KineticText text={profile.tagline} split="lines" delay={420} />
       </p>
 
-      <div class="hero-enter mt-6 grid grid-cols-2 gap-3" style="--enter-delay: 180ms">
+      <div class="hero-enter mt-6 grid grid-cols-2 gap-3" data-kinetic-cascade style="--enter-delay: 180ms; --k-cascade-delay: 640ms">
         <Button href={`#${SECTION_IDS.products}`} variant="primary" size="lg" class="px-3!">
           {t('hero.ctaProducts')}
         </Button>

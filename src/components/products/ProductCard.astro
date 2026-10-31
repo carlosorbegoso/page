@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import Button from '../ui/Button.astro';
 import Tag from '../ui/Tag.astro';
+import KineticText from '../ui/KineticText.astro';
 import { useTranslations, type Locale } from '../../i18n/utils';
 
 type Product = CollectionEntry<'products'>['data']['entries'][number];
@@ -53,7 +54,7 @@ const hostname = new URL(product.url).hostname;
             class:list={['size-2.5 shrink-0 rounded-full', accent.dot]}
             aria-hidden="true"
           ></span>
-          {product.name}
+          <KineticText text={product.name} split="chars" />
         </h3>
         <Tag tone={status.tone as 'live' | 'building'}>{status.label}</Tag>
       </div>
@@ -63,7 +64,7 @@ const hostname = new URL(product.url).hostname;
     <p class="text-sm text-pretty text-text-muted">{product.description}</p>
 
     {product.features.length > 0 && (
-      <ul class="flex flex-col gap-2 text-sm text-text-muted" role="list">
+      <ul class="flex flex-col gap-2 text-sm text-text-muted" role="list" data-kinetic-cascade>
         {product.features.map(feature => (
           <li class="flex items-start gap-2.5">
             <span

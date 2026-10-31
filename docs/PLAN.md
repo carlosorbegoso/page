@@ -350,3 +350,10 @@ Prevalece sobre lo anterior cuando contradiga.
 Paneles en desktop (≥ 1024): izquierda en hero, company y experience; derecha en about, products y contact (el objeto 3D en el lado contrario). Móvil/tablet: panel abajo, objeto en el tercio superior. Cada sección mide ≥ 100svh.
 
 Contratos de eventos en `window`: `product:focus` y `experience:focus` (`{ id }`, en ambos sentidos UI ↔ 3D), `motion:toggle` (`{ paused }`), `scene:hover` (`{ label }`, 3D → UI). Atributo de sección: `data-station="<id>"`.
+
+### Segundo cambio: "Constelación" con texto en 3D (2026-10-31)
+
+- **Concepto**: espacio profundo. Alfa es una estrella (TUSOCIO IA); SkyMek, Parati y Ventixs orbitan como lunas que evocan su mascota; la experiencia es una órbita con 4 hitos (SYSARP → Baufest → Intercorp → TCS); el hero es un campo estelar con la constelación del monograma "C"; about es un cúmulo de nodos del stack; contact es una señal emitida desde Alfa. Dirección de arte en `docs/design/constellation.md`.
+- **Texto dentro del 3D**: HTML real colocado en el espacio con `CSS3DRenderer` (misma cámara que el `WebGLRenderer`). Sigue siendo texto seleccionable, con enlaces reales, legible por Google y lectores de pantalla.
+- **Contrato de placas**: cada `<section data-station>` contiene `<div class="plate" data-plate data-plate-id>` (opcionales `data-plate-anchor`, `data-plate-order`, `data-product`, `data-experience`). Con 3D (`html.is-3d`) el motor mueve las placas al espacio y las secciones quedan como espaciadores que definen el recorrido del scroll; sin 3D la página es un flujo vertical de placas sobre una imagen estática del cielo. `focusin` en una placa lleva la cámara a su estación.
+- **HUD** (monograma, idioma, pausa, Índice, mapa estelar de progreso) queda en pantalla, con estilo de observatorio.

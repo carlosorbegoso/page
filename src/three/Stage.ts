@@ -6,6 +6,7 @@ import {
   registeredShotProvider,
   registeredStations,
   type ChapterId,
+  type Shot,
   type FxPipeline,
   type ShotProvider,
   type StationContext,
@@ -37,6 +38,8 @@ export interface StageOptions {
   capture?: CaptureOptions;
   /** Fixes one chapter without scroll (`?chapter=`). */
   forcedChapter?: ChapterId;
+  /** Sub-shot of the forced chapter (`?sub=`). */
+  forcedSub?: number;
   debug?: boolean;
 }
 
@@ -44,6 +47,7 @@ const RESIZE_HEIGHT_THRESHOLD = 150;
 const IDLE_WINDOW_MS = 8000;
 const DISSOLVE_HALF_MS = 150;
 const INTRO_SECONDS = 2.4;
+const PHONE_MONITOR_PUSH = 0.1;
 /** Sub-shots when neither the desk nor the plates say otherwise. */
 const DEFAULT_SUBS: Partial<Record<ChapterId, number>> = { products: 3 };
 
@@ -157,7 +161,7 @@ export class Stage {
 
     if (!capture) this.mountPlates();
     const first = this.firstChapter();
-    this.director.request({ id: first.id, subIndex: first.sub, shot: this.world.shot(first.id, first.sub) }, 'instant');
+    this.director.request({ id: first.id, subIndex: first.sub, shot: this.shotFor(first.id, first.sub) }, 'instant');
     this.director.update(this.camera, 0, this.fov(), { x: 0, y: 0 }, true);
     await this.renderer.compileAsync(this.world.scene, this.camera);
     await yieldToMain();
@@ -181,13 +185,24 @@ export class Stage {
 
   /** Capture / forced chapter, else `intro` when the page starts at the top, else the hero. */
   private firstChapter(): { id: ChapterId; sub: number } {
-    const fixed = this.options.capture ?? (this.options.forcedChapter ? { chapter: this.options.forcedChapter, sub: 0 } : null);
+    const fixed = this.options.capture ?? (this.options.forcedChapter ? { chapter: this.options.forcedChapter, sub: this.options.forcedSub ?? 0 } : null);
     if (fixed) return { id: fixed.chapter, sub: fixed.sub };
     if (scrollY < 4 && this.movesAllowed) {
       this.introUntil = performance.now() + INTRO_SECONDS * 1000;
       return { id: 'intro', sub: 0 };
     }
     return { id: 'hero', sub: 0 };
+  }
+
+  /**
+   * Chapter shot for the current layout. Below 768 px the hero (and intro) push in 10 % towards
+   * the target so the screen text is not tiny (a straight dolly: roll and FOV are unchanged).
+   */
+  private shotFor(id: ChapterId, sub: number): Shot {
+    const shot = this.world.shot(id, sub);
+    if (this.layout !== 'phone' || (id !== 'hero' && id !== 'intro')) return shot;
+    const position = shot.position.clone().lerp(shot.target, PHONE_MONITOR_PUSH);
+    return { ...shot, position };
   }
 
   private fov(): number {
@@ -205,7 +220,7 @@ export class Stage {
       this.pendingChapter = { id, sub };
       return;
     }
-    this.director.request({ id, subIndex: sub, shot: this.world.shot(id, sub) }, this.movesAllowed ? 'move' : 'cut');
+    this.director.request({ id, subIndex: sub, shot: this.shotFor(id, sub) }, this.movesAllowed ? 'move' : 'cut');
     this.bump();
   }
 
@@ -338,7 +353,7 @@ export class Stage {
 
   private refreshShot(): void {
     const id = this.director.chapter;
-    if (id) this.director.refresh(this.world.shot(id, this.director.subIndex));
+    if (id) this.director.refresh(this.shotFor(id, this.director.subIndex));
   }
 
   /** Requests a render; starts the loop if it is allowed to run. */

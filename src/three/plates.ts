@@ -61,6 +61,7 @@ export class Plates {
   private readonly origins: Origin[] = [];
   private width = 1;
   private height = 1;
+  private safeBottom = 0;
   private readonly onFocusIn = (event: FocusEvent) => this.focusIn(event);
 
   constructor(private readonly host: PlateHost) {}
@@ -155,6 +156,7 @@ export class Plates {
   setSize(width: number, height: number): void {
     this.width = width;
     this.height = height;
+    this.safeBottom = this.measureSafeBottom();
     this.css3d.setSize(width, height);
   }
 
@@ -212,11 +214,24 @@ export class Plates {
       y = Math.min(Math.max(y, SAFE_Y), this.height - SAFE_Y - height + overflow) - overflow * progress;
     } else {
       x = (this.width - width) / 2;
-      const top = Math.max(ay + this.height * 0.1, this.height * 0.42);
-      const overflow = Math.max(top + height - (this.height - SAFE_Y), 0);
+      const bottom = this.height - SAFE_Y - this.safeBottom;
+      const preferred = Math.max(ay + this.height * 0.1, this.height * 0.42);
+      const lifted = Math.min(preferred, bottom - height);
+      const top = Math.max(lifted, SAFE_Y);
+      const overflow = Math.max(top + height - bottom, 0);
       y = top - overflow * progress;
     }
     entry.wrapper.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`;
+  }
+
+  /** `env(safe-area-inset-bottom)` in px (home indicator on iOS). */
+  private measureSafeBottom(): number {
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;bottom:0;height:env(safe-area-inset-bottom, 0px);visibility:hidden;pointer-events:none';
+    document.body.append(probe);
+    const value = probe.getBoundingClientRect().height;
+    probe.remove();
+    return value;
   }
 
   private focusIn(event: FocusEvent): void {

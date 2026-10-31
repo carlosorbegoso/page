@@ -33,7 +33,6 @@ const sources = (name: string) => [
 
 <script>
   import { onIdle } from '../../three/idle';
-  import { StationTracker } from '../../three/sections';
   import { detectTier } from '../../three/tier';
 
   const BOOT_TIMEOUT_MS = 3000;
@@ -59,7 +58,6 @@ const sources = (name: string) => [
   async function init(container: HTMLElement): Promise<void> {
     const params = new URLSearchParams(location.search);
     const capture = params.has('capture');
-    const tracker = new StationTracker();
 
     if (!capture) {
       await whenLoaded();
@@ -72,7 +70,7 @@ const sources = (name: string) => [
       if (tier.tier === 'none') return;
       try {
         const { boot } = await import('../../three/index');
-        await boot({ container, tier, tracker, params });
+        await boot({ container, tier, params });
       } catch (error) {
         container.dataset.degraded = 'error';
         console.error('[stage] 3D unavailable', error);

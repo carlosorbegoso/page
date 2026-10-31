@@ -12,15 +12,14 @@ import {
   type Sprite,
   type Texture
 } from 'three';
-import { withFluidDisplacement } from '../fx/fluid';
-import { tokenColor, tokenNumber } from '../tokens';
+import { tokenColor } from '../tokens';
 import { glowSprite, mulberry32 } from './common';
 
 const STAR_CLASSES = [
-  { token: '--color-star-hot', share: 0.3, size: [0.8, 1.6], brightness: [0.7, 1] },
-  { token: '--color-star-white', share: 0.45, size: [0.6, 1.4], brightness: [0.5, 0.9] },
-  { token: '--color-star-warm', share: 0.2, size: [0.8, 1.8], brightness: [0.5, 0.8] },
-  { token: '--color-star-ember', share: 0.05, size: [1.2, 2.4], brightness: [0.4, 0.6] }
+  { color: '#bfd6ff', share: 0.3, size: [0.8, 1.6], brightness: [0.7, 1] },
+  { color: '#f3f6ff', share: 0.45, size: [0.6, 1.4], brightness: [0.5, 0.9] },
+  { color: '#ffe2bd', share: 0.2, size: [0.8, 1.8], brightness: [0.5, 0.8] },
+  { color: '#ffb98f', share: 0.05, size: [1.2, 2.4], brightness: [0.4, 0.6] }
 ] as const;
 
 const VERTEX = /* glsl */ `
@@ -68,9 +67,9 @@ function gradientTexture(top: Color, bottom: Color): Texture {
 }
 
 /**
- * Sky (docs/design/constellation.md §4): one Points draw call with per-star size, colour and
- * twinkle in the shader, a dome that follows the camera (never past `far`), faint nebulae and a
- * vertical zenith→horizon background gradient.
+ * Minimal night sky seen through the desk window: one Points draw call (per-star size, colour,
+ * twinkle) on a dome that follows the camera, optional faint nebulae and a zenith→horizon
+ * background gradient from the remaining sky tokens.
  */
 export class Sky {
   readonly root = new Group();
@@ -83,7 +82,7 @@ export class Sky {
 
   constructor(count: number, nebulaCount: number, glow: Texture) {
     const random = mulberry32(101);
-    const radius = tokenNumber('--sky-radius', 48);
+    const radius = 48;
     const band = new Vector3(1, 0.55, -0.3).normalize();
     const positions: number[] = [];
     const sizes: number[] = [];
@@ -112,18 +111,17 @@ export class Sky {
       uniforms: {
         time: { value: 0 },
         pixelRatio: { value: 1 },
-        period: { value: tokenNumber('--sky-twinkle-period', 7) },
-        amplitude: { value: tokenNumber('--sky-twinkle-amplitude', 0.18) }
+        period: { value: 7 },
+        amplitude: { value: 0.18 }
       },
       transparent: true,
       depthWrite: false,
       blending: AdditiveBlending
     });
-    withFluidDisplacement(this.material);
     const stars = new Points(this.geometry, this.material);
     stars.frustumCulled = false;
     stars.raycast = () => undefined;
-    const opacity = tokenNumber('--sky-nebula-opacity', 0.14);
+    const opacity = 0.14;
     const placements = [
       new Vector3(-0.55, 0.45, -0.7),
       new Vector3(-0.8, 0.1, -0.2),
@@ -132,7 +130,6 @@ export class Sky {
     this.nebulae = placements.slice(0, nebulaCount).map((dir, i) => {
       const sprite = glowSprite(glow, 32 + i * 6, opacity * 2.2);
       sprite.position.copy(dir.normalize().multiplyScalar(radius * 0.9));
-      withFluidDisplacement(sprite.material);
       return sprite;
     });
     this.root.add(stars, ...this.nebulae);
@@ -148,7 +145,7 @@ export class Sky {
   }
 
   applyTokens(): void {
-    const colors = STAR_CLASSES.map(c => tokenColor(c.token));
+    const colors = STAR_CLASSES.map(c => new Color(c.color));
     const attribute = this.geometry.getAttribute('color') as Float32BufferAttribute;
     const color = new Color();
     this.classes.forEach((index, i) => {
@@ -156,8 +153,8 @@ export class Sky {
       attribute.setXYZ(i, color.r, color.g, color.b);
     });
     attribute.needsUpdate = true;
-    const tints = ['--color-sky-nebula-blue', '--color-sky-nebula-teal', '--color-sky-nebula-violet'];
-    this.nebulae.forEach((sprite, i) => sprite.material.color.copy(tokenColor(tints[i]!)));
+    const tints = ['#1b3a6b', '#0e3a40', '#2b2150'];
+    this.nebulae.forEach((sprite, i) => sprite.material.color.set(tints[i]!));
     this.background?.dispose();
     this.background = gradientTexture(tokenColor('--color-sky-zenith', '#04060b'), tokenColor('--color-sky-horizon', '#0a0e14'));
   }

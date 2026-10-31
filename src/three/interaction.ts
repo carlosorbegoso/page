@@ -1,61 +1,69 @@
-import { Raycaster, Vector2, type PerspectiveCamera } from 'three';
-import type { WorldHit, WorldScene } from './scenes/WorldScene';
+import { Raycaster, Vector2, type Object3D, type PerspectiveCamera } from 'three';
+import type { StationPick } from './contracts';
 
 const UI_SELECTOR =
-  'a, button, input, textarea, select, label, summary, [role="button"], [tabindex]:not([tabindex="-1"]), [contenteditable], [data-panel], [data-plate], [data-station-plates]';
+  'a, button, input, textarea, select, label, summary, [role="button"], [tabindex]:not([tabindex="-1"]), [contenteditable], [data-panel], [data-plate], [data-plate-wrapper]';
+
+export interface PickSource {
+  picks(): readonly StationPick[];
+  resolvePick(object: Object3D): StationPick | null;
+  setHover(object: Object3D | null): void;
+}
 
 export interface InteractionOptions {
-  world: WorldScene;
+  source: PickSource;
   camera: PerspectiveCamera;
   canvas: HTMLCanvasElement;
-  /** Scrolls to the hit's section (or plate) and dispatches its focus event. */
-  navigate: (hit: WorldHit) => void;
+  navigate: (pick: StationPick) => void;
   invalidate: () => void;
 }
 
+function labelOf(pick: StationPick): string {
+  if (typeof pick.label === 'string') return pick.label;
+  return document.documentElement.lang.startsWith('en') ? pick.label.en : pick.label.es;
+}
+
 /**
- * Scene navigation by raycasting: hover shows a pointer cursor and emits `scene:hover`
- * (fine pointers only); click or tap navigates to the object's section.
+ * Scene navigation by raycasting the desk's picks: hover shows a pointer cursor and emits
+ * `scene:hover` (fine pointers only); click or tap navigates to the pick's chapter.
  */
 export function setupInteraction(options: InteractionOptions): () => void {
-  const { world, camera, canvas } = options;
+  const { source, camera, canvas } = options;
   const raycaster = new Raycaster();
   const ndc = new Vector2();
   const finePointer = matchMedia('(pointer: fine)').matches;
-  let hovered: WorldHit | null = null;
+  let hovered: StationPick | null = null;
   let pending: PointerEvent | null = null;
 
-  const pick = (event: PointerEvent | MouseEvent): WorldHit | null => {
+  const pick = (event: PointerEvent | MouseEvent): StationPick | null => {
     const target = event.target as Element | null;
     if (target?.closest?.(UI_SELECTOR)) return null;
     const rect = canvas.getBoundingClientRect();
     if (!rect.width || !rect.height) return null;
     ndc.set(((event.clientX - rect.left) / rect.width) * 2 - 1, -((event.clientY - rect.top) / rect.height) * 2 + 1);
     raycaster.setFromCamera(ndc, camera);
-    for (const hit of raycaster.intersectObjects(world.pickables(), true)) {
-      if (!hit.object.visible) continue;
-      const meaning = world.resolve(hit.object, hit.instanceId);
+    const objects = source.picks().map(p => p.object3D);
+    for (const hit of raycaster.intersectObjects(objects, true)) {
+      const meaning = source.resolvePick(hit.object);
       if (meaning) return meaning;
     }
     return null;
   };
 
-  const setHover = (hit: WorldHit | null) => {
-    if (hit?.key === hovered?.key) return;
-    hovered = hit;
-    document.body.style.cursor = hit ? 'pointer' : '';
-    world.setHover(hit);
-    window.dispatchEvent(new CustomEvent('scene:hover', { detail: { label: hit?.label ?? null } }));
+  const setHover = (next: StationPick | null) => {
+    if (next?.key === hovered?.key) return;
+    hovered = next;
+    document.body.style.cursor = next ? 'pointer' : '';
+    source.setHover(next?.object3D ?? null);
+    window.dispatchEvent(new CustomEvent('scene:hover', { detail: { label: next ? labelOf(next) : null } }));
     options.invalidate();
   };
 
   const onMove = (event: PointerEvent) => {
     if (event.pointerType !== 'mouse' && event.pointerType !== 'pen') return;
-    if (pending) {
-      pending = event;
-      return;
-    }
+    const scheduled = pending !== null;
     pending = event;
+    if (scheduled) return;
     requestAnimationFrame(() => {
       if (pending) setHover(pick(pending));
       pending = null;

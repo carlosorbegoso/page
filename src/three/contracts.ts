@@ -43,6 +43,8 @@ export interface PlateAnchor {
   quaternion: Quaternion;
   /** Omit to get 1 CSS px = 1 screen px at the chapter's shot distance. */
   scale?: number;
+  /** Physical surface size in metres; with `scale` the engine sets `--surface-width/height` (CSS px) on the plate. */
+  size?: { width: number; height: number };
 }
 
 export type SurfaceName = 'monitor' | 'phone';

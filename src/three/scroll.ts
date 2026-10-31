@@ -1,59 +1,108 @@
-import type { Stage } from './Stage';
-import { STATIONS, stationElement } from './sections';
+import type { ChapterId } from './contracts';
+import { chapterElement, SECTION_CHAPTERS } from './sections';
+
+export interface ChapterScrollHost {
+  /** Number of sub-shots of a chapter (products, experience). */
+  subCount(chapter: ChapterId): number;
+  /** The section owning the viewport changed (or its sub-shot). */
+  onChapter(chapter: ChapterId, sub: number): void;
+  onProgress(chapter: ChapterId, progress: number): void;
+}
+
+export interface ChapterScroll {
+  /** Scroll position that shows a chapter's sub-shot. */
+  positionOf(chapter: ChapterId, sub: number): number | null;
+  refresh(): void;
+  dispose(): void;
+}
 
 /**
- * Bridges scroll to the camera path with GSAP ScrollTrigger (only inside the 3D chunk).
- * Each section contributes the move from the previous station while its top travels from the
- * bottom to the top of the viewport; while a tall section stays on screen the camera holds.
- * Without scrub (reduced motion or pause) the Stage jumps between stations with a fade.
+ * Chapters on scroll (GSAP ScrollTrigger, loaded only inside the 3D chunk). Desktop: each section
+ * is pinned for `subs × 100vh` and the camera changes shot only at chapter / sub-shot boundaries.
+ * Touch: no pin and no scrub; a chapter fires when its section reaches 50 % of the viewport and
+ * its spacer is `subs × 100svh` tall. No `normalizeScroll`.
  */
-export async function setupScroll(stage: Stage): Promise<() => void> {
+export async function setupChapterScroll(host: ChapterScrollHost): Promise<ChapterScroll> {
   const [{ gsap }, { ScrollTrigger }] = await Promise.all([import('gsap'), import('gsap/ScrollTrigger')]);
   gsap.registerPlugin(ScrollTrigger);
   ScrollTrigger.config({ ignoreMobileResize: true });
+  const touch = matchMedia('(pointer: coarse)').matches || innerWidth < 1024;
+  const triggers = new Map<ChapterId, InstanceType<typeof ScrollTrigger>>();
+  const lastSub = new Map<ChapterId, number>();
 
-  const progress = STATIONS.map(() => ({ value: 0 }));
-  let tweens: gsap.core.Tween[] = [];
-
-  const publish = () => {
-    let station = 0;
-    progress.forEach((p, index) => {
-      if (index > 0 && p.value > 0) station = Math.max(station, index - 1 + p.value);
-    });
-    stage.setStation(station);
+  const report = (chapter: ChapterId, progress: number, active: boolean) => {
+    const subs = Math.max(1, host.subCount(chapter));
+    const sub = Math.min(subs - 1, Math.floor(progress * subs));
+    host.onProgress(chapter, progress);
+    if (active && lastSub.get(chapter) !== sub) {
+      lastSub.set(chapter, sub);
+      host.onChapter(chapter, sub);
+    }
   };
 
-  const build = () => {
-    for (const tween of tweens) tween.kill();
-    tweens = [];
-    if (!stage.scrubAllowed) return;
-    STATIONS.forEach((id, index) => {
-      const el = stationElement(id);
-      if (index === 0 || !el) return;
-      tweens.push(
-        gsap.to(progress[index]!, {
-          value: 1,
-          ease: 'none',
-          onUpdate: publish,
-          scrollTrigger: { trigger: el, start: 'top bottom', end: 'top 15%', scrub: 0.8 }
+  for (const chapter of SECTION_CHAPTERS) {
+    const section = chapterElement(chapter);
+    if (!section) continue;
+    const subs = () => Math.max(1, host.subCount(chapter));
+    if (!touch) {
+      triggers.set(
+        chapter,
+        ScrollTrigger.create({
+          trigger: section,
+          start: 'top top',
+          end: () => `+=${subs() * innerHeight}`,
+          pin: true,
+          pinSpacing: true,
+          invalidateOnRefresh: true,
+          onToggle: self => {
+            if (!self.isActive) return;
+            lastSub.delete(chapter);
+            report(chapter, self.progress, true);
+          },
+          onUpdate: self => report(chapter, self.progress, self.isActive)
         })
       );
-    });
-    ScrollTrigger.refresh();
-    publish();
-  };
+    } else {
+      section.style.minHeight = `${subs() * 100}svh`;
+      triggers.set(
+        chapter,
+        ScrollTrigger.create({
+          trigger: section,
+          start: 'top 50%',
+          end: 'bottom 50%',
+          onToggle: self => {
+            if (!self.isActive) return;
+            lastSub.delete(chapter);
+            report(chapter, self.progress, true);
+          },
+          onUpdate: self => report(chapter, self.progress, self.isActive)
+        })
+      );
+    }
+  }
+  ScrollTrigger.refresh();
+  const active = [...triggers].find(([, trigger]) => trigger.isActive);
+  if (active) report(active[0], active[1].progress, true);
 
-  build();
-  const offMotion = stage.onMotionChange(() => build());
-  let refreshTimer: ReturnType<typeof setTimeout> | undefined;
-  const offLayout = stage.onLayoutChange(() => {
-    clearTimeout(refreshTimer);
-    refreshTimer = setTimeout(() => ScrollTrigger.refresh(), 100);
-  });
-  return () => {
-    offMotion();
-    offLayout();
-    clearTimeout(refreshTimer);
-    for (const tween of tweens) tween.kill();
+  return {
+    positionOf(chapter, sub) {
+      const trigger = triggers.get(chapter);
+      if (!trigger) return null;
+      const subs = Math.max(1, host.subCount(chapter));
+      return trigger.start + ((Math.min(sub, subs - 1) + 0.5) / subs) * (trigger.end - trigger.start);
+    },
+    refresh() {
+      if (touch) {
+        for (const chapter of SECTION_CHAPTERS) {
+          const section = chapterElement(chapter);
+          if (section) section.style.minHeight = `${Math.max(1, host.subCount(chapter)) * 100}svh`;
+        }
+      }
+      ScrollTrigger.refresh();
+    },
+    dispose() {
+      for (const trigger of triggers.values()) trigger.kill(true);
+      for (const chapter of SECTION_CHAPTERS) chapterElement(chapter)?.style.removeProperty('min-height');
+    }
   };
 }

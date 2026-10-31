@@ -1,11 +1,10 @@
 import type { WebGLRenderer } from 'three';
 import { cacheSnapshot } from './assets';
-import { STATIONS } from './sections';
 
 /** Read-only view of the Stage the overlay needs. */
 interface StageMetrics {
   readonly tierName: string;
-  stationValue(): number;
+  chapterLabel(): string;
   dprValue(): number;
   p75FrameMs(): number;
   refreshIntervalMs(): number;
@@ -61,7 +60,7 @@ export class DebugOverlay {
   /** Called after each rendered frame; repaints at most twice a second. */
   frame(now: number): void {
     const info = this.renderer.info;
-    const station = STATIONS[Math.round(this.stage.stationValue())] ?? 'hero';
+    const station = this.stage.chapterLabel();
     const p75 = this.stage.p75FrameMs();
     const current = this.perStation[station] ?? { calls: 0, triangles: 0, p75Ms: 0, dpr: 0 };
     this.perStation[station] = {
@@ -74,7 +73,7 @@ export class DebugOverlay {
     this.lastPaint = now;
     const heap = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize;
     const lines = [
-      `tier ${this.stage.tierName}  station ${this.stage.stationValue().toFixed(2)} (${station})`,
+      `tier ${this.stage.tierName}  chapter ${station}`,
       `fps(p75) ${p75 ? (1000 / p75).toFixed(0) : '—'}  p75 ${p75.toFixed(1)} ms  refresh ${this.stage.refreshIntervalMs().toFixed(1)} ms`,
       `dpr ${this.stage.dprValue()}  calls ${info.render.calls}  tris ${info.render.triangles}`,
       `geo ${info.memory.geometries}  tex ${info.memory.textures}  programs ${info.programs?.length ?? 0}`,

@@ -111,7 +111,9 @@ const jsonLd = {
         let stored = null;
         try {
           stored = localStorage.getItem('motion');
-        } catch {}
+        } catch {
+          stored = null;
+        }
         const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
         document.documentElement.dataset.motion = reduce || stored === 'paused' ? 'paused' : 'running';
       })();

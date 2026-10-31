@@ -1,11 +1,11 @@
 {
-  "name": "Carlos Orbegoso - Backend Developer",
+  "name": "Carlos Orbegoso · Backend Developer",
   "short_name": "Carlos O.",
   "description": "Backend Developer especializado en Java, Spring Boot y Quarkus. +5 años de experiencia en microservicios, APIs REST y arquitecturas cloud-native.",
   "start_url": "/page/",
   "display": "standalone",
-  "background_color": "#030308",
-  "theme_color": "#64B5F6",
+  "background_color": "#0A0E14",
+  "theme_color": "#0A0E14",
   "orientation": "portrait-primary",
   "icons": [
     {

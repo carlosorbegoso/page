@@ -333,3 +333,20 @@ Revisión de Claude Fable (2026-10-31), contrastada con el repo. Se aceptaron lo
 | 18 | Pipeline y color poco detallados → comando de gltf-transform explícito, ACES + sRGB, unidades físicas de luz. | §2, §3.2 |
 | 19 | Datos corregidos: 8 archivos sin commitear (incluye `package.json`/`bun.lock`), `package-lock.json` no está trackeado, `web-vitals` se elimina, enlace roto al CV, GSAP gratuito desde 3.13, quitar `prefetch`, `inlineStylesheets: 'always'`. | §1, §2, §3.5, §4, §9 |
 | 20 | 30 fps no verificables con CPU 4× → dispositivo real (Android gama media + iPhone, o Samsung Remote Test Lab); `?debug` guarda métricas. | §5, §6.3 |
+
+---
+
+## Cambio de dirección (2026-10-31, decisión de Carlos)
+
+Prevalece sobre lo anterior cuando contradiga.
+
+| Tema | Antes | Ahora |
+|---|---|---|
+| Alcance del 3D | Solo Hero y TUSOCIO IA/Productos; el resto con fondo sólido y canvas oculto. | **Mundo 3D continuo** en toda la landing: una `WorldScene` con estaciones (`hero`, `about`, `company`, `products`, `experience`, `contact`); la cámara recorre un camino ligado al scroll. El texto sigue siendo HTML real en **paneles flotantes** sobre fondo transparente. |
+| Navegación | Header fijo con nav por anclas. | **Sin header.** Navegación por la escena (clic en mascotas e hitos → su sección) + UI mínima en esquinas: monograma, idioma, pausa y **☰ Índice** (alternativa accesible), indicador de progreso y tooltip de escena. |
+| Móvil | Prioridad rendimiento (3D simplificado en `mid`). | **Prioridad espectacularidad**: mundo completo también en móvil (DPR ≤ 1.5, sin post pesado). Fallback estático solo sin WebGL, render por software, contexto perdido o p75 < 20 fps. |
+| Lighthouse móvil | Performance ≥ 85. | **≈ 70–80 aceptado** por Carlos. Accessibility ≥ 90 se mantiene. |
+
+Paneles en desktop (≥ 1024): izquierda en hero, company y experience; derecha en about, products y contact (el objeto 3D en el lado contrario). Móvil/tablet: panel abajo, objeto en el tercio superior. Cada sección mide ≥ 100svh.
+
+Contratos de eventos en `window`: `product:focus` y `experience:focus` (`{ id }`, en ambos sentidos UI ↔ 3D), `motion:toggle` (`{ paused }`), `scene:hover` (`{ label }`, 3D → UI). Atributo de sección: `data-station="<id>"`.

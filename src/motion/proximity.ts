@@ -12,8 +12,9 @@ interface Profile {
 }
 
 /* No translateZ on purpose: a unit pushed off its layer's plane can sort behind the plate's dark pool on stations whose CSS3D matrix is mirrored. */
-const CHARS: Profile = { radius: 96, lift: 6, spread: 3, scale: 0.12 };
-const WORDS: Profile = { radius: 130, lift: 2, spread: 1.2, scale: 0.015 };
+const CHARS: Profile = { radius: 90, lift: 4, spread: 2, scale: 0.08 };
+/** Only short headlines react letter by letter; body text stays still so it can be read. */
+const MAX_HEADLINE_CHARS = 32;
 
 interface Unit {
   el: HTMLElement;
@@ -36,7 +37,7 @@ interface Word {
 
 const html = document.documentElement;
 const finePointer = matchMedia('(pointer: fine)');
-const motionOn = () => html.classList.contains('k-armed');
+const motionOn = () => html.classList.contains('k-armed') && !html.hasAttribute('data-chapter-moving');
 
 let words: Word[] = [];
 let pointerX = Number.POSITIVE_INFINITY;
@@ -52,10 +53,12 @@ function collect(): void {
   words = [];
   let budget = MAX_UNITS;
   const roots = Array.from(
-    document.querySelectorAll<HTMLElement>('[data-motion-live] .kinetic:not([data-kinetic-variant="type"])')
-  ).sort((a, b) => Number(b.dataset.kinetic === 'chars') - Number(a.dataset.kinetic === 'chars'));
+    document.querySelectorAll<HTMLElement>(
+      '[data-motion-live] .kinetic[data-kinetic="chars"]:not([data-kinetic-variant="type"])'
+    )
+  ).filter(root => root.querySelectorAll('.k-c').length <= MAX_HEADLINE_CHARS);
   for (const root of roots) {
-    const profile = root.dataset.kinetic === 'chars' ? CHARS : WORDS;
+    const profile = CHARS;
     for (const el of root.querySelectorAll<HTMLElement>('.k-w')) {
       const unitEls = Array.from(el.querySelectorAll<HTMLElement>('.k-i'));
       if (budget < unitEls.length) return;

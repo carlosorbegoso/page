@@ -1,94 +1,120 @@
 ---
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import type { CollectionEntry } from 'astro:content';
 import Button from '../ui/Button.astro';
 import Tag from '../ui/Tag.astro';
 import KineticText from '../ui/KineticText.astro';
-import { useTranslations, type Locale } from '../../i18n/utils';
+import { useTranslations, withBase, type Locale } from '../../i18n/utils';
 
 type Product = CollectionEntry<'products'>['data']['entries'][number];
-type ProductId = 'skymek' | 'parati' | 'ventixs';
 
 interface Props {
   product: Product;
   locale: Locale;
+  order?: number;
 }
 
-const { product, locale } = Astro.props;
+const { product, locale, order } = Astro.props;
 const t = useTranslations(locale);
+const featured = product.featured === true;
 
-const accents: Record<ProductId, { dot: string; token: string }> = {
-  skymek: { dot: 'bg-skymek', token: 'skymek' },
-  parati: { dot: 'bg-parati', token: 'parati' },
-  ventixs: { dot: 'bg-ventixs', token: 'ventixs' }
+const dots: Record<Product['id'], string> = {
+  skymek: 'bg-skymek',
+  parati: 'bg-parati',
+  ventixs: 'bg-ventixs'
 };
-const accent = accents[product.id as ProductId] ?? { dot: 'bg-accent', token: 'accent' };
-const accentToken = accent.token;
+const dot = dots[product.id];
 
 const status =
   product.status === 'production'
-    ? { tone: 'live', label: t('products.status.production') }
-    : { tone: 'building', label: t('products.status.building') };
+    ? { tone: 'live' as const, label: t('products.status.production') }
+    : { tone: 'building' as const, label: t('products.status.building') };
 
-const titleId = `product-${product.id}`;
+const plateId = `product-${product.id}`;
+const titleId = `${plateId}-title`;
 const hostname = new URL(product.url).hostname;
+
+/* Carlos drops the real capture into public/ later; until then the plate renders without it. */
+const screenshotPath = `images/${product.id}-screenshot.webp`;
+const screenshot =
+  featured && existsSync(join(process.cwd(), 'public', screenshotPath)) ? withBase(screenshotPath) : null;
 ---
 
 <article
   aria-labelledby={titleId}
-  class="plate product-plate"
+  class="plate p-(--plate-padding)"
   data-plate
-  data-plate-id={`product-${product.id}`}
+  data-plate-id={plateId}
+  data-plate-mode="anchored"
+  data-plate-anchor={plateId}
+  data-plate-order={order}
+  data-plate-accent={product.id}
   data-product={product.id}
-  style={`--product-accent: var(--color-${accentToken});`}
+  data-featured={featured ? '' : undefined}
 >
-  <div class="relative flex flex-col gap-4 overflow-hidden rounded-[inherit] p-5 md:gap-5 md:p-6">
-    <span class="product-plate__bar absolute inset-x-0 top-0 h-0.5" aria-hidden="true"></span>
+  <div class="flex max-w-[60ch] flex-col gap-4 md:gap-5">
+    <slot />
 
-    <div class="flex flex-col gap-2" data-depth="30">
-      <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        <h3
-          id={titleId}
-          class="flex items-center gap-2.5 font-display text-xl font-semibold tracking-tight text-text"
+    <header class="flex flex-col gap-2">
+      <Tag tone={status.tone} class="self-start">{status.label}</Tag>
+      <h3
+        id={titleId}
+        class:list={[
+          'flex items-center gap-3 font-display font-semibold tracking-display text-text',
+          featured ? 'text-4xl' : 'text-2xl'
+        ]}
+      >
+        <span class:list={['size-2.5 shrink-0 rounded-full', dot]} aria-hidden="true"></span>
+        <KineticText text={product.name} split="chars" />
+      </h3>
+      <p class:list={['font-medium text-text', featured ? 'text-lg' : 'text-base']}>{product.tagline}</p>
+    </header>
+
+    {
+      screenshot && (
+        <picture>
+          <source srcset={screenshot} type="image/webp" />
+          <img
+            src={screenshot}
+            alt={`${product.name}: ${product.tagline}`}
+            width="1280"
+            height="800"
+            loading="lazy"
+            decoding="async"
+            class="aspect-[16/10] w-full rounded-md object-cover object-top"
+          />
+        </picture>
+      )
+    }
+
+    <p class:list={['text-pretty text-text-muted', featured ? 'text-base' : 'text-sm']}>
+      {product.description}
+    </p>
+
+    {
+      product.features.length > 0 && (
+        <ul
+          class="grid gap-x-6 gap-y-2 text-sm text-text-muted sm:grid-cols-2"
+          role="list"
+          data-kinetic-cascade
         >
-          <span
-            class:list={['size-2.5 shrink-0 rounded-full', accent.dot]}
-            aria-hidden="true"
-          ></span>
-          <KineticText text={product.name} split="chars" />
-        </h3>
-        <Tag tone={status.tone as 'live' | 'building'}>{status.label}</Tag>
-      </div>
-      <p class="text-base font-medium text-text">{product.tagline}</p>
-    </div>
+          {product.features.map(feature => (
+            <li class="flex items-start gap-2.5">
+              <span class:list={['mt-[0.55em] size-1.5 shrink-0 rounded-full', dot]} aria-hidden="true" />
+              <span>{feature}</span>
+            </li>
+          ))}
+        </ul>
+      )
+    }
 
-    <p class="text-sm text-pretty text-text-muted" data-depth="-30">{product.description}</p>
-
-    {product.features.length > 0 && (
-      <ul class="flex flex-col gap-2 text-sm text-text-muted" role="list" data-kinetic-cascade data-depth="-10">
-        {product.features.map(feature => (
-          <li class="flex items-start gap-2.5">
-            <span
-              class:list={['mt-[0.55em] size-1.5 shrink-0 rounded-full', accent.dot]}
-              aria-hidden="true"
-            />
-            <span>{feature}</span>
-          </li>
-        ))}
-      </ul>
-    )}
-
-    <div class="flex flex-col gap-4 border-t border-border pt-4" data-depth="50">
-      <dl class="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
-        <dt class="text-xs font-semibold tracking-caps text-text-subtle uppercase">
-          {t('products.role')}
-        </dt>
-        <dd class="text-text">{product.role}</dd>
-      </dl>
+    <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6">
       <Button
         href={product.url}
         external
-        variant="secondary"
-        class="w-full sm:w-auto sm:self-start"
+        variant={featured ? 'primary' : 'secondary'}
+        class="w-full sm:w-auto"
       >
         <span>{t('products.visit')}</span>
         <span class="text-text-muted">{hostname}</span>
@@ -102,25 +128,13 @@ const hostname = new URL(product.url).hostname;
           stroke-linejoin="round"
           aria-hidden="true"
         >
-          <path d="M6 3.5h6.5V10M12.5 3.5 4 12" />
+          <path d="M6 3.5h6.5V10M12.5 3.5 4 12"></path>
         </svg>
       </Button>
+      <dl class="flex flex-wrap items-baseline gap-x-2 text-sm">
+        <dt class="text-xs font-semibold tracking-caps text-text-subtle uppercase">{t('products.role')}</dt>
+        <dd class="text-text">{product.role}</dd>
+      </dl>
     </div>
   </div>
 </article>
-
-<style>
-  .product-plate__bar {
-    background-color: var(--product-accent);
-    transition: height var(--duration-base) var(--ease-standard);
-  }
-
-  .product-plate:is(:hover, :has(:focus-visible), [data-active]) .product-plate__bar {
-    height: 0.25rem;
-  }
-
-  .product-plate[data-active] {
-    outline: 1px solid color-mix(in oklab, var(--product-accent) 60%, transparent);
-    outline-offset: -1px;
-  }
-</style>

@@ -13,7 +13,12 @@ Archivos: `src/components/ui/KineticText.astro`, `src/motion/{kinetic,magnetic,s
 | `data-settled` | `kinetic.ts` (raíces con `shine`) | La entrada terminó: se quita la máscara y empieza el brillo. |
 | `data-motion-live` | `kinetic.ts`, en la placa | La placa se está leyendo: corren la señal del borde y el cursor. |
 
-**Con 3D (`html.is-3d`)** — un `MutationObserver` mira `data-active`/`data-dormant` de cada placa:
+**Con 3D (`html.is-3d`) y director de cámara** — en cuanto llega el primer evento `chapter:*`, el texto solo entra al asentarse la cámara:
+- `chapter:enter {id}` → `html[data-chapter-moving]`, las placas pierden `data-motion-live` (se congela la flotación y la proximidad);
+- `chapter:settled {id}` → se quita el atributo y se revelan las placas no `data-dormant` del capítulo `id` (capítulo = `data-station` de la sección original de la placa, o `data-station-plates` del contenedor del motor); `data-motion-live` = placa con `data-active`;
+- `data-dormant` sigue recogiendo el texto.
+
+**Con 3D sin eventos de capítulo (motor antiguo)** — un `MutationObserver` mira `data-active`/`data-dormant` de cada placa:
 - la placa revela su contenido cuando ella **o una hermana de su columna** recibe `data-active` (así las placas visibles de la misma estación no quedan vacías) y no está `data-dormant`;
 - al pasar a `data-dormant` (ya invisible) se recoge, y vuelve a emerger en la siguiente visita;
 - `data-motion-live` = la placa tiene `data-active`.
@@ -36,7 +41,9 @@ Archivos: `src/components/ui/KineticText.astro`, `src/motion/{kinetic,magnetic,s
 | `text` | `string` | — | Si se omite, usa el slot cuando es texto plano; si el slot trae HTML, no se parte y se anima como bloque (`data-kinetic="block"`). |
 | `split` | `'words' \| 'lines' \| 'chars'` | `words` | `lines` agrupa las palabras por línea real (se mide `offsetTop` una vez, al revelar). `chars` parte en grafemas (`Intl.Segmenter`). |
 | `delay` | `number` (ms) | `0` | Retardo antes de la primera unidad (`--k-delay`). |
-| `shine` | `boolean` | `false` | Brillo lento que cruza el texto ya asentado (titular del hero). |
+| `shine` | `boolean` | `false` | Brillo que recorre las letras del texto asentado; solo en la página plana. |
+| `type` | `boolean` | `false` | Tecleo: caracteres uno a uno (18 ms) con cursor `_` (implica `split="chars"`). Titular del hero en el monitor. |
+| `counts` | `boolean` | `false` | No parte el texto: las cifras seguidas de `%` cuentan de 0 al revelarse (cifras del hero). |
 | `class` | `string` | — | Clases del elemento raíz. |
 
 Marcado generado (en el servidor):
@@ -62,33 +69,31 @@ Marcado generado (en el servidor):
 | `data-kinetic-count="30"` | span `aria-hidden` con la cifra (va acompañado de una copia `sr-only`) | Cuenta de 0 al valor al revelar (1.4 s, `easeOutQuart`, 220 ms de retardo). Ancho fijo `--k-digits` en `ch` + `tabular-nums`: sin saltos de layout. `splitCounts()` en `src/motion/split.ts` detecta cifras seguidas de `%`. |
 | `data-magnetic` / `data-magnetic-inner` | `Button.astro` | Solo `pointer: fine`: el **hijo interno** sigue al cursor dentro de la caja del botón (máx. 6 px X / 4 px Y, `translate`, rAF). Hover y `:focus-visible`: línea inferior que se dibuja (`scale` 0→1 desde la izquierda); con teclado la línea es más gruesa y el contenido sube 1 px, además del anillo de foco. |
 | `--signal-progress` | `.plate` (propiedad registrada `<number>`) | Solo en la página plana: recorre 0→1→0 en 7 s en placas `data-motion-live` y mueve un destello del acento por el borde superior (`.plate::after`). |
-| `data-depth="-50…60"` | bloques de la placa | En `.is-3d`, capa a `translateZ((depth + 50px) × --k-zsign)`: todo queda delante del plano de la placa (donde vive el pozo oscuro). Los títulos, eyebrows y subtítulos de `SectionHeader` se colocan por posición (90/50/30 px). Cada línea del titular lleva un desfase extra de 0–12 px y los tags un abanico de 0–16 px. `preserve-3d` se encadena desde `.stage-plates__station`/`__column` hasta cada capa. |
-| `--k-zsign` | placa | `-1` en la estación `hero`: Chrome pinta esas capas en orden de profundidad invertido (la placa del escritorio va a escala ≈3e-4), así que allí van a −Z. Quitarlo cuando se arregle el anclaje del hero en el motor. |
 
 ## 4. Vida e interacción (`src/motion/proximity.ts`)
 
-- **Proximidad** (solo `pointer: fine`): en las placas `data-motion-live`, las unidades cercanas al cursor se elevan, se separan y crecen (caracteres: radio 96 px, 6 px, 3 px, ×1.12; palabras: 130 px, 2 px, 1.2 px, ×1.015) con un resorte (rigidez 170, amortiguación 19). Los centros salen del rect de cada palabra (proyectado por CSS3D) más el offset del carácter cacheado: una lectura por palabra y frame, todas antes de escribir. Usa `transform` en `.k-i` (la entrada usa `translate`, así no chocan). Sin `translateZ`, para no cruzar el pozo. Máximo 200 unidades.
-- **Deriva en reposo**: cada palabra flota sola (±3 px, ±0.5°, 6–11 s, fases por índice con `sin()`). Los tags y elementos en cascada orbitan 1.5–3 px.
-- **Ola**: al entrar el ratón en un `h2`/`h3` de placa, sus letras suben 0.14em en ola (28 ms entre letras). Se hace con WAAPI `translate` y `composite: 'add'`.
-- **Táctil**: al tocar una placa viva, onda desde el punto de contacto sobre las unidades a menos de 220 px.
-- **Hover**: tags suben 2 px; el contenido del botón crece ×1.035 además del magnetismo y la línea de luz (no en `ghost`, que ya tiene subrayado); los enlaces de texto dibujan un subrayado.
-- **Brillo**: por carácter, con un retardo de 35 ms entre letras; solo en la página plana (en 3D el halo oscuro del texto taparía el degradado).
+Regla de la dirección final: una sola fuente de movimiento a la vez y el texto quieto para leer.
+- **Reposo**: solo la placa activa flota ±1 px (7 s, `--ease-in-out`), nunca durante una transición de cámara. Sin deriva por palabra, sin órbitas ni capas `translateZ`.
+- **Proximidad por letra** (solo `pointer: fine`, solo titulares de ≤ 32 caracteres partidos por letras, nunca párrafos): elevación 4 px, separación 2 px, ×1.08, resorte (170/19). Usa `transform` en `.k-i`; congelada con `data-chapter-moving`.
+- **Ola** al entrar el ratón en un `h2`/`h3` de placa (WAAPI `translate`, `composite: 'add'`, 28 ms entre letras). **Táctil**: onda breve desde el punto de contacto sobre las letras de los titulares cercanos.
+- **Hover**: tags suben 2 px; el contenido del botón crece ×1.035, magnetismo y línea de luz (no en `ghost`); los enlaces de texto dibujan su subrayado.
 
 ## 5. Timings
 
 | Uso | Valor | Token |
 |---|---|---|
-| Entrada de palabra/carácter | 810 ms (opacidad 80 %, blur 70 %) | `--k-rise` = `--duration-scene` × 0.9, `--ease-out` |
+| Entrada de palabra/carácter | 420 ms (opacidad 80 %, blur 70 %); total por bloque ≤ 700 ms | `--k-rise` = `--duration-slow` × 1.05, `--ease-out` |
 | Salida (recogerse) | 240 ms, sin stagger | `--k-exit` = `--duration-base`, `--ease-in` |
-| Stagger | palabras 42 ms (tope 14) · caracteres 22 ms (tope 40) · líneas 120 ms · tecleo 26 ms · cascada 40 ms (tope 16) | `--k-stagger-*` |
+| Stagger | palabras 30 ms (tope 8) · caracteres 12 ms (tope 20) · líneas 60 ms · tecleo 18 ms (sin tope) · cascada 30 ms (tope 6, retardo 120 ms) | `--k-stagger-*` |
 | Cascada | 400 ms | `--duration-slow`, `--ease-out` |
 | Cursor | 1.6 s alterno, opacidad 0.65 ↔ 0.12 | `--ease-in-out` |
 | Señal del borde | 7 s alterno | `--ease-in-out` |
-| Brillo del titular | ciclo de 14 s por letra (cruza en el primer 9 %), empieza 1.2 s tras asentarse + 35 ms × letra | `linear` |
+| Brillo (`shine`, solo plano) | ciclo de 14 s por letra, 35 ms entre letras | `linear` |
+| Flotación en reposo | ±1 px, 7 s alterno, solo placa activa | `--ease-in-out` |
 
 Con `prefers-reduced-motion` todos los tokens `--duration-*` ya valen `0.01ms` (`tokens.css`), y además no hay estados ocultos.
 
-Desviación consciente de `identity.md` §5 («desplazamiento máximo 12–16 px»): las palabras suben su propia altura, pero dentro de una máscara, así que el ojo ve una emergencia y no un desplazamiento de bloque. Los bloques y cascadas sí respetan 8–12 px.
+Nota sobre `identity.md` §5 («desplazamiento máximo 12–16 px»): las palabras suben su propia altura, pero dentro de una máscara, así que el ojo ve una emergencia y no un desplazamiento de bloque. Los bloques y cascadas sí respetan 8–12 px.
 
 ## 6. Rendimiento
 

@@ -157,9 +157,13 @@ function resetRoot(root: HTMLElement): void {
 
 const groups = new Map<HTMLElement, HTMLElement[]>();
 
+const stationOf = new Map<HTMLElement, string>();
+
 function collect(): void {
   for (const root of document.querySelectorAll<HTMLElement>(ROOTS)) {
     const owner = root.closest<HTMLElement>('[data-plate]') ?? root;
+    const station = owner.closest<HTMLElement>('[data-station]')?.dataset.station;
+    if (station) stationOf.set(owner, station);
     const list = groups.get(owner) ?? [];
     list.push(root);
     groups.set(owner, list);
@@ -181,9 +185,23 @@ function setPlate(owner: HTMLElement, revealed: boolean, live: boolean): void {
   }
 }
 
+/** Set once the camera director speaks: from then on text only enters when its chapter has settled. */
+let chapterEvents = false;
+let settledChapter: string | null = null;
+
+function chapterOf(owner: HTMLElement): string | undefined {
+  return stationOf.get(owner) ?? owner.closest<HTMLElement>('[data-station-plates]')?.dataset.stationPlates;
+}
+
 function evaluate3d(owner: HTMLElement): void {
   const dormant = owner.hasAttribute('data-dormant');
   const active = owner.hasAttribute('data-active');
+  if (chapterEvents) {
+    if (dormant) setPlate(owner, false, false);
+    else if (settledChapter !== null && chapterOf(owner) === settledChapter) setPlate(owner, true, active);
+    else setLive(owner, false);
+    return;
+  }
   const siblings = owner.parentElement ? Array.from(owner.parentElement.children) : [];
   const stationActive = active || siblings.some(el => el.hasAttribute('data-active'));
   if (dormant) setPlate(owner, false, false);
@@ -226,6 +244,7 @@ function applyMode(): void {
   if (next === '3d') {
     for (const owner of groups.keys()) evaluate3d(owner);
   } else {
+    html.removeAttribute('data-chapter-moving');
     for (const owner of groups.keys()) intersection.observe(owner);
   }
 }
@@ -264,6 +283,18 @@ function boot(): void {
   }
   new MutationObserver(applyMode).observe(html, { attributes: true, attributeFilter: ['class'] });
   window.addEventListener('motion:toggle', syncMotion);
+  window.addEventListener('chapter:enter', () => {
+    chapterEvents = true;
+    settledChapter = null;
+    html.toggleAttribute('data-chapter-moving', true);
+    if (is3d()) for (const owner of groups.keys()) evaluate3d(owner);
+  });
+  window.addEventListener('chapter:settled', event => {
+    chapterEvents = true;
+    settledChapter = (event as CustomEvent<{ id?: string }>).detail?.id ?? null;
+    html.removeAttribute('data-chapter-moving');
+    if (is3d()) for (const owner of groups.keys()) evaluate3d(owner);
+  });
   reducedQuery.addEventListener('change', syncMotion);
 }
 

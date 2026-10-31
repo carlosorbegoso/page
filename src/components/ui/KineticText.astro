@@ -1,7 +1,7 @@
 ---
 import type { HTMLTag } from 'astro/types';
 import { firstInRequest } from '../../motion/once';
-import { splitWords, type SplitMode } from '../../motion/split';
+import { splitCounts, splitWords, type SplitMode } from '../../motion/split';
 
 interface Props {
   /** Element to render (default `span`, so it can live inside headings and paragraphs). */
@@ -13,14 +13,29 @@ interface Props {
   delay?: number;
   /** Slow highlight that drifts across the text once it has settled (headlines only). */
   shine?: boolean;
+  /** Typewriter: characters appear one by one behind a soft cursor (implies `split="chars"`). */
+  type?: boolean;
+  /** Figures followed by `%` count up from 0 when revealed; the rest of the text is left unsplit. */
+  counts?: boolean;
   class?: string;
 }
 
-const { as: Tag = 'span', text, split = 'words', delay = 0, shine = false, class: className } = Astro.props;
+const {
+  as: Tag = 'span',
+  text,
+  split: requestedSplit = 'words',
+  delay = 0,
+  shine = false,
+  type = false,
+  counts = false,
+  class: className
+} = Astro.props;
+const split: SplitMode = type ? 'chars' : requestedSplit;
 
 const slotted = text ?? (Astro.slots.has('default') ? await Astro.slots.render('default') : '');
 const plain = text !== undefined || !/[<&]/.test(slotted);
-const words = plain ? splitWords(slotted) : [];
+const words = plain && !counts ? splitWords(slotted) : [];
+const countParts = plain && counts ? splitCounts(slotted) : [];
 const emitArming = firstInRequest(Astro.request);
 
 let charStart = 0;
@@ -46,11 +61,26 @@ const units = words.map((word, wordIndex) => {
   )
 }
 {
-  plain ? (
+  counts && plain ? (
+    <Tag class={className}>
+      {countParts.map(part =>
+        part.count === undefined ? (
+          part.text
+        ) : (
+          <>
+            <span class="sr-only select-none">{part.text}</span>
+            <span aria-hidden="true" data-kinetic-count={part.count} style={`--k-digits: ${part.text.length}`}>{part.text}</span>
+          </>
+        )
+      )}
+    </Tag>
+  ) : plain ? (
     <Tag
       class:list={['kinetic', className]}
       data-kinetic={split}
       data-kinetic-shine={shine ? '' : undefined}
+      data-kinetic-variant={type ? 'type' : undefined}
+      data-kinetic-cursor={type ? '' : undefined}
       style={delay ? `--k-delay: ${delay}ms` : undefined}
     >
       <span class="sr-only select-none">{words.map(w => w.text).join(' ')}</span>

@@ -1,7 +1,6 @@
 ---
-import Button from '../ui/Button.astro';
 import CvLink from '../ui/CvLink.astro';
-import SectionHeader from '../ui/SectionHeader.astro';
+import ExternalLink from '../ui/ExternalLink.astro';
 import CopyEmail from '../contact/CopyEmail.astro';
 import { SECTION_IDS, SITE } from '../../config/site';
 import { useTranslations, type Locale } from '../../i18n/utils';
@@ -13,66 +12,73 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 const socials = [
-  { label: 'LinkedIn', href: SITE.social.linkedin },
-  { label: 'GitHub', href: SITE.social.github },
-  { label: `X ${SITE.handle}`, href: SITE.social.x }
+  { label: 'LinkedIn', detail: 'carlos-orbergoso-loayza', href: SITE.social.linkedin, icon: 'in' },
+  { label: 'GitHub', detail: 'carlosorbegoso', href: SITE.social.github, icon: 'gh' },
+  { label: 'X', detail: SITE.handle, href: SITE.social.x, icon: 'x' }
 ];
+const tile =
+  'flex min-h-14 w-full items-center gap-4 rounded-2xl border border-text/10 bg-text/[0.04] px-4 text-start text-text transition-colors duration-(--duration-fast) ease-standard hover:border-accent/50 hover:bg-accent/10 focus-visible:shadow-focus focus-visible:outline-none';
+const glyph =
+  'grid size-9 shrink-0 place-items-center rounded-xl bg-accent/15 font-display text-xs font-semibold text-accent';
 ---
 
 <section
   id={SECTION_IDS.contact}
   aria-labelledby="contact-title"
   data-station="contact"
-  class="relative flex min-h-svh flex-col items-center justify-center px-gutter py-section lg:items-end lg:pr-24"
+  class="relative flex min-h-svh flex-col items-center justify-center px-gutter py-section"
 >
-  <div class="plate @container flex w-full max-w-[36rem] flex-col gap-8 p-(--plate-padding)" data-plate data-plate-id="contact">
-    <SectionHeader id="contact-title" title={t('contact.title')} subtitle={t('contact.subtitle')}>
-      <p class="text-text-muted">{t('contact.body')}</p>
-    </SectionHeader>
+  <div
+    class="plate flex w-full max-w-[24rem] flex-col gap-6 p-(--plate-padding)"
+    data-plate
+    data-plate-id="contact"
+    data-plate-mode="surface-phone"
+  >
+    <header class="flex flex-col gap-2">
+      <h2 id="contact-title" class="font-display text-3xl font-semibold tracking-display text-text">
+        {t('contact.title')}
+      </h2>
+      <p class="text-base text-pretty text-text-muted">{t('contact.subtitle')}</p>
+    </header>
 
-    <div class="flex flex-col gap-3">
-      <p id="contact-email-label" class="text-xs font-semibold tracking-caps text-text-muted uppercase">
-        {t('contact.email')}
-      </p>
-      <Button
-        href={`mailto:${SITE.email}`}
-        variant="primary"
-        size="lg"
-        class="w-full break-all"
-        aria-describedby="contact-email-label"
-      >
-        <svg
-          viewBox="0 0 24 24"
-          width="18"
-          height="18"
-          aria-hidden="true"
-          class="shrink-0 fill-none stroke-current"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <rect x="3" y="5" width="18" height="14" rx="2"></rect>
-          <path d="m3 7 9 6 9-6"></path>
-        </svg>
-        {SITE.email}
-      </Button>
+    <div class="flex flex-col gap-2">
+      <p id="contact-email-label" class="sr-only">{t('contact.email')}</p>
+      <a href={`mailto:${SITE.email}`} class:list={[tile, 'min-h-16 border-accent/45 bg-accent/10']} aria-describedby="contact-email-label">
+        <span class={glyph} aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" class="fill-none stroke-current" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+            <path d="m3 7 9 6 9-6"></path>
+          </svg>
+        </span>
+        <span class="flex min-w-0 flex-col">
+          <span class="text-xs text-text-muted">{t('contact.email')}</span>
+          <span class="truncate font-medium">{SITE.email}</span>
+        </span>
+      </a>
       <CopyEmail locale={locale} email={SITE.email} />
     </div>
 
-    <div class="flex flex-col gap-3 border-t border-border pt-6">
+    <div class="flex flex-col gap-2">
       <p id="contact-social-label" class="text-xs font-semibold tracking-caps text-text-muted uppercase">
         {t('contact.social')}
       </p>
-      <ul aria-labelledby="contact-social-label" class="grid gap-2 @md:grid-cols-2" role="list" data-kinetic-cascade data-depth="40">
-        {socials.map(social => (
-          <li class="@md:last:col-span-2">
-            <Button href={social.href} variant="secondary" external class="w-full">
-              {social.label}
-            </Button>
-          </li>
-        ))}
+      <ul aria-labelledby="contact-social-label" class="flex flex-col gap-2" role="list" data-kinetic-cascade>
+        {
+          socials.map(social => (
+            <li>
+              <ExternalLink href={social.href} locale={locale} class={tile}>
+                <span class={glyph} aria-hidden="true">{social.icon}</span>
+                <span class="flex min-w-0 flex-col">
+                  <span class="font-medium">{social.label}</span>
+                  <span class="truncate text-xs text-text-muted">{social.detail}</span>
+                </span>
+              </ExternalLink>
+            </li>
+          ))
+        }
       </ul>
-      <CvLink locale={locale} variant="ghost" class="w-full" />
     </div>
+
+    <CvLink locale={locale} variant="primary" size="lg" class="min-h-14 w-full rounded-2xl" />
   </div>
 </section>

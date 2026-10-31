@@ -7,13 +7,13 @@
 }
 
 :root {
-  --k-rise: calc(var(--duration-scene) * 0.9);
+  --k-rise: calc(var(--duration-slow) * 1.05);
   --k-exit: var(--duration-base);
-  --k-stagger-words: 42ms;
-  --k-stagger-chars: 22ms;
-  --k-stagger-type: 26ms;
-  --k-stagger-lines: 120ms;
-  --k-stagger-cascade: 40ms;
+  --k-stagger-words: 30ms;
+  --k-stagger-chars: 12ms;
+  --k-stagger-type: 18ms;
+  --k-stagger-lines: 60ms;
+  --k-stagger-cascade: 30ms;
   --k-blur: 6px;
 }
 
@@ -42,11 +42,15 @@
 
   .k-i {
     display: inline-block;
-    --k-n: min(var(--k-i, 0), 14);
+    --k-n: min(var(--k-i, 0), 8);
   }
 
   .k-c {
-    --k-n: min(var(--k-c, 0), 40);
+    --k-n: min(var(--k-c, 0), 20);
+  }
+
+  .kinetic[data-kinetic-variant='type'] .k-c {
+    --k-n: var(--k-c, 0);
   }
 
   [data-kinetic-count] {
@@ -189,7 +193,7 @@
 }
 
 :root.k-armed [data-kinetic-cascade][data-reveal='in'] > * {
-  --k-wait: calc(var(--k-cascade-delay, 160ms) + min(var(--k-i, 0), 16) * var(--k-stagger-cascade));
+  --k-wait: calc(var(--k-cascade-delay, 120ms) + min(var(--k-i, 0), 6) * var(--k-stagger-cascade));
 
   transition:
     opacity var(--duration-slow) var(--ease-out) var(--k-wait),
@@ -211,91 +215,9 @@
   clip-path: none;
 }
 
-/* Idle drift: every word floats on its own slow path (±3 px, ±0.5°), phases spread by index so the block never looks glued. */
-:root.k-armed [data-motion-live] .kinetic:not([data-kinetic-variant='type']) .k-w {
-  --k-dx: calc(sin(calc(var(--k-i, 0) * 73deg + 20deg)) * 3px);
-  --k-dy: calc(cos(calc(var(--k-i, 0) * 41deg)) * 2.5px);
-  --k-rot: calc(sin(calc(var(--k-i, 0) * 29deg + 50deg)) * 0.5deg);
-
-  animation: k-drift calc(6s + (sin(calc(var(--k-i, 0) * 57deg)) + 1) * 2.5s) var(--ease-in-out)
-    calc(var(--k-i, 0) * -1.37s) infinite alternate;
-}
-
-:root.k-armed [data-motion-live] [data-kinetic-cascade] > * {
-  --k-orbit: calc(1.5px + (sin(calc(var(--k-i, 0) * 61deg)) + 1) * 0.75px);
-
-  animation: k-orbit calc(9s + (cos(calc(var(--k-i, 0) * 47deg)) + 1) * 3s) linear calc(var(--k-i, 0) * -2.1s)
-    infinite;
-}
-
-/* Depth layers. preserve-3d has to run unbroken from the CSS3D camera down to every layer, so it is set on the engine's station holder and column and on each ancestor of a layer. */
-:root.is-3d :is(.stage-plates__station, .stage-plates__column),
-:root.is-3d [data-plate] :is(div, header, section, article, ul, ol, li, dl, dd, p, h1, h2, h3, a, span):has([data-depth], .k-w, [data-kinetic-cascade]),
-:root.is-3d [data-plate] :is([data-depth], .kinetic, .kinetic__visual, [data-kinetic-cascade]) {
-  transform-style: preserve-3d;
-}
-
-:root.is-3d [data-plate] :is(.kinetic, .kinetic__visual) {
-  display: inline-block;
-}
-
-:root.is-3d [data-plate] .product-plate > div {
-  overflow: visible;
-}
-
-[data-depth] {
-  --depth: 0px;
-}
-
-[data-depth='-50'] { --depth: -50px; }
-[data-depth='-30'] { --depth: -30px; }
-[data-depth='-15'] { --depth: -15px; }
-[data-depth='-10'] { --depth: -10px; }
-[data-depth='10'] { --depth: 10px; }
-[data-depth='20'] { --depth: 20px; }
-[data-depth='30'] { --depth: 30px; }
-[data-depth='40'] { --depth: 40px; }
-[data-depth='50'] { --depth: 50px; }
-[data-depth='60'] { --depth: 60px; }
-
-/* Chrome paints the desk station's layers in reverse depth order (its plate sits at a ~3e-4 world scale, which breaks the 3D sort): there, layers go to -Z so they still paint over the pool. Remove once the hero anchor is fixed in the engine. */
-:root.is-3d [data-plate] {
-  --k-zsign: 1;
-}
-
-:root.is-3d [data-station-plates='hero'] [data-plate] {
-  --k-zsign: -1;
-}
-
-/* Every layer stays in front of the plate plane (the dark pool behind the text lives there): --depth is relative, the base sits 50px out. */
-:root.is-3d [data-plate] [data-depth] {
-  translate: 0 0 calc((var(--depth) + 50px) * var(--k-zsign));
-}
-
-/* SectionHeader belongs to the UI layer, so its layers are addressed by position. */
-:root.is-3d [data-plate] header > p:first-child:not(:only-child) {
-  translate: 0 0 calc(90px * var(--k-zsign));
-}
-
-:root.is-3d [data-plate] header > h2 {
-  translate: 0 0 calc(50px * var(--k-zsign));
-}
-
-:root.is-3d [data-plate] header > h2 ~ p {
-  translate: 0 0 calc(30px * var(--k-zsign));
-}
-
-:root.is-3d [data-plate] .kinetic[data-settled] .k-w {
-  transform-style: preserve-3d;
-  translate: 0 0 calc((sin(calc(var(--k-line, 0) * 97deg + 15deg)) + 1) * 6px * var(--k-zsign));
-}
-
-:root.is-3d [data-plate] [data-kinetic-cascade] > * {
-  transform-style: preserve-3d;
-}
-
-:root.is-3d.k-armed [data-motion-live] [data-kinetic-cascade] > * {
-  --k-fan: calc((sin(calc(var(--k-i, 0) * 67deg + 10deg)) + 1) * 8px * var(--k-zsign));
+/* The only motion at rest: the content of the plate being read floats ±1 px. It stops while the camera moves, because the plate loses data-motion-live between chapter:enter and chapter:settled. */
+:root.k-armed .plate[data-motion-live] > * {
+  animation: k-float 7s var(--ease-in-out) infinite alternate;
 }
 
 /* Hover. */
@@ -347,38 +269,6 @@
   }
 }
 
-@keyframes k-drift {
-  from {
-    transform: translate(calc(var(--k-dx) * -1), calc(var(--k-dy) * -1)) rotate(calc(var(--k-rot) * -1));
-  }
-
-  to {
-    transform: translate(var(--k-dx), var(--k-dy)) rotate(var(--k-rot));
-  }
-}
-
-@keyframes k-orbit {
-  0% {
-    transform: translate3d(var(--k-orbit), 0, var(--k-fan, 0px));
-  }
-
-  25% {
-    transform: translate3d(0, var(--k-orbit), var(--k-fan, 0px));
-  }
-
-  50% {
-    transform: translate3d(calc(var(--k-orbit) * -1), 0, var(--k-fan, 0px));
-  }
-
-  75% {
-    transform: translate3d(0, calc(var(--k-orbit) * -1), var(--k-fan, 0px));
-  }
-
-  100% {
-    transform: translate3d(var(--k-orbit), 0, var(--k-fan, 0px));
-  }
-}
-
 @keyframes k-signal {
   from {
     --signal-progress: 0;
@@ -386,6 +276,16 @@
 
   to {
     --signal-progress: 1;
+  }
+}
+
+@keyframes k-float {
+  from {
+    translate: 0 -1px;
+  }
+
+  to {
+    translate: 0 1px;
   }
 }
 

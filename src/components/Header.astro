@@ -1,5 +1,6 @@
 ---
 import LangSwitch from './LangSwitch.astro';
+import MotionToggle from './MotionToggle.astro';
 import { SECTION_IDS, SITE } from '../config/site';
 import { localeUrl, useTranslations, type Locale } from '../i18n/utils';
 
@@ -19,16 +20,216 @@ const links = [
 ];
 ---
 
-<header>
-  <a href={`${home}#${SECTION_IDS.hero}`}>{SITE.name}</a>
-  <nav aria-label={t('nav.label')}>
-    <ul>
-      {links.map(link => (
-        <li>
-          <a href={`#${link.id}`}>{link.label}</a>
-        </li>
-      ))}
-    </ul>
-  </nav>
-  <LangSwitch locale={locale} />
+<header
+  class="fixed inset-x-0 top-0 z-(--z-header) h-(--header-height) border-b border-border bg-scrim backdrop-blur-md"
+>
+  <div class="container-content flex h-full items-center justify-between gap-3">
+    <a
+      href={`${home}#${SECTION_IDS.hero}`}
+      aria-label={t('nav.home')}
+      class="-ms-1.5 inline-flex min-h-tap items-center gap-2.5 rounded-md px-1.5 focus-visible:shadow-focus focus-visible:outline-none"
+    >
+      <svg viewBox="0 0 64 64" width="32" height="32" aria-hidden="true" class="shrink-0">
+        <rect width="64" height="64" rx="14" class="fill-surface-raised stroke-border" stroke-width="2"></rect>
+        <path d="M43.5 22.4A15 15 0 1 0 43.5 41.6" fill="none" class="stroke-text" stroke-width="8"></path>
+        <circle cx="47" cy="32" r="4.5" class="fill-accent"></circle>
+      </svg>
+      <span class="font-display text-base font-semibold tracking-tight text-text md:hidden lg:inline">
+        {SITE.name}
+      </span>
+    </a>
+
+    <nav aria-label={t('nav.label')} class="hidden md:block">
+      <ul class="flex items-center gap-1">
+        {
+          links.map(link => (
+            <li>
+              <a
+                href={`#${link.id}`}
+                data-nav-link={link.id}
+                class:list={[
+                  'relative inline-flex min-h-tap items-center rounded-md px-3 text-sm font-medium text-text-muted',
+                  'transition-colors duration-(--duration-fast) ease-standard hover:text-text',
+                  'focus-visible:shadow-focus focus-visible:outline-none',
+                  'after:absolute after:inset-x-3 after:bottom-1.5 after:h-0.5 after:origin-center after:scale-x-0 after:rounded-full after:bg-accent after:transition-transform after:duration-(--duration-base) after:ease-standard',
+                  'aria-[current=true]:text-text aria-[current=true]:after:scale-x-100'
+                ]}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <MotionToggle locale={locale} class="hidden md:inline-flex" />
+      <LangSwitch locale={locale} compact />
+      <button
+        type="button"
+        data-menu-open
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        aria-label={t('nav.openMenu')}
+        class="inline-flex min-h-tap min-w-tap items-center justify-center rounded-md border border-border text-text transition-colors duration-(--duration-fast) ease-standard hover:bg-surface focus-visible:shadow-focus focus-visible:outline-none md:hidden"
+      >
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" class="fill-none stroke-current" stroke-width="2" stroke-linecap="round">
+          <path d="M4 7h16M4 12h16M4 17h16"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
 </header>
+
+<dialog
+  id="mobile-menu"
+  data-menu
+  aria-label={t('nav.label')}
+  class:list={[
+    'mobile-sheet fixed inset-x-0 top-auto bottom-0 m-0 max-h-[85dvh] w-full max-w-none overflow-y-auto rounded-t-xl border border-b-0 border-border bg-surface-raised p-0 text-text shadow-lg md:hidden',
+    'backdrop:bg-scrim'
+  ]}
+>
+  <div class="flex flex-col gap-4 px-gutter pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <div class="flex items-center justify-between">
+      <span class="mx-auto h-1 w-10 rounded-full bg-border-strong" aria-hidden="true"></span>
+    </div>
+    <div class="flex items-center justify-between gap-3">
+      <span class="font-display text-lg font-semibold tracking-tight">{SITE.name}</span>
+      <button
+        type="button"
+        data-menu-close
+        aria-label={t('nav.closeMenu')}
+        class="inline-flex min-h-tap min-w-tap items-center justify-center rounded-md border border-border text-text transition-colors duration-(--duration-fast) ease-standard hover:bg-surface focus-visible:shadow-focus focus-visible:outline-none"
+      >
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" class="fill-none stroke-current" stroke-width="2" stroke-linecap="round">
+          <path d="M6 6l12 12M18 6 6 18"></path>
+        </svg>
+      </button>
+    </div>
+    <nav aria-label={t('nav.label')}>
+      <ul class="flex flex-col gap-1">
+        {
+          links.map(link => (
+            <li>
+              <a
+                href={`#${link.id}`}
+                data-nav-link={link.id}
+                data-menu-link
+                class:list={[
+                  'flex min-h-12 items-center rounded-md border-s-2 border-transparent px-4 text-base font-medium text-text-muted',
+                  'transition-colors duration-(--duration-fast) ease-standard hover:bg-surface hover:text-text',
+                  'focus-visible:shadow-focus focus-visible:outline-none',
+                  'aria-[current=true]:border-accent aria-[current=true]:bg-accent-soft aria-[current=true]:text-text'
+                ]}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <div class="flex flex-col gap-2 border-t border-border pt-4">
+      <MotionToggle locale={locale} display="full" />
+      <LangSwitch locale={locale} class="w-full justify-start" />
+    </div>
+  </div>
+</dialog>
+
+<style>
+  .mobile-sheet {
+    transform: translateY(100%);
+    transition:
+      transform var(--duration-slow) var(--ease-out),
+      overlay var(--duration-slow) allow-discrete,
+      display var(--duration-slow) allow-discrete;
+  }
+
+  .mobile-sheet[open] {
+    transform: translateY(0);
+
+    @starting-style {
+      transform: translateY(100%);
+    }
+  }
+
+  .mobile-sheet::backdrop {
+    opacity: 0;
+    transition:
+      opacity var(--duration-slow) var(--ease-out),
+      overlay var(--duration-slow) allow-discrete,
+      display var(--duration-slow) allow-discrete;
+  }
+
+  .mobile-sheet[open]::backdrop {
+    opacity: 1;
+
+    @starting-style {
+      opacity: 0;
+    }
+  }
+
+  :global(html:has(.mobile-sheet[open])) {
+    overflow: hidden;
+  }
+</style>
+
+<script>
+  import { SECTION_IDS } from '../config/site';
+
+  const sheet = document.querySelector<HTMLDialogElement>('[data-menu]');
+  const openButton = document.querySelector<HTMLButtonElement>('[data-menu-open]');
+
+  if (sheet && openButton) {
+    openButton.addEventListener('click', () => {
+      sheet.showModal();
+      openButton.setAttribute('aria-expanded', 'true');
+    });
+
+    sheet.addEventListener('close', () => openButton.setAttribute('aria-expanded', 'false'));
+
+    sheet.querySelector('[data-menu-close]')?.addEventListener('click', () => sheet.close());
+
+    sheet.addEventListener('click', event => {
+      if (event.target === sheet) sheet.close();
+    });
+
+    for (const link of sheet.querySelectorAll('[data-menu-link]')) {
+      link.addEventListener('click', () => sheet.close());
+    }
+
+    matchMedia('(width >= 48rem)').addEventListener('change', event => {
+      if (event.matches && sheet.open) sheet.close();
+    });
+  }
+
+  const navLinks = [...document.querySelectorAll<HTMLAnchorElement>('[data-nav-link]')];
+  const sections = Object.values(SECTION_IDS)
+    .map(id => document.getElementById(id))
+    .filter((section): section is HTMLElement => section !== null);
+
+  function setActive(id: string | null) {
+    for (const link of navLinks) {
+      if (link.dataset.navLink === id) link.setAttribute('aria-current', 'true');
+      else link.removeAttribute('aria-current');
+    }
+  }
+
+  if ('IntersectionObserver' in window && sections.length > 0) {
+    const visible = new Set<string>();
+    const observer = new IntersectionObserver(
+      entries => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) visible.add(entry.target.id);
+          else visible.delete(entry.target.id);
+        }
+        const current = sections.find(section => visible.has(section.id));
+        setActive(current?.id ?? null);
+      },
+      { rootMargin: '-40% 0px -55% 0px' }
+    );
+    for (const section of sections) observer.observe(section);
+  }
+</script>

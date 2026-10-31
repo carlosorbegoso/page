@@ -16,7 +16,8 @@ export const SECTION_IDS = {
   company: 'company',
   products: 'products',
   experience: 'experience',
-  contact: 'contact'
+  contact: 'contact',
+  outro: 'outro'
 } as const;
 
 export type SectionId = (typeof SECTION_IDS)[keyof typeof SECTION_IDS];

@@ -1,19 +1,98 @@
 ---
 import { withBase } from '../../i18n/utils';
+
+const fallback = (name: string, width: number, format: string) => withBase(`fallback/${name}-${width}.${format}`);
+const sources = (name: string) => [
+  { media: '(min-width: 1024px)', width: 1440, height: 900 },
+  { media: '(min-width: 768px)', width: 768, height: 1024 },
+  { media: undefined, width: 375, height: 667 }
+].flatMap(({ media, width, height }) =>
+  ['avif', 'webp'].map(format => ({
+    media,
+    width,
+    height,
+    type: `image/${format}`,
+    srcset: fallback(name, width, format)
+  }))
+);
 ---
 
-<div data-stage data-active="hero" aria-hidden="true">
-  <picture data-stage-fallback>
+<div data-stage data-fallback="hero" aria-hidden="true">
+  <picture data-stage-fallback="hero">
+    {sources('hero').map(s => <source media={s.media} type={s.type} srcset={s.srcset} width={s.width} height={s.height} />)}
     <img
-      src={withBase('fallback/hero-placeholder.svg')}
+      src={fallback('hero', 375, 'webp')}
       alt=""
-      width="1200"
-      height="800"
+      width="375"
+      height="667"
       decoding="async"
       fetchpriority="high"
     />
   </picture>
+  <picture data-stage-fallback="products">
+    {sources('products').map(s => <source media={s.media} type={s.type} srcset={s.srcset} width={s.width} height={s.height} />)}
+    <img src={fallback('products', 375, 'webp')} alt="" width="375" height="667" decoding="async" loading="lazy" />
+  </picture>
 </div>
+
+<script>
+  import { onIdle } from '../../three/idle';
+  import { StationTracker } from '../../three/sections';
+  import { detectTier } from '../../three/tier';
+
+  const BOOT_TIMEOUT_MS = 3000;
+  const INTERACTIONS = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'] as const;
+
+  function whenLoaded(): Promise<void> {
+    if (document.readyState === 'complete') return Promise.resolve();
+    return new Promise(resolve => window.addEventListener('load', () => resolve(), { once: true }));
+  }
+
+  function firstInteractionOrTimeout(): Promise<void> {
+    return new Promise(resolve => {
+      const done = () => {
+        clearTimeout(timer);
+        for (const type of INTERACTIONS) window.removeEventListener(type, done);
+        resolve();
+      };
+      const timer = setTimeout(done, BOOT_TIMEOUT_MS);
+      for (const type of INTERACTIONS) window.addEventListener(type, done, { once: true, passive: true });
+    });
+  }
+
+  async function init(container: HTMLElement): Promise<void> {
+    const params = new URLSearchParams(location.search);
+    const capture = params.has('capture');
+    const tracker = new StationTracker();
+    tracker.subscribe(active => {
+      container.dataset.fallback = active === 'company' || active === 'products' ? 'products' : 'hero';
+    });
+
+    if (!capture) {
+      await whenLoaded();
+      await firstInteractionOrTimeout();
+    }
+    onIdle(async () => {
+      const tier = detectTier(params.get('tier') ?? (capture ? 'high' : null));
+      container.dataset.tier = tier.tier;
+      if (capture || params.has('debug')) console.info('[stage] tier', tier);
+      if (tier.tier === 'none') return;
+      try {
+        const { boot } = await import('../../three/index');
+        await boot({ container, tier, tracker, params });
+      } catch (error) {
+        container.dataset.degraded = 'error';
+        console.error('[stage] 3D unavailable', error);
+      }
+    });
+  }
+
+  const container = document.querySelector<HTMLElement>('[data-stage]');
+  if (container && !container.dataset.booted) {
+    container.dataset.booted = 'true';
+    void init(container);
+  }
+</script>
 
 <style>
   [data-stage] {
@@ -27,9 +106,42 @@ import { withBase } from '../../i18n/utils';
     background: var(--color-scene-bg);
   }
 
+  [data-stage-fallback] {
+    display: none;
+  }
+
+  [data-stage][data-fallback='hero'] [data-stage-fallback='hero'],
+  [data-stage][data-fallback='products'] [data-stage-fallback='products'] {
+    display: block;
+    height: 100%;
+  }
+
   [data-stage-fallback] img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  [data-stage] :global([data-stage-canvas]) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity var(--duration-slow) var(--ease-standard);
+  }
+
+  [data-stage][data-ready='true'] :global([data-stage-canvas]) {
+    opacity: 1;
+  }
+
+  [data-stage][data-degraded] :global([data-stage-canvas]) {
+    display: none;
+  }
+
+  @media (forced-colors: active) {
+    [data-stage] :global([data-stage-canvas]) {
+      display: none;
+    }
   }
 </style>

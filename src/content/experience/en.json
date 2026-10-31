@@ -2,14 +2,18 @@
   "entries": [
     {
       "id": "tcs",
-      "company": "Tata Consultancy Services (TCS)",
+      "company": "TCS (Tata Consultancy Services)",
       "client": "BCP (Banco de Crédito del Perú)",
       "role": "Backend Developer",
       "start": "2025-06",
       "end": null,
-      "summary": "Enterprise solutions and microservices with Spring Boot and Quarkus for BCP. Cloud-native architectures and performance optimization for large-scale systems.",
-      "highlights": ["Enterprise-level solutions", "Cloud-native architecture"],
-      "stack": ["Spring Boot", "Quarkus", "Microservices", "Cloud native"]
+      "summary": "I modernize BCP backend services with Quarkus and cloud-native architecture.",
+      "highlights": [
+        "Migrated applications from RxJava to Quarkus, moving the stack to a cloud-native architecture.",
+        "Refactored Java services around Quarkus principles: native compilation, fast startup and a low memory footprint.",
+        "Contributed to the Azure Functions initiative, enabling event-driven serverless processes across the bank's ecosystem."
+      ],
+      "stack": ["Java", "Quarkus", "RxJava", "Azure Functions", "Cloud-native"]
     },
     {
       "id": "intercorp-retail",
@@ -17,33 +21,50 @@
       "role": "Backend Developer",
       "start": "2024-04",
       "end": "2025-06",
-      "summary": "Backend services for retail solutions. Scalable applications for one of Peru's largest retail groups.",
-      "highlights": ["Backend development", "Retail systems integration"],
-      "stack": ["Java", "SQL", "Spring Boot", "REST APIs"]
+      "summary": "Backend for the HR applications of a leading Peruvian retail group.",
+      "highlights": [
+        "Raised system performance by 30–40%, including stored procedure optimization.",
+        "Led the migration from a monolith to CQRS for better scalability and separation of concerns.",
+        "Set up observability with Grafana, Loki, Promtail and Prometheus, and built Spring Batch jobs for high-volume data."
+      ],
+      "stack": [
+        "Java",
+        "Spring Boot",
+        "Spring Batch",
+        "CQRS",
+        "SQL",
+        "Grafana",
+        "Loki",
+        "Prometheus"
+      ]
     },
     {
       "id": "baufest",
       "company": "Baufest",
-      "role": "Java Developer",
+      "client": "Cencosud (Chile and Argentina)",
+      "role": "Backend Developer",
       "start": "2022-03",
       "end": "2024-02",
-      "summary": "Microservices and REST APIs, database integration, security and authentication, and log observability dashboards with New Relic.",
+      "summary": "Microservices and APIs for Cencosud: API security and authentication, architecture templates, internal training and a log dashboard.",
       "highlights": [
-        "Microservices architecture",
-        "Observability dashboards",
-        "Security implementation"
+        "Led a three-person microservices project and moved its build from Maven to Gradle.",
+        "Drove internal system improvements that made our projects 20% more efficient.",
+        "Migrated data from JSON to SQL Server tables, improving data accessibility by 30%."
       ],
-      "stack": ["Java", "Microservices", "New Relic", "Docker", "SQL Server"]
+      "stack": ["Java", "Microservices", "API security", "Maven", "Gradle", "SQL Server"]
     },
     {
       "id": "sysarp",
       "company": "SYSARP",
-      "role": "Frontend Web Developer",
+      "role": "Frontend Developer",
       "start": "2020-01",
       "end": "2021-12",
-      "summary": "Design and development of intuitive web applications with clean code, fast loading and cross-browser, cross-device compatibility.",
-      "highlights": ["Web application development", "Performance optimization"],
-      "stack": ["JavaScript", "Java", "HTML/CSS", "Responsive design"]
+      "summary": "Web applications at an IT consultancy, focused on usability and speed.",
+      "highlights": [
+        "Designed and built usable, intuitive web applications.",
+        "Improved load times and application performance with JavaScript."
+      ],
+      "stack": ["JavaScript", "HTML", "CSS"]
     }
   ]
 }

@@ -1,33 +1,41 @@
 {
   "name": "Carlos Orbegoso",
-  "role": "Backend Developer (Java/Quarkus)",
-  "tagline": "En TCS para BCP (Banco de Crédito del Perú) · Cofundador de TUSOCIO IA",
+  "role": "Backend Developer · Java y Quarkus",
+  "tagline": "En TCS para el BCP · Cofundador de TUSOCIO IA",
   "location": "Lima, Perú",
   "summary": [
-    "Construyo backends sólidos para bancos de día y productos propios con mi empresa de noche.",
-    "Me especializo en microservicios con Java, Quarkus y Spring Boot, APIs REST y arquitecturas cloud-native."
+    "Soy desarrollador backend con más de 5 años de experiencia. Hoy trabajo en TCS para el BCP, donde migro servicios a Quarkus y llevo el stack hacia lo cloud-native.",
+    "Antes pasé por Intercorp Retail, Baufest y SYSARP: observabilidad, CQRS, microservicios y mejoras de hasta 40 % en el rendimiento.",
+    "De noche construyo productos propios con TUSOCIO IA, la empresa que cofundé.",
+    "Técnico en Computación e Informática por CIBERTEC (2023) y becado en el Bootcamp Java Developer de Alura Latam (2023)."
   ],
-  "photoAlt": "Foto de Carlos Orbegoso",
+  "photoAlt": "Carlos Orbegoso con lentes de sol y polera blanca, frente a un muro de piedra",
   "education": {
     "institution": "Universidad Peruana de Ciencias Aplicadas (UPC)",
     "degree": "Ingeniería de Sistemas",
-    "status": "10.º ciclo"
+    "status": "10.º ciclo, horario nocturno"
   },
   "company": {
     "name": "TUSOCIO IA",
     "legalName": "TUSOCIO IA S.A.C.",
     "role": "Cofundador",
     "summary": [
-      "TUSOCIO IA crea productos digitales para pequeños negocios y personas: software de gestión, herramientas para eventos y automatización de ventas.",
-      "Como cofundador lidero la arquitectura y el desarrollo de los productos."
+      "TUSOCIO IA S.A.C. es la empresa que cofundé para lanzar productos digitales propios desde el Perú.",
+      "Hoy son tres: SkyMek, ya en producción, y Parati y Ventixs, en construcción. Alfa, nuestra mascota, es la marca madre que los une."
     ]
   },
   "stack": [
     {
       "category": "Backend",
-      "items": ["Java 17+", "Quarkus", "Spring Boot", "Microservicios", "APIs REST"]
+      "items": ["Java", "Quarkus", "Spring Boot", "WebFlux", "Microservicios", "APIs REST"]
     },
-    { "category": "DevOps y cloud", "items": ["Docker", "Kubernetes", "AWS", "CI/CD"] },
-    { "category": "Bases de datos", "items": ["PostgreSQL", "MongoDB", "Redis"] }
+    { "category": "Mensajería", "items": ["Kafka", "SQS", "Pub/Sub"] },
+    {
+      "category": "Cloud y DevOps",
+      "items": ["Docker", "CI/CD", "Azure DevOps", "Azure Functions", "SonarQube"]
+    },
+    { "category": "Observabilidad", "items": ["Grafana", "Loki", "Tempo", "Prometheus"] },
+    { "category": "Bases de datos", "items": ["PostgreSQL", "SQL Server", "MongoDB", "DynamoDB"] },
+    { "category": "También", "items": ["Angular", "JavaScript", "Python"] }
   ]
 }

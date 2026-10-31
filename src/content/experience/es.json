@@ -2,14 +2,18 @@
   "entries": [
     {
       "id": "tcs",
-      "company": "Tata Consultancy Services (TCS)",
+      "company": "TCS (Tata Consultancy Services)",
       "client": "BCP (Banco de Crédito del Perú)",
       "role": "Backend Developer",
       "start": "2025-06",
       "end": null,
-      "summary": "Desarrollo de soluciones empresariales y microservicios con Spring Boot y Quarkus para BCP. Arquitecturas cloud-native y optimización de rendimiento en sistemas de gran escala.",
-      "highlights": ["Soluciones de nivel empresarial", "Arquitectura cloud-native"],
-      "stack": ["Spring Boot", "Quarkus", "Microservicios", "Cloud native"]
+      "summary": "Modernizo servicios backend del BCP hacia Quarkus y arquitecturas cloud-native.",
+      "highlights": [
+        "Migré aplicaciones de RxJava a Quarkus y llevé el stack hacia una arquitectura cloud-native.",
+        "Refactoricé servicios en Java con los principios de Quarkus: compilación nativa, arranque rápido y bajo consumo de memoria.",
+        "Participé en la iniciativa de Azure Functions, que habilita procesos serverless event-driven en el ecosistema bancario."
+      ],
+      "stack": ["Java", "Quarkus", "RxJava", "Azure Functions", "Cloud-native"]
     },
     {
       "id": "intercorp-retail",
@@ -17,33 +21,50 @@
       "role": "Backend Developer",
       "start": "2024-04",
       "end": "2025-06",
-      "summary": "Desarrollo de servicios backend para soluciones de retail. Aplicaciones escalables para uno de los grupos de retail más grandes del Perú.",
-      "highlights": ["Desarrollo backend", "Integración de sistemas de retail"],
-      "stack": ["Java", "SQL", "Spring Boot", "APIs REST"]
+      "summary": "Backend para las aplicaciones de gestión humana de un holding líder del retail peruano.",
+      "highlights": [
+        "Subí entre 30 % y 40 % el rendimiento del sistema, entre otras mejoras optimizando procedimientos almacenados.",
+        "Lideré la migración de un monolito a CQRS para ganar escalabilidad y separar responsabilidades.",
+        "Implementé observabilidad con Grafana, Loki, Promtail y Prometheus, y procesos Spring Batch para grandes volúmenes de datos."
+      ],
+      "stack": [
+        "Java",
+        "Spring Boot",
+        "Spring Batch",
+        "CQRS",
+        "SQL",
+        "Grafana",
+        "Loki",
+        "Prometheus"
+      ]
     },
     {
       "id": "baufest",
       "company": "Baufest",
-      "role": "Java Developer",
+      "client": "Cencosud (Chile y Argentina)",
+      "role": "Backend Developer",
       "start": "2022-03",
       "end": "2024-02",
-      "summary": "Desarrollo de microservicios y APIs REST, integración con bases de datos, mecanismos de seguridad y autenticación, y dashboards de observabilidad de logs con New Relic.",
+      "summary": "Microservicios y APIs para Cencosud: seguridad y autenticación de APIs, plantillas de arquitectura, capacitaciones internas y un dashboard de logs.",
       "highlights": [
-        "Arquitectura de microservicios",
-        "Dashboards de observabilidad",
-        "Implementación de seguridad"
+        "Lideré un proyecto de microservicios con un equipo de 3 personas y migré su build de Maven a Gradle.",
+        "Impulsé mejoras en los sistemas internos que elevaron un 20 % la eficiencia de nuestros proyectos.",
+        "Migré datos de JSON a tablas en SQL Server: 30 % más de accesibilidad a los datos."
       ],
-      "stack": ["Java", "Microservicios", "New Relic", "Docker", "SQL Server"]
+      "stack": ["Java", "Microservicios", "Seguridad de APIs", "Maven", "Gradle", "SQL Server"]
     },
     {
       "id": "sysarp",
       "company": "SYSARP",
-      "role": "Frontend Web Developer",
+      "role": "Frontend Developer",
       "start": "2020-01",
       "end": "2021-12",
-      "summary": "Diseño y desarrollo de aplicaciones web intuitivas, con código limpio, optimización de carga y compatibilidad entre navegadores y dispositivos.",
-      "highlights": ["Desarrollo de aplicaciones web", "Optimización de rendimiento"],
-      "stack": ["JavaScript", "Java", "HTML/CSS", "Diseño responsive"]
+      "summary": "Aplicaciones web en una consultora de TI, con foco en usabilidad y velocidad.",
+      "highlights": [
+        "Diseñé y desarrollé aplicaciones web usables e intuitivas.",
+        "Optimicé la velocidad de carga y el rendimiento de las aplicaciones con JavaScript."
+      ],
+      "stack": ["JavaScript", "HTML", "CSS"]
     }
   ]
 }

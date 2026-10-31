@@ -87,7 +87,7 @@ Recomendación para UI: el titular de impacto es el texto grande visible; el H1 
 
 | Producto | Rol | Tagline | Descripción | Puntos |
 |---|---|---|---|---|
-| SkyMek · skymek.app | Dueño | Gestión de talleres automotrices | SaaS peruano para gestionar talleres automotrices. Es mi producto y ya está en producción. | — |
+| SkyMek · skymek.app | Cofundador y dueño | Gestión de talleres automotrices | SaaS peruano para gestionar talleres automotrices. Es mi producto y ya está en producción. | — |
 | Parati · paratipe.com | Cofundador | Invitaciones digitales y mesa de regalos | Invitaciones digitales con mesa de regalos: tus invitados aportan por Yape. Crear un evento es gratis. | Invitaciones digitales · Mesa de regalos con aportes por Yape · Crear un evento es gratis |
 | Ventixs · ventixs.com | Cofundador | Bot de ventas por WhatsApp | Un bot de ventas que trabaja en WhatsApp, el canal donde tus clientes ya conversan. | — |
 

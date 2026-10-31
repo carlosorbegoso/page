@@ -5,9 +5,9 @@
       "name": "SkyMek",
       "url": "https://skymek.app",
       "status": "production",
-      "role": "Owner",
+      "role": "Co-founder & owner",
       "tagline": "Auto repair shop management",
-      "description": "SaaS for auto repair shops to manage work orders, customers and vehicles.",
+      "description": "Peruvian SaaS for running auto repair shops. It's my product, and it's already live.",
       "features": []
     },
     {
@@ -17,7 +17,7 @@
       "status": "building",
       "role": "Co-founder",
       "tagline": "Digital invitations and gift registry",
-      "description": "Digital invitations and a gift registry with contributions via Yape. Creating an event is free.",
+      "description": "Digital invitations with a gift registry where guests chip in via Yape. Creating an event is free.",
       "features": [
         "Digital invitations",
         "Gift registry with Yape contributions",
@@ -31,7 +31,7 @@
       "status": "building",
       "role": "Co-founder",
       "tagline": "WhatsApp sales bot",
-      "description": "A bot that answers and sells over WhatsApp for small businesses.",
+      "description": "A sales bot that works inside WhatsApp, where your customers already chat.",
       "features": []
     }
   ]

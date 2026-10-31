@@ -84,7 +84,7 @@ Brackets show the target key in `src/i18n/ui.en.ts` or the field in `src/content
 
 | Product | Role | Tagline | Description | Points |
 |---|---|---|---|---|
-| SkyMek · skymek.app | Owner | Auto repair shop management | Peruvian SaaS for running auto repair shops. It's my product, and it's already live. | — |
+| SkyMek · skymek.app | Co-founder & owner | Auto repair shop management | Peruvian SaaS for running auto repair shops. It's my product, and it's already live. | — |
 | Parati · paratipe.com | Co-founder | Digital invitations and gift registry | Digital invitations with a gift registry where guests chip in via Yape. Creating an event is free. | Digital invitations · Gift registry with Yape contributions · Creating an event is free |
 | Ventixs · ventixs.com | Co-founder | WhatsApp sales bot | A sales bot that works inside WhatsApp, where your customers already chat. | — |
 

@@ -5,9 +5,9 @@
       "name": "SkyMek",
       "url": "https://skymek.app",
       "status": "production",
-      "role": "Dueño",
+      "role": "Cofundador y dueño",
       "tagline": "Gestión de talleres automotrices",
-      "description": "SaaS para que los talleres automotrices gestionen órdenes de trabajo, clientes y vehículos.",
+      "description": "SaaS peruano para gestionar talleres automotrices. Es mi producto y ya está en producción.",
       "features": []
     },
     {
@@ -17,7 +17,7 @@
       "status": "building",
       "role": "Cofundador",
       "tagline": "Invitaciones digitales y mesa de regalos",
-      "description": "Invitaciones digitales y mesa de regalos con aportes por Yape. Crear un evento es gratis.",
+      "description": "Invitaciones digitales con mesa de regalos: tus invitados aportan por Yape. Crear un evento es gratis.",
       "features": [
         "Invitaciones digitales",
         "Mesa de regalos con aportes por Yape",
@@ -31,7 +31,7 @@
       "status": "building",
       "role": "Cofundador",
       "tagline": "Bot de ventas por WhatsApp",
-      "description": "Bot que atiende y vende por WhatsApp para pequeños negocios.",
+      "description": "Un bot de ventas que trabaja en WhatsApp, el canal donde tus clientes ya conversan.",
       "features": []
     }
   ]

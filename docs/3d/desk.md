@@ -57,6 +57,8 @@ También pasan en 390 × 844, 1024 × 1366 y 1920 × 1080.
 
 ## Decisiones que se apartan de desk.md v2
 
+0. **Peana de 50 cm** (no 24): SkyMek y Parati en los extremos, Alfa atrás a la izquierda del centro y Burbu delante. Así cada macro de producto deja a las vecinas fuera de cuadro. En horizontal el texto va a la izquierda (columna del 56 %) y el sujeto en el 70 % del ancho, también en `company` y `experience`. Alfa es un torno facetado de 9 lados con anillo de latón de 1.3 mm.
+
 1. **Lámpara atrás a la derecha**: el doc pide la lámpara "atrás a la izquierda" y a la vez la peana "a la derecha, bajo su cono". Manda el cono.
 2. **Teléfono en un soporte de nogal** inclinado 16° respecto a la vertical, en vez de tumbado y con un plano cenital a 45°. Así la superficie se ve de frente a 1:1 y el plano anterior (estantería) queda dentro del límite de giro.
 3. **Estantería**: lomos vistos con rumbo −34° y pitch +3° (en lugar de +18°/−35°), para cumplir ≤ 28° con `products` y con `contact`.

@@ -44,28 +44,31 @@ export const KEYBOARD = { x: -0.05, z: 0.16, trackpadX: 0.21 } as const;
  * "back left" and the plinth "right, under the lamp cone": the cone wins).
  */
 export const LAMP = {
-  base: new Vector3(0.56, DESK.top, -0.25),
-  elbow: new Vector3(0.66, 1.16, -0.31),
-  head: new Vector3(0.42, 1.28, -0.05),
-  aim: new Vector3(0.35, DESK.top, -0.1)
+  base: new Vector3(0.6, DESK.top, -0.28),
+  elbow: new Vector3(0.68, 1.16, -0.33),
+  head: new Vector3(0.47, 1.28, -0.06),
+  aim: new Vector3(0.44, DESK.top, -0.12)
 } as const;
 
-/** Walnut plinth 24 × 10 × 3 cm with a brass inlay (mascots.md "Peana"). */
-export const PLINTH = { centre: new Vector3(0.36, DESK.top, -0.13), width: 0.24, depth: 0.1, height: 0.03 } as const;
+/**
+ * Walnut plinth with a brass inlay. Wider than mascots.md's 24 cm (50 cm) so each product can be
+ * framed in macro with its neighbours outside the frame (never behind the text).
+ */
+export const PLINTH = { centre: new Vector3(0.42, DESK.top, -0.13), width: 0.5, depth: 0.1, height: 0.03 } as const;
 
 const plinthTop = PLINTH.centre.y + PLINTH.height;
 const onPlinth = (x: number, z: number) => new Vector3(PLINTH.centre.x + x, plinthTop, PLINTH.centre.z + z);
 
-/** Base centres of the collectibles (mascots.md §2 "Juntas sobre la peana"). */
+/** Base centres of the collectibles: SkyMek and Parati at the ends, Alfa (tallest) back left of centre, Burbu front right of it. */
 export const FIGURES = {
-  alfa: onPlinth(0, -0.018),
-  skymek: onPlinth(-0.078, 0.004),
-  parati: onPlinth(0.074, -0.014),
-  ventixs: onPlinth(0.058, 0.03)
+  alfa: onPlinth(-0.09, -0.024),
+  skymek: onPlinth(-0.19, 0.008),
+  parati: onPlinth(0.19, -0.006),
+  ventixs: onPlinth(0.035, 0.018)
 } as const;
 
 /** Approximate heights for framing (m). */
-export const FIGURE_HEIGHT = { alfa: 0.12, skymek: 0.06, parati: 0.066, ventixs: 0.07 } as const;
+export const FIGURE_HEIGHT = { alfa: 0.122, skymek: 0.06, parati: 0.066, ventixs: 0.07 } as const;
 
 export type FigureId = keyof typeof FIGURES;
 export const PRODUCT_FIGURES = ['skymek', 'parati', 'ventixs'] as const;
@@ -84,15 +87,15 @@ export const PHONE = {
   screen: { width: 0.065, height: 0.14 }
 } as const;
 
-export const MUG = new Vector3(0.6, DESK.top, 0.02);
+export const MUG = new Vector3(0.64, DESK.top, 0.17);
 
 /** Floating shelves on the left wall; the middle one holds the four archive box files. */
 export const SHELF = {
   x: ROOM.left,
   depth: 0.3,
-  length: 0.92,
-  z: 0.02,
-  boards: [1.05, 1.42, 1.85] as const
+  length: 0.7,
+  z: -0.06,
+  boards: [0.88, 1.24, 1.66] as const
 } as const;
 
 export const FOLDERS = ['sysarp', 'baufest', 'intercorp', 'tcs'] as const;

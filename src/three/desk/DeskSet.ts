@@ -93,6 +93,8 @@ const FIGURE_ORDER: readonly FigureId[] = ['alfa', 'ventixs', 'parati', 'skymek'
 const ALFA_TURN = 20 * (Math.PI / 180);
 const MAX_TURN_SPEED = 0.05;
 const FIGURE_LIFT = 0.02;
+/** Warm bounce on the focused figure (desk.md §5: +10 %), as self-illumination of its albedo. */
+const FOCUS_BOUNCE = 0.12;
 
 const LABELS: Record<string, { es: string; en: string }> = {
   alfa: { es: 'Alfa · TUSOCIO IA', en: 'Alfa · TUSOCIO IA' },
@@ -520,6 +522,7 @@ export class DeskSet implements ShotProvider {
     });
     uniforms.uSignal.value[OBJECT_ID.alfa] = level.alfaSignal;
     for (const id of FOLDERS) uniforms.uGlow.value[OBJECT_ID[id]] = (this.folderGlow.get(id) ?? 0) * 0.55;
+    for (const id of PRODUCT_FIGURES) uniforms.uGlow.value[OBJECT_ID[id]] = ((this.figureLift.get(id) ?? 0) / FIGURE_LIFT) * FOCUS_BOUNCE;
     uniforms.uGlow.value[OBJECT_ID.openFolder] = (this.folderGlow.get('tcs') ?? 0) * 0.25;
     uniforms.uHoverMix.value = this.hoverMix;
     for (const id of PRODUCT_FIGURES) {

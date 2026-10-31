@@ -113,10 +113,13 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
   const monitor = monitorFrame();
   const screen = monitor.centre;
   const screenSpan = MONITOR.screen.width + MONITOR.bezel * 2;
-  const panelRight = { sx: 0.54, sy: 0.34 };
+  /**
+   * The director lays an anchored panel on the side of its anchor away from the frame centre:
+   * an anchor right of centre gets the panel on its left. Subjects sit on the opposite side.
+   */
+  const textLeft = { panel: { sx: 0.56, sy: 0.3 }, subject: 0.7 };
   const panelBelow = { sx: 0.06, sy: 0.6 };
-  const panel = portrait ? panelBelow : panelRight;
-  const subjectX = portrait ? 0.5 : 0.32;
+  const layoutFor = (side: typeof textLeft) => ({ panel: portrait ? panelBelow : side.panel, sx: portrait ? 0.5 : side.subject });
   const subjectY = portrait ? 0.3 : 0.5;
 
   const heroDistance = portrait ? clamp(widthFit(screenSpan, 0.94, view), 1.2, 2.3) : HERO_EYE.distanceTo(screen);
@@ -135,43 +138,57 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
   };
 
   const alfaFocus = FIGURES.alfa.clone().add(new Vector3(0, FIGURE_HEIGHT.alfa * 0.5, 0));
+  const companyLayout = layoutFor(textLeft);
   const company: Framing = {
-    eye: eyeFor(alfaFocus, 0, -12, portrait ? 0.78 : 0.55),
+    eye: eyeFor(alfaFocus, -4, -12, portrait ? 0.78 : 0.6),
     focus: alfaFocus,
-    sx: subjectX,
+    sx: companyLayout.sx,
     sy: subjectY,
-    panel: { name: 'company', ...panel }
+    panel: { name: 'company', ...companyLayout.panel }
   };
 
+  /**
+   * Each product in macro, right of its text, close enough that the neighbours (≥ 15 cm away on
+   * the plinth) fall outside the frame instead of behind the text; Burbu is shot from the left so
+   * Alfa, behind it, swings out.
+   */
+  const productSetup: Record<(typeof PRODUCT_FIGURES)[number], { side: typeof textLeft; heading: number; distance: number }> = {
+    skymek: { side: textLeft, heading: 0, distance: 0.24 },
+    parati: { side: textLeft, heading: 0, distance: 0.2 },
+    ventixs: { side: textLeft, heading: 18, distance: 0.2 }
+  };
   const products = PRODUCT_FIGURES.map<Framing>(id => {
     const focus = FIGURES[id].clone().add(new Vector3(0, FIGURE_HEIGHT[id] * 0.5, 0));
+    const setup = productSetup[id];
+    const layout = layoutFor(setup.side);
     return {
-      eye: eyeFor(focus, 0, -14, portrait ? 0.46 : 0.35),
+      eye: eyeFor(focus, portrait ? 0 : setup.heading, -14, portrait ? 0.34 : setup.distance),
       focus,
-      sx: subjectX,
+      sx: layout.sx,
       sy: subjectY,
-      panel: { name: `product-${id}`, ...panel }
+      panel: { name: `product-${id}`, ...layout.panel }
     };
   });
+  const experienceLayout = layoutFor(textLeft);
 
   const experience = EXPERIENCE_ORDER.map<Framing>(id => {
     if (id === 'tcs') {
       const focus = OPEN_FOLDER.centre.clone().add(new Vector3(0, 0.01, 0));
       return {
-        eye: eyeFor(focus, -24, -18, portrait ? 1.05 : 0.85),
+        eye: eyeFor(focus, portrait ? -20 : -8, -18, portrait ? 1.05 : 0.85),
         focus,
-        sx: portrait ? 0.5 : 0.36,
+        sx: experienceLayout.sx,
         sy: portrait ? 0.32 : 0.56,
-        panel: { name: EXPERIENCE_ANCHOR.tcs, ...panel }
+        panel: { name: EXPERIENCE_ANCHOR.tcs, ...experienceLayout.panel }
       };
     }
     const focus = folderSpine(id);
     return {
-      eye: eyeFor(focus, -34, 3, portrait ? 1.24 : 1.3),
+      eye: eyeFor(focus, portrait ? -34 : -26, 0, portrait ? 1.24 : 1.18),
       focus,
-      sx: subjectX,
+      sx: experienceLayout.sx,
       sy: portrait ? 0.3 : 0.5,
-      panel: { name: EXPERIENCE_ANCHOR[id], ...panel }
+      panel: { name: EXPERIENCE_ANCHOR[id], ...experienceLayout.panel }
     };
   });
 

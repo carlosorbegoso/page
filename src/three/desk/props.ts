@@ -463,7 +463,7 @@ export function buildShelves(b: PartBuilder, p: Palette, q: Quality): void {
   }
   const random = seeded(23);
   const covers = [p.paper, p.bookDark, p.bookBlue, shade(p.pot, 0.55), shade(p.plant, 0.7)];
-  let cursor = z - 0.36;
+  let cursor = z - 0.32;
   for (let i = 0; i < 5; i++) {
     const thickness = 0.025 + random() * 0.02;
     const height = 0.18 + random() * 0.06;
@@ -559,20 +559,26 @@ export function buildFigures(b: PartBuilder, p: Palette, q: Quality): void {
   b.add(new BoxGeometry(width - 0.02, 0.004, 0.002), p.brass, { position: [centre.x, centre.y + height * 0.55, centre.z + depth / 2 + 0.0006] });
 
   const alfa = FIGURES.alfa;
-  const body = new OctahedronGeometry(0.045, 0).scale(0.9, 1.35, 0.75);
-  const position = body.getAttribute('position');
-  for (let i = 0; i < position.count; i++) {
-    const y = position.getY(i);
-    if (y < 0) position.setXYZ(i, position.getX(i) * 0.82, y, position.getZ(i) * 0.82);
-  }
+  const silhouette = [
+    [0, 0],
+    [0.014, 0.004],
+    [0.026, 0.03],
+    [0.033, 0.062],
+    [0.031, 0.08],
+    [0.022, 0.104],
+    [0.009, 0.119],
+    [0, 0.122]
+  ].map(([r, y]) => new Vector2(r!, y!));
+  const body = new LatheGeometry(silhouette, 9).toNonIndexed().scale(1, 1, 0.82);
   body.deleteAttribute('normal');
+  body.deleteAttribute('uv');
   body.computeVertexNormals();
-  const half = 0.045 * 1.35;
-  b.add(body, p.alfaBody, { position: [alfa.x, alfa.y + half, alfa.z], rotation: [0, 0.35, 0] }, OBJECT_ID.alfa);
+  b.add(body, p.alfaBody, { position: alfa.toArray(), rotation: [0, 0.2, 0] }, OBJECT_ID.alfa);
   const ringY = alfa.y + 0.066;
-  const ringRadius = 0.034;
-  b.add(new TorusGeometry(ringRadius, 0.0025, 8, seg(64, q, 24)), p.alfaRing, { position: [alfa.x, ringY, alfa.z], rotation: [Math.PI / 2, 0, 0] }, OBJECT_ID.alfa);
-  b.add(new TorusGeometry(ringRadius - 0.0025, 0.0007, 4, seg(64, q, 24)), p.alfaSignal, { position: [alfa.x, ringY, alfa.z], rotation: [Math.PI / 2, 0, 0] }, OBJECT_ID.alfa);
+  const ring = new TorusGeometry(0.0335, 0.0013, 8, seg(72, q, 32)).scale(1, 0.82, 1);
+  b.add(ring, p.alfaRing, { position: [alfa.x, ringY, alfa.z], rotation: [Math.PI / 2, 0, 0] }, OBJECT_ID.alfa);
+  const signal = new TorusGeometry(0.0322, 0.0005, 4, seg(72, q, 32)).scale(1, 0.82, 1);
+  b.add(signal, p.alfaSignal, { position: [alfa.x, ringY, alfa.z], rotation: [Math.PI / 2, 0, 0] }, OBJECT_ID.alfa);
 
   const burbu = FIGURES.ventixs;
   const bubble = new Matrix4().compose(
@@ -608,7 +614,7 @@ export function buildFigures(b: PartBuilder, p: Palette, q: Quality): void {
   }
 
   const tool = FIGURES.skymek;
-  const base = new Matrix4().compose(tool, new Quaternion().setFromAxisAngle(UP, 0.55), new Vector3(1, 1, 1));
+  const base = new Matrix4().compose(tool, new Quaternion().setFromAxisAngle(UP, 1.05), new Vector3(1, 1, 1));
   b.add(new RoundedBoxGeometry(0.04, 0.015, 0.02, 2, 0.002), p.wood, new Matrix4().multiplyMatrices(base, new Matrix4().makeTranslation(-0.035, 0.0075, 0)), OBJECT_ID.skymek);
   const wrench = new ExtrudeGeometry(wrenchShapes(), {
     depth: 0.005,

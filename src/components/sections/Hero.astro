@@ -18,14 +18,10 @@ const profile = await getProfile(locale);
   id={SECTION_IDS.hero}
   aria-labelledby="hero-title"
   data-station="hero"
-  class="relative grid min-h-svh grid-rows-[minmax(33svh,1fr)_auto] lg:grid-rows-1"
+  class="flex min-h-svh flex-col items-center justify-center px-gutter py-section"
 >
-  <div
-    class="relative row-start-2 mx-auto grid w-full max-w-wide px-gutter pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-10 lg:row-start-1 lg:grid-cols-12 lg:items-center lg:py-24"
-  >
-    <div
-      class="hero-panel rounded-xl border border-border bg-scrim p-5 shadow-lg backdrop-blur-md sm:p-8 md:max-w-2xl lg:col-span-7 lg:p-12 xl:col-span-6"
-    >
+  <div class="plate" data-plate data-plate-id="hero" data-plate-anchor="left">
+    <div class="@container flex flex-col">
       <h1
         id="hero-title"
         class="hero-enter flex flex-wrap items-baseline gap-x-2 text-sm font-medium text-text-muted"
@@ -36,56 +32,42 @@ const profile = await getProfile(locale);
       </h1>
 
       <p
-        class="hero-enter mt-3 font-display text-3xl font-semibold tracking-display text-balance text-text md:text-4xl"
+        class="hero-enter mt-4 font-display text-3xl font-semibold tracking-display text-balance text-text @md:text-4xl"
         style="--enter-delay: 60ms"
       >
         {t('hero.headline')}
       </p>
 
       <p
-        class="hero-enter mt-3 max-w-reading text-base text-text-muted md:mt-4 md:text-lg"
+        class="hero-enter mt-4 text-base text-pretty text-text-muted @md:text-lg"
         style="--enter-delay: 120ms"
       >
         {profile.tagline}
       </p>
 
-      <div
-        class="hero-enter mt-5 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center md:mt-6"
-        style="--enter-delay: 180ms"
-      >
-        <Button href={`#${SECTION_IDS.products}`} variant="primary" size="lg" class="max-sm:px-3">
+      <div class="hero-enter mt-6 grid grid-cols-2 gap-3" style="--enter-delay: 180ms">
+        <Button href={`#${SECTION_IDS.products}`} variant="primary" size="lg" class="px-3!">
           {t('hero.ctaProducts')}
         </Button>
-        <Button href={`#${SECTION_IDS.contact}`} variant="secondary" size="lg" class="max-sm:px-3">
+        <Button href={`#${SECTION_IDS.contact}`} variant="secondary" size="lg" class="px-3!">
           {t('hero.ctaContact')}
         </Button>
-        <CvLink locale={locale} variant="ghost" size="lg" class="col-span-2 min-h-tap sm:col-span-1" />
+        <CvLink locale={locale} variant="ghost" size="lg" class="col-span-2 min-h-tap" />
       </div>
     </div>
   </div>
-
-  <a
-    href={`#${SECTION_IDS.about}`}
-    class="hero-cue absolute bottom-6 left-1/2 hidden min-h-tap -translate-x-1/2 flex-col items-center justify-center gap-1 rounded-pill border border-border bg-scrim px-4 text-xs font-medium tracking-caps text-text-muted uppercase transition-colors duration-(--duration-fast) ease-standard hover:text-text focus-visible:shadow-focus focus-visible:outline-none lg:flex"
-  >
-    <span>{t('nav.about')}</span>
-    <svg
-      class="hero-cue-arrow"
-      width="14"
-      height="14"
-      viewBox="0 0 14 14"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path d="M2 5l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-    </svg>
-  </a>
 </section>
 
 <style>
   @keyframes hero-enter {
     from {
       opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+
+  @keyframes hero-slide {
+    from {
       transform: translateY(12px);
     }
   }
@@ -100,35 +82,13 @@ const profile = await getProfile(locale);
     animation-name: hero-slide;
   }
 
-  @keyframes hero-slide {
-    from {
-      transform: translateY(12px);
-    }
-  }
-
-  @keyframes hero-cue {
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(3px);
-    }
-  }
-
-  .hero-cue-arrow {
-    animation: hero-cue 2.4s var(--ease-in-out) infinite;
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    .hero-enter,
-    .hero-cue-arrow {
+    .hero-enter {
       animation: none;
     }
   }
 
-  :global(:root[data-motion='paused']) .hero-enter,
-  :global(:root[data-motion='paused']) .hero-cue-arrow {
+  :global(:root[data-motion='paused']) .hero-enter {
     animation: none;
   }
 </style>

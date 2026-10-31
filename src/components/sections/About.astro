@@ -25,14 +25,10 @@ const { degree, institution, status } = profile.education;
   id={SECTION_IDS.about}
   aria-labelledby="about-title"
   data-station="about"
-  class="relative grid min-h-svh grid-rows-[minmax(33svh,1fr)_auto] lg:grid-rows-1"
+  class="flex min-h-svh flex-col items-center justify-center gap-stack px-gutter py-section"
 >
-  <div
-    class="row-start-2 mx-auto grid w-full max-w-wide px-gutter pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-10 lg:row-start-1 lg:grid-cols-12 lg:items-center lg:py-24"
-  >
-    <div
-      class="flex flex-col gap-6 rounded-xl border border-border bg-scrim p-5 shadow-lg backdrop-blur-md sm:p-8 md:ml-auto md:max-w-2xl lg:col-span-7 lg:col-start-6 lg:max-w-none lg:p-10 xl:col-span-6 xl:col-start-7"
-    >
+  <div class="plate" data-plate data-plate-id="about-bio" data-plate-anchor="right">
+    <div class="@container flex flex-col gap-6">
       <SectionHeader
         id="about-title"
         eyebrow={profile.location}
@@ -40,27 +36,28 @@ const { degree, institution, status } = profile.education;
         subtitle={t('about.subtitle')}
       />
 
-      <div class="flex flex-col gap-5 sm:flex-row sm:items-start">
+      <div class="flex flex-col gap-5 @md:flex-row @md:items-start">
         <Picture
           src={photo}
           formats={['avif', 'webp']}
           widths={[192, 320, 480]}
-          sizes="(min-width: 640px) 10rem, 7rem"
+          sizes="(min-width: 768px) 9rem, 7rem"
           alt={profile.photoAlt}
           loading="lazy"
           pictureAttributes={{ class: 'shrink-0' }}
           decoding="async"
-          class="aspect-square w-28 shrink-0 rounded-lg border border-border object-cover sm:w-40"
+          class="aspect-square w-28 rounded-lg border border-border object-cover @md:w-36"
         />
         <div class="flex flex-col gap-4 text-base text-text-muted">
           {body.map(paragraph => <p class="text-pretty">{paragraph}</p>)}
         </div>
       </div>
+    </div>
+  </div>
 
-      <section
-        aria-labelledby="about-education"
-        class="rounded-lg border border-border bg-surface p-5 sm:p-6"
-      >
+  <div class="plate" data-plate data-plate-id="about-stack" data-plate-anchor="right">
+    <div class="@container flex flex-col gap-6">
+      <section aria-labelledby="about-education">
         <h3
           id="about-education"
           class="font-display text-xl font-semibold tracking-tight text-text"
@@ -73,7 +70,7 @@ const { degree, institution, status } = profile.education;
             <span>
               <span class="block font-medium text-text">{degree}</span>
               <span class="block">{institution}</span>
-              <span class="block text-text-subtle">{status}</span>
+              <span class="block">{status}</span>
             </span>
           </li>
           {
@@ -87,14 +84,11 @@ const { degree, institution, status } = profile.education;
         </ul>
       </section>
 
-      <section
-        aria-labelledby="about-stack"
-        class="rounded-lg border border-border bg-surface p-5 sm:p-6"
-      >
+      <section aria-labelledby="about-stack" class="border-t border-border pt-6">
         <h3 id="about-stack" class="font-display text-xl font-semibold tracking-tight text-text">
           {t('about.stack')}
         </h3>
-        <dl class="mt-4 grid gap-4 sm:grid-cols-2">
+        <dl class="mt-4 grid gap-4 @md:grid-cols-2">
           {
             profile.stack.map(group => (
               <div>

@@ -93,3 +93,36 @@ Tras generar: limpieza en Blender según el checklist de intake (PLAN §6.3), re
 - [ ] Color de producto solo en el acento; cuerpo en grafito/acero.
 - [ ] Las cuatro juntas, con la misma luz, parecen de la misma colección.
 - [ ] Línea de señal presente y legible en cada una.
+
+## 6. Versión "cuerpo celeste" (concepto Constelación)
+
+En el mundo "Constelación" (`constellation.md`) las mascotas dejan de ser objetos sueltos y se vuelven **cuerpos del sistema de Alfa**. La forma de producto se conserva, pero **leída como astro**: volumen principal casi esférico y el rasgo del producto como relieve, banda o satélite. Se mantienen la línea de señal, la regla "sin ojos" y un material por cuerpo. Las luce la `PointLight` de Alfa, que marca un terminador día/noche: es lo que las vuelve "lunas" y no iconos.
+
+| Cuerpo | Forma celeste | Rasgo de producto | Banda de acento (emisiva) | Material |
+|---|---|---|---|---|
+| **Alfa** (estrella) | Núcleo facetado (icosaedro alargado) + halo doble + anillo-visor | Es la marca madre | Visor `#5AA9FF`; núcleo `#EAF4FF` emisivo 3.2 | Ver `constellation.md` §5 |
+| **SkyMek** | Esfera r 0.30 con **6 facetas planas mecanizadas** en el ecuador (sección de tuerca hexagonal) | Una llave diminuta (0.18 u) orbita la luna como satélite, a 0.5 u, periodo 20 s | Anillo ecuatorial fino `#F0A43C` | Acero satinado `#8C97A8`, rugosidad 0.45, metalness 0.7 |
+| **Parati** | Cubo de cantos muy redondeados (radio 35 % del lado), un "planeta-caja" de lado 0.48 | Cinta en cruz en relieve (0.006 u) que envuelve el cuerpo, con un lazo facetado bajo como "polo" | La cinta `#F28BA0` (metálico satinado, rugosidad 0.3, metalness 0.7) emite a 1.4 | Grafito `#2A3142` mate, rugosidad 0.6, metalness 0.1 |
+| **Ventixs** | Esfera achatada (1.2 × 1 × 0.9), r 0.25, con una **cola cónica suave** a 40° bajo el ecuador: la burbuja de chat leída como cometa breve | Tres puntos-ranura en línea sobre la cara iluminada, que se encienden en secuencia (indicador "escribiendo") | Puntos `#3FCF8E` | Verde profundo `#1F6E52` cerámico, rugosidad 0.55, metalness 0.1 |
+
+Primitivas procedurales:
+- **SkyMek**: `IcosahedronGeometry(0.3, 3)` con los vértices de `|y| < 0.08` proyectados a un prisma hexagonal (o `CylinderGeometry(0.3, 0.3, 0.16, 6)` fusionado con dos casquetes `SphereGeometry` recortados) · anillo `TorusGeometry(0.305, 0.006, 4, 96)` · llave satélite: la `ExtrudeGeometry` de §3 escalada a 0.28.
+- **Parati**: `RoundedBoxGeometry(0.48, 0.48, 0.48, 6, 0.17)` · cinta: 2× `TorusGeometry` aplastados o `BoxGeometry(0.06, 0.49, 0.49)` cruzados · lazo `OctahedronGeometry(0.05, 0)` ×2.
+- **Ventixs**: `SphereGeometry(0.25, 32, 24)` escalada `(1.2, 1, 0.9)` · cola `ConeGeometry(0.06, 0.14, 16)` · puntos 3× `SphereGeometry(0.014, 8, 6)` emisivos.
+
+Presupuesto por cuerpo: < 4 k tris procedural; GLB `high` ≤ 25 k, `mid` ≤ 8 k. Escalas y órbitas en `constellation.md` §6.
+
+### Prompts Tripo (variante celeste)
+
+Se añaden los requisitos técnicos de §4.2; la imagen de referencia es la captura `?capture=products` del placeholder.
+
+**SkyMek (luna)**
+> A small moon-like sphere with six flat machined facets around its equator like a hexagonal nut, brushed satin steel (#8C97A8), a thin amber glowing ring (#F0A43C) along the equator. Precise industrial hard-surface design, minimal, sober, no texture noise, no craters.
+
+**Parati (luna)**
+> A small planet shaped like a gift box with very rounded edges, dark graphite matte surface (#2A3142), wrapped by a flat cross ribbon in raised satin rose metallic (#F28BA0) with a small low faceted bow at the top pole. Elegant, minimal, premium, sober.
+
+**Ventixs (luna)**
+> A small slightly flattened sphere with a short soft conical tail below its equator, like a chat bubble read as a tiny comet, deep green ceramic matte surface (#1F6E52), three small glowing mint dots (#3FCF8E) in a row on its face. Minimal, modern technology product, sober, not cartoon.
+
+**Alfa (estrella)**: el GLB de §4.3 sirve tal cual; el brillo de estrella (emisión fuerte, halo, bloom) se resuelve en el motor, no en el modelo.

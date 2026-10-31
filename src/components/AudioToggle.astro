@@ -113,7 +113,7 @@ const t = useTranslations(locale);
 
   if (button && AudioContextClass) {
     button.hidden = false;
-    const gestureEvents = ['pointerdown', 'keydown'] as const;
+    const gestureEvents = ['pointerup', 'keydown'] as const;
 
     const onFirstGesture = (event: Event) => {
       if (event instanceof KeyboardEvent && event.key === 'Escape') return;

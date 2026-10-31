@@ -14,7 +14,6 @@ export function createImpulse(
     for (let i = 0; i < length; i++) {
       const t = i / length;
       const white = Math.random() * 2 - 1;
-      // One-pole lowpass that darkens as the tail goes on, like air absorbing the highs.
       const pole = damping + (1 - damping) * t * 0.6;
       smoothed = smoothed * pole + white * (1 - pole);
       const fadeIn = Math.min(1, i / (context.sampleRate * 0.012));

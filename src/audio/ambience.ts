@@ -8,10 +8,10 @@ export const MASTER_LEVEL = 0.11;
 const LEVELS = {
   pad: 0.5,
   shimmer: 0.09,
-  hum: 0.05,
-  air: 0.012,
-  ping: 0.05,
-  hoverPing: 0.025
+  hum: 0.16,
+  air: 0.04,
+  ping: 0.22,
+  hoverPing: 0.1
 } as const;
 
 const CROSSFADE_SECONDS = 3;
@@ -244,6 +244,7 @@ export class Ambience {
   async start(): Promise<void> {
     this.enabled = true;
     if (this.context.state !== 'running') await this.context.resume();
+    if (!this.enabled) return;
     if (!this.layer) this.setStation(this.station ?? this.currentStationFromDom(), false);
     if (document.visibilityState === 'hidden') return;
     this.rampMaster(MASTER_LEVEL, FADE_IN_SECONDS);
@@ -370,7 +371,6 @@ export class Ambience {
     this.rampMaster(MASTER_LEVEL, FADE_IN_SECONDS);
   }
 
-  /** A soft glassy bell: a sine plus an inharmonic partial, mostly sent to the long reverb. */
   private ping(bells: readonly number[], level: number): void {
     const note = bells[Math.floor(Math.random() * bells.length)] ?? 88;
     const frequency = midiToHz(note);

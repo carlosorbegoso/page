@@ -46,7 +46,7 @@ Los impulsos de reverb son ruido estéreo con caída exponencial y un paso bajo 
 
 - `src/components/AudioToggle.astro` (en el HUD, `hud-control hud-icon`, 44 × 44 px, `aria-pressed`, etiqueta i18n `audio.enable` / `audio.mute` / `audio.armed`). Oculto si el navegador no tiene Web Audio.
 - El `AudioContext` se crea **dentro del clic**, antes de cualquier `await` (Safari lo deja suspendido si no). Después se hace `import('../audio/ambience')`: el código de audio es un chunk aparte (~9 KB minificado, ~3 KB gzip) que no se descarga hasta ese momento.
-- La preferencia se guarda en `localStorage['audio']` (`on`/`off`, con try/catch). Al recargar con `on`, el botón queda en estado **armado** (icono silenciado + punto de acento, `aria-pressed="false"`) y el sonido arranca con el primer gesto del usuario en la página (`pointerdown` o tecla que no sea Escape). Nunca suena sin gesto.
+- La preferencia se guarda en `localStorage['audio']` (`on`/`off`, con try/catch). Al recargar con `on`, el botón queda en estado **armado** (icono silenciado + punto de acento, `aria-pressed="false"`) y el sonido arranca con el primer gesto del usuario en la página (`pointerup` —un toque, no un scroll táctil, que acaba en `pointercancel`— o tecla que no sea Escape). Nunca suena sin gesto.
 - Con la pestaña oculta el master baja a 0 en 0.6 s y el contexto se suspende; al volver, si sigue activado, sube en 2.5 s. Al silenciar: fundido de 1.2 s y `suspend()` (sin coste de CPU).
 
 ## Eventos (en `window`)
@@ -64,7 +64,7 @@ Los impulsos de reverb son ruido estéreo con caída exponencial y un paso bajo 
 Todo en `src/audio/ambience.ts`:
 
 - `MASTER_LEVEL` (0.11): volumen máximo global. No pasar de ~0.15; el compresor de salida es una red de seguridad, no un limitador de volumen.
-- `LEVELS`: `pad` 0.5, `shimmer` 0.09, `hum` 0.05, `air` 0.012, `ping` 0.05, `hoverPing` 0.025. Son relativos al master.
+- `LEVELS`: `pad` 0.5, `shimmer` 0.09, `hum` 0.16, `air` 0.04, `ping` 0.22, `hoverPing` 0.1. Son relativos al master. Están fijados por cálculo (ping ≈ 8–10 dB por debajo del pad), no a oído: ajustar escuchando.
 - Tiempos: `CROSSFADE_SECONDS`, `FADE_IN_SECONDS`, `FADE_OUT_SECONDS`, `HIDDEN_FADE_SECONDS`, `STATION_PING_GAP_MS`, `HOVER_PING_GAP_MS`.
 
 Por estación, en `src/audio/presets.ts`: `chord`, `cutoff`, `hum`, `air`, `room`, `space` (0..1, multiplican los niveles de arriba o los envíos de reverb) y `bells` (notas que puede tocar el ping).

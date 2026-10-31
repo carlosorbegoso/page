@@ -1,38 +1,24 @@
 @layer components {
   .plate {
     --plate-accent: var(--product-accent, var(--color-accent));
-    --plate-signal: var(--plate-signal-width);
 
     position: relative;
     box-sizing: border-box;
     width: 100%;
     max-width: var(--plate-width);
+    color: var(--color-text);
+  }
+
+  html:not(.is-3d) .plate {
     border: 1px solid var(--color-plate-border);
     border-radius: var(--plate-radius);
     background-color: var(--color-plate-solid);
-    background-image: linear-gradient(180deg, var(--color-plate-glow) 0, transparent 6rem);
-    box-shadow:
-      inset 0 1px 0 0 rgb(255 255 255 / 0.04),
-      var(--shadow-lg);
-    color: var(--color-text);
-    isolation: isolate;
-    transition:
-      border-color var(--duration-base) var(--ease-standard),
-      box-shadow var(--duration-base) var(--ease-standard),
-      opacity var(--duration-slow) var(--ease-standard),
-      visibility 0s linear;
+    box-shadow: var(--shadow-md);
+    transition: border-color var(--duration-base) var(--ease-standard);
   }
 
-  .plate::before {
-    content: '';
-    position: absolute;
-    top: -1px;
-    left: var(--plate-signal-inset);
-    width: var(--plate-signal);
-    height: 2px;
-    border-radius: 0 0 2px 2px;
-    background-color: var(--plate-accent);
-    transition: width var(--duration-slow) var(--ease-out);
+  html:not(.is-3d) .plate[data-active] {
+    border-color: var(--color-plate-border-active);
   }
 
   .plate[data-plate-accent='skymek'] {
@@ -51,49 +37,99 @@
     --plate-accent: var(--color-milestone-current);
   }
 
-  .plate[data-active] {
-    --plate-signal: var(--plate-signal-width-active);
-
-    border-color: var(--color-plate-border-active);
-    box-shadow:
-      inset 0 1px 0 0 rgb(255 255 255 / 0.06),
-      0 0 0 1px var(--color-plate-glow),
-      0 0 48px -12px var(--color-plate-glow),
-      var(--shadow-lg);
-  }
-
-  .plate :where(h1, h2, h3) {
-    letter-spacing: var(--tracking-display);
-  }
-
-  .is-3d .plate {
-    width: var(--plate-width);
-    max-width: none;
-    background-color: var(--color-plate);
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    contain: layout style;
-  }
-
-  /* visibility (not only opacity) takes off-station plates out of the tab order; the delay lets the fade finish first. */
-  .is-3d .plate[data-dormant] {
-    opacity: var(--plate-dormant-opacity);
-    visibility: hidden;
-    pointer-events: none;
+  .plate :is(p:has(+ h1, + h2, + h3), [data-signal])::before {
+    content: '';
+    display: inline-block;
+    width: var(--plate-signal-width);
+    height: 2px;
+    margin-inline-end: 0.75rem;
+    border-radius: 2px;
+    vertical-align: middle;
+    background-color: var(--plate-accent);
     transition:
-      opacity var(--duration-slow) var(--ease-standard),
-      visibility 0s linear var(--duration-slow);
+      width var(--duration-slow) var(--ease-out),
+      box-shadow var(--duration-slow) var(--ease-standard);
   }
 
-  @media (forced-colors: active) {
-    .plate {
-      border-color: CanvasText;
-      background: Canvas;
-      box-shadow: none;
-    }
+  .plate[data-active] :is(p:has(+ h1, + h2, + h3), [data-signal])::before {
+    width: var(--plate-signal-width-active);
+  }
+}
 
-    .plate::before {
-      background-color: Highlight;
-    }
+/* Unlayered on purpose: loose 3D text must win over the card utilities the sections ship for the flat fallback. */
+.is-3d .plate {
+  width: var(--plate-width);
+  max-width: none;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  text-shadow: var(--plate-text-halo);
+  transition: visibility 0s linear;
+}
+
+/* A large, edgeless pool of darkness behind the block keeps AA over Alfa's halo; it must never read as a rectangle. */
+.is-3d .plate::before {
+  content: '';
+  position: absolute;
+  inset: var(--plate-pool-inset);
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    closest-side,
+    var(--color-plate-pool) 0,
+    var(--color-plate-pool) 60%,
+    var(--color-plate-pool-edge) 85%,
+    transparent 100%
+  );
+}
+
+.is-3d .plate :is(h1, h2) {
+  font-family: var(--font-display);
+  letter-spacing: var(--tracking-display);
+}
+
+.is-3d .plate h2 {
+  font-size: var(--text-4xl);
+  line-height: var(--text-4xl--line-height);
+}
+
+.is-3d .plate .plate-display {
+  font-size: var(--text-6xl);
+  line-height: var(--text-6xl--line-height);
+  letter-spacing: var(--tracking-display);
+}
+
+.is-3d .plate[data-active] :is(p:has(+ h1, + h2, + h3), [data-signal])::before {
+  box-shadow: 0 0 12px 1px var(--plate-accent);
+}
+
+/* Fade the children, not the plate: opacity below 1 on a preserve-3d parent flattens its 3D children. */
+.is-3d .plate > * {
+  transition: opacity var(--duration-slow) var(--ease-standard);
+}
+
+.is-3d .plate[data-dormant] {
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s linear var(--duration-slow);
+}
+
+.is-3d .plate[data-dormant] > * {
+  opacity: var(--plate-dormant-opacity);
+}
+
+@media (forced-colors: active) {
+  .plate {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    text-shadow: none;
+  }
+
+  .plate::before {
+    display: none;
   }
 }

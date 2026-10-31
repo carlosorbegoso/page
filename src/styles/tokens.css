@@ -128,6 +128,8 @@
   --color-plate-border: #2a3b57;
   --color-plate-border-active: #3d5a85;
   --color-plate-glow: rgb(90 169 255 / 0.16);
+  --color-plate-pool: rgb(4 6 11 / 0.85);
+  --color-plate-pool-edge: rgb(4 6 11 / 0.7);
 
   /* Stub names kept as aliases: global.css and SkipLink (not owned by design) still use them. */
   --color-background: var(--color-bg);
@@ -162,6 +164,8 @@
   --text-4xl--line-height: 1.08;
   --text-5xl: clamp(2.5rem, 1.8333rem + 2.963vw, 4.5rem);
   --text-5xl--line-height: 1.04;
+  --text-6xl: clamp(3rem, 2.0833rem + 4.0741vw, 5.75rem);
+  --text-6xl--line-height: 1;
 
   --tracking-display: -0.025em;
   --tracking-tight: -0.012em;
@@ -242,6 +246,9 @@
   --plate-signal-width: 3rem;
   --plate-signal-width-active: 6rem;
   --plate-dormant-opacity: 0;
+  --plate-pool-inset: -35% -30%;
+  --plate-text-halo:
+    0 0 1px rgb(4 6 11 / 0.9), 0 0 6px rgb(4 6 11 / 0.85), 0 0 18px rgb(4 6 11 / 0.7);
 
   --sky-radius: 48;
   --sky-stars-high: 6000;

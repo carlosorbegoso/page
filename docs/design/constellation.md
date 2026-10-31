@@ -108,13 +108,29 @@ Fases iniciales separadas 120°. En foco: la banda pasa a 2.2 y la luna se acerc
 
 **Con `prefers-reduced-motion: reduce` o `data-motion="paused"`**: se congelan órbitas, giro, parpadeo, respiración, pulsos y barrido (se renderiza un frame estático con las lunas en su fase inicial y el hito actual con el anillo a mitad de expansión, visible sin movimiento); la C aparece ya dibujada; sin parallax de puntero; la cámara no hace `scrub`, salta de estación con un fundido cruzado de 240 ms (`--duration-base`). Las placas cambian de estado sin transición.
 
-## 11. Placas
+## 11. Texto suelto (placas invisibles)
 
-Ver `src/styles/plates.css`. Resumen:
-- `.plate` define fondo, borde, radio, ancho y estados; **no define padding** (cada interior pone el suyo; `--plate-padding` queda como valor recomendado). Nunca `transform` en `.plate`: lo usa CSS3DRenderer. El acento sale de `--product-accent` si existe, si no de `data-plate-accent`, si no `--color-accent`.
-- Obsidiana casi opaca `--color-plate` (`rgb(11 16 25 / 0.94)`), borde 1 px `--color-plate-border`, radio `--plate-radius`, línea de señal arriba-izquierda (2 px, acento) como las mascotas.
-- **Contraste**: calculado en el peor caso (placa al 94 % sobre **blanco puro** detrás): `text` 14.3 · `text-muted` 6.9 · `text-subtle` 4.8 · `accent` 6.8 · `status-live` 9.7 · `skymek` 8.0 · `parati` 7.1 · `ventixs` 8.4. Todos ≥ 4.5 sin excepción (a diferencia del scrim de `identity.md`).
-- Sin `backdrop-filter`; `backface-visibility: hidden`.
-- Estados: `[data-active]` (placa de la estación actual: borde `--color-plate-border-active`, brillo de acento, señal se alarga a 6rem) y `[data-dormant]` (fuera de estación: se desvanece y queda `visibility: hidden`, sin foco ni lectura). El motor 3D pone y quita esos atributos.
-- **Fallback** (`html` sin `.is-3d`): las placas son tarjetas en flujo normal, fondo sólido `--color-plate-solid`, sobre la imagen de cielo.
-- El modo claro solo aplica sin `.is-3d` (el espacio es oscuro por definición).
+Regla: **en 3D no hay cajas.** El texto flota suelto en el espacio; la jerarquía la dan la escala tipográfica y la luz, no los rectángulos. Ver `src/styles/plates.css`.
+
+- **`.is-3d .plate`** es un contenedor invisible: sin fondo, borde, radio ni sombra. Lleva `transform-style: preserve-3d` (los hijos pueden tener profundidad con `translateZ`, que gestiona motion) y `backface-visibility: hidden`. **Nunca `transform` en `.plate`** (lo usa CSS3DRenderer). No se le aplican `opacity < 1`, `filter`, `isolation`, `overflow` ni `contain: paint`, porque cualquiera de ellos aplana el 3D de los hijos. Por eso el estado dormido desvanece a los **hijos** y oculta la placa con `visibility`.
+- **Legibilidad sin caja**, en dos capas:
+  1. **Charco de oscuridad**: `::before` con gradiente radial `closest-side` de `--color-plate-pool` (`rgb(4 6 11 / .85)`) al 60 %, `--color-plate-pool-edge` (`/.7`) al 85 % y transparente al 100 %. Ocupa un área un 60–70 % mayor que el bloque (`--plate-pool-inset: -35% -30%`): no tiene bordes y se lee como "cielo más profundo", no como rectángulo.
+  2. **Halo por glifo**: `text-shadow: var(--plate-text-halo)` (tres capas de `--color-sky-zenith` a 1, 6 y 18 px). Tapa las estrellas que caen justo bajo una letra, que son más pequeñas que el halo (≤ 2.4 px).
+- **Contraste calculado** con el charco al 85 % sobre el peor fondo realista de cada caso:
+
+| Fondo detrás | `text` | `text-muted` | `text-subtle` | `accent` | `accent-hover` | `status-live` | `skymek` | `parati` | `ventixs` |
+|---|---|---|---|---|---|---|---|---|---|
+| Cielo (`#0A0E14`) | 17.28 | 8.36 | 5.83 | 8.21 | 10.55 | 11.71 | 9.67 | 8.61 | 10.10 |
+| Nebulosa al 14 % | 17.17 | 8.30 | 5.79 | 8.15 | 10.48 | 11.63 | 9.61 | 8.55 | 10.03 |
+| Pantalla del monitor (glow 0.15) | 17.09 | 8.27 | 5.76 | 8.12 | 10.44 | 11.58 | 9.57 | 8.52 | 9.99 |
+| **Pico del halo de Alfa** (`#3C6BA0`) | 15.73 | 7.61 | 5.30 | 7.47 | 9.61 | 10.66 | 8.80 | 7.84 | 9.20 |
+| Estrella blanca (`#F3F6FF`) bajo el texto | 12.30 | 5.95 | 4.15 ✗ | 5.84 | 7.51 | 8.34 | 6.89 | 6.13 | 7.19 |
+| Borde del charco (70 %) sobre el halo de Alfa | 13.43 | 6.50 | 4.53 | 6.38 | 8.20 | 9.10 | 7.52 | 6.69 | 7.85 |
+
+  Sin charco, sobre el pico del halo de Alfa, `text-muted` cae a 2.29: **el charco es obligatorio**. Reglas derivadas: en texto suelto no se usa `text-subtle` (usar `text-muted`); el núcleo de Alfa (intensidad > 50 % del halo) nunca debe quedar detrás de una placa, cosa que la composición ya garantiza (sujeto y placa en mitades opuestas).
+- **Tipografía protagonista**: en 3D los `h2` de placa suben a `text-4xl` y la frase principal del hero usa `.plate-display` (`--text-6xl`: 48 → 92 px). Sora semibold con `tracking-display`. Cuerpo en `text-lg` y `text-muted`.
+- **Línea de señal suelta**: trazo de luz de 2 px (`--plate-signal-width`, 3rem) delante del eyebrow (el `p` que precede a un `h1`/`h2`/`h3`, o cualquier elemento con `[data-signal]`), del color `--plate-accent` (`--product-accent` → `data-plate-accent` → `--color-accent`). En `[data-active]` se alarga a 6rem y gana un glow de 12 px.
+- **Botones flotantes** (`ui/Button.astro`): píldoras sin relleno sólido. El primario lleva un borde de acento al 55 %, un tinte del 10 % y un glow suave del acento que crece en hover. El secundario lleva un borde de texto al 15 % que se ilumina al 45 % en hover. El ghost es texto con subrayado de luz. El texto hereda el halo. El foco es siempre el anillo `shadow-focus`.
+- **Tags** (`ui/Tag.astro`): solo texto y un punto de color de 6 px; el punto "live" tiene un glow mínimo. Sin fondos ni bordes.
+- **Movimiento**: el estilo es estático (color, luz, estados). La profundidad (`translateZ`) y las reacciones al hover las pone el especialista de motion en los hijos.
+- **Fallback** (`html` sin `.is-3d`): las placas vuelven a ser tarjetas discretas (fondo `--color-plate-solid`, borde fino, `shadow-md`). El modo claro solo aplica aquí.

@@ -180,7 +180,7 @@ Reveals: desplazamiento máximo 12–16 px + opacidad; nada de escalas > 1.02 ni
 
 ## 6. Reglas de uso
 
-1. **Texto sobre 3D**: siempre dentro de un panel `bg-scrim` (90 % de opacidad; el PLAN fija ≥ 60 % como **mínimo**, pero con 60 % `text-muted` cae a 2.1:1 en el peor caso, así que el valor de diseño es 90 %). Se permite `backdrop-blur-md` como refuerzo, nunca como sustituto. Ver regla derivada en §2.4.
+1. **Texto sobre 3D**: **texto suelto, sin cajas** (ver `constellation.md` §11). La legibilidad la garantizan un charco de oscuridad radial sin bordes (`--color-plate-pool` al 85 %) y un halo por glifo (`--plate-text-halo`); el contraste está calculado contra el halo de Alfa, las nebulosas, el monitor y las estrellas. El `bg-scrim` (90 %) queda solo para UI fija que no vive en el espacio (menús, hoja inferior). En texto suelto no se usa `text-subtle`.
 2. **Foco visible**: anillo de dos tonos `shadow-focus` = `0 0 0 2px bg, 0 0 0 4px focus` (o `outline: 2px solid var(--color-focus); outline-offset: 2px`). El anillo interior del color de fondo separa el foco de botones `accent` (focus vs accent solo da 1.38:1) y del 3D. Solo con `:focus-visible`.
 3. **Objetivos táctiles** ≥ 44×44 px (`min-h-tap`), separación ≥ 8 px entre objetivos contiguos.
 4. **Botones**: primario `bg-accent text-on-accent` (hover `bg-accent-hover`); secundario `border border-border-strong text-text` sobre fondo sólido; terciario/enlace `text-accent` subrayado en hover. Un solo primario por vista.

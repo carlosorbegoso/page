@@ -32,20 +32,21 @@ const {
 const t = useTranslations(getLocale(Astro.currentLocale, Astro.url));
 
 const variants: Record<Variant, string> = {
-  primary: 'border-transparent bg-accent text-on-accent hover:bg-accent-hover',
-  secondary:
-    'border-border-strong bg-surface text-text hover:border-text-muted hover:bg-surface-raised',
-  ghost: 'border-transparent bg-transparent text-text hover:bg-surface hover:text-accent-hover'
+  primary:
+    'border-accent/55 bg-accent/10 text-text shadow-[0_0_28px_-10px_var(--color-accent)] hover:border-accent hover:bg-accent/15 hover:text-accent-hover hover:shadow-[0_0_36px_-6px_var(--color-accent)]',
+  secondary: 'border-text/15 bg-transparent text-text hover:border-text/45 hover:text-accent-hover',
+  ghost:
+    'border-transparent bg-transparent text-text-muted underline decoration-accent/50 decoration-1 underline-offset-[6px] hover:text-text hover:decoration-accent'
 };
 
 const sizes: Record<Size, string> = {
-  md: 'min-h-tap gap-2 px-4 text-sm',
-  lg: 'min-h-12 gap-2.5 px-6 text-base'
+  md: 'min-h-tap gap-2 px-5 text-sm',
+  lg: 'min-h-12 gap-2.5 px-7 text-base'
 };
 
 const classes = [
-  'inline-flex min-w-tap items-center justify-center rounded-md border font-medium leading-tight select-none',
-  'transition-colors duration-(--duration-fast) ease-standard',
+  'inline-flex min-w-tap items-center justify-center rounded-pill border font-medium leading-tight select-none',
+  'transition-[color,background-color,border-color,box-shadow,text-decoration-color] duration-(--duration-base) ease-standard',
   'focus-visible:shadow-focus focus-visible:outline-none',
   'disabled:pointer-events-none disabled:opacity-50',
   variants[variant],

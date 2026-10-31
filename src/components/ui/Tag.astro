@@ -10,12 +10,12 @@ interface Props extends HTMLAttributes<'span'> {
 const { tone = 'neutral', class: className, ...attrs } = Astro.props;
 
 const tones: Record<Tone, { chip: string; dot?: string }> = {
-  neutral: { chip: 'border-border bg-surface-raised text-text-muted' },
-  live: { chip: 'border-border-strong bg-surface text-text', dot: 'bg-status-live' },
-  building: { chip: 'border-border-strong bg-surface text-text', dot: 'bg-status-building' },
-  skymek: { chip: 'border-skymek/40 bg-skymek-soft text-skymek', dot: 'bg-skymek' },
-  parati: { chip: 'border-parati/40 bg-parati-soft text-parati', dot: 'bg-parati' },
-  ventixs: { chip: 'border-ventixs/40 bg-ventixs-soft text-ventixs', dot: 'bg-ventixs' }
+  neutral: { chip: 'text-text-muted', dot: 'bg-border-strong' },
+  live: { chip: 'text-text', dot: 'bg-status-live shadow-[0_0_8px_var(--color-status-live)]' },
+  building: { chip: 'text-text', dot: 'bg-status-building' },
+  skymek: { chip: 'text-skymek', dot: 'bg-skymek' },
+  parati: { chip: 'text-parati', dot: 'bg-parati' },
+  ventixs: { chip: 'text-ventixs', dot: 'bg-ventixs' }
 };
 
 const { chip, dot } = tones[tone];
@@ -23,13 +23,13 @@ const { chip, dot } = tones[tone];
 
 <span
   class:list={[
-    'inline-flex min-h-7 items-center gap-1.5 rounded-sm border px-2.5 py-0.5 text-xs font-medium leading-tight whitespace-nowrap',
+    'inline-flex min-h-6 items-center gap-2 text-xs font-medium leading-tight whitespace-nowrap',
     chip,
     className
   ]}
   data-tone={tone}
   {...attrs}
 >
-  {dot && <span class:list={['size-2 shrink-0 rounded-full', dot]} aria-hidden="true" />}
+  {dot && <span class:list={['size-1.5 shrink-0 rounded-full', dot]} aria-hidden="true" />}
   <slot />
 </span>

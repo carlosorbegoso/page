@@ -308,7 +308,7 @@ export class Plates {
       if (!instant) this.choreograph(unit, station, s - station.index, unitScale);
       this.finish(unit, station, front && distance < 0.35, unitScale * restScale, instant);
 
-      const resting = index === 0 ? 0.35 : 0;
+      const resting = index === 0 && layoutKind(this.width) === 'desktop' ? 0.35 : 0;
       unit.holder.style.opacity = (stationOpacity * (resting + (1 - resting) * unit.presence)).toFixed(3);
       unit.holder.style.pointerEvents = front && distance < 0.35 ? 'auto' : 'none';
       for (const plate of unit.plates) {

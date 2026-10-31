@@ -119,8 +119,9 @@
   background: radial-gradient(
     closest-side,
     var(--color-plate-pool) 0,
-    var(--color-plate-pool) 60%,
-    var(--color-plate-pool-edge) 85%,
+    var(--color-plate-pool) 40%,
+    var(--color-plate-pool-edge) 62%,
+    rgb(4 6 11 / 0.32) 82%,
     transparent 100%
   );
 }
@@ -231,4 +232,9 @@
   .plate::before {
     display: none;
   }
+}
+
+/* A one-line entry sits on the dark wall already; its pool would only read as a smudge. */
+.is-3d .plate:has([data-compact])::before {
+  display: none;
 }

@@ -79,6 +79,10 @@ const sources = (name: string) => [
   }
 
   const container = document.querySelector<HTMLElement>('[data-stage]');
+  if (container) {
+    window.addEventListener('chapter:enter', () => (container.dataset.moving = ''));
+    window.addEventListener('chapter:settled', () => delete container.dataset.moving);
+  }
   if (container && !container.dataset.booted) {
     container.dataset.booted = 'true';
     void init(container);
@@ -95,6 +99,44 @@ const sources = (name: string) => [
     pointer-events: none;
     overflow: hidden;
     background: linear-gradient(180deg, var(--color-sky-zenith), var(--color-sky-horizon));
+  }
+
+  /* Matte bars frame the canvas like a film gate and close in slightly while the camera moves. */
+  [data-stage][data-ready='true']::before,
+  [data-stage][data-ready='true']::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    z-index: 1;
+    height: var(--letterbox, 3.2vh);
+    background: #000;
+    transition: height 900ms var(--ease-in-out);
+  }
+
+  [data-stage][data-ready='true']::before {
+    top: 0;
+  }
+
+  [data-stage][data-ready='true']::after {
+    bottom: 0;
+  }
+
+  [data-stage][data-moving] {
+    --letterbox: 7vh;
+  }
+
+  @media (orientation: portrait) {
+    [data-stage] {
+      --letterbox: 1.6vh;
+    }
+
+    [data-stage][data-moving] {
+      --letterbox: 4vh;
+    }
+  }
+
+  :global(:root[data-motion='paused']) [data-stage][data-moving] {
+    --letterbox: 3.2vh;
   }
 
   [data-stage-fallback] {

@@ -11,7 +11,8 @@ interface Props extends Omit<HTMLAttributes<'a'>, 'href' | 'download' | 'type' |
   size?: Size;
   external?: boolean;
   download?: boolean | string;
-  type?: 'button' | 'submit' | 'reset';
+  /** Button type when rendered as `<button>`; MIME type hint (e.g. `application/pdf`) when rendered as a link. */
+  type?: 'button' | 'submit' | 'reset' | (string & {});
 }
 
 const {
@@ -20,7 +21,7 @@ const {
   size = 'md',
   external = false,
   download,
-  type = 'button',
+  type,
   class: className,
   rel,
   ...attrs
@@ -61,13 +62,18 @@ const linkRel = external ? ['noopener', 'noreferrer', rel].filter(Boolean).join(
       target={external ? '_blank' : undefined}
       rel={linkRel}
       download={download}
+      type={type}
       {...attrs}
     >
       <slot />
       {external && <span class="sr-only">{t('link.newTab')}</span>}
     </a>
   ) : (
-    <button type={type} class:list={classes} {...(attrs as HTMLAttributes<'button'>)}>
+    <button
+      type={(type ?? 'button') as 'button' | 'submit' | 'reset'}
+      class:list={classes}
+      {...(attrs as HTMLAttributes<'button'>)}
+    >
       <slot />
     </button>
   )

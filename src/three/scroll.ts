@@ -28,16 +28,33 @@ export async function setupChapterScroll(host: ChapterScrollHost): Promise<Chapt
   ScrollTrigger.config({ ignoreMobileResize: true });
   const touch = matchMedia('(pointer: coarse)').matches || innerWidth < 1024;
   const triggers = new Map<ChapterId, InstanceType<typeof ScrollTrigger>>();
-  const lastSub = new Map<ChapterId, number>();
+  let current: ChapterId | null = null;
+  let currentSub = -1;
 
-  const report = (chapter: ChapterId, progress: number, active: boolean) => {
+  const report = (chapter: ChapterId, progress: number) => {
+    host.onProgress(chapter, progress);
+    if (chapter !== current) return;
     const subs = Math.max(1, host.subCount(chapter));
     const sub = Math.min(subs - 1, Math.floor(progress * subs));
-    host.onProgress(chapter, progress);
-    if (active && lastSub.get(chapter) !== sub) {
-      lastSub.set(chapter, sub);
-      host.onChapter(chapter, sub);
+    if (sub === currentSub) return;
+    currentSub = sub;
+    host.onChapter(chapter, sub);
+  };
+
+  /** The most recently entered active trigger owns the camera; on leave, fall back to any other active one. */
+  const toggle = (chapter: ChapterId, active: boolean, progress: number) => {
+    if (active) {
+      current = chapter;
+      currentSub = -1;
+      report(chapter, progress);
+      return;
     }
+    if (current !== chapter) return;
+    const other = [...triggers].find(([id, trigger]) => id !== chapter && trigger.isActive);
+    if (!other) return;
+    current = other[0];
+    currentSub = -1;
+    report(other[0], other[1].progress);
   };
 
   for (const chapter of SECTION_CHAPTERS) {
@@ -49,17 +66,13 @@ export async function setupChapterScroll(host: ChapterScrollHost): Promise<Chapt
         chapter,
         ScrollTrigger.create({
           trigger: section,
-          start: 'top top',
+          start: 'top top+=2',
           end: () => `+=${subs() * innerHeight}`,
           pin: true,
           pinSpacing: true,
           invalidateOnRefresh: true,
-          onToggle: self => {
-            if (!self.isActive) return;
-            lastSub.delete(chapter);
-            report(chapter, self.progress, true);
-          },
-          onUpdate: self => report(chapter, self.progress, self.isActive)
+          onToggle: self => toggle(chapter, self.isActive, self.progress),
+          onUpdate: self => report(chapter, self.progress)
         })
       );
     } else {
@@ -70,19 +83,15 @@ export async function setupChapterScroll(host: ChapterScrollHost): Promise<Chapt
           trigger: section,
           start: 'top 50%',
           end: 'bottom 50%',
-          onToggle: self => {
-            if (!self.isActive) return;
-            lastSub.delete(chapter);
-            report(chapter, self.progress, true);
-          },
-          onUpdate: self => report(chapter, self.progress, self.isActive)
+          onToggle: self => toggle(chapter, self.isActive, self.progress),
+          onUpdate: self => report(chapter, self.progress)
         })
       );
     }
   }
   ScrollTrigger.refresh();
-  const active = [...triggers].find(([, trigger]) => trigger.isActive);
-  if (active) report(active[0], active[1].progress, true);
+  const active = [...triggers].filter(([, trigger]) => trigger.isActive).pop();
+  if (active) toggle(active[0], true, active[1].progress);
 
   return {
     positionOf(chapter, sub) {

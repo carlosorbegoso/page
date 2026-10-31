@@ -72,6 +72,10 @@ export class Plates {
     surfaceRoot.dataset.stageSurfaces = '';
     this.panels.className = 'stage-panels';
     this.panels.dataset.stagePanels = '';
+    for (const layer of [surfaceRoot, this.panels]) {
+      Object.assign(layer.style, { position: 'fixed', inset: '0', zIndex: 'var(--z-content)', pointerEvents: 'none' });
+    }
+    this.panels.style.overflow = 'hidden';
     const cameraElement = surfaceRoot.firstElementChild?.firstElementChild;
     for (const chapter of SECTION_CHAPTERS) {
       const section = chapterElement(chapter);
@@ -108,12 +112,14 @@ export class Plates {
         this.entries.push(entry);
       });
       section.dataset.stationSpacer = '';
+      section.style.scrollMarginTop = '0px';
     }
     if (!this.entries.length) return false;
     const first = chapterElement(SECTION_CHAPTERS[0]!) ?? document.querySelector('main');
     first?.parentElement?.insertBefore(surfaceRoot, first);
     first?.parentElement?.insertBefore(this.panels, first);
     document.documentElement.classList.add('is-3d');
+    document.documentElement.style.scrollPaddingTop = '0px';
     surfaceRoot.addEventListener('focusin', this.onFocusIn);
     this.panels.addEventListener('focusin', this.onFocusIn);
     return true;
@@ -130,11 +136,14 @@ export class Plates {
     }
     for (const chapter of SECTION_CHAPTERS) {
       const section = chapterElement(chapter);
-      if (section) delete section.dataset.stationSpacer;
+      if (!section) continue;
+      delete section.dataset.stationSpacer;
+      section.style.removeProperty('scroll-margin-top');
     }
     this.css3d.domElement.remove();
     this.panels.remove();
     document.documentElement.classList.remove('is-3d');
+    document.documentElement.style.removeProperty('scroll-padding-top');
   }
 
   /** Sub-shots implied by the plates of a chapter (explicit `data-plate-sub`, else one per plate). */

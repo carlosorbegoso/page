@@ -192,9 +192,9 @@ Hilo: *"Construyo backends sólidos para bancos de día, y productos propios con
 | 3 | **TUSOCIO IA** | La empresa: qué hace, rol de cofundador. Presenta a Alfa como marca madre. | Alfa se divide en tres. |
 | 4 | **Productos** | 3 tarjetas con estado: **SkyMek** (dueño, en producción) — SaaS de gestión de talleres automotrices → skymek.app. **Parati** (en construcción) — invitaciones digitales y mesa de regalos con aportes por Yape, crear un evento es gratis → paratipe.com. **Ventixs** (en construcción) — bot de ventas por WhatsApp → ventixs.com. Enlaces externos con `rel="noopener"` y `target="_blank"` + aviso de nueva pestaña para lectores de pantalla. | Llave/herramienta, caja de regalo, Burbu. |
 | 5 | **Experiencia** | Timeline: TCS — IT Analyst, cliente BCP (jun 2025–hoy) · Intercorp Retail — Full-stack Developer (abr 2024–jun 2025) · Baufest — Java Developer (mar 2022–feb 2024) · SYSARP — Frontend Web Developer (ene 2021–sep 2022). | Ninguno. |
-| 6 | **Contacto** | Email `car_11.09@hotmail.com`, LinkedIn `carlos-orbergoso-loayza`, GitHub `carlosorbegoso`. Sin formulario (no hay backend; evita spam). Botón copiar email. | Opcional: Alfa pequeño de cierre (solo desktop alto). |
+| 6 | **Contacto** | Email `car_11.09@hotmail.com`, LinkedIn `carlos-orbergoso-loayza`, GitHub `carlosorbegoso`, X `@carlosorbegoso`, Descargar CV. Sin formulario (no hay backend; evita spam). Botón copiar email. | Opcional: Alfa pequeño de cierre (solo desktop alto). |
 
-Si Carlos entrega un CV en PDF (§9), se agrega "Descargar CV" en Hero y Contacto; si no, se quita el botón (hoy apunta a un archivo inexistente).
+"Descargar CV" en Hero y Contacto con el PDF que entrega Carlos (§9).
 
 Header: logo/monograma, navegación por anclas, selector ES/EN. En móvil: barra superior compacta + menú en hoja inferior.
 
@@ -292,16 +292,18 @@ Commits pequeños por especialista. Todo en `develop`; un único PR `develop →
 
 ---
 
-## 9. Preguntas abiertas para Carlos
+## 9. Decisiones de Carlos (antes abiertas)
 
-1. ¿Qué herramienta IA de 3D usarás (Meshy, Tripo, Rodin u otra) y quién la opera (tú con tu cuenta, o el especialista guiado por ti)?
-2. ¿Hay logos oficiales de TUSOCIO IA, SkyMek, Parati y Ventixs (SVG) y alguna paleta de marca que deba respetarse?
-3. Los 6 archivos modificados sin commitear en `main` (motores y visualizer): ¿se commitean como legado o se descartan?
-4. ¿Mantener GitHub Pages en `carlosorbegoso.github.io/page` o pasar a dominio propio?
-5. ¿Agregar datos de GitHub (repos destacados) generados en build, o se omite del todo?
-6. ¿Habrá CV descargable en PDF (ES/EN)? Hoy el botón del Hero apunta a `public/cv/` vacío.
-7. ¿Tienes un Android de gama media y un iPhone para medir FPS, o usamos Samsung Remote Test Lab?
-8. ¿Existe una cuenta de X/Twitter `@carlosorbegoso`? Si no, se quita `twitter:creator`.
+| # | Tema | Decisión |
+|---|---|---|
+| 1 | Herramienta IA 3D | Sin decidir. Se arranca con **mascotas procedurales** como placeholder (mismos nombres, escala y presupuesto); recomendación: **Tripo** (export GLB, topología limpia, plan de pago con uso comercial). Los GLB reemplazan a los placeholders sin cambiar código. |
+| 2 | Marca | No hay logos ni paleta oficiales: el Diseñador propone una identidad nueva y coherente para TUSOCIO IA y sus 3 productos. |
+| 3 | 8 archivos sin commitear | Se commitean como legado en `develop` antes del tag `legacy-v2`. |
+| 4 | Hosting | Sigue en `carlosorbegoso.github.io/page`. |
+| 5 | Repos de GitHub | Se omiten; solo enlace al perfil. |
+| 6 | CV | Carlos entrega el PDF; se agrega "Descargar CV" en Hero y Contacto (`public/cv/`). |
+| 7 | Dispositivos de prueba | Android y iPhone propios de Carlos. |
+| 8 | X/Twitter | `@carlosorbegoso` existe: se mantiene `twitter:creator` y se enlaza en Contacto. |
 
 ---
 

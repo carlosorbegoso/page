@@ -17,14 +17,14 @@ const profile = await getProfile(locale);
 <section
   id={SECTION_IDS.hero}
   aria-labelledby="hero-title"
-  data-stage-scene="hero"
-  class="hero relative grid min-h-[calc(100svh-var(--header-height))] grid-rows-[1fr_auto] lg:grid-rows-1"
+  data-station="hero"
+  class="relative grid min-h-svh grid-rows-[minmax(33svh,1fr)_auto] lg:grid-rows-1"
 >
   <div
-    class="relative z-(--z-content) row-start-2 mx-auto grid w-full max-w-wide px-gutter pb-[max(1rem,env(safe-area-inset-bottom))] lg:row-start-1 lg:grid-cols-12 lg:items-center lg:py-24"
+    class="relative row-start-2 mx-auto grid w-full max-w-wide px-gutter pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-10 lg:row-start-1 lg:grid-cols-12 lg:items-center lg:py-24"
   >
     <div
-      class="hero-panel rounded-xl bg-scrim p-5 backdrop-blur-md sm:p-8 lg:col-span-6 lg:p-10"
+      class="hero-panel rounded-xl border border-border bg-scrim p-5 shadow-lg backdrop-blur-md sm:p-8 md:max-w-2xl lg:col-span-7 lg:p-12 xl:col-span-6"
     >
       <h1
         id="hero-title"
@@ -50,23 +50,23 @@ const profile = await getProfile(locale);
       </p>
 
       <div
-        class="hero-enter mt-5 flex flex-wrap items-center gap-3 md:mt-6"
+        class="hero-enter mt-5 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center md:mt-6"
         style="--enter-delay: 180ms"
       >
-        <Button href={`#${SECTION_IDS.products}`} variant="primary" size="lg" class="grow sm:grow-0">
+        <Button href={`#${SECTION_IDS.products}`} variant="primary" size="lg" class="max-sm:px-3">
           {t('hero.ctaProducts')}
         </Button>
-        <Button href={`#${SECTION_IDS.contact}`} variant="secondary" size="lg" class="grow sm:grow-0">
+        <Button href={`#${SECTION_IDS.contact}`} variant="secondary" size="lg" class="max-sm:px-3">
           {t('hero.ctaContact')}
         </Button>
-        <CvLink locale={locale} variant="ghost" size="lg" class="w-full sm:w-auto" />
+        <CvLink locale={locale} variant="ghost" size="lg" class="col-span-2 min-h-tap sm:col-span-1" />
       </div>
     </div>
   </div>
 
   <a
     href={`#${SECTION_IDS.about}`}
-    class="hero-cue absolute bottom-6 left-1/2 z-(--z-content) hidden min-h-tap -translate-x-1/2 flex-col items-center justify-center gap-1 rounded-pill bg-scrim px-4 text-xs font-medium tracking-caps text-text-muted uppercase transition-colors duration-(--duration-fast) ease-standard hover:text-text focus-visible:shadow-focus focus-visible:outline-none lg:flex"
+    class="hero-cue absolute bottom-6 left-1/2 hidden min-h-tap -translate-x-1/2 flex-col items-center justify-center gap-1 rounded-pill border border-border bg-scrim px-4 text-xs font-medium tracking-caps text-text-muted uppercase transition-colors duration-(--duration-fast) ease-standard hover:text-text focus-visible:shadow-focus focus-visible:outline-none lg:flex"
   >
     <span>{t('nav.about')}</span>
     <svg
@@ -130,12 +130,5 @@ const profile = await getProfile(locale);
   :global(:root[data-motion='paused']) .hero-enter,
   :global(:root[data-motion='paused']) .hero-cue-arrow {
     animation: none;
-  }
-
-  @media (forced-colors: active) {
-    .hero-panel,
-    .hero-cue {
-      border: 1px solid transparent;
-    }
   }
 </style>

@@ -91,6 +91,9 @@
   --color-star-white: #f3f6ff;
   --color-star-warm: #ffe2bd;
   --color-star-ember: #ffb98f;
+  --color-star: var(--color-star-white);
+  --color-star-dim: var(--color-milestone);
+  --color-star-glow: var(--color-alfa-corona);
   --color-alfa-core: #eaf4ff;
   --color-alfa-corona: #5aa9ff;
   --color-orbit: #2a3b57;

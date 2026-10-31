@@ -41,7 +41,7 @@ const t = useTranslations(locale);
   </svg>
   <span
     aria-hidden="true"
-    class="absolute top-2.5 right-2.5 hidden size-1.5 rounded-full bg-accent group-data-[state=armed]:block"
+    class="absolute top-2.5 right-2.5 hidden size-1.5 rounded-full bg-accent group-data-[invite]:block group-data-[state=armed]:block"
   ></span>
 </button>
 
@@ -51,6 +51,8 @@ const t = useTranslations(locale);
   type State = 'off' | 'armed' | 'on';
 
   const STORAGE_KEY = 'audio';
+  const INVITE_KEY = 'audio-invited';
+  const INVITE_MS = 10000;
   const button = document.querySelector<HTMLButtonElement>('[data-audio-toggle]');
   const AudioContextClass =
     window.AudioContext ??
@@ -59,11 +61,12 @@ const t = useTranslations(locale);
   let context: AudioContext | null = null;
   let ambience: Promise<Ambience> | null = null;
 
-  function readPreference(): boolean {
+  function readPreference(): 'on' | 'off' | null {
     try {
-      return localStorage.getItem(STORAGE_KEY) === 'on';
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored === 'on' || stored === 'off' ? stored : null;
     } catch {
-      return false;
+      return null;
     }
   }
 
@@ -125,17 +128,36 @@ const t = useTranslations(locale);
       for (const type of gestureEvents) window.removeEventListener(type, onFirstGesture, true);
     };
 
+    const endInvite = () => delete button.dataset.invite;
+
+    const invite = () => {
+      try {
+        if (sessionStorage.getItem(INVITE_KEY)) return;
+        sessionStorage.setItem(INVITE_KEY, '1');
+      } catch {
+        return;
+      }
+      if (button.dataset.state !== 'off') return;
+      button.dataset.invite = '';
+      window.dispatchEvent(new CustomEvent('audio:invite'));
+      setTimeout(endInvite, INVITE_MS);
+    };
+
     button.addEventListener('click', () => {
       stopWaiting();
+      endInvite();
       if (button.dataset.state === 'on') disable(button);
       else enable(button);
     });
 
-    if (readPreference()) {
+    const preference = readPreference();
+    if (preference === 'on') {
       render(button, 'armed');
       for (const type of gestureEvents) window.addEventListener(type, onFirstGesture, true);
     } else {
       render(button, 'off');
+      if (preference === null)
+        window.addEventListener('scroll', invite, { once: true, passive: true });
     }
   }
 </script>

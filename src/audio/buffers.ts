@@ -13,9 +13,8 @@ export function createImpulse(
     let smoothed = 0;
     for (let i = 0; i < length; i++) {
       const t = i / length;
-      const white = Math.random() * 2 - 1;
       const pole = damping + (1 - damping) * t * 0.6;
-      smoothed = smoothed * pole + white * (1 - pole);
+      smoothed = smoothed * pole + (Math.random() * 2 - 1) * (1 - pole);
       const fadeIn = Math.min(1, i / (context.sampleRate * 0.012));
       data[i] = smoothed * (1 - t) ** decay * fadeIn;
     }
@@ -29,4 +28,18 @@ export function createNoise(context: BaseAudioContext, seconds: number): AudioBu
   const data = noise.getChannelData(0);
   for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
   return noise;
+}
+
+/** A raindrop on glass: a damped high ring plus a tiny noise transient. */
+export function createDrop(context: BaseAudioContext, ringHz: number): AudioBuffer {
+  const length = Math.round(context.sampleRate * 0.03);
+  const drop = context.createBuffer(1, length, context.sampleRate);
+  const data = drop.getChannelData(0);
+  for (let i = 0; i < length; i++) {
+    const t = i / context.sampleRate;
+    const ring = Math.sin(2 * Math.PI * ringHz * t * (1 - t * 6)) * Math.exp(-t / 0.004);
+    const tick = (Math.random() * 2 - 1) * Math.exp(-t / 0.0012);
+    data[i] = ring * 0.7 + tick * 0.4;
+  }
+  return drop;
 }

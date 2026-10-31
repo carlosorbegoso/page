@@ -1,106 +1,79 @@
-import { isStationId, type StationId } from '../three/sections';
 import { createImpulse, createNoise } from './buffers';
-import { midiToHz, PRESETS, type StationPreset } from './presets';
+import { isChapterId, midiToHz, PRESETS, type ChapterId, type ChapterPreset } from './chapters';
+import { RoomTone } from './room';
+import { playChime, playKey, playTock } from './voices';
 
 /** Master level at full volume. Keep it low: this is a background bed, not music. */
 export const MASTER_LEVEL = 0.11;
 
 const LEVELS = {
-  pad: 0.5,
-  shimmer: 0.09,
-  hum: 0.16,
-  air: 0.04,
-  ping: 0.22,
-  hoverPing: 0.1
+  pad: 0.32,
+  room: 1,
+  key: 0.1,
+  tockHover: 0.09,
+  tockClick: 0.18,
+  chime: 0.16
 } as const;
 
-const CROSSFADE_SECONDS = 3;
+const SWELL_GAIN = 1.45;
+const SUB_SHOT_SWELL_GAIN = 1.2;
 const FADE_IN_SECONDS = 2.5;
 const FADE_OUT_SECONDS = 1.2;
 const HIDDEN_FADE_SECONDS = 0.6;
-const STATION_PING_GAP_MS = 1200;
-const HOVER_PING_GAP_MS = 450;
+const KEY_GAP_MS = 28;
+const TOCK_GAP_MS = 250;
+const CHIME_GAP_MS = 4000;
+const FALLBACK_CHIME_DELAY_MS = 900;
 const DETUNE_CENTS = 7;
 const FILTER_LFO_HZ = 0.045;
-const FILTER_LFO_DEPTH_HZ = 140;
-const SHIMMER_LFO_HZ = 0.21;
+const FILTER_LFO_DEPTH_HZ = 90;
 
-interface StationDetail {
+type Source = 'chapter' | 'station' | 'section';
+
+interface ChapterDetail {
   id?: string | null;
+  subIndex?: number;
   progress?: number;
 }
 
-/** Time constant for setTargetAtTime so a ramp settles (~95 %) in `seconds`. */
-function settle(seconds: number): number {
-  return seconds / 3;
-}
-
 class ChordLayer {
-  private readonly pad: GainNode;
-  private readonly shimmer: GainNode;
+  private readonly output: GainNode;
   private readonly oscillators: OscillatorNode[] = [];
 
-  constructor(
-    context: AudioContext,
-    preset: StationPreset,
-    padBus: AudioNode,
-    shimmerBus: AudioNode
-  ) {
-    this.pad = context.createGain();
-    this.pad.gain.value = 0;
-    this.pad.connect(padBus);
-    this.shimmer = context.createGain();
-    this.shimmer.gain.value = 0;
-    this.shimmer.connect(shimmerBus);
+  constructor(context: AudioContext, preset: ChapterPreset, destination: AudioNode) {
+    this.output = context.createGain();
+    this.output.gain.value = 0;
+    this.output.connect(destination);
 
-    const voiceGain = 1 / preset.chord.length;
-    const shimmerFrom = preset.chord.length - 2;
+    const voiceGain = 1 / Math.sqrt(preset.chord.length * 2);
     preset.chord.forEach((note, index) => {
-      const frequency = midiToHz(note);
-      const drift = index % 2 === 0 ? 1.5 : -1.5;
       const voice = context.createGain();
       voice.gain.value = voiceGain;
-      voice.connect(this.pad);
+      voice.connect(this.output);
+      const drift = index % 2 === 0 ? 1.5 : -1.5;
       for (const [type, detune] of [
         ['triangle', -DETUNE_CENTS],
         ['sine', DETUNE_CENTS]
       ] as const) {
-        this.addOscillator(context, type, frequency, detune + drift, voice);
-      }
-      if (index >= shimmerFrom) {
-        this.addOscillator(context, 'sine', frequency * 2, drift * 2.5, this.shimmer);
+        const oscillator = context.createOscillator();
+        oscillator.type = type;
+        oscillator.frequency.value = midiToHz(note);
+        oscillator.detune.value = detune + drift;
+        oscillator.connect(voice);
+        this.oscillators.push(oscillator);
       }
     });
-
     for (const oscillator of this.oscillators) oscillator.start();
   }
 
   fadeIn(at: number, seconds: number): void {
-    for (const gain of [this.pad.gain, this.shimmer.gain]) rampTo(gain, 1, at, seconds);
+    rampTo(this.output.gain, 1, at, seconds);
   }
 
   fadeOutAndStop(at: number, seconds: number): void {
-    for (const gain of [this.pad.gain, this.shimmer.gain]) rampTo(gain, 0, at, seconds);
+    rampTo(this.output.gain, 0, at, seconds);
     for (const oscillator of this.oscillators) oscillator.stop(at + seconds + 0.05);
-    this.oscillators[0]?.addEventListener('ended', () => {
-      this.pad.disconnect();
-      this.shimmer.disconnect();
-    });
-  }
-
-  private addOscillator(
-    context: AudioContext,
-    type: OscillatorType,
-    frequency: number,
-    detune: number,
-    destination: AudioNode
-  ): void {
-    const oscillator = context.createOscillator();
-    oscillator.type = type;
-    oscillator.frequency.value = frequency;
-    oscillator.detune.value = detune;
-    oscillator.connect(destination);
-    this.oscillators.push(oscillator);
+    this.oscillators[0]?.addEventListener('ended', () => this.output.disconnect());
   }
 }
 
@@ -112,30 +85,30 @@ function rampTo(param: AudioParam, target: number, at: number, seconds: number):
 
 export class Ambience {
   private readonly master: GainNode;
-  private readonly padFilter: BiquadFilterNode;
   private readonly padBus: GainNode;
-  private readonly shimmerBus: GainNode;
-  private readonly shimmerTremolo: GainNode;
-  private readonly shimmerLfoDepth: GainNode;
-  private readonly humGain: GainNode;
-  private readonly airGain: GainNode;
+  private readonly padFilter: BiquadFilterNode;
+  private readonly swell: GainNode;
   private readonly roomSend: GainNode;
-  private readonly spaceSend: GainNode;
-  private readonly pingBus: GainNode;
-  private readonly sources: AudioScheduledSourceNode[] = [];
+  private readonly hallSend: GainNode;
+  private readonly fxBus: GainNode;
+  private readonly chimeBus: GainNode;
+  private readonly roomTone: RoomTone;
+  private readonly noise: AudioBuffer;
+  private readonly lfo: OscillatorNode;
   private layer: ChordLayer | null = null;
-  private station: StationId | null = null;
-  private engineDrivesStations = false;
+  private chapter: ChapterId | null = null;
+  private subIndex = 0;
+  private driver: Source | null = null;
   private paused: boolean;
   private enabled = false;
-  private lastStationPing = 0;
-  private lastHoverPing = 0;
+  private lastKey = 0;
+  private lastTock = 0;
+  private lastChime = 0;
   private lastHoverLabel: string | null = null;
+  private chimeTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly abort = new AbortController();
 
   constructor(private readonly context: AudioContext) {
-    const now = context.currentTime;
-
     const limiter = context.createDynamicsCompressor();
     limiter.threshold.value = -18;
     limiter.knee.value = 12;
@@ -149,94 +122,44 @@ export class Ambience {
     this.master.connect(limiter);
 
     const roomVerb = context.createConvolver();
-    roomVerb.buffer = createImpulse(context, 1.4, 2.6, 3200);
-    const spaceVerb = context.createConvolver();
-    spaceVerb.buffer = createImpulse(context, 5.5, 1.8, 5200);
+    roomVerb.buffer = createImpulse(context, 1.2, 2.8, 3000);
+    const hallVerb = context.createConvolver();
+    hallVerb.buffer = createImpulse(context, 3.6, 2, 4200);
     this.roomSend = context.createGain();
-    this.spaceSend = context.createGain();
+    this.hallSend = context.createGain();
     this.roomSend.connect(roomVerb).connect(this.master);
-    this.spaceSend.connect(spaceVerb).connect(this.master);
+    this.hallSend.connect(hallVerb).connect(this.master);
 
+    this.padBus = context.createGain();
+    this.padBus.gain.value = LEVELS.pad;
     this.padFilter = context.createBiquadFilter();
     this.padFilter.type = 'lowpass';
     this.padFilter.Q.value = 0.6;
     this.padFilter.frequency.value = PRESETS.hero.cutoff;
-    this.padBus = context.createGain();
-    this.padBus.gain.value = LEVELS.pad;
-    this.padBus.connect(this.padFilter);
-    this.connectWithSends(this.padFilter, 1);
+    this.swell = context.createGain();
+    this.padBus.connect(this.padFilter).connect(this.swell);
+    this.connectWithSends(this.swell, 1, 1, 1);
 
-    const filterLfo = context.createOscillator();
-    filterLfo.frequency.value = FILTER_LFO_HZ;
-    const filterLfoDepth = context.createGain();
-    filterLfoDepth.gain.value = FILTER_LFO_DEPTH_HZ;
-    filterLfo.connect(filterLfoDepth).connect(this.padFilter.frequency);
-    this.sources.push(filterLfo);
+    this.lfo = context.createOscillator();
+    this.lfo.frequency.value = FILTER_LFO_HZ;
+    const lfoDepth = context.createGain();
+    lfoDepth.gain.value = FILTER_LFO_DEPTH_HZ;
+    this.lfo.connect(lfoDepth).connect(this.padFilter.frequency);
+    this.lfo.start();
 
-    this.shimmerBus = context.createGain();
-    this.shimmerBus.gain.value = 0;
-    this.shimmerTremolo = context.createGain();
-    this.shimmerTremolo.gain.value = 1;
-    this.shimmerBus.connect(this.shimmerTremolo);
-    this.connectWithSends(this.shimmerTremolo, 0.6, 1.4);
-    const shimmerLfo = context.createOscillator();
-    shimmerLfo.frequency.value = SHIMMER_LFO_HZ;
-    this.shimmerLfoDepth = context.createGain();
-    this.shimmerLfoDepth.gain.value = 0;
-    shimmerLfo.connect(this.shimmerLfoDepth).connect(this.shimmerTremolo.gain);
-    this.sources.push(shimmerLfo);
+    this.noise = createNoise(context, 4);
+    this.roomTone = new RoomTone(context, this.noise);
+    this.roomTone.output.gain.value = LEVELS.room;
+    this.connectWithSends(this.roomTone.output, 1, 0.25, 0);
 
-    const noise = createNoise(context, 4);
-
-    this.humGain = context.createGain();
-    this.humGain.gain.value = 0;
-    const humRumble = context.createBufferSource();
-    humRumble.buffer = noise;
-    humRumble.loop = true;
-    const humLowpass = context.createBiquadFilter();
-    humLowpass.type = 'lowpass';
-    humLowpass.frequency.value = 170;
-    const humRumbleGain = context.createGain();
-    humRumbleGain.gain.value = 0.7;
-    humRumble.connect(humLowpass).connect(humRumbleGain).connect(this.humGain);
-    const mainsHum = context.createOscillator();
-    mainsHum.frequency.value = 60;
-    const mainsHarmonic = context.createOscillator();
-    mainsHarmonic.frequency.value = 120;
-    const mainsGain = context.createGain();
-    mainsGain.gain.value = 0.18;
-    const harmonicGain = context.createGain();
-    harmonicGain.gain.value = 0.05;
-    mainsHum.connect(mainsGain).connect(this.humGain);
-    mainsHarmonic.connect(harmonicGain).connect(this.humGain);
-    this.humGain.connect(this.master);
-    this.humGain.connect(this.roomSend);
-    this.sources.push(humRumble, mainsHum, mainsHarmonic);
-
-    this.airGain = context.createGain();
-    this.airGain.gain.value = 0;
-    const air = context.createBufferSource();
-    air.buffer = noise;
-    air.loop = true;
-    air.playbackRate.value = 0.93;
-    const airBand = context.createBiquadFilter();
-    airBand.type = 'bandpass';
-    airBand.frequency.value = 5200;
-    airBand.Q.value = 0.5;
-    air.connect(airBand).connect(this.airGain);
-    this.connectWithSends(this.airGain, 0.5, 1.2);
-    this.sources.push(air);
-
-    this.pingBus = context.createGain();
-    this.pingBus.gain.value = 1;
-    this.connectWithSends(this.pingBus, 0.35, 1.6, 0.4);
-
-    for (const source of this.sources) source.start(now);
+    this.fxBus = context.createGain();
+    this.connectWithSends(this.fxBus, 0.85, 0.35, 0.05);
+    this.chimeBus = context.createGain();
+    this.connectWithSends(this.chimeBus, 0.6, 0.6, 0.5);
 
     this.paused =
       document.documentElement.dataset.motion === 'paused' ||
       matchMedia('(prefers-reduced-motion: reduce)').matches;
-    this.applyPause();
     this.listen();
   }
 
@@ -245,7 +168,7 @@ export class Ambience {
     this.enabled = true;
     if (this.context.state !== 'running') await this.context.resume();
     if (!this.enabled) return;
-    if (!this.layer) this.setStation(this.station ?? this.currentStationFromDom(), false);
+    if (!this.layer) this.setChapter(this.chapter ?? this.chapterFromDom(), false);
     if (document.visibilityState === 'hidden') return;
     this.rampMaster(MASTER_LEVEL, FADE_IN_SECONDS);
   }
@@ -260,101 +183,132 @@ export class Ambience {
 
   dispose(): void {
     this.abort.abort();
-    for (const source of this.sources) source.stop();
+    this.roomTone.dispose();
+    this.lfo.stop();
     void this.context.close();
   }
 
   private listen(): void {
     const options = { signal: this.abort.signal };
+    const on = <T>(type: string, handler: (detail: T | undefined) => void) =>
+      window.addEventListener(type, event => handler((event as CustomEvent<T>).detail), options);
 
-    window.addEventListener(
-      'station:enter',
-      event => {
-        this.engineDrivesStations = true;
-        this.onStation((event as CustomEvent<StationDetail>).detail?.id);
-      },
-      options
+    on<ChapterDetail>('chapter:enter', detail =>
+      this.onEnter('chapter', detail?.id, detail?.subIndex)
     );
-    window.addEventListener(
-      'section:active',
-      event => {
-        if (!this.engineDrivesStations)
-          this.onStation((event as CustomEvent<StationDetail>).detail?.id);
-      },
-      options
-    );
-    window.addEventListener(
-      'station:progress',
-      event => this.onProgress((event as CustomEvent<StationDetail>).detail),
-      options
-    );
-    window.addEventListener(
-      'scene:hover',
-      event =>
-        this.onHover((event as CustomEvent<{ label?: string | null }>).detail?.label ?? null),
-      options
-    );
-    window.addEventListener(
-      'motion:toggle',
-      event => {
-        this.paused = Boolean((event as CustomEvent<{ paused?: boolean }>).detail?.paused);
-        this.applyPause();
-      },
-      options
-    );
+    on<ChapterDetail>('station:enter', detail => this.onEnter('station', detail?.id));
+    on<ChapterDetail>('section:active', detail => this.onEnter('section', detail?.id));
+    on<ChapterDetail>('chapter:settled', detail => this.onSettled(detail?.id));
+    on<ChapterDetail>('chapter:progress', detail => this.onProgress(detail));
+    on<{ label?: string | null }>('scene:hover', detail => this.onHover(detail?.label ?? null));
+    on<{ source?: string }>('product:focus', detail => this.onSceneSelect(detail?.source));
+    on<{ source?: string }>('experience:focus', detail => this.onSceneSelect(detail?.source));
+    on<unknown>('desk:key', () => this.onKey());
+    on<{ paused?: boolean }>('motion:toggle', detail => {
+      this.paused = Boolean(detail?.paused);
+    });
     document.addEventListener('visibilitychange', () => void this.onVisibility(), options);
   }
 
-  private onStation(id: string | null | undefined): void {
-    if (!isStationId(id) || id === this.station) return;
-    const isFirst = this.station === null;
-    this.setStation(id, !isFirst);
+  /** Chapter events win; station and section events only drive the sound until they arrive. */
+  private accepts(source: Source): boolean {
+    const rank: Record<Source, number> = { chapter: 0, station: 1, section: 2 };
+    if (this.driver === null || rank[source] < rank[this.driver]) this.driver = source;
+    return this.driver === source;
   }
 
-  private setStation(id: StationId, withPing: boolean): void {
-    this.station = id;
-    const preset = PRESETS[id];
-    const now = this.context.currentTime;
-    const tau = settle(CROSSFADE_SECONDS);
-
-    const next = new ChordLayer(this.context, preset, this.padBus, this.shimmerBus);
-    this.layer?.fadeOutAndStop(now, CROSSFADE_SECONDS);
-    next.fadeIn(now, CROSSFADE_SECONDS);
-    this.layer = next;
-
-    this.padFilter.frequency.setTargetAtTime(preset.cutoff, now, tau);
-    this.humGain.gain.setTargetAtTime(preset.hum * LEVELS.hum, now, tau);
-    this.airGain.gain.setTargetAtTime(preset.air * LEVELS.air, now, tau);
-    this.shimmerBus.gain.setTargetAtTime(preset.air * LEVELS.shimmer, now, tau);
-    this.roomSend.gain.setTargetAtTime(preset.room, now, tau);
-    this.spaceSend.gain.setTargetAtTime(preset.space, now, tau);
-
-    if (withPing && this.enabled && !this.paused) {
-      const elapsed = performance.now() - this.lastStationPing;
-      if (elapsed >= STATION_PING_GAP_MS) {
-        this.lastStationPing = performance.now();
-        this.ping(preset.bells, LEVELS.ping);
+  private onEnter(source: Source, id: string | null | undefined, subIndex = 0): void {
+    if (!isChapterId(id) || !this.accepts(source)) return;
+    if (id === this.chapter) {
+      if (subIndex !== this.subIndex) {
+        this.subIndex = subIndex;
+        this.swellBy(SUB_SHOT_SWELL_GAIN);
       }
+      return;
+    }
+    this.subIndex = subIndex;
+    const isFirst = this.chapter === null;
+    this.setChapter(id, !isFirst);
+    if (source !== 'chapter' && id === 'contact') {
+      this.clearChimeTimer();
+      this.chimeTimer = setTimeout(() => this.onSettled('contact'), FALLBACK_CHIME_DELAY_MS);
     }
   }
 
-  private onProgress(detail: StationDetail | undefined): void {
-    if (this.paused || !detail || !this.station || detail.id !== this.station) return;
-    const progress = Math.max(-1, Math.min(1, Number(detail.progress) || 0));
-    const preset = PRESETS[this.station];
-    const travel = Math.abs(progress);
-    const cutoff = preset.cutoff * (1 + travel * 0.18);
-    this.padFilter.frequency.setTargetAtTime(cutoff, this.context.currentTime, 0.4);
+  private onSettled(id: string | null | undefined): void {
+    if (id !== 'contact' || this.chapter !== 'contact' || !this.canPlayDetail()) return;
+    const now = performance.now();
+    if (now - this.lastChime < CHIME_GAP_MS) return;
+    this.lastChime = now;
+    playChime(this.context, this.chimeBus, LEVELS.chime);
+  }
+
+  private setChapter(id: ChapterId, withSwell: boolean): void {
+    this.chapter = id;
+    if (id !== 'contact') this.clearChimeTimer();
+    const preset = PRESETS[id];
+    const now = this.context.currentTime;
+    const seconds = preset.crossfade;
+    const tau = seconds / 3;
+
+    const next = new ChordLayer(this.context, preset, this.padBus);
+    this.layer?.fadeOutAndStop(now, seconds);
+    next.fadeIn(now, seconds);
+    this.layer = next;
+
+    this.padFilter.frequency.setTargetAtTime(preset.cutoff, now, tau);
+    this.roomSend.gain.setTargetAtTime(preset.room, now, tau);
+    this.hallSend.gain.setTargetAtTime(preset.hall, now, tau);
+    this.roomTone.set(preset, seconds);
+
+    if (withSwell) this.swellBy(SWELL_GAIN);
+  }
+
+  private swellBy(peak: number): void {
+    if (this.paused) return;
+    const now = this.context.currentTime;
+    const gain = this.swell.gain;
+    gain.cancelScheduledValues(now);
+    gain.setTargetAtTime(peak, now, 0.6);
+    gain.setTargetAtTime(1, now + 1.8, 1.2);
+  }
+
+  /** Only the dawn follows the scroll: the chord keeps opening as the outro is read. */
+  private onProgress(detail: ChapterDetail | undefined): void {
+    if (this.paused || this.chapter !== 'outro' || detail?.id !== 'outro') return;
+    const progress = Math.min(1, Math.max(0, Number(detail.progress) || 0));
+    const cutoff = PRESETS.outro.cutoff * (0.7 + 0.3 * progress);
+    this.padFilter.frequency.setTargetAtTime(cutoff, this.context.currentTime, 0.6);
   }
 
   private onHover(label: string | null): void {
     const changed = label !== this.lastHoverLabel;
     this.lastHoverLabel = label;
-    if (!label || !changed || this.paused || !this.enabled || !this.station) return;
+    if (label && changed) this.tock(LEVELS.tockHover);
+  }
+
+  private onSceneSelect(source: string | undefined): void {
+    if (source === 'scene') this.tock(LEVELS.tockClick);
+  }
+
+  private tock(level: number): void {
+    if (!this.canPlayDetail()) return;
     const now = performance.now();
-    if (now - this.lastHoverPing < HOVER_PING_GAP_MS) return;
-    this.lastHoverPing = now;
-    this.ping(PRESETS[this.station].bells, LEVELS.hoverPing);
+    if (now - this.lastTock < TOCK_GAP_MS) return;
+    this.lastTock = now;
+    playTock(this.context, this.fxBus, level);
+  }
+
+  private onKey(): void {
+    if (!this.canPlayDetail()) return;
+    const now = performance.now();
+    if (now - this.lastKey < KEY_GAP_MS) return;
+    this.lastKey = now;
+    playKey(this.context, this.fxBus, this.noise, LEVELS.key);
+  }
+
+  private canPlayDetail(): boolean {
+    return this.enabled && !this.paused && this.context.state === 'running';
   }
 
   private async onVisibility(): Promise<void> {
@@ -371,60 +325,34 @@ export class Ambience {
     this.rampMaster(MASTER_LEVEL, FADE_IN_SECONDS);
   }
 
-  private ping(bells: readonly number[], level: number): void {
-    const note = bells[Math.floor(Math.random() * bells.length)] ?? 88;
-    const frequency = midiToHz(note);
-    const at = this.context.currentTime + 0.02;
-    const envelope = this.context.createGain();
-    envelope.gain.setValueAtTime(0, at);
-    envelope.gain.linearRampToValueAtTime(level, at + 0.008);
-    envelope.gain.exponentialRampToValueAtTime(0.0001, at + 2.4);
-    envelope.connect(this.pingBus);
-
-    const partials: [ratio: number, gain: number][] = [
-      [1, 1],
-      [2.756, 0.22],
-      [5.404, 0.06]
-    ];
-    for (const [ratio, gain] of partials) {
-      const oscillator = this.context.createOscillator();
-      oscillator.frequency.value = frequency * ratio;
-      const partialGain = this.context.createGain();
-      partialGain.gain.value = gain;
-      oscillator.connect(partialGain).connect(envelope);
-      oscillator.start(at);
-      oscillator.stop(at + 2.5);
-      oscillator.addEventListener('ended', () => partialGain.disconnect());
+  private connectWithSends(node: AudioNode, dry: number, room: number, hall: number): void {
+    for (const [destination, level] of [
+      [this.master, dry],
+      [this.roomSend, room],
+      [this.hallSend, hall]
+    ] as const) {
+      if (level <= 0) continue;
+      const gain = this.context.createGain();
+      gain.gain.value = level;
+      node.connect(gain).connect(destination);
     }
-  }
-
-  private applyPause(): void {
-    const now = this.context.currentTime;
-    this.shimmerLfoDepth.gain.setTargetAtTime(this.paused ? 0 : 0.35, now, 0.8);
-  }
-
-  private connectWithSends(node: AudioNode, dry: number, space = 1, room = 1): void {
-    const dryGain = this.context.createGain();
-    dryGain.gain.value = dry;
-    node.connect(dryGain).connect(this.master);
-    const roomGain = this.context.createGain();
-    roomGain.gain.value = room;
-    node.connect(roomGain).connect(this.roomSend);
-    const spaceGain = this.context.createGain();
-    spaceGain.gain.value = space;
-    node.connect(spaceGain).connect(this.spaceSend);
   }
 
   private rampMaster(target: number, seconds: number): void {
     rampTo(this.master.gain, target, this.context.currentTime, seconds);
   }
 
-  private currentStationFromDom(): StationId {
+  private clearChimeTimer(): void {
+    if (this.chimeTimer) clearTimeout(this.chimeTimer);
+    this.chimeTimer = null;
+  }
+
+  private chapterFromDom(): ChapterId {
     const centre = innerHeight / 2;
     for (const section of document.querySelectorAll<HTMLElement>('[data-station]')) {
       const box = section.getBoundingClientRect();
       const id = section.dataset.station;
-      if (box.top <= centre && box.bottom >= centre && isStationId(id)) return id;
+      if (box.top <= centre && box.bottom >= centre && isChapterId(id)) return id;
     }
     return 'hero';
   }

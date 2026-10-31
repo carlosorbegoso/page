@@ -111,6 +111,7 @@ Fases iniciales separadas 120°. En foco: la banda pasa a 2.2 y la luna se acerc
 ## 11. Placas
 
 Ver `src/styles/plates.css`. Resumen:
+- `.plate` define fondo, borde, radio, ancho y estados; **no define padding** (cada interior pone el suyo; `--plate-padding` queda como valor recomendado). Nunca `transform` en `.plate`: lo usa CSS3DRenderer. El acento sale de `--product-accent` si existe, si no de `data-plate-accent`, si no `--color-accent`.
 - Obsidiana casi opaca `--color-plate` (`rgb(11 16 25 / 0.94)`), borde 1 px `--color-plate-border`, radio `--plate-radius`, línea de señal arriba-izquierda (2 px, acento) como las mascotas.
 - **Contraste**: calculado en el peor caso (placa al 94 % sobre **blanco puro** detrás): `text` 14.3 · `text-muted` 6.9 · `text-subtle` 4.8 · `accent` 6.8 · `status-live` 9.7 · `skymek` 8.0 · `parati` 7.1 · `ventixs` 8.4. Todos ≥ 4.5 sin excepción (a diferencia del scrim de `identity.md`).
 - Sin `backdrop-filter`; `backface-visibility: hidden`.

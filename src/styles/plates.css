@@ -1,13 +1,12 @@
 @layer components {
   .plate {
-    --plate-accent: var(--color-accent);
+    --plate-accent: var(--product-accent, var(--color-accent));
     --plate-signal: var(--plate-signal-width);
 
     position: relative;
     box-sizing: border-box;
     width: 100%;
     max-width: var(--plate-width);
-    padding: var(--plate-padding);
     border: 1px solid var(--color-plate-border);
     border-radius: var(--plate-radius);
     background-color: var(--color-plate-solid);
@@ -28,7 +27,7 @@
     content: '';
     position: absolute;
     top: -1px;
-    left: var(--plate-padding);
+    left: var(--plate-signal-inset);
     width: var(--plate-signal);
     height: 2px;
     border-radius: 0 0 2px 2px;

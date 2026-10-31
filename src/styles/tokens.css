@@ -212,7 +212,8 @@
   --tool-band-metalness: 0.2;
 
   --plate-width: 36rem;
-  --plate-padding: clamp(1.5rem, 1rem + 2.2vw, 2.75rem);
+  --plate-padding: clamp(1.25rem, 0.9rem + 1.6vw, 2rem);
+  --plate-signal-inset: 1.5rem;
   --plate-radius: 1.25rem;
   --plate-gap: clamp(0.875rem, 0.7rem + 0.6vw, 1.25rem);
   --plate-signal-width: 3rem;

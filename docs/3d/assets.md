@@ -113,3 +113,12 @@ FPS: p75 16.7 ms (60 fps) en desktop `high` y 30 fps en reposo / 60 en scroll co
 - `?station=<id>` — fija una estación (sin scroll).
 - `?tier=none|mid|high` — fuerza el tier.
 - `?capture=<id>&progress=1&w=<ancho>` — frame determinista para el fallback.
+
+## 6. Integración con escritorio y FX (2026-10-31, tarde)
+
+- Chunk 3D completo de arranque (gzip -9): `three` 114.2 + `three.core` 70.6 + `gsap` 27.1 + `ScrollTrigger` 17.4 + `desk` 12.7 + `fx` 5.6 = **≈ 248 KB** (presupuesto 260). JS inicial del 3D ≈ 3.5 KB.
+- Los módulos de estación exponen `picks` / `resolvePick` / `setHover` (`contracts.ts`): el raycast los incluye cuando la cámara está a ±0.6 de su estación.
+- Las poses de un módulo no llevan view offset: el motor interpola `cx/cy` entre estaciones (escritorio cx 0.5 → about cx 0.26) con el mismo easing del vuelo.
+- La exposición pasa de 1.1 (cuarto) al valor del token entre `s` 0.5 y 0.85; arrastre táctil horizontal ±4° en el escritorio (`s < 0.25`).
+- Productos: una placa al frente por segmento (0.8 viewport cada uno); las demás descansan junto a su luna. `product:focus` (`source: 'scene'`) sigue a la placa del frente.
+- Fallback del hero regenerado con el escritorio: 375 3.2 KB · 768 16.3 KB · 1440 30 KB (AVIF); total `public/fallback/` 116 KB. La pantalla sale vacía (la placa es DOM).

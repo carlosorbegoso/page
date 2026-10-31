@@ -42,7 +42,7 @@ Archivos: `src/components/ui/KineticText.astro`, `src/motion/{kinetic,magnetic,s
 | `split` | `'words' \| 'lines' \| 'chars'` | `words` | `lines` agrupa las palabras por línea real (se mide `offsetTop` una vez, al revelar). `chars` parte en grafemas (`Intl.Segmenter`). |
 | `delay` | `number` (ms) | `0` | Retardo antes de la primera unidad (`--k-delay`). |
 | `shine` | `boolean` | `false` | Brillo que recorre las letras del texto asentado; solo en la página plana. |
-| `type` | `boolean` | `false` | Tecleo: caracteres uno a uno (18 ms) con cursor `_` (implica `split="chars"`). Titular del hero en el monitor. |
+| `type` | `boolean` | `false` | Tecleo: caracteres uno a uno (18 ms) con cursor `_` (implica `split="chars"`); emite `window` `desk:key` por carácter (no con reduced-motion/pausa; los eyebrows de `SectionHeader` teclean en silencio). Titular del hero en el monitor. |
 | `counts` | `boolean` | `false` | No parte el texto: las cifras seguidas de `%` cuentan de 0 al revelarse (cifras del hero). |
 | `class` | `string` | — | Clases del elemento raíz. |
 

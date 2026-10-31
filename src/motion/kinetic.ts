@@ -62,6 +62,7 @@ function enhanceSectionHeaders(): void {
     if (eyebrow.children.length > 0) continue;
     buildSplit(eyebrow, 'chars');
     eyebrow.dataset.kineticVariant = 'type';
+    eyebrow.dataset.kineticSilent = '';
     eyebrow.toggleAttribute('data-kinetic-cursor', true);
   }
 }
@@ -135,6 +136,29 @@ function watchSettle(root: HTMLElement): void {
   settleTimers.set(root, window.setTimeout(() => settle(root), SETTLE_FALLBACK_MS));
 }
 
+const keyTimers = new WeakMap<HTMLElement, number[]>();
+
+function stopKeys(root: HTMLElement): void {
+  for (const timer of keyTimers.get(root) ?? []) window.clearTimeout(timer);
+  keyTimers.delete(root);
+}
+
+const msOf = (value: string) => Number.parseFloat(value) * (value.trim().endsWith('ms') ? 1 : 1000) || 0;
+
+/** The desk audio plays a mechanical key for every typed character (`desk:key`), in step with the CSS stagger. */
+function typeKeys(root: HTMLElement): void {
+  stopKeys(root);
+  const style = getComputedStyle(root);
+  const delay = msOf(style.getPropertyValue('--k-delay'));
+  const stagger = msOf(style.getPropertyValue('--k-stagger'));
+  const count = root.querySelectorAll('.k-c').length;
+  const timers: number[] = [];
+  for (let i = 0; i < count; i++) {
+    timers.push(window.setTimeout(() => window.dispatchEvent(new CustomEvent('desk:key')), delay + i * stagger));
+  }
+  keyTimers.set(root, timers);
+}
+
 function revealRoot(root: HTMLElement, animate: boolean): void {
   if (root.dataset.reveal === 'in') return;
   if (root.dataset.kinetic && root.dataset.kinetic !== 'block') measureLines(root);
@@ -143,6 +167,7 @@ function revealRoot(root: HTMLElement, animate: boolean): void {
     if (animate) runCount(root);
     else finishCount(root);
   }
+  if (animate && root.dataset.kineticVariant === 'type' && root.dataset.kineticSilent === undefined) typeKeys(root);
   if (animate) watchSettle(root);
   else settle(root);
 }
@@ -150,6 +175,7 @@ function revealRoot(root: HTMLElement, animate: boolean): void {
 function resetRoot(root: HTMLElement): void {
   if (root.dataset.reveal !== 'in') return;
   window.clearTimeout(settleTimers.get(root));
+  stopKeys(root);
   delete root.dataset.reveal;
   root.removeAttribute('data-settled');
   if (root.dataset.kineticCount !== undefined) finishCount(root);
@@ -252,7 +278,10 @@ function applyMode(): void {
 function revealEverything(): void {
   for (const [owner, roots] of groups) {
     setLive(owner, false);
-    for (const root of roots) revealRoot(root, false);
+    for (const root of roots) {
+      stopKeys(root);
+      revealRoot(root, false);
+    }
   }
 }
 

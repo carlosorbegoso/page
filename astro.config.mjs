@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   site: 'https://carlosorbegoso.github.io',
   base: '/page',
-  trailingSlash: 'always',
+  trailingSlash: 'ignore',
   i18n: {
     defaultLocale: 'es',
     locales: ['es', 'en'],

@@ -26,7 +26,7 @@ const description = Astro.props.description ?? t('meta.description');
 
 const site = Astro.site!;
 const absolute = (path: string) => new URL(path, site).href;
-const canonical = absolute(Astro.url.pathname);
+const canonical = absolute(Astro.url.pathname.replace(/\/?$/, '/'));
 const alternates = LOCALES.map(l => ({
   hreflang: LOCALE_TAGS[l].bcp47,
   href: absolute(localeUrl(l))

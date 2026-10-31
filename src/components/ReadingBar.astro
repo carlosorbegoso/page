@@ -1,0 +1,42 @@
+---
+import LangSwitch from './LangSwitch.astro';
+import { SECTION_IDS, SITE } from '../config/site';
+import { localeUrl, otherLocale, useTranslations, type Locale } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const readingPath = (l: Locale) => localeUrl(l, l === 'es' ? 'lectura' : 'reading');
+---
+
+<header class="border-b border-border bg-surface">
+  <div class="container-content flex min-h-16 flex-wrap items-center justify-between gap-x-4 gap-y-2 py-2">
+    <a
+      href={`${localeUrl(locale)}#${SECTION_IDS.hero}`}
+      class="-ms-2 inline-flex min-h-tap items-center gap-2 rounded-md px-2 text-sm font-medium text-text transition-colors duration-(--duration-fast) ease-standard hover:text-accent-hover focus-visible:shadow-focus focus-visible:outline-none"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        width="18"
+        height="18"
+        aria-hidden="true"
+        class="shrink-0 fill-none stroke-current"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M19 12H5M11 6l-6 6 6 6"></path>
+      </svg>
+      {t('reading.exit')}
+    </a>
+    <div class="flex items-center gap-3">
+      <span class="hidden font-display text-base font-semibold text-text sm:inline">
+        {SITE.name}
+      </span>
+      <LangSwitch locale={locale} href={readingPath(otherLocale(locale))} />
+    </div>
+  </div>
+</header>

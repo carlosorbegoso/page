@@ -5,7 +5,7 @@ import AudioToggle from './AudioToggle.astro';
 import CopyEmail from './contact/CopyEmail.astro';
 import CvLink from './ui/CvLink.astro';
 import { SECTION_IDS, SITE } from '../config/site';
-import { localeUrl, useTranslations, type Locale } from '../i18n/utils';
+import { localeUrl, useTranslations, withBase, type Locale } from '../i18n/utils';
 
 interface Props {
   locale: Locale;
@@ -13,7 +13,7 @@ interface Props {
 
 const { locale } = Astro.props;
 const t = useTranslations(locale);
-const home = localeUrl(locale);
+const readingUrl = localeUrl(locale, locale === 'es' ? 'lectura' : 'reading');
 const sections = [
   { id: SECTION_IDS.hero, label: t('nav.hero') },
   { id: SECTION_IDS.about, label: t('nav.about') },
@@ -22,49 +22,104 @@ const sections = [
   { id: SECTION_IDS.experience, label: t('nav.experience') },
   { id: SECTION_IDS.contact, label: t('nav.contact') }
 ];
+const menuItem =
+  'flex min-h-tap w-full items-center gap-3 rounded-md px-3 text-xs font-medium tracking-caps text-text-muted uppercase transition-colors duration-(--duration-fast) ease-standard hover:bg-surface hover:text-text focus-visible:shadow-focus focus-visible:outline-none';
 ---
 
-<a
-  href={`${home}#${SECTION_IDS.hero}`}
-  aria-label={t('nav.home')}
-  class="hud-control hud-icon fixed top-[max(0.5rem,env(safe-area-inset-top))] left-[max(0.5rem,env(safe-area-inset-left))] z-(--z-header) md:top-4 md:left-4"
+<div
+  data-hud
+  class="fixed top-[max(0.5rem,env(safe-area-inset-top))] left-[max(0.5rem,env(safe-area-inset-left))] z-(--z-header) md:top-4 md:left-4"
 >
-  <svg viewBox="0 0 64 64" width="22" height="22" aria-hidden="true">
-    <path
-      d="M43.5 22.4A15 15 0 1 0 43.5 41.6"
-      fill="none"
-      class="stroke-text"
-      stroke-width="7"
-    ></path>
-    <circle cx="47" cy="32" r="4.5" class="fill-accent"></circle>
-  </svg>
-</a>
-
-<div class="fixed top-[max(0.5rem,env(safe-area-inset-top))] right-[max(0.5rem,env(safe-area-inset-right))] z-(--z-header) flex items-center gap-1 md:top-4 md:right-4">
-  <LangSwitch locale={locale} compact hud />
-  <MotionToggle locale={locale} floating />
-  <AudioToggle locale={locale} />
-  <button
-    type="button"
-    data-index-open
-    aria-expanded="false"
-    aria-controls="section-index"
-    aria-haspopup="dialog"
-    class="hud-control"
-  >
-    <svg
-      viewBox="0 0 24 24"
-      width="14"
-      height="14"
-      aria-hidden="true"
-      class="fill-none stroke-current"
-      stroke-width="2"
-      stroke-linecap="round"
+  <div class="flex items-center gap-1">
+    <button
+      type="button"
+      data-hud-toggle
+      aria-expanded="false"
+      aria-controls="hud-menu"
+      aria-label={t('hud.label')}
+      class="hud-control hud-icon"
     >
-      <path d="M4 7h16M4 12h16M4 17h10"></path>
-    </svg>
-    <span>{t('nav.index')}</span>
-  </button>
+      <svg viewBox="0 0 64 64" width="22" height="22" aria-hidden="true">
+        <path
+          d="M43.5 22.4A15 15 0 1 0 43.5 41.6"
+          fill="none"
+          class="stroke-text"
+          stroke-width="7"
+        ></path>
+        <circle cx="47" cy="32" r="4.5" class="fill-accent"></circle>
+      </svg>
+    </button>
+    <span
+      data-hud-chapter
+      aria-hidden="true"
+      class="font-mono text-xs tracking-caps text-text-muted tabular-nums opacity-0 transition-opacity duration-(--duration-base) ease-standard data-[ready=true]:opacity-100"
+    ></span>
+  </div>
+
+  <div
+    id="hud-menu"
+    data-hud-menu
+    hidden
+    class="hud-menu mt-1 flex w-60 flex-col gap-1 rounded-lg border border-border bg-scrim p-2 shadow-lg backdrop-blur-md"
+  >
+    <div class="flex items-center gap-1 border-b border-border pb-2">
+      <LangSwitch locale={locale} compact hud />
+      <AudioToggle locale={locale} />
+      <MotionToggle locale={locale} floating />
+    </div>
+    <button
+      type="button"
+      data-index-open
+      aria-expanded="false"
+      aria-controls="section-index"
+      aria-haspopup="dialog"
+      class={menuItem}
+    >
+      <svg
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        aria-hidden="true"
+        class="shrink-0 fill-none stroke-current"
+        stroke-width="2"
+        stroke-linecap="round"
+      >
+        <path d="M4 7h16M4 12h16M4 17h10"></path>
+      </svg>
+      {t('nav.index')}
+    </button>
+    <a href={readingUrl} class={menuItem}>
+      <svg
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        aria-hidden="true"
+        class="shrink-0 fill-none stroke-current"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z"></path>
+      </svg>
+      {t('reading.enter')}
+    </a>
+    <a href={withBase(SITE.cvPath)} download type="application/pdf" class={menuItem}>
+      <svg
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        aria-hidden="true"
+        class="shrink-0 fill-none stroke-current"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path>
+      </svg>
+      {t('cv.download')}
+      <span class="sr-only">({t('cv.format')})</span>
+    </a>
+  </div>
 </div>
 
 <dialog
@@ -150,6 +205,18 @@ const sections = [
 </dialog>
 
 <style>
+  .hud-menu {
+    transform-origin: top left;
+    transition:
+      opacity var(--duration-base) var(--ease-out),
+      translate var(--duration-base) var(--ease-out);
+
+    @starting-style {
+      opacity: 0;
+      translate: 0 -0.25rem;
+    }
+  }
+
   .index-sheet {
     --sheet-offset: translateY(100%);
     transform: var(--sheet-offset);
@@ -195,57 +262,120 @@ const sections = [
 </style>
 
 <script>
-  import { SECTION_IDS } from '../config/site';
-
+  const STATION_SELECTOR = '[data-station]';
+  const hud = document.querySelector<HTMLElement>('[data-hud]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-hud-toggle]');
+  const menu = document.querySelector<HTMLElement>('[data-hud-menu]');
+  const chapter = document.querySelector<HTMLElement>('[data-hud-chapter]');
   const sheet = document.querySelector<HTMLDialogElement>('[data-index]');
-  const openButton = document.querySelector<HTMLButtonElement>('[data-index-open]');
+  const indexButton = document.querySelector<HTMLButtonElement>('[data-index-open]');
+  const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
+  const HOVER_CLOSE_DELAY_MS = 250;
 
-  if (sheet && openButton) {
-    openButton.addEventListener('click', () => {
-      sheet.showModal();
-      openButton.setAttribute('aria-expanded', 'true');
+  if (hud && toggle && menu) {
+    let closeTimer: number | undefined;
+
+    const isOpen = () => !menu.hidden;
+
+    function setOpen(open: boolean, { restoreFocus = false } = {}) {
+      window.clearTimeout(closeTimer);
+      if (open === isOpen()) return;
+      menu!.hidden = !open;
+      toggle!.setAttribute('aria-expanded', String(open));
+      if (!open && restoreFocus) toggle!.focus();
+    }
+
+    toggle.addEventListener('click', () => setOpen(!isOpen()));
+
+    hud.addEventListener('pointerenter', event => {
+      if (event.pointerType === 'mouse' && finePointer.matches) setOpen(true);
+    });
+    hud.addEventListener('pointerleave', event => {
+      if (event.pointerType !== 'mouse' || !finePointer.matches) return;
+      if (hud.contains(document.activeElement)) return;
+      closeTimer = window.setTimeout(() => setOpen(false), HOVER_CLOSE_DELAY_MS);
     });
 
-    sheet.addEventListener('close', () => openButton.setAttribute('aria-expanded', 'false'));
+    hud.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && isOpen()) {
+        event.stopPropagation();
+        setOpen(false, { restoreFocus: true });
+      }
+    });
+
+    hud.addEventListener('focusout', event => {
+      const next = event.relatedTarget;
+      if (next instanceof Node && hud.contains(next)) return;
+      if (sheet?.open) return;
+      setOpen(false);
+    });
+
+    document.addEventListener('pointerdown', event => {
+      if (isOpen() && event.target instanceof Node && !hud.contains(event.target)) setOpen(false);
+    });
+
+    indexButton?.addEventListener('click', () => {
+      setOpen(false);
+      sheet?.showModal();
+      indexButton.setAttribute('aria-expanded', 'true');
+    });
+  }
+
+  if (sheet) {
+    sheet.addEventListener('close', () => {
+      indexButton?.setAttribute('aria-expanded', 'false');
+      toggle?.focus();
+    });
     sheet.querySelector('[data-index-close]')?.addEventListener('click', () => sheet.close());
     sheet.addEventListener('click', event => {
       if (event.target === sheet) sheet.close();
     });
-
     for (const link of sheet.querySelectorAll('[data-index-link]')) {
       link.addEventListener('click', () => sheet.close());
     }
   }
 
   const indexLinks = [...document.querySelectorAll<HTMLAnchorElement>('[data-index-link]')];
-  const sections = Object.values(SECTION_IDS)
-    .map(
-      id =>
-        document.querySelector<HTMLElement>(`[data-station="${id}"]`) ?? document.getElementById(id)
-    )
-    .filter((section): section is HTMLElement => section !== null);
+  const stations = [...document.querySelectorAll<HTMLElement>(STATION_SELECTOR)];
+  const stationIds = stations.map(station => station.dataset.station ?? station.id);
+  let activeId: string | null = null;
 
   function setActive(id: string | null) {
+    if (!id || id === activeId) return;
+    activeId = id;
     for (const link of indexLinks) {
       if (link.dataset.indexLink === id) link.setAttribute('aria-current', 'true');
       else link.removeAttribute('aria-current');
     }
+    const position = stationIds.indexOf(id);
+    if (chapter && position >= 0) {
+      const pad = (value: number) => String(value).padStart(2, '0');
+      chapter.textContent = `${pad(position + 1)} / ${pad(stationIds.length)}`;
+      chapter.dataset.ready = 'true';
+    }
     window.dispatchEvent(new CustomEvent('section:active', { detail: { id } }));
   }
 
-  if ('IntersectionObserver' in window && sections.length > 0) {
-    const visible = new Set<string>();
+  for (const type of ['station:enter', 'chapter:enter']) {
+    window.addEventListener(type, event => {
+      setActive((event as CustomEvent<{ id?: string }>).detail?.id ?? null);
+    });
+  }
+
+  if ('IntersectionObserver' in window && stations.length > 0) {
+    const visible = new Set<HTMLElement>();
     const observer = new IntersectionObserver(
       entries => {
         for (const entry of entries) {
-          if (entry.isIntersecting) visible.add(entry.target.id);
-          else visible.delete(entry.target.id);
+          const target = entry.target as HTMLElement;
+          if (entry.isIntersecting) visible.add(target);
+          else visible.delete(target);
         }
-        const current = sections.find(section => visible.has(section.id));
-        if (current) setActive(current.id);
+        const current = stations.find(station => visible.has(station));
+        if (current) setActive(current.dataset.station ?? current.id);
       },
       { rootMargin: '-45% 0px -50% 0px' }
     );
-    for (const section of sections) observer.observe(section);
+    for (const station of stations) observer.observe(station);
   }
 </script>

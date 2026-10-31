@@ -4,7 +4,6 @@ import Header from './Header.astro';
 import Footer from './Footer.astro';
 import StageCanvas from './three/StageCanvas.astro';
 import HeroFallbackPreload from './three/HeroFallbackPreload.astro';
-import StarMap from './StarMap.astro';
 import SceneTooltip from './SceneTooltip.astro';
 import Hero from './sections/Hero.astro';
 import About from './sections/About.astro';
@@ -34,6 +33,5 @@ const { locale } = Astro.props;
     <Contact locale={locale} />
   </main>
   <Footer locale={locale} />
-  <StarMap locale={locale} />
   <SceneTooltip />
 </Base>

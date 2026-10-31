@@ -4,17 +4,18 @@ import { LOCALE_TAGS, localeUrl, otherLocale, useTranslations, type Locale } fro
 interface Props {
   locale: Locale;
   compact?: boolean;
+  href?: string;
   hud?: boolean;
   class?: string;
 }
 
-const { locale, compact = false, hud = false, class: className } = Astro.props;
+const { locale, compact = false, hud = false, href, class: className } = Astro.props;
 const target = otherLocale(locale);
 const t = useTranslations(locale);
 ---
 
 <a
-  href={localeUrl(target)}
+  href={href ?? localeUrl(target)}
   hreflang={LOCALE_TAGS[target].bcp47}
   lang={target}
   data-lang-switch

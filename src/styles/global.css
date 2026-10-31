@@ -81,6 +81,11 @@
   }
 }
 
+/* In 3D the outro chapter paints the credits; the HTML footer stays for no-WebGL and reading mode. */
+html.is-3d [data-site-footer] {
+  display: none;
+}
+
 @utility container-content {
   width: 100%;
   max-width: calc(var(--container-content) + 2 * var(--spacing-gutter));

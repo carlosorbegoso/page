@@ -23,6 +23,7 @@ export const en = {
   'nav.index': 'Index',
   'nav.closeIndex': 'Close index',
   'nav.quickActions': 'Quick actions',
+  'nav.starMap': 'Section map',
   'lang.label': 'Language',
   'lang.switchTo': 'Español',
   'lang.current': 'English',

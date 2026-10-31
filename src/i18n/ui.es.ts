@@ -21,6 +21,7 @@ export const es = {
   'nav.index': 'Índice',
   'nav.closeIndex': 'Cerrar índice',
   'nav.quickActions': 'Acciones rápidas',
+  'nav.starMap': 'Mapa de secciones',
   'lang.label': 'Idioma',
   'lang.switchTo': 'English',
   'lang.current': 'Español',

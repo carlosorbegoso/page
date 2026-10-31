@@ -1,0 +1,236 @@
+---
+import { SECTION_IDS } from '../config/site';
+import { useTranslations, type Locale } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const stations = [
+  { id: SECTION_IDS.hero, label: t('nav.hero') },
+  { id: SECTION_IDS.about, label: t('nav.about') },
+  { id: SECTION_IDS.company, label: t('nav.company') },
+  { id: SECTION_IDS.products, label: t('nav.products') },
+  { id: SECTION_IDS.experience, label: t('nav.experience') },
+  { id: SECTION_IDS.contact, label: t('nav.contact') }
+];
+---
+
+<nav
+  aria-label={t('nav.starMap')}
+  data-star-map
+  class="fixed bottom-[max(0.25rem,env(safe-area-inset-bottom))] left-1/2 z-(--z-header) -translate-x-1/2 md:top-1/2 md:right-2 md:bottom-auto md:left-auto md:translate-x-0 md:-translate-y-1/2"
+>
+  <ol class="relative flex items-center md:flex-col md:gap-2">
+    <li aria-hidden="true" class="star-rail pointer-events-none absolute">
+      <span class="star-rail-fill absolute inset-0"></span>
+    </li>
+    {stations.map(station => (
+      <li class="relative">
+        <a href={`#${station.id}`} data-star-link={station.id} class="star-link">
+          <span class="star-dot" aria-hidden="true" />
+          <span class="star-label">{station.label}</span>
+        </a>
+      </li>
+    ))}
+  </ol>
+</nav>
+
+<style>
+  .star-rail {
+    inset-inline: calc(var(--spacing-tap) / 2);
+    top: 50%;
+    height: 1px;
+    background-color: var(--color-orbit, var(--color-border));
+  }
+
+  .star-rail-fill {
+    background-color: var(--color-star-glow, var(--color-accent));
+    transform: scaleX(var(--progress, 0));
+    transform-origin: left center;
+  }
+
+  .star-link {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: var(--spacing-tap);
+    height: var(--spacing-tap);
+    border-radius: var(--radius-pill);
+  }
+
+  .star-link:focus-visible {
+    outline: none;
+  }
+
+  .star-dot {
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-star-dim, var(--color-border-strong));
+    transition:
+      background-color var(--duration-base) var(--ease-standard),
+      box-shadow var(--duration-base) var(--ease-standard),
+      scale var(--duration-base) var(--ease-standard);
+  }
+
+  .star-link[data-reached='true'] .star-dot {
+    background-color: var(--color-star, var(--color-text-muted));
+  }
+
+  .star-link:hover .star-dot {
+    background-color: var(--color-text);
+  }
+
+  .star-link[aria-current='true'] .star-dot {
+    scale: 1.6;
+    background-color: var(--color-star-glow, var(--color-accent));
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--color-star-glow, var(--color-accent)) 25%, transparent),
+      0 0 12px 2px color-mix(in srgb, var(--color-star-glow, var(--color-accent)) 60%, transparent);
+  }
+
+  .star-link:focus-visible .star-dot {
+    box-shadow: var(--shadow-focus);
+  }
+
+  .star-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (width >= 48rem) {
+    .star-rail {
+      inset-inline: auto;
+      inset-block: calc(var(--spacing-tap) / 2);
+      left: 50%;
+      width: 1px;
+      height: auto;
+    }
+
+    .star-rail-fill {
+      transform: scaleY(var(--progress, 0));
+      transform-origin: center top;
+    }
+
+    .star-label {
+      right: calc(100% - 0.25rem);
+      width: auto;
+      height: auto;
+      padding: 0.25rem 0.625rem;
+      clip-path: none;
+      opacity: 0;
+      translate: 0.25rem 0;
+      border-radius: var(--radius-pill);
+      background-color: color-mix(in srgb, var(--color-scrim) 70%, transparent);
+      color: var(--color-text-muted);
+      font-size: var(--text-xs);
+      font-weight: var(--font-weight-medium);
+      letter-spacing: var(--tracking-caps);
+      text-transform: uppercase;
+      pointer-events: none;
+      transition:
+        opacity var(--duration-fast) var(--ease-standard),
+        translate var(--duration-fast) var(--ease-standard);
+    }
+
+    .star-link:hover .star-label,
+    .star-link:focus-visible .star-label,
+    .star-link[aria-current='true'] .star-label {
+      opacity: 1;
+      translate: 0 0;
+    }
+
+    .star-link[aria-current='true'] .star-label {
+      color: var(--color-text);
+    }
+  }
+
+  @media (forced-colors: active) {
+    .star-dot {
+      background-color: CanvasText;
+    }
+
+    .star-link[aria-current='true'] .star-dot {
+      background-color: Highlight;
+    }
+  }
+</style>
+
+<script>
+  import { SECTION_IDS } from '../config/site';
+
+  const mapElement = document.querySelector<HTMLElement>('[data-star-map]');
+
+  if (mapElement) {
+    const map = mapElement;
+    const links = [...map.querySelectorAll<HTMLAnchorElement>('[data-star-link]')];
+    const sectionFor = (id: string) =>
+      document.querySelector<HTMLElement>(`[data-station="${id}"]`) ?? document.getElementById(id);
+    let ratios: number[] = [];
+    let frame = 0;
+
+    const maxScroll = () => Math.max(1, document.documentElement.scrollHeight - innerHeight);
+
+    function measure() {
+      const max = maxScroll();
+      ratios = Object.values(SECTION_IDS).map(id => {
+        const section = sectionFor(id);
+        const top = section ? section.getBoundingClientRect().top + scrollY : 0;
+        return Math.min(1, Math.max(0, (top - innerHeight * 0.1) / max));
+      });
+      update();
+    }
+
+    function railProgress(progress: number): number {
+      const last = ratios.length - 1;
+      if (last < 1) return progress;
+      for (let index = 0; index < last; index++) {
+        const start = ratios[index];
+        const end = ratios[index + 1];
+        if (progress < end) {
+          const span = end - start;
+          const local = span > 0 ? Math.max(0, (progress - start) / span) : 1;
+          return (index + local) / last;
+        }
+      }
+      return 1;
+    }
+
+    function update() {
+      frame = 0;
+      const progress = Math.min(1, Math.max(0, scrollY / maxScroll()));
+      map.style.setProperty('--progress', railProgress(progress).toFixed(4));
+      links.forEach((link, index) => {
+        link.dataset.reached = String(progress + 0.001 >= ratios[index]);
+      });
+    }
+
+    addEventListener(
+      'scroll',
+      () => {
+        if (!frame) frame = requestAnimationFrame(update);
+      },
+      { passive: true }
+    );
+    addEventListener('resize', measure);
+    addEventListener('load', measure);
+    new ResizeObserver(measure).observe(document.body);
+
+    addEventListener('section:active', event => {
+      const { id } = (event as CustomEvent<{ id: string | null }>).detail;
+      for (const link of links) {
+        if (link.dataset.starLink === id) link.setAttribute('aria-current', 'true');
+        else link.removeAttribute('aria-current');
+      }
+    });
+
+    measure();
+  }
+</script>

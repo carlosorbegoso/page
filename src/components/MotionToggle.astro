@@ -21,20 +21,22 @@ const iconOnly = display === 'icon';
   aria-label={iconOnly ? t('motion.pause') : undefined}
   title={iconOnly ? t('motion.pause') : undefined}
   class:list={[
-    'group inline-flex min-h-tap min-w-tap items-center justify-center gap-2 rounded-md border text-sm font-medium',
-    'transition-colors duration-(--duration-fast) ease-standard hover:bg-surface hover:text-text',
+    'group',
     floating
-      ? 'border-border bg-scrim text-text shadow-md backdrop-blur-md hover:border-border-strong'
-      : 'border-transparent text-text-muted',
-    'focus-visible:shadow-focus focus-visible:outline-none',
+      ? 'hud-control hud-icon'
+      : [
+          'inline-flex min-h-tap min-w-tap items-center justify-center gap-2 rounded-md border border-transparent text-sm font-medium text-text-muted',
+          'transition-colors duration-(--duration-fast) ease-standard hover:bg-surface hover:text-text',
+          'focus-visible:shadow-focus focus-visible:outline-none'
+        ],
     !iconOnly && 'w-full justify-start border-border px-4',
     className
   ]}
 >
   <svg
     viewBox="0 0 24 24"
-    width="20"
-    height="20"
+    width={floating ? 14 : 20}
+    height={floating ? 14 : 20}
     aria-hidden="true"
     class="shrink-0 fill-current group-data-[state=paused]:hidden"
   >
@@ -43,8 +45,8 @@ const iconOnly = display === 'icon';
   </svg>
   <svg
     viewBox="0 0 24 24"
-    width="20"
-    height="20"
+    width={floating ? 14 : 20}
+    height={floating ? 14 : 20}
     aria-hidden="true"
     class="hidden shrink-0 fill-current group-data-[state=paused]:block"
   >

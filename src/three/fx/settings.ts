@@ -11,7 +11,6 @@ export interface FxTokens {
   vignetteDarkness: number;
   vignetteOffset: number;
   bokeh: number;
-  focusRange: number;
   pointerDamping: number;
 }
 
@@ -25,7 +24,6 @@ export function readFxTokens(): FxTokens {
     vignetteDarkness: tokenNumber('--fx-vignette-darkness', 0.5),
     vignetteOffset: tokenNumber('--fx-vignette-offset', 0.32),
     bokeh: tokenNumber('--fx-dof-bokeh-scale', 2.5),
-    focusRange: 0.6,
     pointerDamping: tokenNumber('--fx-pointer-damping', 0.06)
   };
 }

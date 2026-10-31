@@ -20,7 +20,7 @@ También llama a `attachPointer`, `setTier` y `resize`. Los recursos de GPU se c
 
 | Evento | Efecto |
 |---|---|
-| `chapter:enter` | Arranca la transición de grading al capítulo y **congela la distancia de foco** mientras viaja la cámara |
+| `chapter:enter` | Arranca la transición de grading al capítulo y **congela la distancia de foco** mientras viaja la cámara. Si `chapter:settled` no llega en 2 s (transición interrumpida), el foco se libera y hace el rack igualmente |
 | `chapter:settled` | Rack focus (≤ 600 ms, ease in-out) desde la distancia retenida hasta el sujeto de `setFocus` |
 | `station:enter` | Respaldo para el grading mientras el motor no emita eventos `chapter:*` |
 | `motion:toggle` y `prefers-reduced-motion` | Ver "Reduced motion" |
@@ -34,7 +34,7 @@ Orden: fluido (solo si algún material lo consume y está despierto) → escena 
 | Efecto | Implementación | Valor |
 |---|---|---|
 | Bloom | Umbral suave sobre la luminancia HDR lineal, con Karis. 13 taps de bajada y tienda de subida. **Solo deben pasar el umbral la pantalla, la lámpara y las señales** (ver "Regla de emisivos") | strength 0.32 (tope 0.6), radius 0.45, threshold 0.88, smoothing 0.1 |
-| Rack focus (DoF) | Gather en disco áureo. El fondo no sangra sobre el primer plano nítido. El foco se retiene durante la transición de cámara y se tira en ≤ 600 ms al asentarse. Sin eventos de capítulo, un salto de foco mayor que medio rango dispara el mismo rack. Los puntos lejanos (z > 30 u: ciudad o estrellas tras el vidrio) se limitan a CoC 0.3 | bokeh `--fx-dof-bokeh-scale` 2.5, rango 0.6 m |
+| Rack focus (DoF) | Gather en disco áureo. El fondo no sangra sobre el primer plano nítido. El foco se retiene durante la transición de cámara y se tira en ≤ 600 ms al asentarse. Sin eventos de capítulo, un salto de foco mayor que medio rango dispara el mismo rack. Los puntos lejanos (z > 30 u: ciudad o estrellas tras el vidrio) se limitan a CoC 0.3 | bokeh `--fx-dof-bokeh-scale` 2.5; rango de foco por capítulo (tabla) |
 | Grading por capítulo | Exposición × balance de blancos (temperatura) × split toning (sombras frías de la ventana, altas cálidas de la lámpara), en lineal antes del ACES | tabla abajo |
 | Tone mapping | `tonemapping_fragment` + `colorspace_fragment`: el ACES y la exposición del renderer siguen siendo la fuente de verdad, y el grading multiplica encima | — |
 | Viñeta | Eskil, después del tone mapping. La intensidad la da el capítulo, escalada por `--fx-vignette-darkness` / 0.5 | offset 0.32 |
@@ -46,16 +46,16 @@ El texto (CSS3D en monitor y teléfono, y paneles 2D anclados) vive en el DOM, e
 
 ### Grading por capítulo (`grading.ts`)
 
-| Capítulo | Exposición × | Temperatura | Split | Viñeta | Transición |
-|---|---|---|---|---|---|
-| `intro` (encendido) | 0.55 | −0.30 (monitor frío, antes de la lámpara) | 0.10 | 0.60 | corte |
-| `hero` | 1.00 | 0 | 0.20 | 0.50 | 0.8 s desde `intro` |
-| `about` | 1.00 | −0.08 (el monitor llena el plano) | 0.15 | 0.45 | 1.2 s |
-| `company` | 1.00 | +0.12 (bajo la lámpara) | 0.25 | 0.55 | 1.2 s |
-| `products` | 1.00 | +0.14 | 0.25 | 0.55 | 1.2 s |
-| `experience` | 0.98 | +0.04 | 0.20 | 0.50 | 1.2 s |
-| `contact` | 1.00 | −0.06 (pantalla del teléfono) | 0.20 | 0.50 | 1.2 s |
-| `outro` (amanecer) | 1.30 | +0.35 | 0.10 | 0.30 | **2.5 s** |
+| Capítulo | Exposición × | Temperatura | Split | Viñeta | Rango de foco | Transición |
+|---|---|---|---|---|---|---|
+| `intro` (encendido) | 0.55 | −0.30 (monitor frío, antes de la lámpara) | 0.10 | 0.60 | 0.6 m | corte |
+| `hero` | 1.00 | 0 | 0.20 | 0.50 | 0.6 m | 0.8 s desde `intro` |
+| `about` | 1.00 | −0.08 (el monitor llena el plano) | 0.15 | 0.45 | 0.6 m | 1.2 s |
+| `company` | 1.00 | +0.12 (bajo la lámpara) | 0.25 | 0.55 | 0.25 m | 1.2 s |
+| `products` | 1.00 | +0.14 | 0.25 | 0.55 | **0.13 m** (macro: las figuras vecinas se desenfocan) | 1.2 s |
+| `experience` | 0.98 | +0.04 | 0.20 | 0.50 | 0.3 m | 1.2 s |
+| `contact` | 1.00 | −0.06 (pantalla del teléfono) | 0.20 | 0.50 | 0.2 m | 1.2 s |
+| `outro` (amanecer) | 1.30 | +0.35 | 0.10 | 0.30 | 0.8 m | **2.5 s** |
 
 Sin eventos de capítulo, el grade es el de `hero`, así que el arranque nunca queda negro por culpa del FX. El parpadeo de la lámpara del `intro` es del escenario: el FX solo pone la base fría y oscura y la abre al entrar en `hero`.
 
@@ -129,3 +129,4 @@ En un móvil de gama media (GPU unas 10–15 veces más lenta) calculo 8–12 ms
 - Grano: estático.
 - Rack focus y transiciones de grading (amanecer incluido): instantáneos. La disolvencia de 300 ms de los cortes es del motor.
 - Bloom, viñeta y tone mapping se mantienen: son estáticos.
+- Con `?capture=` (frames de fallback) el FX se comporta igual que con reduced-motion: grano fijo y transiciones instantáneas, para que el resultado sea determinista.

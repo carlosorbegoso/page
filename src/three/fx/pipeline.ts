@@ -64,6 +64,8 @@ export interface FxOptions {
 
 const CUT_ORDER: readonly FxFeature[] = ['fluid', 'dof'];
 const RACK_SECONDS = 0.6;
+/** Longest camera transition (1.4 s) plus margin: releases the focus hold if `chapter:settled` never comes. */
+const HOLD_TIMEOUT_SECONDS = 2;
 const AMOUNT_TAU = 0.15;
 const EVALUATE_EVERY_MS = 1000;
 const MIN_SAMPLES = 20;
@@ -123,6 +125,8 @@ class CinematicPipeline implements CinematicFx {
   private rackTo = 5;
   private rackElapsed = RACK_SECONDS;
   private holdingFocus = false;
+  private holdElapsed = 0;
+  private readonly capture = new URLSearchParams(location.search).has('capture');
   private chapterEvents = false;
   private chapter = '';
   private readonly grading = new ChapterGrading();
@@ -191,17 +195,22 @@ class CinematicPipeline implements CinematicFx {
       this.chapterEvents = true;
       this.enterChapter(id);
       this.holdingFocus = true;
+      this.holdElapsed = 0;
     });
     listen('chapter:settled', id => {
       this.chapterEvents = true;
       this.enterChapter(id);
-      this.holdingFocus = false;
-      this.rackElapsed = 0;
-      this.rackFrom = this.focusDistance;
+      this.releaseHold();
     });
     listen('station:enter', id => {
       if (!this.chapterEvents) this.enterChapter(id);
     });
+  }
+
+  private releaseHold(): void {
+    this.holdingFocus = false;
+    this.rackElapsed = 0;
+    this.rackFrom = this.focusDistance;
   }
 
   private enterChapter(id: string): void {
@@ -218,7 +227,7 @@ class CinematicPipeline implements CinematicFx {
   }
 
   private get frozen(): boolean {
-    return !motionAllowed(this.motion) || (this.pointer !== null && !this.pointer.enabled);
+    return this.capture || !motionAllowed(this.motion) || (this.pointer !== null && !this.pointer.enabled);
   }
 
   private get fluidRunning(): boolean {
@@ -297,7 +306,7 @@ class CinematicPipeline implements CinematicFx {
     u.uNear!.value = camera.near;
     u.uFar!.value = camera.far;
     u.uFocus!.value = this.focusDistance;
-    u.uRange!.value = tokens.focusRange;
+    u.uRange!.value = grade.focusRange;
     u.uDofAmount!.value = targets.dof ? this.dofAmount : 0;
     u.uBloomStrength!.value = tokens.bloomStrength;
     u.uExposure!.value = grade.exposure;
@@ -356,6 +365,11 @@ class CinematicPipeline implements CinematicFx {
   private updateFocus(camera: PerspectiveCamera, dt: number): void {
     const target = this.hasFocus && this.dofEnabled ? 1 : 0;
     const instant = this.frozen;
+    const range = this.grading.value.focusRange;
+    if (this.holdingFocus) {
+      this.holdElapsed += dt;
+      if (this.holdElapsed > HOLD_TIMEOUT_SECONDS) this.releaseHold();
+    }
     if (this.hasFocus) {
       camera.getWorldDirection(this.forward);
       const desired = Math.max(this.toPoint.subVectors(this.focusPoint, camera.position).dot(this.forward), camera.near);
@@ -369,7 +383,7 @@ class CinematicPipeline implements CinematicFx {
           const t = this.rackElapsed / RACK_SECONDS;
           const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
           this.focusDistance = this.rackFrom + (this.rackTo - this.rackFrom) * eased;
-        } else if (Math.abs(desired - this.focusDistance) > this.tokens.focusRange * 0.5) {
+        } else if (Math.abs(desired - this.focusDistance) > range * 0.5) {
           this.rackFrom = this.focusDistance;
           this.rackTo = desired;
           this.rackElapsed = 0;
@@ -401,7 +415,7 @@ class CinematicPipeline implements CinematicFx {
     u.uNear!.value = camera.near;
     u.uFar!.value = camera.far;
     u.uFocus!.value = this.focusDistance;
-    u.uRange!.value = this.tokens.focusRange;
+    u.uRange!.value = this.grading.value.focusRange;
     (u.uTexel!.value as Vector2).set(1 / dofTarget.width, 1 / dofTarget.height);
     const bokeh = this.tokens.bokeh;
     u.uMaxRadius!.value = (bokeh * 3 * (targets.height / 1080)) / this.profile.dofDivisor;

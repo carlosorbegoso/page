@@ -1,0 +1,74 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import { getLocale, useTranslations } from '../../i18n/utils';
+
+type Variant = 'primary' | 'secondary' | 'ghost';
+type Size = 'md' | 'lg';
+
+interface Props extends Omit<HTMLAttributes<'a'>, 'href' | 'download' | 'type' | 'target'> {
+  href?: string;
+  variant?: Variant;
+  size?: Size;
+  external?: boolean;
+  download?: boolean | string;
+  type?: 'button' | 'submit' | 'reset';
+}
+
+const {
+  href,
+  variant = 'primary',
+  size = 'md',
+  external = false,
+  download,
+  type = 'button',
+  class: className,
+  rel,
+  ...attrs
+} = Astro.props;
+
+const t = useTranslations(getLocale(Astro.currentLocale, Astro.url));
+
+const variants: Record<Variant, string> = {
+  primary: 'border-transparent bg-accent text-on-accent hover:bg-accent-hover',
+  secondary:
+    'border-border-strong bg-surface text-text hover:border-text-muted hover:bg-surface-raised',
+  ghost: 'border-transparent bg-transparent text-text hover:bg-surface hover:text-accent-hover'
+};
+
+const sizes: Record<Size, string> = {
+  md: 'min-h-tap gap-2 px-4 text-sm',
+  lg: 'min-h-12 gap-2.5 px-6 text-base'
+};
+
+const classes = [
+  'inline-flex min-w-tap items-center justify-center rounded-md border font-medium leading-tight select-none',
+  'transition-colors duration-(--duration-fast) ease-standard',
+  'focus-visible:shadow-focus focus-visible:outline-none',
+  'disabled:pointer-events-none disabled:opacity-50',
+  variants[variant],
+  sizes[size],
+  className
+];
+
+const linkRel = external ? ['noopener', 'noreferrer', rel].filter(Boolean).join(' ') : rel;
+---
+
+{
+  href ? (
+    <a
+      href={href}
+      class:list={classes}
+      target={external ? '_blank' : undefined}
+      rel={linkRel}
+      download={download}
+      {...attrs}
+    >
+      <slot />
+      {external && <span class="sr-only">{t('link.newTab')}</span>}
+    </a>
+  ) : (
+    <button type={type} class:list={classes} {...(attrs as HTMLAttributes<'button'>)}>
+      <slot />
+    </button>
+  )
+}

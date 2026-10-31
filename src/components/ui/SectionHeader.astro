@@ -1,0 +1,35 @@
+---
+interface Props {
+  id: string;
+  title: string;
+  eyebrow?: string;
+  subtitle?: string;
+  align?: 'start' | 'center';
+  class?: string;
+}
+
+const { id, title, eyebrow, subtitle, align = 'start', class: className } = Astro.props;
+const centered = align === 'center';
+---
+
+<header
+  class:list={[
+    'flex max-w-reading flex-col gap-3',
+    centered ? 'mx-auto items-center text-center' : 'items-start text-start',
+    className
+  ]}
+>
+  {
+    eyebrow && (
+      <p class="font-sans text-xs font-semibold tracking-caps text-accent uppercase">{eyebrow}</p>
+    )
+  }
+  <h2
+    id={id}
+    class="font-display text-3xl font-semibold tracking-display text-balance text-text"
+  >
+    {title}
+  </h2>
+  {subtitle && <p class="text-lg text-pretty text-text-muted">{subtitle}</p>}
+  <slot />
+</header>

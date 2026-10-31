@@ -10,19 +10,36 @@ import {
   PMREMGenerator,
   Scene,
   SRGBColorSpace,
+  Vector3,
   type Texture,
   type WebGLRenderer
 } from 'three';
 import { tokenColor } from '../tokens';
 
-/** Uniforms the atlas shader exposes for hover highlighting. */
+/** Number of object ids the per-object arrays cover (ids 0 … OBJECT_SLOTS − 1). */
+export const OBJECT_SLOTS = 12;
+/** Figures animated in the vertex shader: object ids 1 … FIGURE_SLOTS. */
+export const FIGURE_SLOTS = 4;
+
+/** Uniforms the atlas shader exposes: hover, per-figure lift/turn and per-object light. */
 export interface AtlasUniforms {
   uHoverId: { value: number };
   uHoverMix: { value: number };
   uHoverColor: { value: Color };
+  /** Pivot (base centre) of each animated figure. */
+  uFigPivot: { value: Vector3[] };
+  uFigLift: { value: number[] };
+  uFigYaw: { value: number[] };
+  /** Multiplier of the baked emission (signal lines) per object id. */
+  uSignal: { value: number[] };
+  /** Extra self-illumination (albedo × value) per object id: folder labels, highlights. */
+  uGlow: { value: number[] };
 }
 
 const VERTEX_DECLARATIONS = /* glsl */ `
+uniform vec3 uFigPivot[${FIGURE_SLOTS}];
+uniform float uFigLift[${FIGURE_SLOTS}];
+uniform float uFigYaw[${FIGURE_SLOTS}];
 attribute vec4 pbr;
 attribute float oid;
 varying vec4 vPbr;
@@ -39,6 +56,8 @@ varying vec3 vRoomNormal;
 uniform float uHoverId;
 uniform float uHoverMix;
 uniform vec3 uHoverColor;
+uniform float uSignal[${OBJECT_SLOTS}];
+uniform float uGlow[${OBJECT_SLOTS}];
 uniform vec4 uRoomBounds;
 uniform vec4 uDeskBounds;
 uniform float uDeskTop;
@@ -86,16 +105,47 @@ export function createAtlasMaterial(
   const uniforms: AtlasUniforms = {
     uHoverId: { value: -1 },
     uHoverMix: { value: 0 },
-    uHoverColor: { value: new Color(1, 1, 1) }
+    uHoverColor: { value: new Color(1, 1, 1) },
+    uFigPivot: { value: Array.from({ length: FIGURE_SLOTS }, () => new Vector3()) },
+    uFigLift: { value: new Array<number>(FIGURE_SLOTS).fill(0) },
+    uFigYaw: { value: new Array<number>(FIGURE_SLOTS).fill(0) },
+    uSignal: { value: new Array<number>(OBJECT_SLOTS).fill(1) },
+    uGlow: { value: new Array<number>(OBJECT_SLOTS).fill(0) }
   };
   material.onBeforeCompile = shader => {
-    Object.assign(shader.uniforms, uniforms, {
+    Object.assign(shader.uniforms, {
+      uHoverId: uniforms.uHoverId,
+      uHoverMix: uniforms.uHoverMix,
+      uHoverColor: uniforms.uHoverColor,
+      uFigPivot: uniforms.uFigPivot,
+      uFigLift: uniforms.uFigLift,
+      uFigYaw: uniforms.uFigYaw,
+      uSignal: uniforms.uSignal,
+      uGlow: uniforms.uGlow,
       uRoomBounds: { value: roomBounds },
       uDeskBounds: { value: deskBounds },
       uDeskTop: { value: deskTop }
     });
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', `#include <common>\n${VERTEX_DECLARATIONS}`)
+      .replace(
+        '#include <beginnormal_vertex>',
+        `#include <beginnormal_vertex>
+        int figure = int(oid + 0.5) - 1;
+        float figureYaw = figure >= 0 && figure < ${FIGURE_SLOTS} ? uFigYaw[figure] : 0.0;
+        float yawC = cos(figureYaw);
+        float yawS = sin(figureYaw);
+        objectNormal = vec3(yawC * objectNormal.x + yawS * objectNormal.z, objectNormal.y, -yawS * objectNormal.x + yawC * objectNormal.z);`
+      )
+      .replace(
+        '#include <begin_vertex>',
+        `#include <begin_vertex>
+        if (figure >= 0 && figure < ${FIGURE_SLOTS}) {
+          vec3 pivot = uFigPivot[figure];
+          vec3 q = transformed - pivot;
+          transformed = vec3(yawC * q.x + yawS * q.z, q.y, -yawS * q.x + yawC * q.z) + pivot + vec3(0.0, uFigLift[figure], 0.0);
+        }`
+      )
       .replace(
         '#include <color_vertex>',
         '#include <color_vertex>\nvPbr = pbr;\nvOid = oid;\nvRoomPosition = position;\nvRoomNormal = normal;'
@@ -113,13 +163,14 @@ export function createAtlasMaterial(
       .replace(
         '#include <emissivemap_fragment>',
         `#include <emissivemap_fragment>
-        totalEmissiveRadiance += diffuseColor.rgb * vPbr.z;
+        int objectId = clamp(int(vOid + 0.5), 0, ${OBJECT_SLOTS - 1});
+        totalEmissiveRadiance += diffuseColor.rgb * (vPbr.z * uSignal[objectId] + uGlow[objectId]);
         float hovered = (1.0 - step(0.5, abs(vOid - uHoverId))) * step(0.5, vOid);
         float rim = pow(1.0 - abs(dot(normalize(normal), normalize(vViewPosition))), 2.5);
         totalEmissiveRadiance += uHoverColor * hovered * uHoverMix * (0.05 + 0.6 * rim);`
       );
   };
-  material.customProgramCacheKey = () => 'desk-atlas-v1';
+  material.customProgramCacheKey = () => 'desk-atlas-v2';
   return { material, uniforms };
 }
 
@@ -151,82 +202,70 @@ export function createContactShadowTexture(): CanvasTexture {
   });
 }
 
-/** Faint fake reflection on the window glass: a warm smear where the lamp would reflect. */
-export function createGlassTexture(tint: Color, lamp: Color, moon: Color, opacity: number): CanvasTexture {
-  return canvasTexture(256, 256, ctx => {
-    ctx.fillStyle = `rgba(${rgb(tint)},${opacity})`;
-    ctx.fillRect(0, 0, 256, 256);
-    const sky = ctx.createLinearGradient(0, 0, 0, 256);
-    sky.addColorStop(0, `rgba(${rgb(moon)},0.10)`);
-    sky.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = sky;
-    ctx.fillRect(0, 0, 256, 256);
-    const warm = ctx.createRadialGradient(40, 196, 2, 40, 196, 70);
-    warm.addColorStop(0, `rgba(${rgb(lamp)},0.14)`);
-    warm.addColorStop(1, `rgba(${rgb(lamp)},0)`);
-    ctx.fillStyle = warm;
-    ctx.fillRect(0, 0, 256, 256);
-    ctx.strokeStyle = 'rgba(255,255,255,0.012)';
-    ctx.lineWidth = 18;
-    ctx.beginPath();
-    ctx.moveTo(150, 0);
-    ctx.lineTo(256, 120);
-    ctx.stroke();
-  });
-}
-
 function rgb(color: Color): string {
   const srgb = color.clone().convertLinearToSRGB();
   return `${Math.round(srgb.r * 255)},${Math.round(srgb.g * 255)},${Math.round(srgb.b * 255)}`;
 }
 
-/** Rect (in 0..1 screen UV, y down) where the hero plate sits; the screen stays black there. */
-export interface ScreenRect {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
 /**
- * Draws the monitor's picture: near-black glass with a faint, out-of-focus editor (code lines)
- * so the screen is never a dead black slab, and, when the hero plate floats over it, a soft dark
- * pool under the text plus a brand-blue halo around it.
+ * The monitor's idle picture: near-black glass with a faint, out-of-focus editor (code lines) and
+ * a soft brand-blue glow, so the screen is never a dead slab (fallback captures, between slides).
+ * The CSS3D screen content covers it when the plate is mounted.
  */
-export function drawScreen(texture: CanvasTexture, aspect: number, rect: ScreenRect | null, glow: Color): void {
+export function drawScreen(texture: CanvasTexture, aspect: number, glow: Color): void {
   const canvas = texture.image as HTMLCanvasElement;
   const width = 768;
   const height = Math.round(width / aspect);
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d')!;
-  ctx.fillStyle = '#03050a';
+  ctx.fillStyle = '#05080e';
   ctx.fillRect(0, 0, width, height);
-  drawCode(ctx, width, height, glow, rect ? 0.22 : 0.42);
-  if (!rect) {
-    texture.needsUpdate = true;
-    return;
-  }
-  const cx = (rect.x + rect.width / 2) * width;
-  const cy = (rect.y + rect.height / 2) * height;
-  const radius = Math.max(width, height) * 0.75;
-  const halo = ctx.createRadialGradient(cx, cy, Math.min(rect.width * width, rect.height * height) * 0.3, cx, cy, radius);
-  halo.addColorStop(0, `rgba(${rgb(glow)},0.2)`);
-  halo.addColorStop(0.5, `rgba(${rgb(glow)},0.07)`);
+  const halo = ctx.createRadialGradient(width * 0.5, height * 0.45, 0, width * 0.5, height * 0.45, width * 0.7);
+  halo.addColorStop(0, `rgba(${rgb(glow)},0.16)`);
   halo.addColorStop(1, `rgba(${rgb(glow)},0.02)`);
   ctx.fillStyle = halo;
   ctx.fillRect(0, 0, width, height);
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.scale((rect.width * width) / 2, (rect.height * height) / 2);
-  const pool = ctx.createRadialGradient(0, 0, 0.2, 0, 0, 1.25);
-  pool.addColorStop(0, 'rgba(2,3,6,0.9)');
-  pool.addColorStop(0.7, 'rgba(2,3,6,0.75)');
-  pool.addColorStop(1, 'rgba(2,3,6,0)');
-  ctx.fillStyle = pool;
-  ctx.fillRect(-1.4, -1.4, 2.8, 2.8);
-  ctx.restore();
+  drawCode(ctx, width, height, glow, 0.38);
   texture.needsUpdate = true;
+}
+
+/** Phone lock screen: dark gradient, clock and (optionally) one notification card. */
+export function drawPhone(texture: CanvasTexture, notification: boolean, accent: Color): void {
+  const canvas = texture.image as HTMLCanvasElement;
+  const width = 260;
+  const height = 560;
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d')!;
+  const background = ctx.createLinearGradient(0, 0, 0, height);
+  background.addColorStop(0, '#0b0f16');
+  background.addColorStop(1, '#141b28');
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = 'rgba(233,238,245,0.85)';
+  ctx.fillRect(width * 0.3, height * 0.12, width * 0.4, height * 0.05);
+  ctx.fillStyle = 'rgba(155,168,187,0.5)';
+  ctx.fillRect(width * 0.36, height * 0.19, width * 0.28, height * 0.015);
+  if (notification) {
+    ctx.fillStyle = 'rgba(24,32,46,0.95)';
+    ctx.beginPath();
+    ctx.roundRect(width * 0.06, height * 0.3, width * 0.88, height * 0.1, 14);
+    ctx.fill();
+    ctx.fillStyle = `rgba(${rgb(accent)},0.95)`;
+    ctx.beginPath();
+    ctx.arc(width * 0.15, height * 0.35, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(233,238,245,0.8)';
+    ctx.fillRect(width * 0.24, height * 0.325, width * 0.5, 8);
+    ctx.fillStyle = 'rgba(155,168,187,0.6)';
+    ctx.fillRect(width * 0.24, height * 0.355, width * 0.62, 6);
+  }
+  texture.needsUpdate = true;
+}
+
+export function createPhoneTexture(): CanvasTexture {
+  return canvasTexture(260, 560, () => undefined);
 }
 
 function drawCode(ctx: CanvasRenderingContext2D, width: number, height: number, accent: Color, alpha: number): void {
@@ -288,7 +327,7 @@ export function bakeNightEnvironment(renderer: WebGLRenderer): Texture {
   disposables.push(shellGeometry, shellMaterial);
   patch(tokenColor('--color-moonlight', '#9db8e8'), 3, [2.2, 1.4], [0.6, 0.4, -2.9], [0, 0, 0]);
   patch(tokenColor('--color-monitor-glow', '#7fb8ff'), 4, [0.7, 0.4], [-0.2, 0, -1.2], [0, 0, 0]);
-  patch(tokenColor('--color-lamp', '#ffb566'), 8, [0.5, 0.5], [-0.5, 1.4, -0.6], [0, 0, 0]);
+  patch(tokenColor('--color-lamp', '#ffb566'), 8, [0.5, 0.5], [0.5, 1.4, -0.6], [0, 0, 0]);
   patch(tokenColor('--color-lamp', '#ffb566'), 0.25, [2, 2], [0, -1.49, 0], [0, 0, 0]);
   const generator = new PMREMGenerator(renderer);
   const target = generator.fromScene(scene, 0.04);

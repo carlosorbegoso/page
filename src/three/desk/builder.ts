@@ -18,8 +18,23 @@ export interface Placement {
   scale?: [number, number, number] | number;
 }
 
-/** Object ids of the navigable props (0 = static, not hoverable). */
-export const OBJECT_ID = { none: 0, alfa: 1, burbu: 2, gift: 3, telescope: 4 } as const;
+/**
+ * Object ids baked per vertex (0 = static). 1–4 are the figures the vertex shader can lift and
+ * turn; the rest only take hover and per-object light (`uGlow`, `uSignal`).
+ */
+export const OBJECT_ID = {
+  none: 0,
+  alfa: 1,
+  ventixs: 2,
+  parati: 3,
+  skymek: 4,
+  sysarp: 5,
+  baufest: 6,
+  intercorp: 7,
+  tcs: 8,
+  openFolder: 9,
+  phone: 10
+} as const;
 
 export function placementMatrix(placement: Placement = {}): Matrix4 {
   const position = new Vector3(...(placement.position ?? [0, 0, 0]));

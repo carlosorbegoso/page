@@ -5,10 +5,12 @@ import {
   Color,
   ConeGeometry,
   CylinderGeometry,
-  IcosahedronGeometry,
+  Euler,
+  ExtrudeGeometry,
   LatheGeometry,
   Matrix4,
   OctahedronGeometry,
+  Path,
   PlaneGeometry,
   Quaternion,
   Shape,
@@ -23,7 +25,28 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { tokenColor, tokenNumber } from '../tokens';
 import { doubleSided, OBJECT_ID, PartBuilder, type Finish } from './builder';
-import { DESK, FIGURES, GLASS_Z, KEYBOARD_X, LAMP, MONITOR, ROOM, TELESCOPE, WINDOW } from './layout';
+import {
+  CHAIR,
+  DESK,
+  FIGURES,
+  FOLDER,
+  FOLDERS,
+  GLASS_Z,
+  KEYBOARD,
+  LAMP,
+  MONITOR,
+  MUG,
+  OPEN_FOLDER,
+  PHONE,
+  PLANT,
+  PLINTH,
+  ROOM,
+  SHELF,
+  TELESCOPE,
+  WINDOW,
+  folderCentre,
+  type FolderId
+} from './layout';
 
 /** Segment multiplier: 1 on `high`, lower on `mid`. */
 export type Quality = number;
@@ -53,12 +76,19 @@ export interface Palette {
   telescopeBrass: Finish;
   lens: Finish;
   alfaBody: Finish;
+  alfaRing: Finish;
   alfaSignal: Finish;
   burbuBody: Finish;
   burbuSignal: Finish;
   giftBody: Finish;
   giftRibbon: Finish;
   giftSeam: Finish;
+  toolBody: Finish;
+  toolBand: Finish;
+  toolSignal: Finish;
+  folders: Record<FolderId, Finish>;
+  label: Finish;
+  phone: Finish;
 }
 
 /**
@@ -70,14 +100,13 @@ const PERCEIVED_TO_ALBEDO = { wall: 3.5, floor: 2 } as const;
 /** Room finishes read from the design tokens (desk.md §2–3, mascots.md §2). */
 export function readPalette(): Palette {
   const c = (token: string, fallback: string) => tokenColor(token, fallback);
-  const signal = 0.8;
   return {
     wall: { color: c('--color-desk-wall', '#121722').multiplyScalar(PERCEIVED_TO_ALBEDO.wall), roughness: 0.95, metalness: 0 },
     floor: { color: c('--color-desk-floor', '#17140f').multiplyScalar(PERCEIVED_TO_ALBEDO.floor), roughness: 0.7, metalness: 0, grain: 0.7 },
     wood: { color: c('--color-desk-wood', '#5a3e2b'), roughness: 0.72, metalness: 0, grain: 1 },
     metal: { color: c('--color-desk-metal', '#2b313c'), roughness: 0.35, metalness: 0.8 },
     fabric: { color: c('--color-desk-fabric', '#232a3a'), roughness: 0.9, metalness: 0 },
-    ceramic: { color: c('--color-desk-ceramic', '#e6e0d4'), roughness: 0.35, metalness: 0 },
+    ceramic: { color: c('--color-desk-ceramic', '#e6e0d4'), roughness: 0.7, metalness: 0 },
     coffee: { color: c('--color-desk-coffee', '#2a1a10'), roughness: 0.15, metalness: 0 },
     plant: { color: c('--color-desk-plant', '#2f5a44'), roughness: 0.45, metalness: 0 },
     pot: { color: c('--color-desk-pot', '#8c5a44'), roughness: 0.8, metalness: 0 },
@@ -85,7 +114,7 @@ export function readPalette(): Palette {
     paper: { color: c('--color-desk-paper', '#d8d2c4'), roughness: 0.9, metalness: 0 },
     bookDark: { color: c('--color-desk-fabric', '#232a3a'), roughness: 0.8, metalness: 0 },
     bookBlue: { color: c('--color-desk-metal', '#2b313c'), roughness: 0.8, metalness: 0 },
-    brass: { color: c('--color-telescope-brass', '#b08a4a'), roughness: 0.35, metalness: 1 },
+    brass: { color: c('--color-desk-brass', '#b08a4a'), roughness: 0.35, metalness: 1 },
     frame: { color: c('--color-window-frame', '#1a1f29'), roughness: 0.5, metalness: 0.6 },
     bezel: { color: c('--color-monitor-bezel', '#0c0f14'), roughness: 0.4, metalness: 0.3 },
     keys: { color: c('--color-monitor-bezel', '#0c0f14').multiplyScalar(1.6), roughness: 0.5, metalness: 0.2 },
@@ -96,28 +125,52 @@ export function readPalette(): Palette {
     telescopeBrass: { color: c('--color-telescope-brass', '#b08a4a'), roughness: 0.35, metalness: 1 },
     lens: { color: new Color(0.01, 0.015, 0.03), roughness: 0.05, metalness: 0.4 },
     alfaBody: {
-      color: c('--color-alfa-body', '#2b3a52'),
-      roughness: tokenNumber('--alfa-roughness', 0.38),
-      metalness: tokenNumber('--alfa-metalness', 0.6)
+      color: c('--color-alfa-body', '#10131a'),
+      roughness: tokenNumber('--alfa-roughness', 0.15),
+      metalness: tokenNumber('--alfa-metalness', 0)
     },
-    alfaSignal: { color: c('--color-alfa-signal', '#5aa9ff'), roughness: 0.4, metalness: 0, emissive: signal },
+    alfaRing: {
+      color: c('--color-alfa-ring', '#b08a4a'),
+      roughness: tokenNumber('--alfa-ring-roughness', 0.3),
+      metalness: tokenNumber('--alfa-ring-metalness', 1)
+    },
+    alfaSignal: { color: c('--color-alfa-signal', '#5aa9ff'), roughness: 0.4, metalness: 0, emissive: tokenNumber('--alfa-signal-intensity', 1) },
     burbuBody: {
       color: c('--color-burbu-body', '#1f6e52'),
-      roughness: tokenNumber('--burbu-roughness', 0.55),
-      metalness: tokenNumber('--burbu-metalness', 0.1)
+      roughness: tokenNumber('--burbu-roughness', 0.75),
+      metalness: tokenNumber('--burbu-metalness', 0)
     },
-    burbuSignal: { color: c('--color-burbu-signal', '#3fcf8e'), roughness: 0.4, metalness: 0, emissive: signal },
+    burbuSignal: { color: c('--color-burbu-signal', '#3fcf8e'), roughness: 0.4, metalness: 0, emissive: tokenNumber('--burbu-signal-intensity', 0.8) },
     giftBody: {
       color: c('--color-gift-body', '#2a3142'),
-      roughness: tokenNumber('--gift-roughness', 0.62),
-      metalness: tokenNumber('--gift-metalness', 0.05)
+      roughness: tokenNumber('--gift-roughness', 0.4),
+      metalness: tokenNumber('--gift-metalness', 0)
     },
     giftRibbon: {
       color: c('--color-gift-ribbon', '#f28ba0'),
-      roughness: tokenNumber('--gift-ribbon-roughness', 0.3),
-      metalness: tokenNumber('--gift-ribbon-metalness', 0.7)
+      roughness: tokenNumber('--gift-ribbon-roughness', 0.35),
+      metalness: tokenNumber('--gift-ribbon-metalness', 0.05)
     },
-    giftSeam: { color: c('--color-gift-ribbon', '#f28ba0'), roughness: 0.4, metalness: 0, emissive: signal * 0.4 }
+    giftSeam: { color: c('--color-gift-ribbon', '#f28ba0'), roughness: 0.4, metalness: 0, emissive: 0.4 },
+    toolBody: {
+      color: c('--color-tool-body', '#8c97a8'),
+      roughness: tokenNumber('--tool-roughness', 0.38),
+      metalness: tokenNumber('--tool-metalness', 1)
+    },
+    toolBand: {
+      color: c('--color-tool-band', '#f0a43c'),
+      roughness: tokenNumber('--tool-band-roughness', 0.4),
+      metalness: tokenNumber('--tool-band-metalness', 0.6)
+    },
+    toolSignal: { color: c('--color-tool-band', '#f0a43c'), roughness: 0.4, metalness: 0, emissive: 0.8 },
+    folders: {
+      sysarp: { color: c('--color-folder-sysarp', '#7e776a'), roughness: 0.85, metalness: 0 },
+      baufest: { color: c('--color-folder-baufest', '#4a5847'), roughness: 0.85, metalness: 0 },
+      intercorp: { color: c('--color-folder-intercorp', '#6b4a35'), roughness: 0.7, metalness: 0 },
+      tcs: { color: c('--color-folder-tcs', '#33405a'), roughness: 0.85, metalness: 0 }
+    },
+    label: { color: c('--color-desk-paper', '#d8d2c4'), roughness: 0.9, metalness: 0 },
+    phone: { color: c('--color-phone-body', '#15181e'), roughness: 0.45, metalness: 0.6 }
   };
 }
 
@@ -226,7 +279,7 @@ export function buildDesk(b: PartBuilder, p: Palette, q: Quality): void {
 
 /** Monitor stand (static) and the keyboard group in front of it. */
 export function buildWorkstation(b: PartBuilder, p: Palette, q: Quality): void {
-  const { centre, yaw } = MONITOR;
+  const { centre, yaw, tilt } = MONITOR;
   const back = new Vector3(Math.sin(yaw), 0, Math.cos(yaw)).multiplyScalar(-0.075);
   const baseCentre = new Vector3(centre.x, DESK.top + 0.005, centre.z).add(back.clone().multiplyScalar(0.3));
   b.add(new RoundedBoxGeometry(0.25, 0.01, 0.18, 2, 0.0045), p.metal, { position: baseCentre.toArray(), rotation: [0, yaw, 0] });
@@ -235,10 +288,16 @@ export function buildWorkstation(b: PartBuilder, p: Palette, q: Quality): void {
     position: [columnBase.x, (DESK.top + centre.y + 0.04) / 2, columnBase.z],
     rotation: [0, yaw, 0]
   });
+  const head = new Matrix4().compose(centre, new Quaternion().setFromEuler(new Euler(tilt, yaw, 0, 'YXZ')), new Vector3(1, 1, 1));
+  const local = (x: number, y: number, z: number) => new Matrix4().multiplyMatrices(head, new Matrix4().makeTranslation(x, y, z));
+  const { width, height } = MONITOR.screen;
+  const e = MONITOR.bezel;
+  b.add(new RoundedBoxGeometry(width + 2 * e, height + 2 * e, MONITOR.depth, seg(2, q, 1), 0.003), p.bezel, head);
+  b.add(new RoundedBoxGeometry(width * 0.72, height * 0.75, 0.03, seg(3, q, 2), 0.012), p.bezel, local(0, 0, -MONITOR.depth / 2 - 0.012));
+  b.add(new RoundedBoxGeometry(0.11, 0.11, 0.012, 1, 0.004), p.metal, local(0, 0, -MONITOR.depth / 2 - 0.032));
 
-  const keyboard = new Vector3(KEYBOARD_X, DESK.top, 0.16);
-  const kYaw = yaw * 0.5;
-  const kb = new Matrix4().compose(keyboard, new Quaternion().setFromAxisAngle(UP, kYaw), new Vector3(1, 1, 1));
+  const keyboard = new Vector3(KEYBOARD.x, DESK.top, KEYBOARD.z);
+  const kb = new Matrix4().compose(keyboard, new Quaternion(), new Vector3(1, 1, 1));
   b.add(new RoundedBoxGeometry(0.37, 0.009, 0.125, 2, 0.004), p.bezel, new Matrix4().multiplyMatrices(kb, new Matrix4().makeTranslation(0, 0.0045, 0)));
   const keyW = 0.0205;
   const pitch = 0.0242;
@@ -253,38 +312,61 @@ export function buildWorkstation(b: PartBuilder, p: Palette, q: Quality): void {
     }
   }
   b.add(new BoxGeometry(pitch * 6 - 0.004, 0.004, keyW * 0.92), p.keys, new Matrix4().multiplyMatrices(kb, new Matrix4().makeTranslation(0, 0.011, 2 * pitch)));
+  b.add(new RoundedBoxGeometry(0.13, 0.005, 0.105, 2, 0.003), p.trackpad, { position: [KEYBOARD.trackpadX, DESK.top + 0.0025, KEYBOARD.z] });
 
-  b.add(new RoundedBoxGeometry(0.13, 0.005, 0.105, 2, 0.003), p.trackpad, { position: [KEYBOARD_X + 0.27, DESK.top + 0.0025, 0.165], rotation: [0, kYaw, 0] });
-
-  const note = new Matrix4().compose(new Vector3(0.53, DESK.top, 0.2), new Quaternion().setFromAxisAngle(UP, 0.18), new Vector3(1, 1, 1));
-  b.add(new RoundedBoxGeometry(0.15, 0.012, 0.21, 1, 0.003), p.bookDark, new Matrix4().multiplyMatrices(note, new Matrix4().makeTranslation(0, 0.006, 0)));
-  b.add(new BoxGeometry(0.143, 0.0125, 0.203), p.paper, new Matrix4().multiplyMatrices(note, new Matrix4().makeTranslation(0.004, 0.006, 0)));
-  b.add(new BoxGeometry(0.008, 0.0135, 0.211), shade(p.pot, 0.6), new Matrix4().multiplyMatrices(note, new Matrix4().makeTranslation(0.05, 0.006, 0)));
-  const pencil = new Matrix4().compose(
-    new Vector3(0.625, DESK.top + 0.004, 0.2),
-    new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2).premultiply(new Quaternion().setFromAxisAngle(UP, 0.1)),
-    new Vector3(1, 1, 1)
-  );
-  b.add(new CylinderGeometry(0.0038, 0.0038, 0.16, 6), shade(p.brass, 0.9), pencil);
-  b.add(new ConeGeometry(0.0038, 0.018, 6), p.paper, new Matrix4().multiplyMatrices(pencil, new Matrix4().makeTranslation(0, 0.089, 0)));
-
-  const mug = new Vector3(0.43, DESK.top, -0.04);
   const profile = [
     [0.0, 0.0],
-    [0.034, 0.0],
-    [0.039, 0.004],
-    [0.04, 0.09],
-    [0.0385, 0.095],
-    [0.0355, 0.095],
-    [0.035, 0.012],
+    [0.037, 0.0],
+    [0.042, 0.004],
+    [0.0425, 0.09],
+    [0.041, 0.095],
+    [0.038, 0.095],
+    [0.0375, 0.012],
     [0.0, 0.012]
   ].map(([x, y]) => new Vector2(x!, y!));
-  b.add(new LatheGeometry(profile, seg(32, q, 12)), p.ceramic, { position: mug.toArray() });
-  b.add(new CircleGeometry(0.0352, seg(28, q, 10)), p.coffee, { position: [mug.x, mug.y + 0.074, mug.z], rotation: [-Math.PI / 2, 0, 0] });
+  b.add(new LatheGeometry(profile, seg(32, q, 12)), p.ceramic, { position: MUG.toArray() });
+  b.add(new CircleGeometry(0.0376, seg(28, q, 10)), p.coffee, { position: [MUG.x, MUG.y + 0.076, MUG.z], rotation: [-Math.PI / 2, 0, 0] });
   b.add(new TorusGeometry(0.025, 0.006, seg(8, q, 4), seg(16, q, 8), Math.PI), p.ceramic, {
-    position: [mug.x + 0.038, mug.y + 0.048, mug.z],
+    position: [MUG.x + 0.04, MUG.y + 0.048, MUG.z],
     rotation: [0, 0, -Math.PI / 2]
   });
+}
+
+/** Open TCS folder (linen boards, a few sheets) left of the keyboard. */
+export function buildOpenFolder(b: PartBuilder, p: Palette): void {
+  const { centre, width, depth, yaw } = OPEN_FOLDER;
+  const frame = new Matrix4().compose(centre, new Quaternion().setFromAxisAngle(UP, yaw), new Vector3(1, 1, 1));
+  const at = (x: number, y: number, z: number, rz = 0) =>
+    new Matrix4().multiplyMatrices(frame, new Matrix4().compose(new Vector3(x, y, z), new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), rz), new Vector3(1, 1, 1)));
+  const half = width / 2;
+  const id = OBJECT_ID.openFolder;
+  b.add(new RoundedBoxGeometry(half - 0.004, 0.004, depth, 1, 0.0015), p.folders.tcs, at(-half / 2, 0.002, 0, 0.02), id);
+  b.add(new RoundedBoxGeometry(half - 0.004, 0.004, depth, 1, 0.0015), p.folders.tcs, at(half / 2, 0.002, 0, -0.02), id);
+  b.add(new BoxGeometry(0.012, 0.006, depth), shade(p.folders.tcs, 0.7), at(0, 0.003, 0), id);
+  b.add(new BoxGeometry(half - 0.03, 0.002, depth - 0.03), p.paper, at(half / 2, 0.006, 0, -0.02), id);
+  b.add(new BoxGeometry(half - 0.034, 0.002, depth - 0.036), shade(p.paper, 0.93), at(half / 2 + 0.004, 0.0075, 0.004, -0.02), id);
+  for (let line = 0; line < 7; line++) {
+    b.add(new BoxGeometry(0.11 + (line % 3) * 0.02, 0.0004, 0.004), shade(p.bookDark, 0.8), at(half / 2 - 0.02, 0.0086, -0.09 + line * 0.022), id);
+  }
+  b.add(new BoxGeometry(half - 0.04, 0.002, depth - 0.04), shade(p.paper, 0.85), at(-half / 2, 0.005, 0, 0.02), id);
+}
+
+/** Phone on a small walnut stand; the glass itself is a separate mesh (the `phone` surface). */
+export function buildPhone(b: PartBuilder, p: Palette): Matrix4 {
+  const { base, yaw, lean, size } = PHONE;
+  const stand = new Matrix4().compose(base, new Quaternion().setFromAxisAngle(UP, yaw), new Vector3(1, 1, 1));
+  const at = (m: Matrix4) => new Matrix4().multiplyMatrices(stand, m);
+  b.add(new RoundedBoxGeometry(0.085, 0.014, 0.07, 2, 0.003), p.wood, at(new Matrix4().makeTranslation(0, 0.007, 0)));
+  b.add(new BoxGeometry(0.075, 0.012, 0.008), p.wood, at(new Matrix4().makeTranslation(0, 0.02, 0.024)));
+  const body = at(
+    new Matrix4().compose(
+      new Vector3(0, 0.014 + (size.height / 2) * Math.cos(lean), 0.02 - (size.height / 2) * Math.sin(lean)),
+      new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -lean),
+      new Vector3(1, 1, 1)
+    )
+  );
+  b.add(new RoundedBoxGeometry(size.width, size.height, size.depth, 2, 0.003), p.phone, new Matrix4().multiplyMatrices(body, new Matrix4().makeTranslation(0, 0, -size.depth / 2)), OBJECT_ID.phone);
+  return new Matrix4().multiplyMatrices(body, new Matrix4().makeTranslation(0, 0, 0.0004));
 }
 
 export function buildLamp(b: PartBuilder, p: Palette, q: Quality): void {
@@ -325,31 +407,31 @@ function leaf(length: number, width: number, curl: number, q: Quality): BufferGe
 }
 
 export function buildPlant(b: PartBuilder, p: Palette, q: Quality): void {
-  const pot = new Vector3(0.57, DESK.top, -0.21);
+  const pot = PLANT.clone();
   const profile = [
     [0, 0],
-    [0.052, 0],
-    [0.056, 0.006],
-    [0.068, 0.13],
-    [0.072, 0.134],
-    [0.072, 0.14],
-    [0.064, 0.14],
-    [0.062, 0.125],
-    [0, 0.125]
+    [0.045, 0],
+    [0.048, 0.005],
+    [0.058, 0.11],
+    [0.061, 0.114],
+    [0.061, 0.12],
+    [0.054, 0.12],
+    [0.052, 0.106],
+    [0, 0.106]
   ].map(([x, y]) => new Vector2(x!, y!));
   b.add(new LatheGeometry(profile, seg(28, q, 10)), p.pot, { position: pot.toArray() });
-  b.add(new CircleGeometry(0.062, seg(20, q, 8)), p.soil, { position: [pot.x, pot.y + 0.128, pot.z], rotation: [-Math.PI / 2, 0, 0] });
+  b.add(new CircleGeometry(0.052, seg(20, q, 8)), p.soil, { position: [pot.x, pot.y + 0.108, pot.z], rotation: [-Math.PI / 2, 0, 0] });
   const random = seeded(11);
-  const leaves = Math.round(7 + 2 * q);
+  const leaves = Math.round(6 + 2 * q);
   for (let i = 0; i < leaves; i++) {
     const angle = (i / leaves) * Math.PI * 2 + random() * 0.5;
-    const height = 0.12 + random() * 0.2;
-    const lean = 0.25 + random() * 0.35;
-    const stemBase = pot.clone().add(new Vector3(Math.cos(angle) * 0.015, 0.125, Math.sin(angle) * 0.015));
+    const height = 0.1 + random() * 0.16;
+    const lean = 0.25 + random() * 0.3;
+    const stemBase = pot.clone().add(new Vector3(Math.cos(angle) * 0.012, 0.106, Math.sin(angle) * 0.012));
     const outward = new Vector3(Math.cos(angle), 0, Math.sin(angle));
     const stemTop = stemBase.clone().add(new Vector3(0, height, 0)).addScaledVector(outward, height * lean);
-    rod(b, stemBase, stemTop, 0.0022, shade(p.plant, 0.8), q * 0.5);
-    const length = 0.12 + random() * 0.08;
+    rod(b, stemBase, stemTop, 0.002, shade(p.plant, 0.8), q * 0.5);
+    const length = 0.1 + random() * 0.07;
     const tip = outward.clone().multiplyScalar(0.8).add(new Vector3(0, 0.35 + random() * 0.4, 0)).normalize();
     const blade = new Quaternion().setFromUnitVectors(UP, tip);
     const twist = new Quaternion().setFromAxisAngle(tip, random() * 0.8 - 0.4);
@@ -359,46 +441,45 @@ export function buildPlant(b: PartBuilder, p: Palette, q: Quality): void {
   }
 }
 
+/** Left-wall shelves: a box below, the four archive box files in the middle, books and brass on top. */
 export function buildShelves(b: PartBuilder, p: Palette, q: Quality): void {
-  const x = ROOM.left + 0.11;
-  const z = 0.12;
-  const levels = [1.22, 1.56, 1.9];
-  const random = seeded(23);
-  const covers = [p.paper, p.bookDark, p.bookBlue, shade(p.pot, 0.55), p.paper, shade(p.plant, 0.7), p.bookDark];
-  for (const y of levels) {
-    b.add(new RoundedBoxGeometry(0.22, 0.025, 0.9, 1, 0.004), p.wood, { position: [x, y, z] });
+  const x = SHELF.x + SHELF.depth / 2;
+  const z = SHELF.z;
+  const [low, middle, top] = SHELF.boards;
+  for (const y of SHELF.boards) {
+    b.add(new RoundedBoxGeometry(SHELF.depth, 0.025, SHELF.length, 1, 0.004), p.wood, { position: [x, y, z] });
   }
-  let cursor = z - 0.4;
-  for (let i = 0; i < 7; i++) {
-    const thickness = 0.022 + random() * 0.02;
-    const height = 0.17 + random() * 0.07;
-    const depth = 0.15 + random() * 0.03;
-    const lean = i === 6 ? 0.18 : 0;
-    b.add(new RoundedBoxGeometry(depth, height, thickness, 1, 0.002), covers[i % covers.length]!, {
-      position: [x + 0.01, levels[0]! + 0.0125 + height / 2, cursor + thickness / 2 + lean * height * 0.5],
-      rotation: [lean, 0, 0]
+  b.add(new RoundedBoxGeometry(0.22, 0.14, 0.26, 2, 0.01), p.fabric, { position: [x - 0.01, low + 0.0125 + 0.07, z - 0.18] });
+  for (const id of FOLDERS) {
+    const centre = folderCentre(id);
+    const finish = p.folders[id];
+    const objectId = OBJECT_ID[id];
+    b.add(new RoundedBoxGeometry(FOLDER.depth, FOLDER.height, FOLDER.spine, 2, 0.004), finish, { position: centre.toArray() }, objectId);
+    const spine = centre.x + FOLDER.depth / 2;
+    b.add(new BoxGeometry(0.003, 0.09, FOLDER.spine * 0.62), p.label, { position: [spine + 0.0015, centre.y + 0.06, centre.z] }, objectId);
+    b.add(new BoxGeometry(0.0035, 0.002, FOLDER.spine * 0.5), shade(p.bookDark, 0.6), { position: [spine + 0.002, centre.y + 0.07, centre.z] }, objectId);
+    b.add(new BoxGeometry(0.0035, 0.0015, FOLDER.spine * 0.36), shade(p.bookDark, 0.7), { position: [spine + 0.002, centre.y + 0.052, centre.z] }, objectId);
+    b.add(new TorusGeometry(0.012, 0.0025, 6, seg(16, q, 8)), p.metal, { position: [spine + 0.002, centre.y - 0.07, centre.z], rotation: [0, Math.PI / 2, 0] }, objectId);
+  }
+  const random = seeded(23);
+  const covers = [p.paper, p.bookDark, p.bookBlue, shade(p.pot, 0.55), shade(p.plant, 0.7)];
+  let cursor = z - 0.36;
+  for (let i = 0; i < 5; i++) {
+    const thickness = 0.025 + random() * 0.02;
+    const height = 0.18 + random() * 0.06;
+    const depth = 0.16 + random() * 0.04;
+    b.add(new RoundedBoxGeometry(depth, height, thickness, 1, 0.002), covers[i]!, {
+      position: [x + 0.03, top + 0.0125 + height / 2, cursor + thickness / 2]
     });
     cursor += thickness + 0.002;
   }
-  for (let i = 0; i < 3; i++) {
-    const h = 0.025 + random() * 0.01;
-    b.add(new RoundedBoxGeometry(0.16 - i * 0.012, h, 0.22 - i * 0.02, 1, 0.002), covers[(i + 2) % covers.length]!, {
-      position: [x, levels[1]! + 0.0125 + h / 2 + i * 0.033, z + 0.2],
-      rotation: [0, (random() - 0.5) * 0.2, 0]
-    });
-  }
-  b.add(new RoundedBoxGeometry(0.14, 0.11, 0.14, 2, 0.01), p.fabric, { position: [x, levels[1]! + 0.0125 + 0.055, z - 0.22] });
-  b.add(new CylinderGeometry(0.022, 0.03, 0.02, seg(20, q, 8)), p.brass, { position: [x, levels[2]! + 0.0225, z + 0.15] });
-  b.add(new SphereGeometry(0.04, seg(24, q, 10), seg(16, q, 8)), p.brass, { position: [x, levels[2]! + 0.07, z + 0.15] });
-  for (let i = 0; i < 2; i++) {
-    b.add(new RoundedBoxGeometry(0.15, 0.2, 0.03, 1, 0.002), covers[i + 4]!, {
-      position: [x + 0.01, levels[2]! + 0.1125, z - 0.25 + i * 0.033]
-    });
-  }
+  b.add(new CylinderGeometry(0.022, 0.03, 0.02, seg(20, q, 8)), p.brass, { position: [x, top + 0.0225, z + 0.2] });
+  b.add(new SphereGeometry(0.04, seg(24, q, 10), seg(16, q, 8)), p.brass, { position: [x, top + 0.07, z + 0.2] });
+  void middle;
 }
 
 export function buildChair(b: PartBuilder, p: Palette, q: Quality): void {
-  const centre = new Vector3(-0.72, 0, 1.05);
+  const centre = CHAIR.clone();
   const yaw = 0.35;
   const frame = new Matrix4().compose(centre, new Quaternion().setFromAxisAngle(UP, yaw), new Vector3(1, 1, 1));
   const at = (x: number, y: number, z: number, rx = 0) =>
@@ -416,117 +497,134 @@ export function buildChair(b: PartBuilder, p: Palette, q: Quality): void {
 }
 
 /** Direction the telescope tube points to (room-local), set by the station from Alfa's position. */
-export function buildTelescope(b: PartBuilder, p: Palette, q: Quality, aim: Vector3): { head: Vector3; tubeCentre: Vector3 } {
-  const id = OBJECT_ID.telescope;
+/** Refractor on a tripod by the window, pointing at the city (pure set dressing). */
+export function buildTelescope(b: PartBuilder, p: Palette, q: Quality): void {
   const foot = TELESCOPE.foot;
   const head = new Vector3(foot.x, TELESCOPE.headHeight, foot.z);
   for (let i = 0; i < 3; i++) {
     const a = (i / 3) * Math.PI * 2 + 0.4;
     const tip = new Vector3(foot.x + Math.cos(a) * 0.34, 0, foot.z + Math.sin(a) * 0.34);
-    rod(b, head.clone().add(new Vector3(Math.cos(a) * 0.03, -0.02, Math.sin(a) * 0.03)), tip, 0.011, p.metal, q * 0.7, id);
-    b.add(new SphereGeometry(0.014, seg(8, q), seg(6, q)), shade(p.metal, 0.5), { position: [tip.x, 0.012, tip.z] }, id);
+    rod(b, head.clone().add(new Vector3(Math.cos(a) * 0.03, -0.02, Math.sin(a) * 0.03)), tip, 0.011, p.metal, q * 0.7);
+    b.add(new SphereGeometry(0.014, seg(8, q), seg(6, q)), shade(p.metal, 0.5), { position: [tip.x, 0.012, tip.z] });
   }
-  b.add(new CylinderGeometry(0.1, 0.1, 0.008, seg(24, q, 6)), p.metal, { position: [foot.x, 0.46, foot.z] }, id);
-  b.add(new CylinderGeometry(0.035, 0.04, 0.06, seg(16, q, 6)), p.metal, { position: head.toArray() }, id);
+  b.add(new CylinderGeometry(0.1, 0.1, 0.008, seg(24, q, 6)), p.metal, { position: [foot.x, 0.46, foot.z] });
+  b.add(new CylinderGeometry(0.035, 0.04, 0.06, seg(16, q, 6)), p.metal, { position: head.toArray() });
   const pivot = head.clone().add(new Vector3(0, 0.06, 0));
-  b.add(new RoundedBoxGeometry(0.06, 0.05, 0.07, 1, 0.006), p.metal, { position: pivot.toArray() }, id);
-  const dir = aim.clone().normalize();
+  b.add(new RoundedBoxGeometry(0.06, 0.05, 0.07, 1, 0.006), p.metal, { position: pivot.toArray() });
+  const dir = TELESCOPE.aim.clone().normalize();
   const tubeCentre = pivot.clone().add(new Vector3(0, 0.055, 0)).addScaledVector(dir, 0.08);
   const radial = seg(28, q, 10);
-  b.add(new CylinderGeometry(0.045, 0.045, 0.7, radial), p.telescope, along(tubeCentre, dir, 0), id);
-  b.add(new CylinderGeometry(0.053, 0.053, 0.17, radial, 1, true), p.telescope, along(tubeCentre, dir, 0.42), id);
-  b.add(new CircleGeometry(0.05, radial), p.lens, new Matrix4().multiplyMatrices(along(tubeCentre, dir, 0.37), new Matrix4().makeRotationX(-Math.PI / 2)), id);
-  for (const offset of [-0.1, 0.12]) {
-    b.add(new CylinderGeometry(0.05, 0.05, 0.022, radial), p.telescopeBrass, along(tubeCentre, dir, offset), id);
-  }
-  b.add(new CylinderGeometry(0.047, 0.047, 0.012, radial), p.telescopeBrass, along(tubeCentre, dir, 0.335), id);
-  b.add(new CylinderGeometry(0.024, 0.026, 0.09, seg(16, q, 6)), p.telescopeBrass, along(tubeCentre, dir, -0.39), id);
-  const eyepieceBase = tubeCentre.clone().addScaledVector(dir, -0.44);
+  b.add(new CylinderGeometry(0.045, 0.045, 0.7, radial), p.telescope, along(tubeCentre, dir, 0));
+  b.add(new CylinderGeometry(0.053, 0.053, 0.17, radial, 1, true), p.telescope, along(tubeCentre, dir, 0.42));
+  b.add(new CircleGeometry(0.05, radial), p.lens, new Matrix4().multiplyMatrices(along(tubeCentre, dir, 0.37), new Matrix4().makeRotationX(-Math.PI / 2)));
+  for (const offset of [-0.1, 0.12]) b.add(new CylinderGeometry(0.05, 0.05, 0.022, radial), p.telescopeBrass, along(tubeCentre, dir, offset));
+  b.add(new CylinderGeometry(0.024, 0.026, 0.09, seg(16, q, 6)), p.telescopeBrass, along(tubeCentre, dir, -0.39));
   const up = new Vector3(0, 1, 0).sub(dir.clone().multiplyScalar(dir.y)).normalize();
-  rod(b, eyepieceBase, eyepieceBase.clone().addScaledVector(up, 0.06), 0.014, p.metal, q, id);
-  rod(b, eyepieceBase.clone().addScaledVector(up, 0.06), eyepieceBase.clone().addScaledVector(up, 0.09), 0.017, shade(p.metal, 0.5), q, id);
+  const eyepiece = tubeCentre.clone().addScaledVector(dir, -0.44);
+  rod(b, eyepiece, eyepiece.clone().addScaledVector(up, 0.06), 0.014, p.metal, q);
   const finder = tubeCentre.clone().addScaledVector(up, 0.07).addScaledVector(dir, -0.12);
-  b.add(new CylinderGeometry(0.012, 0.012, 0.17, seg(12, q)), p.telescope, along(finder, dir, 0), id);
-  rod(b, finder.clone().addScaledVector(up, -0.012), finder.clone().addScaledVector(up, -0.03), 0.006, p.metal, q, id);
-  return { head, tubeCentre };
+  b.add(new CylinderGeometry(0.012, 0.012, 0.17, seg(12, q)), p.telescope, along(finder, dir, 0));
 }
 
-/** Desk-sized collectibles of the mascots (mascots.md §2) on a walnut plinth. */
+/** Wrench profile for SkyMek, 11 cm long, ring at x = 0 (procedural `body` node). */
+function wrenchShapes(): Shape[] {
+  const k = 0.11 / 0.55;
+  const head = new Shape();
+  const open = (35 * Math.PI) / 180;
+  const headX = 0.485 * k;
+  head.absarc(headX, 0, 0.09 * k, open, Math.PI * 2 - open, false);
+  for (const deg of [300, 240, 180, 120, 60]) {
+    const a = (deg * Math.PI) / 180;
+    head.lineTo(headX + Math.cos(a) * 0.05 * k, Math.sin(a) * 0.05 * k);
+  }
+  head.closePath();
+  const ring = new Shape();
+  ring.absarc(0, 0, 0.065 * k, 0, Math.PI * 2, false);
+  const hole = new Path();
+  hole.absarc(0, 0, 0.035 * k, 0, Math.PI * 2, true);
+  ring.holes.push(hole);
+  const handle = new Shape();
+  handle.moveTo(0.05 * k, -0.03 * k);
+  handle.lineTo(headX - 0.07 * k, -0.036 * k);
+  handle.lineTo(headX - 0.07 * k, 0.036 * k);
+  handle.lineTo(0.05 * k, 0.03 * k);
+  handle.closePath();
+  return [head, ring, handle];
+}
+
+/** The walnut plinth and the four executive desk pieces (mascots.md §2–3). */
 export function buildFigures(b: PartBuilder, p: Palette, q: Quality): void {
-  const plinthTop = FIGURES.plinth.y + 0.018;
-  b.add(new RoundedBoxGeometry(0.32, 0.018, 0.1, 2, 0.004), p.wood, { position: [FIGURES.plinth.x, FIGURES.plinth.y + 0.009, FIGURES.plinth.z] });
+  const { centre, width, depth, height } = PLINTH;
+  b.add(new RoundedBoxGeometry(width, height, depth, 2, 0.003), p.wood, { position: [centre.x, centre.y + height / 2, centre.z] });
+  b.add(new BoxGeometry(width - 0.02, 0.004, 0.002), p.brass, { position: [centre.x, centre.y + height * 0.55, centre.z + depth / 2 + 0.0006] });
 
   const alfa = FIGURES.alfa;
-  const radius = 0.046;
-  const stretch = 1.15;
-  const lift = 0.016;
-  const body = new IcosahedronGeometry(radius, 1);
+  const body = new OctahedronGeometry(0.045, 0).scale(0.9, 1.35, 0.75);
   const position = body.getAttribute('position');
   for (let i = 0; i < position.count; i++) {
-    const y = position.getY(i) * stretch;
-    const taper = y < 0 ? 0.85 : 1;
-    position.setXYZ(i, position.getX(i) * taper, y, position.getZ(i) * taper);
+    const y = position.getY(i);
+    if (y < 0) position.setXYZ(i, position.getX(i) * 0.82, y, position.getZ(i) * 0.82);
   }
   body.deleteAttribute('normal');
   body.computeVertexNormals();
-  const alfaCentre = new Vector3(alfa.x, plinthTop + lift + radius * stretch, alfa.z);
-  b.add(body, p.alfaBody, { position: alfaCentre.toArray(), rotation: [0, 0.4, 0.12] }, OBJECT_ID.alfa);
-  b.add(new TorusGeometry(radius * 0.955, 0.0014, 4, seg(40, q, 16)), p.alfaSignal, {
-    position: [alfaCentre.x - Math.sin(0.12) * radius * 0.22, alfaCentre.y + radius * 0.22, alfaCentre.z],
-    rotation: [Math.PI / 2, 0.12, 0]
-  }, OBJECT_ID.alfa);
-  b.add(new CylinderGeometry(0.0025, 0.0025, lift + 0.01, 8), p.brass, { position: [alfa.x, plinthTop + (lift + 0.01) / 2, alfa.z] }, OBJECT_ID.alfa);
-  b.add(new CylinderGeometry(0.018, 0.02, 0.004, seg(20, q, 8)), p.brass, { position: [alfa.x, plinthTop + 0.002, alfa.z] }, OBJECT_ID.alfa);
+  const half = 0.045 * 1.35;
+  b.add(body, p.alfaBody, { position: [alfa.x, alfa.y + half, alfa.z], rotation: [0, 0.35, 0] }, OBJECT_ID.alfa);
+  const ringY = alfa.y + 0.066;
+  const ringRadius = 0.034;
+  b.add(new TorusGeometry(ringRadius, 0.0025, 8, seg(64, q, 24)), p.alfaRing, { position: [alfa.x, ringY, alfa.z], rotation: [Math.PI / 2, 0, 0] }, OBJECT_ID.alfa);
+  b.add(new TorusGeometry(ringRadius - 0.0025, 0.0007, 4, seg(64, q, 24)), p.alfaSignal, { position: [alfa.x, ringY, alfa.z], rotation: [Math.PI / 2, 0, 0] }, OBJECT_ID.alfa);
 
-  const burbu = FIGURES.burbu;
-  const s = 0.175;
+  const burbu = FIGURES.ventixs;
   const bubble = new Matrix4().compose(
-    new Vector3(burbu.x, plinthTop + 0.2 * s + 0.004, burbu.z),
-    new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), -0.1).premultiply(new Quaternion().setFromAxisAngle(UP, 0.35)),
-    new Vector3(s, s, s)
+    new Vector3(burbu.x, burbu.y + 0.025, burbu.z),
+    new Quaternion().setFromAxisAngle(UP, -0.26),
+    new Vector3(1, 1, 1)
   );
-  const capsule = new CapsuleGeometry(0.2, 0.25, seg(8, q, 4), seg(16, q, 8)).rotateZ(Math.PI / 2).scale(1, 1, 0.55);
-  const tail = new ConeGeometry(0.07, 0.12, seg(12, q, 6)).scale(1, 1, 0.55).rotateZ(2.4).translate(-0.2, -0.17, 0);
-  b.add(mergeGeometries([capsule, tail])!, p.burbuBody, bubble, OBJECT_ID.burbu);
+  const capsule = new CapsuleGeometry(0.025, 0.03, seg(8, q, 4), seg(16, q, 8)).rotateZ(Math.PI / 2).scale(1, 1, 0.6);
+  const tail = new ConeGeometry(0.008, 0.016, seg(12, q, 6)).scale(1, 1, 0.6).rotateZ(2.4).translate(-0.026, -0.021, 0);
+  b.add(mergeGeometries([capsule, tail])!, p.burbuBody, bubble, OBJECT_ID.ventixs);
   capsule.dispose();
   tail.dispose();
   for (let i = 0; i < 3; i++) {
-    const dot = new CapsuleGeometry(0.018, 0.04, 2, seg(8, q, 4)).rotateZ(Math.PI / 2).translate((i - 1) * 0.09, 0, 0.2 * 0.55 - 0.002);
-    b.add(dot, p.burbuSignal, bubble, OBJECT_ID.burbu);
+    b.add(new SphereGeometry(0.003, 8, 6).translate((i - 1) * 0.011, 0, 0.0145), p.burbuSignal, bubble, OBJECT_ID.ventixs);
   }
 
-  const gift = FIGURES.gift;
-  const g = 0.095;
-  const box = new Matrix4().compose(new Vector3(gift.x, plinthTop, gift.z), new Quaternion().setFromAxisAngle(UP, -0.35), new Vector3(g, g, g));
-  const bodyH = 0.48;
-  const lidH = 0.12;
-  const lidY = bodyH + 0.012 + lidH / 2;
+  const gift = FIGURES.parati;
+  const box = new Matrix4().compose(gift, new Quaternion().setFromAxisAngle(UP, -0.2), new Vector3(1, 1, 1));
   const part = (geometry: BufferGeometry, finish: Finish, y: number) =>
-    b.add(geometry, finish, new Matrix4().multiplyMatrices(box, new Matrix4().makeTranslation(0, y, 0)), OBJECT_ID.gift);
-  part(new RoundedBoxGeometry(0.6, bodyH, 0.6, 2, 0.05), p.giftBody, bodyH / 2);
-  part(new BoxGeometry(0.08, bodyH + 0.004, 0.62), p.giftRibbon, bodyH / 2);
-  part(new BoxGeometry(0.62, bodyH + 0.004, 0.08), p.giftRibbon, bodyH / 2);
-  part(new BoxGeometry(0.61, 0.008, 0.61), p.giftSeam, bodyH + 0.006);
-  part(new RoundedBoxGeometry(0.64, lidH, 0.64, 2, 0.04), p.giftBody, lidY);
-  part(new BoxGeometry(0.08, lidH + 0.006, 0.66), p.giftRibbon, lidY);
-  part(new BoxGeometry(0.66, lidH + 0.006, 0.08), p.giftRibbon, lidY);
+    b.add(geometry, finish, new Matrix4().multiplyMatrices(box, new Matrix4().makeTranslation(0, y, 0)), OBJECT_ID.parati);
+  part(new RoundedBoxGeometry(0.06, 0.048, 0.06, 2, 0.004), p.giftBody, 0.024);
+  part(new BoxGeometry(0.0605, 0.001, 0.0605), p.giftSeam, 0.0485);
+  part(new RoundedBoxGeometry(0.063, 0.012, 0.063, 2, 0.003), p.giftBody, 0.055);
+  part(new BoxGeometry(0.008, 0.0612, 0.0645), p.giftRibbon, 0.0306);
+  part(new BoxGeometry(0.0645, 0.0612, 0.008), p.giftRibbon, 0.0306);
   for (const side of [-1, 1]) {
     b.add(
-      new OctahedronGeometry(0.07, 0).scale(1.4, 0.6, 0.8).rotateZ(side * -0.35).translate(side * 0.075, lidY + lidH / 2 + 0.03, 0),
+      new OctahedronGeometry(0.006, 0).scale(1.5, 0.5, 0.9).rotateZ(side * -0.35).translate(side * 0.0065, 0.0635, 0),
       p.giftRibbon,
       box,
-      OBJECT_ID.gift
+      OBJECT_ID.parati
     );
   }
-}
 
-/** Monitor head (bezel and back housing), centred on the screen, facing +Z. */
-export function buildMonitorHead(b: PartBuilder, p: Palette, q: Quality): void {
-  const { width, height } = MONITOR.screen;
-  const e = MONITOR.bezel;
-  b.add(new RoundedBoxGeometry(width + 2 * e, height + 2 * e, MONITOR.depth, seg(2, q, 1), 0.003), p.bezel);
-  b.add(new RoundedBoxGeometry(width * 0.72, height * 0.75, 0.03, seg(3, q, 2), 0.012), p.bezel, { position: [0, 0, -MONITOR.depth / 2 - 0.012] });
-  b.add(new RoundedBoxGeometry(0.11, 0.11, 0.012, 1, 0.004), p.metal, { position: [0, 0, -MONITOR.depth / 2 - 0.032] });
+  const tool = FIGURES.skymek;
+  const base = new Matrix4().compose(tool, new Quaternion().setFromAxisAngle(UP, 0.55), new Vector3(1, 1, 1));
+  b.add(new RoundedBoxGeometry(0.04, 0.015, 0.02, 2, 0.002), p.wood, new Matrix4().multiplyMatrices(base, new Matrix4().makeTranslation(-0.035, 0.0075, 0)), OBJECT_ID.skymek);
+  const wrench = new ExtrudeGeometry(wrenchShapes(), {
+    depth: 0.005,
+    bevelEnabled: true,
+    bevelSize: 0.0008,
+    bevelThickness: 0.0008,
+    bevelSegments: 2,
+    curveSegments: seg(16, q, 8)
+  }).translate(-0.055, 0, -0.0025);
+  const lean = new Matrix4().multiplyMatrices(
+    base,
+    new Matrix4().compose(new Vector3(0, 0.012, 0), new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), -0.24).multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2)), new Vector3(1, 1, 1))
+  );
+  b.add(wrench, p.toolBody, lean, OBJECT_ID.skymek);
+  b.add(new BoxGeometry(0.014, 0.0065, 0.009), p.toolBand, new Matrix4().multiplyMatrices(lean, new Matrix4().makeTranslation(-0.004, 0, 0)), OBJECT_ID.skymek);
+  b.add(new BoxGeometry(0.05, 0.001, 0.0062), p.toolSignal, new Matrix4().multiplyMatrices(lean, new Matrix4().makeTranslation(0.0, 0.0015, 0)), OBJECT_ID.skymek);
 }
 
 /** Rectangles (centre x/z and size) that receive a soft contact shadow, in room space. */
@@ -535,15 +633,15 @@ export function contactShadowSpots(): Array<{ x: number; y: number; z: number; w
   const { centre, yaw } = MONITOR;
   return [
     { x: centre.x, y: top, z: centre.z - 0.03, w: 0.36, d: 0.26, yaw },
-    { x: KEYBOARD_X, y: top, z: 0.16, w: 0.44, d: 0.19, yaw: yaw * 0.5 },
-    { x: KEYBOARD_X + 0.27, y: top, z: 0.165, w: 0.17, d: 0.14 },
-    { x: 0.53, y: top, z: 0.2, w: 0.2, d: 0.26, yaw: 0.18 },
-    { x: 0.43, y: top, z: -0.04, w: 0.12, d: 0.12 },
-    { x: 0.57, y: top, z: -0.21, w: 0.2, d: 0.2 },
+    { x: KEYBOARD.x, y: top, z: KEYBOARD.z, w: 0.44, d: 0.19 },
+    { x: KEYBOARD.trackpadX, y: top, z: KEYBOARD.z, w: 0.17, d: 0.14 },
+    { x: OPEN_FOLDER.centre.x, y: top, z: OPEN_FOLDER.centre.z, w: OPEN_FOLDER.width + 0.06, d: OPEN_FOLDER.depth + 0.05, yaw: OPEN_FOLDER.yaw },
+    { x: MUG.x, y: top, z: MUG.z, w: 0.13, d: 0.13 },
+    { x: PHONE.base.x, y: top, z: PHONE.base.z, w: 0.14, d: 0.12, yaw: PHONE.yaw },
     { x: LAMP.base.x, y: top, z: LAMP.base.z, w: 0.2, d: 0.2 },
-    { x: FIGURES.plinth.x, y: top, z: FIGURES.plinth.z, w: 0.38, d: 0.15 },
+    { x: PLINTH.centre.x, y: top, z: PLINTH.centre.z, w: PLINTH.width + 0.07, d: PLINTH.depth + 0.06 },
     { x: TELESCOPE.foot.x, y: 0.0012, z: TELESCOPE.foot.z, w: 0.8, d: 0.8 },
-    { x: -0.72, y: 0.0012, z: 1.05, w: 0.75, d: 0.75 },
+    { x: CHAIR.x, y: 0.0012, z: CHAIR.z, w: 0.75, d: 0.75 },
     { x: -(DESK.width / 2 - 0.07), y: 0.0012, z: 0, w: 0.12, d: 0.8 },
     { x: DESK.width / 2 - 0.07, y: 0.0012, z: 0, w: 0.12, d: 0.8 }
   ];

@@ -71,8 +71,9 @@
   --color-ventixs-soft: #0e2a1f;
 
   --color-scene-bg: #0a0e14;
-  --color-alfa-body: #2b3a52;
+  --color-alfa-body: #10131a;
   --color-alfa-signal: #5aa9ff;
+  --color-alfa-ring: #b08a4a;
   --color-burbu-body: #1f6e52;
   --color-burbu-signal: #3fcf8e;
   --color-gift-body: #2a3142;
@@ -222,20 +223,22 @@
   --z-skip: 60;
 
   --scene-tone-exposure: 1;
-  --alfa-roughness: 0.38;
-  --alfa-metalness: 0.6;
-  --alfa-signal-intensity: 1.6;
-  --burbu-roughness: 0.55;
-  --burbu-metalness: 0.1;
-  --burbu-signal-intensity: 1.2;
-  --gift-roughness: 0.62;
-  --gift-metalness: 0.05;
-  --gift-ribbon-roughness: 0.3;
-  --gift-ribbon-metalness: 0.7;
-  --tool-roughness: 0.32;
-  --tool-metalness: 0.85;
-  --tool-band-roughness: 0.45;
-  --tool-band-metalness: 0.2;
+  --alfa-roughness: 0.15;
+  --alfa-metalness: 0;
+  --alfa-signal-intensity: 1;
+  --burbu-roughness: 0.75;
+  --burbu-metalness: 0;
+  --burbu-signal-intensity: 0.8;
+  --gift-roughness: 0.4;
+  --gift-metalness: 0;
+  --gift-ribbon-roughness: 0.35;
+  --gift-ribbon-metalness: 0.05;
+  --tool-roughness: 0.38;
+  --tool-metalness: 1;
+  --tool-band-roughness: 0.4;
+  --tool-band-metalness: 0.6;
+  --alfa-ring-roughness: 0.3;
+  --alfa-ring-metalness: 1;
 
   --plate-width: 36rem;
   --plate-padding: clamp(1.25rem, 0.9rem + 1.6vw, 2rem);

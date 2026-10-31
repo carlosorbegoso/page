@@ -1,128 +1,91 @@
-# Mascotas 3D — dirección de arte
+# Mascotas y props: piezas de escritorio ejecutivo
 
-Colores y materiales exactos: `docs/design/identity.md` §7 y `src/styles/tokens.css` (`--color-alfa-*`, `--alfa-roughness`, …). Este documento define forma, carácter, versión procedural y prompts para Tripo.
+Dirección final: "Una noche en el escritorio" (`desk.md`). Las mascotas ya no son personajes ni cuerpos celestes. Son **objetos de colección sobre la peana de nogal**, en el registro de un pisapapeles de diseño o una miniatura de arquitectura: materiales nobles, cortes precisos, sin caras. Colores y materiales en `src/styles/tokens.css` (`--color-alfa-*`, `--alfa-roughness`, …, `--color-desk-brass`).
 
-## 1. Principios de la familia
+---
 
-- **Objetos de diseño industrial, no personajes de dibujos animados.** Piensa en un altavoz inteligente, un router premium o una pieza de mecanizado: facetas limpias, chaflanes suaves, proporciones calmadas.
-- **Sin ojos, boca ni extremidades.** La "personalidad" viene de tres cosas: la postura (leve inclinación de 6–10°), el movimiento lento en reposo y la **línea de señal**: una ranura luminosa fina (emisiva) que cada mascota lleva en el color de su marca. Es el rasgo común que las hace una familia.
-- **Materiales**: base mate o metálico satinado (rugosidad 0.3–0.65), sin brillo de plástico, sin purpurina, sin texturas fotográficas. Un solo material por mascota con atlas (cuerpo + señal), AO horneado.
-- **Paleta**: cuerpo en tonos grafito/acero de la marca; el color del producto solo en el acento (cinta, banda, señal). Así juntas se leen como un sistema y no como cuatro juguetes.
-- **Escala relativa** (1 u = 1 m, pivote en la base): Alfa 1.0 de alto (la mayor, marca madre); las tres de producto 0.55–0.65, de modo que juntas forman un triángulo alrededor de Alfa.
+## Para Carlos: generar en Tripo
+
+### Cómo generar cada modelo
+
+1. **Entrada**: usa **Text to 3D** con el prompt de abajo. Si Tripo da formas raras, usa **Image to 3D** con una referencia: la captura del placeholder procedural (modo `?capture`, vista frontal-¾, fondo gris) o una foto de un objeto real parecido (la columna "Referencia").
+2. **Opciones**, si tu versión de Tripo las ofrece:
+   - texturas PBR activadas, en la mejor calidad disponible;
+   - límite de caras ≈ 20 000 (triángulos, no quads);
+   - sin estilo artístico ("realistic"/none);
+   - exportar en **GLB**.
+3. Genera de 3 a 4 variantes y elige la que tenga la **silueta más limpia**; el color se corrige después.
+4. Guarda el GLB elegido en `assets-src/models/<nombre>.glb` y pásaselo al experto 3D. Él lo limpia en Blender: escala real, pivote en la base, separar las partes con nombre (tabla de nodos), reasignar los colores exactos de los tokens, hornear AO y pasar por `bun run assets`.
+5. Anota en `docs/3d/assets.md` el plan de Tripo usado, que tiene que permitir uso comercial.
+
+**Añade siempre al final del prompt:**
+
+> Single object, centered, resting on its base, studio product shot, neutral grey background, soft even lighting. Clean hard-surface modeling, crisp bevels, realistic PBR materials, no text, no logos, no face, no eyes, no mouth.
+
+**Negativo** (si Tripo lo admite): `cartoon, cute, chibi, character, eyes, face, arms, legs, toy, plastic, glitter, fur, text, logo, busy texture, multiple objects, base plate, ground plane`.
+
+### Mascotas (sobre la peana)
+
+| Modelo | Medidas reales | Prompt | Referencia de imagen | Nodos que hay que separar en Blender |
+|---|---|---|---|---|
+| **Alfa** (`alfa.glb`) | 12 cm de alto × 8 cm | *A faceted obsidian desk sculpture, an elongated geometric gem cut like a monolith, polished black volcanic glass with sharp clean facets, encircled at 55% of its height by a thin brushed brass ring. A very thin groove on the inner face of the ring. Executive desk object, luxury paperweight, minimal and architectural.* | Foto de un pisapapeles de obsidiana facetado + captura del placeholder de Alfa | `body` (obsidiana), `ring` (latón), `signal` (ranura del anillo, emisiva azul) |
+| **Burbu** (`burbu.glb`) | 7 cm de alto × 9 cm | *A matte ceramic desk object shaped like a softened speech bubble, a flattened rounded capsule with a short conical tail at the lower left, unglazed bisque ceramic in deep green, three small round recessed dots on the front. Minimal Scandinavian ceramic design, calm and premium.* | Foto de cerámica mate escandinava (jarrón bajo o pisapapeles) | `body` (cerámica), `dot-1`, `dot-2`, `dot-3` (puntos, emisivos verdes) |
+| **Caja de regalo** (`gift.glb`) | 6 × 6 × 6 cm | *A small lacquered gift box with softly rounded edges, deep graphite satin lacquer, a slightly wider separate lid, wrapped with a flat satin ribbon cross in muted rose and a small neat flat bow. Luxury packaging miniature, jewellery box quality, minimal.* | Foto de un estuche de joyería lacado con cinta de raso | `body`, `lid` (tapa, se levanta), `ribbon` (cinta), `signal` (ranura de luz bajo la tapa) |
+| **SkyMek** (`tool.glb`) | 11 cm de largo, sobre un bloque de nogal de 4 × 2 × 1.5 cm | *A premium combination wrench miniature resting diagonally on a small walnut block, bead-blasted titanium finish, open hexagonal jaw on one end and ring on the other, an amber anodized aluminium grip band in the middle, a thin engraved groove along the handle. High-end workshop tool, precise machining, museum display object.* | Foto de una llave de titanio de gama alta | `body` (titanio), `band` (banda ámbar), `stand` (nogal), `signal` (ranura del mango, emisiva ámbar) |
+
+### Props del escritorio
+
+| Modelo | Medidas | Prompt | Referencia | Nodos |
+|---|---|---|---|---|
+| **Peana** (`plinth.glb`) | 24 × 10 × 3 cm | *A low rectangular walnut display plinth with softly eased edges and a thin inlaid brushed brass strip along the front face. Fine furniture craftsmanship, oiled walnut grain.* | Foto de una peana de nogal para relojes | `body`, `inlay` |
+| **Teléfono** (`phone.glb`) | 147 × 71 × 8 mm | *A modern smartphone lying flat, face up, matte black aluminium frame, flat black glass front with thin even bezels, small camera bump on the back, no brand, no buttons details beyond the side keys.* | Foto cenital de un smartphone genérico | `body`, `screen` (plano exacto de la pantalla, sin textura: ahí va el HTML) |
+| **Carpeta archivadora** (`folder.glb`) | 32 × 28 × 8 cm (lomo de 8 cm) | *A wide-spine archival box file standing upright, linen-covered hardboard in a neutral color, a rectangular paper label holder on the spine, a metal finger ring pull on the spine. Office stationery, premium archival quality.* | Foto de un archivador de lomo ancho con portaetiquetas | `body`, `label` (etiqueta del lomo, recibe la textura con el nombre). Se genera **una** carpeta: el experto 3D la duplica 4 veces y le cambia el color (`--color-folder-*`) |
+| **Carpeta abierta** (`folder-open.glb`) | 32 × 56 cm abierta | *An open archival folder lying flat on a desk with a few loose paper sheets inside, linen hardboard cover, neutral color.* | — | `body`, `sheet` (hoja superior, recibe textura) |
+| **Taza** (`mug.glb`) | Ø 8.5 × 9.5 cm | *A cylindrical matte stoneware coffee mug with a simple loop handle, warm off-white speckled glaze, filled with black coffee.* | Foto de una taza de gres mate | `body`, `coffee` |
+| **Lámpara** (`lamp.glb`) | 55 cm de alto con los brazos | *A minimalist architect desk lamp, two straight arms with a hinge, round weighted base, conical shade, graphite anodized aluminium, warm light bulb visible inside the shade.* | Foto de una lámpara de arquitecto de diseño | `base`, `arm-1`, `arm-2`, `shade`, `bulb` (emisivo) |
+
+Opcionales, si sobra tiempo: telescopio refractor blanco con latón, planta pequeña (ficus o monstera) en maceta de terracota y monitor de 27" de marco fino.
+
+Presupuesto por GLB tras limpieza: mascotas `high` ≤ 25 k tris con texturas de 1024 px y `mid` ≤ 8 k con 512 px; props ≤ 15 k (`high`). Un material por objeto con atlas. Las partes emisivas pueden ir como material aparte: el código las detecta por `emissive` y por los nombres `signal` y `dot-N`.
+
+---
+
+## 1. Registro
+
+- **Pieza de escritorio ejecutivo / miniatura de arquitectura.** Cada mascota debe poder venderse en la tienda de un museo de diseño.
+- **Materiales nobles con un contraste por pieza**: obsidiana con latón, cerámica mate con luz, laca con raso, titanio con aluminio anodizado.
+- **Sin caras.** La personalidad viene de la línea de señal (ranura emisiva fina en el color de su marca), de cómo atrapan la luz de la lámpara y de su gesto de foco.
+- **Señal tenue en el escritorio**: emisión a media intensidad (la lámpara manda), con `--alfa-signal-intensity` 1.0 y `--burbu-signal-intensity` 0.8.
+- **Escala**: es la escala real de los objetos. La cámara las encuadra en macro (`company`, `products`), así que los biseles y las texturas se ven de cerca: 1024 px por pieza.
 
 ## 2. Fichas
 
-### 2.1 Alfa — TUSOCIO IA (marca madre)
+| Pieza | Forma | Material base | Acento | Señal | Gesto de foco |
+|---|---|---|---|---|---|
+| **Alfa** (TUSOCIO IA) | Monolito facetado, de 12 × 8 cm, con la mitad inferior más estrecha | Obsidiana pulida `--color-alfa-body` `#10131A`, r 0.15, m 0 | Anillo de latón `--color-alfa-ring` `#B08A4A`, r 0.3, m 1, a 55 % de la altura | Ranura interior del anillo `#5AA9FF` | Gira 20° y el anillo capta un destello de la lámpara |
+| **Burbu** (Ventixs) | Cápsula achatada con cola, de 9 × 7 cm | Cerámica bizcocho mate `--color-burbu-body` `#1F6E52`, r 0.75, m 0 | — | Tres puntos `#3FCF8E` que se encienden en secuencia | Los puntos "escriben" (0.4 s cada uno) |
+| **Caja** (Parati) | Cubo de 6 cm con cantos suaves y tapa algo más ancha | Laca grafito satinada `--color-gift-body` `#2A3142`, r 0.4, m 0 | Cinta de raso `--color-gift-ribbon` `#F28BA0`, r 0.35, m 0.05 | Ranura bajo la tapa, rosa tenue | La tapa sube 2.5 cm (nodo `lid`) |
+| **SkyMek** | Llave combinada de 11 cm en diagonal sobre un bloque de nogal | Titanio granallado `--color-tool-body` `#8C97A8`, r 0.38, m 1 | Banda de aluminio anodizado `--color-tool-band` `#F0A43C`, r 0.4, m 0.6; bloque de nogal `--color-desk-wood` | Ranura del mango, ámbar | Sube 2 cm y gira despacio; al ser el producto estrella, tiene el plano más largo |
 
-- **Silueta**: cristal/núcleo facetado, un icosaedro ligeramente alargado en vertical (escala Y 1.15) y con la mitad inferior más estrecha, como una gema tallada de baja poligonización. Un **anillo de visor** horizontal a 55 % de la altura: ranura fina que da la vuelta y emite luz azul. Flota sobre su sombra horneada.
-- **Proporciones**: alto 1.0, ancho 0.8; visor de 0.04 de alto.
-- **Material**: grafito azulado `#2B3A52` metálico satinado (rugosidad 0.38, metalness 0.6). Señal `#5AA9FF` emisiva.
-- **Carácter**: sereno, atento; el visor "respira" (intensidad 1.4 ↔ 1.8 en 4 s) cuando hay movimiento permitido.
-- **En la escena Ventures**: se abre en tres facetas que viajan y se transforman en las otras tres mascotas.
+**Juntas sobre la peana**: Alfa en el centro y algo más atrás (es la más alta). SkyMek a la izquierda, en diagonal, con el bloque paralelo al borde de la peana. La caja a la derecha. Burbu delante a la derecha, un poco girada (15°) hacia la cámara. Separación de 3 a 4 cm entre piezas. Las cuatro reciben el mismo cono de la lámpara; Alfa capta el punto más brillante.
 
-### 2.2 Burbu — Ventixs
+## 3. Versión procedural (placeholder)
 
-- **Silueta**: burbuja de chat suavizada: cápsula achatada (ancho 1.3 × alto 1 × fondo 0.55) con una cola cónica corta abajo a la izquierda. Tres ranuras-punto horizontales en el frente (indicador "escribiendo") que son la línea de señal, en verde.
-- **Proporciones**: alto 0.55; cola ≤ 18 % del ancho.
-- **Material**: verde profundo `#1F6E52` mate cerámico (rugosidad 0.55, metalness 0.1). Señal `#3FCF8E`.
-- **Carácter**: el más "vivo": los tres puntos se encienden en secuencia (0.4 s cada uno) cuando hay movimiento permitido.
+Misma interfaz (`Mascot`) y **mismos nombres de nodo** que los GLB, para poder cambiarlos sin tocar código.
 
-### 2.3 Caja de regalo — Parati
+| Pieza | Primitivas `three` |
+|---|---|
+| Alfa | `body`: `OctahedronGeometry(0.045, 0)` escalada `(0.9, 1.35, 0.75)` y facetada (`flatShading`), base recortada en y = 0 · `ring`: `TorusGeometry(0.043, 0.0025, 8, 64)` en y = 0.066 · `signal`: `TorusGeometry(0.0405, 0.0006, 4, 64)` |
+| Burbu | `body`: `CapsuleGeometry(0.025, 0.03, 8, 16)` rotada `z = π/2` y escalada `(1, 1, 0.6)` + cola `ConeGeometry(0.008, 0.016, 12)` · `dot-1..3`: `SphereGeometry(0.003, 8, 6)` |
+| Caja | `body`: `RoundedBoxGeometry(0.06, 0.048, 0.06, 3, 0.004)` · `lid`: `RoundedBoxGeometry(0.063, 0.012, 0.063, 3, 0.003)` · `ribbon`: 2× `BoxGeometry(0.008, 0.061, 0.0605)` · lazo: 2× `OctahedronGeometry(0.006, 0)` aplastados · `signal`: `BoxGeometry(0.0605, 0.001, 0.0605)` |
+| SkyMek | `body`: `Shape` de llave (boca hexagonal y anillo) → `ExtrudeGeometry({ depth: 0.005, bevelSize: 0.0008, bevelThickness: 0.0008, bevelSegments: 2 })`, largo 0.11 · `band`: `BoxGeometry(0.014, 0.0065, 0.009)` · `stand`: `RoundedBoxGeometry(0.04, 0.015, 0.02, 2, 0.002)` · `signal`: `BoxGeometry(0.05, 0.0006, 0.001)` |
 
-- **Silueta**: cubo de cantos redondeados (radio 8 % del lado) con tapa ligeramente más ancha y separada por una ranura de luz; cinta en cruz plana (no lazo rizado: un lazo geométrico de dos lóbulos facetados, bajo).
-- **Proporciones**: lado 0.6; tapa 0.12 de alto; cinta 0.08 de ancho.
-- **Material**: cuerpo grafito `#2A3142` mate (rugosidad 0.62, metalness 0.05); cinta rosa coral `#F28BA0` metálico satinado (rugosidad 0.3, metalness 0.7). La ranura bajo la tapa emite el rosa a baja intensidad (señal).
-- **Carácter**: discreto y elegante; en foco, la tapa se eleva 2–3 cm y la ranura brilla más.
+Movimiento en reposo, solo si está permitido: giro ≤ 0.05 rad/s y respiración de la señal ≤ ±5 % en 6–8 s (reglas anti-mareo del PLAN). Sin flotación: son objetos apoyados.
 
-### 2.4 Herramienta — SkyMek
+## 4. Criterios de aceptación visual (Carlos)
 
-- **Silueta**: llave combinada estilizada: perfil plano extruido (grosor 0.06) con cabeza abierta hexagonal a un lado y anillo al otro; mango con una **banda** de agarre ámbar en el centro. Se presenta inclinada 30° sobre su eje Z, apoyada en el anillo.
-- **Proporciones**: largo 0.65, ancho de cabeza 0.18, bisel 0.01.
-- **Material**: acero cepillado `#8C97A8` (rugosidad 0.32, metalness 0.85); banda `#F0A43C` (rugosidad 0.45, metalness 0.2). Una ranura fina ámbar a lo largo del mango = señal.
-- **Carácter**: la más sólida y "seria" (producto en producción); gira sobre su eje largo muy despacio.
-
-### 2.5 Juntas
-
-Composición en triángulo: Alfa arriba al centro y algo más atrás; SkyMek a la izquierda, Parati a la derecha, Burbu abajo al centro (o en fila horizontal en móvil). Todas con la misma luz y el mismo entorno; sombras de contacto horneadas del mismo tono. Las líneas de señal son el único color saturado de la escena, así el ojo lee: marca azul → tres productos con su acento.
-
-## 3. Versión procedural (placeholder actual)
-
-Todo con `MeshStandardMaterial`, `flatShading: true` en Alfa y caja para el aspecto facetado. La señal es un segundo `MeshStandardMaterial` con `emissive` = color de señal y `emissiveIntensity` del token (en el GLB final será una zona del atlas emisivo: un solo material). Presupuesto procedural: < 3 k tris por mascota, 2 draw calls cada una (cuerpo + señal) → ≤ 8 en total; se pueden fusionar con `BufferGeometryUtils.mergeGeometries` + grupos.
-
-| Mascota | Primitivas `three` | Notas |
-|---|---|---|
-| **Alfa** | `IcosahedronGeometry(0.45, 1)` escalada `(1, 1.15, 1)`, vértices con `y < 0` multiplicados por 0.85 en X/Z · visor: `TorusGeometry(0.43, 0.012, 6, 48)` rotado `x = π/2`, en `y = 0.1` | `flatShading`. Sombra: `PlaneGeometry` con textura radial horneada (canvas 128 px). |
-| **Burbu** | `CapsuleGeometry(0.2, 0.25, 8, 16)` rotada `z = π/2`, escala `(1, 1, 0.55)` · cola: `ConeGeometry(0.07, 0.12, 12)` rotada ~`z = 2.4` abajo-izquierda · puntos: 3× `CapsuleGeometry(0.018, 0.04, 4, 8)` horizontales, separadas 0.09 | Cuerpo suave (sin `flatShading`). |
-| **Caja** | `RoundedBoxGeometry(0.6, 0.48, 0.6, 3, 0.05)` (`three/addons/geometries/RoundedBoxGeometry.js`) · tapa: `RoundedBoxGeometry(0.64, 0.12, 0.64, 3, 0.04)` · cinta: 2× `BoxGeometry(0.08, 0.61, 0.62)` cruzadas · lazo: 2× `OctahedronGeometry(0.07, 0)` escaladas `(1.4, 0.6, 0.8)` · ranura: `BoxGeometry(0.61, 0.008, 0.61)` emisiva | Cinta con material metálico satinado (una de las dos señales visuales). |
-| **Herramienta** | `Shape` 2D (mango rectangular redondeado + cabeza con boca hexagonal vía `Path` de agujero + anillo con `absarc` y agujero) → `ExtrudeGeometry({ depth: 0.06, bevelEnabled: true, bevelSize: 0.01, bevelThickness: 0.01, bevelSegments: 2 })` · banda: `CylinderGeometry` achatado o `BoxGeometry(0.12, 0.05, 0.075)` en el centro | Centrar con `geometry.center()` y pivote en el anillo. |
-
-Movimiento en reposo (solo `high`/`mid` sin reduced-motion): rotación Y 0.08 rad/s, flotación ±0.015 u en 6 s (`sin`), sin rebotes.
-
-## 4. Prompts para Tripo (versión GLB final)
-
-### 4.1 Imagen de referencia
-
-Para cada mascota, usar como imagen de entrada la **captura determinista del placeholder procedural** (modo `?capture=<escena>&progress=1` de PLAN §3.4) a 1024×1024, vista frontal-¾ (cámara 30° a la derecha y 15° arriba), fondo gris neutro `#808080`, sin bloom. Así Tripo hereda proporciones y la familia queda consistente. Si se quiere una referencia más rica, retocarla primero (p. ej. en Firefly o similar) manteniendo silueta, colores y fondo neutro, y guardarla en `assets-src/ref/<mascota>.png`.
-
-### 4.2 Requisitos técnicos (añadir a todos)
-
-> Single object, centered, neutral A-pose / resting pose, neutral grey studio background, soft even lighting, no text, no logos, no face, no eyes, no mouth. Clean low-poly hard-surface topology, under 25,000 triangles, one PBR material (base color, roughness, metallic, emissive) with a single UV atlas, no transparency, watertight mesh, pivot at the base, real-world scale.
-
-Negativo (si la herramienta lo admite): `cartoon, cute, chibi, eyes, face, mouth, arms, legs, toy, plastic gloss, glitter, fur, text, logo, busy texture, photographic texture, multiple objects`.
-
-Tras generar: limpieza en Blender según el checklist de intake (PLAN §6.3), reasignar el color exacto de los tokens en el material, hornear AO, y `bun run assets` para las variantes `high` (≤ 25 k tris, 1024 px) y `mid` (≤ 8 k tris, 512 px).
-
-### 4.3 Prompts
-
-**Alfa**
-> A sleek faceted crystal core, an elongated low-poly icosahedron gem slightly narrower at the bottom, premium industrial design object. Dark blue-graphite satin metal body (#2B3A52), subtle chamfered edges. A thin horizontal glowing visor slit wraps around it at 55% height, emitting soft electric blue light (#5AA9FF). Calm, intelligent, minimal, enterprise technology aesthetic, like a high-end smart device. Floating above the ground.
-
-**Burbu**
-> A minimal speech bubble object, a flattened rounded capsule with a short conical tail at the lower left, premium industrial design. Deep green matte ceramic body (#1F6E52). Three small horizontal glowing slots on the front, like a typing indicator, emitting mint green light (#3FCF8E). Soft rounded forms, sober, modern tech product aesthetic, not cartoon.
-
-**Caja de regalo (Parati)**
-> A minimal geometric gift box with softly rounded edges, slightly wider lid separated by a thin glowing seam. Dark graphite matte body (#2A3142). Flat cross ribbon and a low faceted two-lobe bow in satin rose metallic (#F28BA0); the seam under the lid glows faint rose. Elegant, refined, premium packaging design, sober, not cartoon.
-
-**Herramienta (SkyMek)**
-> A stylized combination wrench, flat extruded profile with an open hexagonal jaw on one end and a ring on the other, small bevels. Brushed steel satin metal (#8C97A8). An amber grip band (#F0A43C) in the middle of the handle and a thin amber glowing groove along the handle. Precise, industrial, premium tool design, clean hard-surface modeling, sober.
-
-## 5. Criterios de aceptación visual (revisión de Carlos)
-
-- [ ] Ninguna lee como juguete o personaje infantil; sin rasgos faciales.
-- [ ] Silueta reconocible a 64 px de alto (prueba en miniatura).
-- [ ] Color de producto solo en el acento; cuerpo en grafito/acero.
-- [ ] Las cuatro juntas, con la misma luz, parecen de la misma colección.
-- [ ] Línea de señal presente y legible en cada una.
-
-## 6. Versión "cuerpo celeste" (concepto Constelación)
-
-En el mundo "Constelación" (`constellation.md`) las mascotas dejan de ser objetos sueltos y se vuelven **cuerpos del sistema de Alfa**. La forma de producto se conserva, pero **leída como astro**: volumen principal casi esférico y el rasgo del producto como relieve, banda o satélite. Se mantienen la línea de señal, la regla "sin ojos" y un material por cuerpo. Las luce la `PointLight` de Alfa, que marca un terminador día/noche: es lo que las vuelve "lunas" y no iconos.
-
-| Cuerpo | Forma celeste | Rasgo de producto | Banda de acento (emisiva) | Material |
-|---|---|---|---|---|
-| **Alfa** (estrella) | Núcleo facetado (icosaedro alargado) + halo doble + anillo-visor | Es la marca madre | Visor `#5AA9FF`; núcleo `#EAF4FF` emisivo 3.2 | Ver `constellation.md` §5 |
-| **SkyMek** | Esfera r 0.30 con **6 facetas planas mecanizadas** en el ecuador (sección de tuerca hexagonal) | Una llave diminuta (0.18 u) orbita la luna como satélite, a 0.5 u, periodo 20 s | Anillo ecuatorial fino `#F0A43C` | Acero satinado `#8C97A8`, rugosidad 0.45, metalness 0.7 |
-| **Parati** | Cubo de cantos muy redondeados (radio 35 % del lado), un "planeta-caja" de lado 0.48 | Cinta en cruz en relieve (0.006 u) que envuelve el cuerpo, con un lazo facetado bajo como "polo" | La cinta `#F28BA0` (metálico satinado, rugosidad 0.3, metalness 0.7) emite a 1.4 | Grafito `#2A3142` mate, rugosidad 0.6, metalness 0.1 |
-| **Ventixs** | Esfera achatada (1.2 × 1 × 0.9), r 0.25, con una **cola cónica suave** a 40° bajo el ecuador: la burbuja de chat leída como cometa breve | Tres puntos-ranura en línea sobre la cara iluminada, que se encienden en secuencia (indicador "escribiendo") | Puntos `#3FCF8E` | Verde profundo `#1F6E52` cerámico, rugosidad 0.55, metalness 0.1 |
-
-Primitivas procedurales:
-- **SkyMek**: `IcosahedronGeometry(0.3, 3)` con los vértices de `|y| < 0.08` proyectados a un prisma hexagonal (o `CylinderGeometry(0.3, 0.3, 0.16, 6)` fusionado con dos casquetes `SphereGeometry` recortados) · anillo `TorusGeometry(0.305, 0.006, 4, 96)` · llave satélite: la `ExtrudeGeometry` de §3 escalada a 0.28.
-- **Parati**: `RoundedBoxGeometry(0.48, 0.48, 0.48, 6, 0.17)` · cinta: 2× `TorusGeometry` aplastados o `BoxGeometry(0.06, 0.49, 0.49)` cruzados · lazo `OctahedronGeometry(0.05, 0)` ×2.
-- **Ventixs**: `SphereGeometry(0.25, 32, 24)` escalada `(1.2, 1, 0.9)` · cola `ConeGeometry(0.06, 0.14, 16)` · puntos 3× `SphereGeometry(0.014, 8, 6)` emisivos.
-
-Presupuesto por cuerpo: < 4 k tris procedural; GLB `high` ≤ 25 k, `mid` ≤ 8 k. Escalas y órbitas en `constellation.md` §6.
-
-### Prompts Tripo (variante celeste)
-
-Se añaden los requisitos técnicos de §4.2; la imagen de referencia es la captura `?capture=products` del placeholder.
-
-**SkyMek (luna)**
-> A small moon-like sphere with six flat machined facets around its equator like a hexagonal nut, brushed satin steel (#8C97A8), a thin amber glowing ring (#F0A43C) along the equator. Precise industrial hard-surface design, minimal, sober, no texture noise, no craters.
-
-**Parati (luna)**
-> A small planet shaped like a gift box with very rounded edges, dark graphite matte surface (#2A3142), wrapped by a flat cross ribbon in raised satin rose metallic (#F28BA0) with a small low faceted bow at the top pole. Elegant, minimal, premium, sober.
-
-**Ventixs (luna)**
-> A small slightly flattened sphere with a short soft conical tail below its equator, like a chat bubble read as a tiny comet, deep green ceramic matte surface (#1F6E52), three small glowing mint dots (#3FCF8E) in a row on its face. Minimal, modern technology product, sober, not cartoon.
-
-**Alfa (estrella)**: el GLB de §4.3 sirve tal cual; el brillo de estrella (emisión fuerte, halo, bloom) se resuelve en el motor, no en el modelo.
+- [ ] Cada pieza parece un objeto real que se podría comprar, no un juguete.
+- [ ] En el macro se aprecian los materiales: el brillo de la obsidiana, el poro de la cerámica, el satinado del raso, el granallado del titanio.
+- [ ] Ninguna tiene rasgos faciales.
+- [ ] Juntas sobre la peana parecen una colección.
+- [ ] La señal se ve, pero no compite con la lámpara.

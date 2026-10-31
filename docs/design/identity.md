@@ -127,6 +127,17 @@ Pesos de uso: Sora 600 en títulos (700 solo en el nombre del hero si se quiere 
 
 Carga: `font-display: swap` + `@font-face` de fallback métrico (`Sora Fallback`, `Inter Fallback` sobre Arial/Helvetica/Roboto con `size-adjust`, `ascent-override`, `descent-override`, `line-gap-override` calculados de las tablas `hhea` y el ancho medio frente a Arial). **Preload solo de Sora** (fuente del título, PLAN §3.5).
 
+### 3.0 Escala única en pantalla (dirección final)
+
+Para el texto de la experiencia 3D (`plates.css`) solo hay cuatro roles. Los detalles están en `desk.md` §6.
+
+- **Titular**: `--text-display`, Sora 600, 72 → 96 px (44 px como mínimo), tracking −0.03em, interlineado 1.
+- **Cuerpo**: `--text-body`, Inter 17 px, interlineado 1.6.
+- **Eyebrow**: `--text-meta`, 13 px en mayúsculas.
+- **Medida**: `--container-measure`, 60ch.
+
+Cada panel tiene un solo margen izquierdo. La escala de abajo se mantiene para la UI fija (HUD, menús) y para el fallback plano.
+
 ### 3.1 Escala fluida (360 → 1440 px)
 
 Todas las `clamp()` combinan `rem + vw`, así que respetan el zoom del navegador (WCAG 1.4.4).
@@ -180,7 +191,7 @@ Reveals: desplazamiento máximo 12–16 px + opacidad; nada de escalas > 1.02 ni
 
 ## 6. Reglas de uso
 
-1. **Texto sobre 3D**: **texto suelto, sin cajas** (ver `constellation.md` §11). La legibilidad la garantizan un charco de oscuridad radial sin bordes (`--color-plate-pool` al 85 %) y un halo por glifo (`--plate-text-halo`); el contraste está calculado contra el halo de Alfa, las nebulosas, el monitor y las estrellas. El `bg-scrim` (90 %) queda solo para UI fija que no vive en el espacio (menús, hoja inferior). En texto suelto no se usa `text-subtle`.
+1. **Texto sobre 3D**: **texto suelto, sin cajas** (ver `constellation.md` §11 y `desk.md` §6). La legibilidad la garantizan un charco de oscuridad radial sin bordes (`--color-plate-pool` al 85 %) y un halo por glifo (`--plate-text-halo`); el contraste está calculado contra el halo de Alfa, las nebulosas, el monitor y las estrellas. El `bg-scrim` (90 %) queda solo para UI fija que no vive en el espacio (menús, hoja inferior). En texto suelto no se usa `text-subtle`.
 2. **Foco visible**: anillo de dos tonos `shadow-focus` = `0 0 0 2px bg, 0 0 0 4px focus` (o `outline: 2px solid var(--color-focus); outline-offset: 2px`). El anillo interior del color de fondo separa el foco de botones `accent` (focus vs accent solo da 1.38:1) y del 3D. Solo con `:focus-visible`.
 3. **Objetivos táctiles** ≥ 44×44 px (`min-h-tap`), separación ≥ 8 px entre objetivos contiguos.
 4. **Botones**: primario `bg-accent text-on-accent` (hover `bg-accent-hover`); secundario `border border-border-strong text-text` sobre fondo sólido; terciario/enlace `text-accent` subrayado en hover. Un solo primario por vista.
@@ -191,22 +202,7 @@ Reveals: desplazamiento máximo 12–16 px + opacidad; nada de escalas > 1.02 ni
 
 ## 7. Valores para el 3D
 
-Todos los colores que lee el motor son **hex literales** (Three.js `Color.setStyle` no interpreta `color-mix()` ni `var()` sin resolver). Se leen con `getComputedStyle(document.documentElement).getPropertyValue('--color-…').trim()`; si el usuario cambia `data-theme`, releerlos. Los números (rugosidad, metalness, intensidad) están como custom properties sin unidad: `parseFloat(...)`.
-
-Renderer: `setClearColor(--color-scene-bg)` (= `--color-bg`, `alpha: false`), `ACESFilmicToneMapping`, `toneMappingExposure = --scene-tone-exposure` (1.0 oscuro / 0.9 claro), `SRGBColorSpace`.
-
-| Elemento | Color base | Rugosidad | Metalness | Acento / emisivo |
-|---|---|---|---|---|
-| Red de nodos (líneas) | `--color-scene-line` `#24344D` | — | — | `LineBasicMaterial`, opacidad 0.6 |
-| Nodos | `--color-scene-node` `#5AA9FF` | — | — | `MeshBasicMaterial`, 2–4 px en pantalla |
-| **Alfa** (cuerpo) | `--color-alfa-body` `#2B3A52` | 0.38 | 0.60 | Línea de señal `--color-alfa-signal` `#5AA9FF`, `emissiveIntensity` 1.6 |
-| **Burbu** (cuerpo) | `--color-burbu-body` `#1F6E52` | 0.55 | 0.10 | Señal `--color-burbu-signal` `#3FCF8E`, intensidad 1.2 |
-| **Caja de regalo** (cuerpo) | `--color-gift-body` `#2A3142` | 0.62 | 0.05 | Cinta `--color-gift-ribbon` `#F28BA0`, rugosidad 0.30, metalness 0.70 |
-| **Herramienta SkyMek** (cuerpo) | `--color-tool-body` `#8C97A8` | 0.32 | 0.85 | Banda `--color-tool-band` `#F0A43C`, rugosidad 0.45, metalness 0.20 |
-
-Variables de material: `--alfa-roughness`, `--alfa-metalness`, `--alfa-signal-intensity`, `--burbu-*`, `--gift-*`, `--gift-ribbon-*`, `--tool-*`, `--tool-band-*`. En claro cambian los colores (ver `tokens.css`, bloque `[data-theme='light']`); los números se mantienen.
-
-Iluminación sugerida coherente con la paleta: `RoomEnvironment` (high) con `environmentIntensity` 0.6–0.8, una direccional cálida-neutra `#FFF4E8` a ~2.5 lux desde arriba-izquierda, sin luces de color (el color lo ponen las señales emisivas). Bloom opcional (desktop high) con umbral alto para que solo brillen las líneas de señal.
+Ver `desk.md` (luces por capítulo, set, ciudad, lluvia, FX) y `mascots.md` (materiales de las piezas). Los colores que lee el motor son hex literales de `tokens.css`; los números (rugosidad, metalness, intensidades) son custom properties sin unidad. Se leen con `getComputedStyle(document.documentElement).getPropertyValue(...)`. Renderer: `--color-scene-bg`, ACES, exposición por capítulo.
 
 ## 8. Monograma, favicon y OG
 

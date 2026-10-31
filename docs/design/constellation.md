@@ -1,4 +1,6 @@
-# Constelación — dirección de arte del mundo 3D
+# Constelación — dirección de arte del mundo 3D (obsoleto)
+
+> **Reemplazado por `desk.md` ("Una noche en el escritorio").** Solo sigue vigente la tabla de contraste del texto suelto de §11, que aplica a los paneles `anchored`. Todo lo demás (cielo, estrellas, órbitas, faro, "C") se ha eliminado.
 
 Complementa `identity.md` (paleta base, tipografía, contraste) y `mascots.md` (cuerpos celestes). Valores en código: `src/styles/tokens.css` (colores `--color-sky-*`, `--color-star-*`, `--color-orbit*`, `--color-plate*`; números `--sky-*`, `--alfa-core-*`, `--plate-*`). Estilo de placas: `src/styles/plates.css`.
 

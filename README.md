@@ -1,161 +1,45 @@
-# Carlos Orbegoso - Portfolio
+# Carlos Orbegoso · Portafolio
 
-Portfolio profesional de Carlos Orbegoso - Backend Developer & Java Specialist
+Sitio estático bilingüe (ES por defecto en `/page/`, EN en `/page/en/`) publicado en
+<https://carlosorbegoso.github.io/page/>. El plan del rediseño está en [`docs/PLAN.md`](docs/PLAN.md).
 
-## 🚀 Tecnologías
+## Stack
 
-- **Frontend**: Vanilla JavaScript (ES6+)
-- **Estilos**: CSS3 con arquitectura modular
-- **Runtime**: Bun (JavaScript runtime moderno y rápido)
-- **Efectos**: Three.js para efectos visuales 3D
-- **Responsive**: Mobile-first design
+- Astro 7 (estático, i18n nativo, content collections) + TypeScript
+- Tailwind CSS 4 vía `@tailwindcss/vite`, tokens en `src/styles/tokens.css`
+- Three.js + GSAP para la escena 3D (en preparación)
+- Bun 1.4.4 como gestor de paquetes y runtime de scripts
+- ESLint 9 (flat) + Prettier, `astro check`, Playwright y Lighthouse CI para QA
 
-## 📋 Requisitos
+## Comandos
 
-- **Bun**: >= 1.0.0
-- **Node.js**: >= 18.0.0 (opcional, para compatibilidad)
+| Comando           | Acción                                         |
+| ----------------- | ---------------------------------------------- |
+| `bun install`     | Instala dependencias (`bun.lock` es la fuente) |
+| `bun run dev`     | Servidor de desarrollo en `/page/`             |
+| `bun run build`   | Genera `dist/`                                 |
+| `bun run preview` | Sirve `dist/` localmente                       |
+| `bun run check`   | Verifica tipos y componentes Astro             |
+| `bun run lint`    | ESLint                                         |
+| `bun run format`  | Prettier (`format:check` solo verifica)        |
 
-## 🛠️ Instalación
-
-1. **Instalar Bun** (si no lo tienes):
-   ```bash
-   # macOS / Linux
-   curl -fsSL https://bun.sh/install | bash
-   
-   # Windows (con WSL)
-   curl -fsSL https://bun.sh/install | bash
-   
-   # Con npm
-   npm install -g bun
-   ```
-
-2. **Clonar el repositorio**:
-   ```bash
-   git clone <tu-repo>
-   cd portafolio/page
-   ```
-
-3. **Instalar dependencias**:
-   ```bash
-   bun install
-   ```
-
-## 🚀 Desarrollo
-
-### Iniciar servidor de desarrollo:
-```bash
-bun run dev
-# o
-bun run start
-```
-
-El servidor se iniciará en `http://localhost:3000`
-
-### Otros comandos:
-```bash
-# Construir para producción
-bun run build
-
-# Limpiar build
-bun run clean
-
-# Linting
-bun run lint
-bun run lint:fix
-
-# Formatear código
-bun run format
-```
-
-## 📁 Estructura del Proyecto
+## Estructura
 
 ```
 src/
-├── scripts/          # JavaScript principal
-│   ├── config/      # Configuración
-│   ├── core/        # Lógica core
-│   ├── engines/     # Motores de efectos
-│   ├── managers/    # Gestores
-│   └── utils/       # Utilidades
-├── styles/          # CSS modular
-│   ├── base/        # Estilos base
-│   ├── components/  # Componentes
-│   ├── layouts/     # Layouts
-│   ├── themes/      # Temas
-│   └── utilities/   # Utilidades
-└── assets/          # Recursos estáticos
+  content/            perfil, experiencia y productos en es.json / en.json
+  content.config.ts   schemas de las colecciones
+  i18n/               textos de interfaz (ui.es.ts, ui.en.ts) y helpers
+  config/site.ts      datos fijos: email, redes, ruta del CV, ids de sección
+  layouts/Base.astro  <head>, SEO, hreflang, JSON-LD
+  components/         Header, Footer, LangSwitch, sections/, ui/, three/
+  pages/              index.astro, en/index.astro, 404.astro
+  styles/             global.css y tokens.css
 ```
 
-## 🌟 Características
+Las URLs internas se construyen con `withBase()` y `localeUrl()` de `src/i18n/utils.ts`
+para respetar `base: '/page'` y la barra final.
 
-- **Diseño Responsive**: Mobile-first approach
-- **Temas**: Claro/Oscuro con persistencia
-- **Idiomas**: Español/Inglés
-- **Efectos Visuales**: Three.js y animaciones CSS
-- **Performance**: Lazy loading y optimizaciones
-- **Accesibilidad**: ARIA labels y navegación por teclado
+## Despliegue
 
-## 🔧 Configuración
-
-El archivo `src/scripts/config/config.js` contiene toda la configuración del portfolio:
-
-- Breakpoints responsive
-- Configuración de temas
-- Idiomas soportados
-- Características habilitadas/deshabilitadas
-
-## 📱 Responsive Design
-
-- **Mobile**: < 768px
-- **Tablet**: 768px - 1024px  
-- **Desktop**: > 1024px
-
-## 🎨 Temas
-
-- **Claro**: Colores claros y legibles
-- **Oscuro**: Modo oscuro para reducir fatiga visual
-
-## 🌍 Idiomas
-
-- **Español**: Idioma por defecto
-- **Inglés**: Disponible con toggle
-
-## 🚀 Despliegue
-
-### Build de producción:
-```bash
-bun run build
-```
-
-Los archivos se generarán en la carpeta `dist/`
-
-### Servir build:
-```bash
-# Con Bun
-bun run --hot dist/
-
-# Con servidor estático
-npx serve dist/
-```
-
-## 🤝 Contribuir
-
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
-
-## 📞 Contacto
-
-- **Email**: carlos.orbegoso@email.com
-- **LinkedIn**: linkedin.com/in/carlosorbegoso
-- **GitHub**: github.com/carlosorbegoso
-
----
-
-Desarrollado con ❤️ por Carlos Orbegoso
+Un push a `main` ejecuta `.github/workflows/deploy.yml` y publica en GitHub Pages.

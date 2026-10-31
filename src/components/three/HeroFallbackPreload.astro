@@ -1,0 +1,24 @@
+---
+import { withBase } from '../../i18n/utils';
+
+const preloads = [
+  { media: '(min-width: 1024px)', width: 1440 },
+  { media: '(min-width: 768px) and (max-width: 1023.98px)', width: 768 },
+  { media: '(max-width: 767.98px)', width: 375 }
+];
+---
+
+{
+  preloads.map(({ media, width }) => (
+    <link
+      rel="preload"
+      as="image"
+      type="image/avif"
+      media={media}
+      href={withBase(`fallback/hero-${width}.avif`)}
+      imagesrcset={withBase(`fallback/hero-${width}.avif`)}
+      imagesizes="100vw"
+      fetchpriority="high"
+    />
+  ))
+}

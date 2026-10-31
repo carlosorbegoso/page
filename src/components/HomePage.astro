@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Header from './Header.astro';
 import Footer from './Footer.astro';
 import StageCanvas from './three/StageCanvas.astro';
+import HeroFallbackPreload from './three/HeroFallbackPreload.astro';
 import StarMap from './StarMap.astro';
 import SceneTooltip from './SceneTooltip.astro';
 import Hero from './sections/Hero.astro';
@@ -21,6 +22,7 @@ const { locale } = Astro.props;
 ---
 
 <Base locale={locale}>
+  <HeroFallbackPreload slot="head" />
   <StageCanvas />
   <Header locale={locale} />
   <main id="main" tabindex="-1" class="relative z-(--z-content)">

@@ -28,6 +28,7 @@ import {
 } from './fluid';
 import { GpuTimer } from './gpuTimer';
 import { guessTier, readFxTokens, tierProfile, type FxTokens, type TierProfile } from './settings';
+import { ToneCompensation } from './toneCompensation';
 import { BLOOM_DOWN_FRAG, BLOOM_UP_FRAG, COMPOSITE_FRAG, dofFrag, FULLSCREEN_VERT } from './shaders';
 
 export type FxFeature = 'fluid' | 'dof' | 'chromatic';
@@ -101,6 +102,7 @@ class CinematicPipeline implements CinematicFx {
   private profile: TierProfile;
   private readonly tokens: FxTokens = readFxTokens();
   private readonly quad = new FullScreenQuad();
+  private readonly tone = new ToneCompensation();
   private readonly bufferSize = new Vector2();
   private targets: Targets | null = null;
   private fluid: FluidField | null = null;
@@ -255,7 +257,9 @@ class CinematicPipeline implements CinematicFx {
 
     this.timer.begin('scene');
     renderer.setRenderTarget(targets.scene);
+    this.tone.begin(renderer, scene);
     renderer.render(scene, camera);
+    this.tone.end(renderer, scene);
     this.timer.end();
 
     this.updateFocus(camera, dt);
@@ -502,6 +506,7 @@ class CinematicPipeline implements CinematicFx {
     this.dof?.dispose();
     this.composite.dispose();
     this.quad.dispose();
+    this.tone.dispose();
     fluidUniforms.uFluidActive.value = 0;
     fluidUniforms.uFluidVelocity.value = FLUID_IDLE_TEXTURE;
   }

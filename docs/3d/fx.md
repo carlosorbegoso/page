@@ -1,6 +1,6 @@
 # FX: pipeline cinematográfico y fluido del cursor
 
-Código: `src/three/fx/` (`index.ts`, `pipeline.ts`, `fluid.ts`, `shaders.ts`, `settings.ts`, `gpuTimer.ts`). Dirección de arte: `docs/design/desk.md` §7 y `docs/design/constellation.md` (lista de efectos prohibidos). Valores: tokens `--fx-*` de `src/styles/tokens.css`.
+Código: `src/three/fx/` (`index.ts`, `pipeline.ts`, `fluid.ts`, `shaders.ts`, `settings.ts`, `gpuTimer.ts`, `toneCompensation.ts`). Dirección de arte: `docs/design/desk.md` §7 y `docs/design/constellation.md` (lista de efectos prohibidos). Valores: tokens `--fx-*` de `src/styles/tokens.css`.
 
 ## Dependencias
 
@@ -14,6 +14,8 @@ Lo que todavía le falta al Stage:
 
 1. **`settling`**: `CinematicFx.settling` es `true` mientras el fluido se mueve o el foco del DoF está en transición. Hay que sumarlo al `settling` del loop (`settling ||= fx.settling`). Si no, el loop a demanda se duerme y el remolino se queda congelado a medias.
 2. **Foco en el hover**: `setFocus` recibe ahora `world.focusPoint()`. Para enfocar el cuerpo bajo el puntero, ese punto debería devolver el objeto en hover cuando lo haya.
+
+Mientras no exista la estación del escritorio, `hero` se trata como "cuarto" (viñeta 0.5, bokeh 2.5, rango 0.6 m): es intencional, y la constelación C recibe ese grading hasta que llegue el módulo `desk`.
 
 Para depurar, `?debug` expone `window.__fx.stats()`: tier, ms por pase, efectos recortados, estado del fluido y del DoF.
 
@@ -30,6 +32,9 @@ Orden por frame: fluido (si está despierto) → escena a un RT HDR (HalfFloat, 
 | Tone mapping | `#include <tonemapping_fragment>` + `<colorspace_fragment>`: aplica el ACES y la `toneMappingExposure` del renderer y la salida sRGB. Una sola fuente de verdad | — |
 | Viñeta | Fórmula de Eskil (como en pmndrs), después del tone mapping | darkness 0.5 en el cuarto → 0.3 en el espacio, offset 0.32 |
 | Grano | Ruido mono con mezcla overlay, más visible en las sombras, a 24 fps | `--fx-grain` 0.035 (tope 0.06) |
+
+**Compensación de tone mapping** (`toneCompensation.ts`): sin pipeline, three no aplica tone mapping al color de limpieza ni a los fondos sRGB (y tampoco a los materiales `toneMapped: false`). En un RT todo queda lineal y pasa por ACES en la composición, y el cielo nocturno se hundía a negro. Durante el pase de escena, el pipeline cambia el clear color y `scene.background` (`Color` o textura sRGB legible: canvas o imagen) por equivalentes ACES-inversos, cacheados por textura, versión y exposición. Medido: fondo directo `10,13,20` / `4,6,11` frente a `10,14,19` / `4,6,11` con FX.
+**Regla para el motor y el escenario**: con FX activo, `toneMapped: false` no tiene efecto (p. ej. `common.ts` nodeMaterial, la pantalla de `desk/DeskStation.ts`). Esos materiales pasan por ACES: un blanco 1.0 sale ≈ 0.8 y menos saturado. Si deben verse "planos", hay que subirles la intensidad (valores HDR > 1, que además activan el bloom) en lugar de depender de `toneMapped: false`.
 
 La mezcla cuarto/espacio sale de los eventos `station:enter`/`station:progress`: `hero` = cuarto (peso 1), y el peso baja a 0 cuando la cámara deja `hero`.
 

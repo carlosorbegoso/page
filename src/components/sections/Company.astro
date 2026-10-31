@@ -37,7 +37,7 @@ const products = await getProducts(locale);
         subtitle={t('company.subtitle')}
       />
 
-      <div class="flex flex-col gap-4 text-base text-pretty text-text-muted">
+      <div class="wide-only flex flex-col gap-4 text-base text-pretty text-text-muted">
         {company.summary.map(paragraph => <p>{paragraph}</p>)}
       </div>
 
@@ -54,7 +54,7 @@ const products = await getProducts(locale);
         </ul>
       </div>
 
-      <div>
+      <div class="wide-only">
         <Button href={`#${SECTION_IDS.products}`} size="lg" class="w-full sm:w-auto">
           {t('company.cta')}
           <svg
@@ -74,3 +74,12 @@ const products = await getProducts(locale);
     </div>
   </div>
 </section>
+
+<style>
+  /* Phones in 3D: the panel shares the frame with the figures, so it keeps the headline and the brand line. */
+  @media (width < 48rem) {
+    :global(.is-3d) .wide-only {
+      display: none;
+    }
+  }
+</style>

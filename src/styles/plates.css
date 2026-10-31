@@ -85,7 +85,7 @@
   letter-spacing: var(--tracking-display);
 }
 
-.is-3d .plate h3 {
+.is-3d .plate:not([data-plate-mode^='surface-']) h3 {
   font-family: var(--font-display);
   font-size: var(--text-2xl);
   font-weight: var(--font-weight-semibold);
@@ -93,7 +93,7 @@
   letter-spacing: var(--tracking-tight);
 }
 
-.is-3d .plate p:not(:has(+ h1, + h2, + h3)) {
+.is-3d .plate:not([data-plate-mode^='surface-']) p:not(:has(+ h1, + h2, + h3)) {
   max-width: var(--container-measure);
   font-size: var(--text-body);
   line-height: var(--text-body--line-height);
@@ -104,8 +104,7 @@
   text-shadow: var(--plate-text-halo);
 }
 
-.is-3d .plate:not([data-plate-mode^='surface-']) :is(h2, .plate-display),
-.is-3d .plate[data-plate-mode='surface-monitor'] :is(h1, h2, .plate-display) {
+.is-3d .plate:not([data-plate-mode^='surface-']) :is(h2, .plate-display) {
   font-size: var(--text-display);
   line-height: var(--text-display--line-height);
 }
@@ -126,7 +125,12 @@
   );
 }
 
+/*
+ * Screens have a fixed size set by the engine (--surface-width/height) and must never clip, so
+ * each section sizes its screen content in container units (cqh/cqw) of the plate.
+ */
 .is-3d .plate[data-plate-mode^='surface-'] {
+  container-type: size;
   width: var(--surface-width, var(--plate-width));
   height: var(--surface-height, auto);
   overflow: hidden;
@@ -136,21 +140,21 @@
 }
 
 .is-3d .plate[data-plate-mode='surface-monitor'] {
-  padding: clamp(1.5rem, 4%, 3.5rem) clamp(1.75rem, 6%, 4.5rem);
+  padding: 4.5% 6%;
 }
 
 .is-3d .plate[data-plate-mode='surface-phone'] {
-  padding: 2.75rem 1.25rem 1.5rem;
+  padding: 14% 7% 7%;
   border-radius: 1.75rem;
 }
 
-.is-3d .plate[data-plate-mode='surface-phone'] :is(h1, h2) {
-  font-size: var(--text-2xl);
-  line-height: var(--text-2xl--line-height);
+.is-3d .plate[data-plate-mode^='surface-'] :is(p:has(+ h1, + h2, + h3), [data-signal])::before {
+  width: 9cqw;
+  margin-block-end: 1.5cqh;
 }
 
-.is-3d .plate[data-plate-mode='surface-phone'] p:not(:has(+ h1, + h2, + h3)) {
-  font-size: 0.9375rem;
+.is-3d .plate[data-plate-mode^='surface-'][data-active] :is(p:has(+ h1, + h2, + h3), [data-signal])::before {
+  width: 14cqw;
 }
 
 .is-3d .plate[data-active] :is(p:has(+ h1, + h2, + h3), [data-signal])::before {

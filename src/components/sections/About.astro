@@ -34,7 +34,7 @@ const { degree, institution, status } = profile.education;
     data-plate-mode="surface-monitor"
     data-plate-order="0"
   >
-    <div class="@container flex flex-col gap-6">
+    <div class="about-bio @container flex flex-col gap-6">
       <SectionHeader
         id="about-title"
         eyebrow={profile.location}
@@ -42,7 +42,7 @@ const { degree, institution, status } = profile.education;
         subtitle={t('about.subtitle')}
       />
 
-      <div class="flex flex-col gap-5 @md:flex-row @md:items-start">
+      <div class="about-bio__row flex flex-col gap-5 @md:flex-row @md:items-start">
         <Picture
           src={photo}
           formats={['avif', 'webp']}
@@ -52,9 +52,9 @@ const { degree, institution, status } = profile.education;
           loading="lazy"
           pictureAttributes={{ class: 'shrink-0' }}
           decoding="async"
-          class="aspect-square w-28 rounded-lg border border-border object-cover @md:w-36"
+          class="about-bio__photo aspect-square w-28 rounded-lg border border-border object-cover @md:w-36"
         />
-        <div class="flex flex-col gap-4 text-base text-text-muted">
+        <div class="about-bio__text flex flex-col gap-4 text-base text-text-muted">
           {body.map(paragraph => <p class="text-pretty">{paragraph}</p>)}
         </div>
       </div>
@@ -68,7 +68,7 @@ const { degree, institution, status } = profile.education;
     data-plate-mode="surface-monitor"
     data-plate-order="1"
   >
-    <div class="@container flex flex-col gap-6">
+    <div class="about-stack @container flex flex-col gap-6">
       <section aria-labelledby="about-education">
         <h3
           id="about-education"
@@ -124,3 +124,118 @@ const { degree, institution, status } = profile.education;
     </div>
   </div>
 </section>
+
+<style>
+  /* On the monitor each slide is a fixed-size screen: sizes are shares of its height so nothing clips. */
+  :global(.is-3d) :is(.about-bio, .about-stack) {
+    height: 100%;
+    justify-content: center;
+    gap: 4cqh;
+  }
+
+  :global(.is-3d) .about-bio :global(header) {
+    gap: 1.2cqh;
+  }
+
+  :global(.is-3d) .about-bio :global(header > p:first-child) {
+    font-size: 3.2cqh;
+    line-height: 1.3;
+  }
+
+  :global(.is-3d) .about-bio :global(h2) {
+    font-size: 9cqh;
+    line-height: 1.05;
+  }
+
+  :global(.is-3d) .about-bio :global(header > p:last-child) {
+    font-size: 4cqh;
+    line-height: 1.3;
+  }
+
+  :global(.is-3d) .about-bio__row {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 4cqw;
+  }
+
+  :global(.is-3d) .about-bio__photo {
+    width: 30cqh;
+  }
+
+  :global(.is-3d) .about-bio__text {
+    gap: 2cqh;
+    font-size: 3.7cqh;
+    line-height: 1.4;
+  }
+
+  :global(.is-3d) .about-stack {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    align-content: center;
+    gap: 0 5cqw;
+  }
+
+  :global(.is-3d) .about-stack h3 {
+    font-size: 5.6cqh;
+    line-height: 1.2;
+  }
+
+  :global(.is-3d) .about-stack ul,
+  :global(.is-3d) .about-stack dl {
+    margin-top: 2.5cqh;
+  }
+
+  :global(.is-3d) .about-stack > section:first-child ul {
+    gap: 2.5cqh;
+    font-size: 3.3cqh;
+    line-height: 1.35;
+  }
+
+  :global(.is-3d) .about-stack > section:first-child li {
+    gap: 2cqw;
+  }
+
+  :global(.is-3d) .about-stack > section:first-child li > span:first-child {
+    width: 1.6cqh;
+    height: 1.6cqh;
+    margin-top: 1.6cqh;
+  }
+
+  :global(.is-3d) .about-stack > section + section {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  :global(.is-3d) .about-stack dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3cqh 4cqw;
+  }
+
+  :global(.is-3d) .about-stack dt {
+    font-size: 2.8cqh;
+    line-height: 1.3;
+  }
+
+  :global(.is-3d) .about-stack dd {
+    margin-top: 1cqh;
+  }
+
+  :global(.is-3d) .about-stack dd ul {
+    margin-top: 0;
+    gap: 0.6cqh 2.2cqw;
+    font-size: 3.1cqh;
+    line-height: 1.35;
+  }
+
+  :global(.is-3d) .about-stack :global([data-tone]) {
+    min-height: 0;
+    gap: 1cqw;
+    font-size: inherit;
+    line-height: inherit;
+  }
+
+  :global(.is-3d) .about-stack :global([data-tone] > span[aria-hidden]) {
+    width: 1.2cqh;
+    height: 1.2cqh;
+  }
+</style>

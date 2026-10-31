@@ -96,17 +96,17 @@ const stackId = `${headingId}-stack`;
           </h3>
           <p class="font-medium text-text">{role}</p>
           {client && (
-            <p class="text-sm text-text-muted">
+            <p class="wide-only text-sm text-text-muted">
               {t('experience.client')}: {client}
             </p>
           )}
         </header>
 
-        <p class="text-text-muted">{summary}</p>
+        <p class="wide-only text-text-muted">{summary}</p>
 
         {highlights.length > 0 && (
           <div class="flex flex-col gap-2">
-            <p id={highlightsId} class="text-xs font-semibold tracking-caps text-text-muted uppercase">
+            <p id={highlightsId} class="wide-only text-xs font-semibold tracking-caps text-text-muted uppercase">
               {t('experience.highlights')}
             </p>
             <ul
@@ -138,7 +138,7 @@ const stackId = `${headingId}-stack`;
         )}
 
         <p id={stackId} class="sr-only">{t('experience.stack')}</p>
-        <ul aria-labelledby={stackId} class="flex flex-wrap gap-x-4 gap-y-2" role="list" data-kinetic-cascade>
+        <ul aria-labelledby={stackId} class="wide-only flex flex-wrap gap-x-4 gap-y-2" role="list" data-kinetic-cascade>
           {stack.map(tech => (
             <li>
               <Tag>{tech}</Tag>
@@ -149,3 +149,13 @@ const stackId = `${headingId}-stack`;
     )
   }
 </div>
+
+<style>
+  /* Phones in 3D: the panel shares the frame with the shelf, so it keeps dates, company, role and two highlights. */
+  @media (width < 48rem) {
+    :global(.is-3d) .wide-only,
+    :global(.is-3d) [data-plate] li:nth-child(n + 3) {
+      display: none;
+    }
+  }
+</style>

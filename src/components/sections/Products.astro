@@ -29,7 +29,7 @@ const { company } = await getProfile(locale);
         {index === 0 && (
           <>
             <h2 id="products-title" class="sr-only">{t('products.title')}</h2>
-            <p class="text-xs font-semibold tracking-caps text-accent uppercase" aria-hidden="true">
+            <p class="products-eyebrow text-xs font-semibold tracking-caps text-accent uppercase" aria-hidden="true">
               {company.name} · {t('products.title')}
             </p>
           </>
@@ -83,3 +83,11 @@ const { company } = await getProfile(locale);
     });
   }
 </script>
+
+<style>
+  @media (width < 48rem) {
+    :global(.is-3d) .products-eyebrow {
+      display: none;
+    }
+  }
+</style>

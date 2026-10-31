@@ -32,7 +32,7 @@ const firstYear = newestFirst.at(-1)?.start.slice(0, 4);
             eyebrow={firstYear ? `${firstYear} – ${t('experience.present')}` : undefined}
             title={t('experience.title')}
             subtitle={t('experience.subtitle')}
-            class="mb-2"
+            class="experience-header mb-6 md:mb-10"
           />
         )}
       </TimelineItem>
@@ -67,3 +67,11 @@ const firstYear = newestFirst.at(-1)?.start.slice(0, 4);
     for (const plate of plates) plate.toggleAttribute('data-active', plate.dataset.experience === detail.id);
   });
 </script>
+
+<style>
+  @media (width < 48rem) {
+    :global(.is-3d .experience-header > p:last-of-type) {
+      display: none;
+    }
+  }
+</style>

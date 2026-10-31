@@ -29,11 +29,12 @@ const glyph =
   class="relative flex min-h-svh flex-col items-center justify-center px-gutter py-section"
 >
   <div
-    class="plate flex w-full max-w-[24rem] flex-col gap-6 p-(--plate-padding)"
+    class="plate w-full max-w-[24rem] p-(--plate-padding)"
     data-plate
     data-plate-id="contact"
     data-plate-mode="surface-phone"
   >
+    <div class="contact-screen flex flex-col gap-6">
     <header class="flex flex-col gap-2">
       <h2 id="contact-title" class="font-display text-3xl font-semibold tracking-display text-text">
         {t('contact.title')}
@@ -41,36 +42,36 @@ const glyph =
       <p class="text-base text-pretty text-text-muted">{t('contact.subtitle')}</p>
     </header>
 
-    <div class="flex flex-col gap-2">
+    <div class="contact-group flex flex-col gap-2">
       <p id="contact-email-label" class="sr-only">{t('contact.email')}</p>
-      <a href={`mailto:${SITE.email}`} class:list={[tile, 'min-h-16 border-accent/45 bg-accent/10']} aria-describedby="contact-email-label">
-        <span class={glyph} aria-hidden="true">
+      <a href={`mailto:${SITE.email}`} class:list={[tile, 'contact-email min-h-16 border-accent/45 bg-accent/10']} aria-describedby="contact-email-label">
+        <span class:list={[glyph, 'contact-glyph']} aria-hidden="true">
           <svg viewBox="0 0 24 24" width="18" height="18" class="fill-none stroke-current" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="5" width="18" height="14" rx="2"></rect>
             <path d="m3 7 9 6 9-6"></path>
           </svg>
         </span>
         <span class="flex min-w-0 flex-col">
-          <span class="text-xs text-text-muted">{t('contact.email')}</span>
-          <span class="truncate font-medium">{SITE.email}</span>
+          <span class="contact-email-label text-xs text-text-muted">{t('contact.email')}</span>
+          <span class="contact-email-value truncate font-medium">{SITE.email}</span>
         </span>
       </a>
       <CopyEmail locale={locale} email={SITE.email} />
     </div>
 
-    <div class="flex flex-col gap-2">
-      <p id="contact-social-label" class="text-xs font-semibold tracking-caps text-text-muted uppercase">
+    <div class="contact-group flex flex-col gap-2">
+      <p id="contact-social-label" class="contact-social-label text-xs font-semibold tracking-caps text-text-muted uppercase">
         {t('contact.social')}
       </p>
-      <ul aria-labelledby="contact-social-label" class="flex flex-col gap-2" role="list" data-kinetic-cascade>
+      <ul aria-labelledby="contact-social-label" class="contact-socials flex flex-col gap-2" role="list" data-kinetic-cascade>
         {
           socials.map(social => (
             <li>
               <ExternalLink href={social.href} locale={locale} class={tile}>
-                <span class={glyph} aria-hidden="true">{social.icon}</span>
+                <span class:list={[glyph, 'contact-glyph']} aria-hidden="true">{social.icon}</span>
                 <span class="flex min-w-0 flex-col">
-                  <span class="font-medium">{social.label}</span>
-                  <span class="truncate text-xs text-text-muted">{social.detail}</span>
+                  <span class="contact-social-name font-medium">{social.label}</span>
+                  <span class="contact-social-detail truncate text-xs text-text-muted">{social.detail}</span>
                 </span>
               </ExternalLink>
             </li>
@@ -79,6 +80,114 @@ const glyph =
       </ul>
     </div>
 
-    <CvLink locale={locale} variant="primary" size="lg" class="min-h-14 w-full rounded-2xl" />
+    <CvLink locale={locale} variant="primary" size="lg" class="contact-cv min-h-14 w-full rounded-2xl" />
+    </div>
   </div>
 </section>
+
+<style>
+  /* The phone is a fixed-size screen: sizes are shares of its height so the CV button never falls off. */
+  :global(.is-3d) .contact-screen {
+    height: 100%;
+    justify-content: center;
+    gap: 3.5cqh;
+  }
+
+  :global(.is-3d) .contact-screen header {
+    gap: 1.5cqh;
+  }
+
+  :global(.is-3d) .contact-screen h2 {
+    font-size: 7cqh;
+    line-height: 1.1;
+  }
+
+  :global(.is-3d) .contact-screen header p {
+    font-size: 3.4cqh;
+    line-height: 1.35;
+  }
+
+  :global(.is-3d) .contact-screen .contact-group {
+    gap: 1.5cqh;
+  }
+
+  :global(.is-3d) .contact-email {
+    min-height: 0;
+    height: 11cqh;
+    gap: 3cqw;
+    padding-inline: 4cqw;
+  }
+
+  :global(.is-3d) .contact-email .contact-glyph {
+    width: 7cqh;
+    height: 7cqh;
+  }
+
+  :global(.is-3d) .contact-email-label {
+    font-size: 2.6cqh;
+  }
+
+  :global(.is-3d) .contact-email-value {
+    font-size: 3.3cqh;
+  }
+
+  :global(.is-3d) .contact-screen :global([data-copy-email]) {
+    gap: 0;
+  }
+
+  :global(.is-3d) .contact-screen :global([data-copy-trigger]) {
+    min-height: 0;
+    height: 8cqh;
+    font-size: 3.2cqh;
+  }
+
+  :global(.is-3d) .contact-screen :global([data-copy-status]:empty) {
+    display: none;
+  }
+
+  :global(.is-3d) .contact-screen :global([data-copy-status]) {
+    min-height: 0;
+    margin-top: 1cqh;
+    font-size: 2.8cqh;
+  }
+
+  :global(.is-3d) .contact-social-label {
+    font-size: 2.6cqh;
+  }
+
+  :global(.is-3d) .contact-socials {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2.5cqw;
+  }
+
+  :global(.is-3d) .contact-socials :global(a) {
+    min-height: 0;
+    height: 13cqh;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1cqh;
+    padding-inline: 1cqw;
+    text-align: center;
+  }
+
+  :global(.is-3d) .contact-socials .contact-glyph {
+    width: 6cqh;
+    height: 6cqh;
+    font-size: 2.4cqh;
+  }
+
+  :global(.is-3d) .contact-social-name {
+    font-size: 2.8cqh;
+  }
+
+  :global(.is-3d) .contact-social-detail {
+    display: none;
+  }
+
+  :global(.is-3d) .contact-screen :global(.contact-cv) {
+    min-height: 0;
+    height: 9cqh;
+    font-size: 3.4cqh;
+  }
+</style>

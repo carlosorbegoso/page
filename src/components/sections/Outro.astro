@@ -30,7 +30,7 @@ const year = new Date().getFullYear();
       <h2 id="outro-title" class="font-display text-3xl font-semibold tracking-display text-balance text-text">
         {t('outro.title')}
       </h2>
-      <p class="text-base text-pretty text-text-muted">{t('outro.body')}</p>
+      <p class="outro-body text-base text-pretty text-text-muted">{t('outro.body')}</p>
       <p class="flex flex-wrap items-baseline gap-x-3 gap-y-1 pt-2 text-xs text-text-subtle">
         <span>{t('outro.tech')}</span>
         <span aria-hidden="true">·</span>
@@ -49,6 +49,12 @@ const year = new Date().getFullYear();
 </section>
 
 <style>
+  @media (width < 48rem) {
+    :global(.is-3d) .outro-body {
+      display: none;
+    }
+  }
+
   /* Without 3D the HTML footer already closes the page; the credits only make sense as the closing shot. */
   :global(html:not(.is-3d)) .outro {
     display: none;

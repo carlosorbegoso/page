@@ -15,16 +15,13 @@ interface Props {
 const { product, locale } = Astro.props;
 const t = useTranslations(locale);
 
-const accents: Record<ProductId, { bar: string; dot: string; active: string }> = {
-  skymek: { bar: 'bg-skymek', dot: 'bg-skymek', active: 'data-active:border-skymek/60' },
-  parati: { bar: 'bg-parati', dot: 'bg-parati', active: 'data-active:border-parati/60' },
-  ventixs: { bar: 'bg-ventixs', dot: 'bg-ventixs', active: 'data-active:border-ventixs/60' }
+const accents: Record<ProductId, { dot: string; token: string }> = {
+  skymek: { dot: 'bg-skymek', token: 'skymek' },
+  parati: { dot: 'bg-parati', token: 'parati' },
+  ventixs: { dot: 'bg-ventixs', token: 'ventixs' }
 };
-const accent = accents[product.id as ProductId] ?? {
-  bar: 'bg-accent',
-  dot: 'bg-accent',
-  active: 'data-active:border-accent/60'
-};
+const accent = accents[product.id as ProductId] ?? { dot: 'bg-accent', token: 'accent' };
+const accentToken = accent.token;
 
 const status =
   product.status === 'production'
@@ -37,34 +34,35 @@ const hostname = new URL(product.url).hostname;
 
 <article
   aria-labelledby={titleId}
+  class="plate product-plate"
+  data-plate
+  data-plate-id={`product-${product.id}`}
   data-product={product.id}
-  class:list={[
-    'product-card relative flex h-full flex-col gap-4 overflow-hidden rounded-lg border border-border bg-surface p-5 shadow-sm md:gap-5 md:p-6 lg:gap-4 lg:p-5',
-    'hover:border-border-strong hover:bg-surface-raised hover:shadow-md',
-    'has-focus-visible:border-border-strong has-focus-visible:bg-surface-raised has-focus-visible:shadow-md',
-    accent.active
-  ]}
+  style={`--product-accent: var(--color-${accentToken});`}
 >
-  <span class:list={['absolute inset-x-0 top-0 h-0.5', accent.bar]} aria-hidden="true"></span>
+  <div class="relative flex flex-col gap-4 overflow-hidden rounded-[inherit] p-5 md:gap-5 md:p-6">
+    <span class="product-plate__bar absolute inset-x-0 top-0 h-0.5" aria-hidden="true"></span>
 
-  <div class="flex flex-col gap-2">
-    <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-      <h3
-        id={titleId}
-        class="flex items-center gap-2.5 font-display text-xl font-semibold tracking-tight text-text"
-      >
-        <span class:list={['size-2.5 shrink-0 rounded-full', accent.dot]} aria-hidden="true"></span>
-        {product.name}
-      </h3>
-      <Tag tone={status.tone as 'live' | 'building'}>{status.label}</Tag>
+    <div class="flex flex-col gap-2">
+      <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+        <h3
+          id={titleId}
+          class="flex items-center gap-2.5 font-display text-xl font-semibold tracking-tight text-text"
+        >
+          <span
+            class:list={['size-2.5 shrink-0 rounded-full', accent.dot]}
+            aria-hidden="true"
+          ></span>
+          {product.name}
+        </h3>
+        <Tag tone={status.tone as 'live' | 'building'}>{status.label}</Tag>
+      </div>
+      <p class="text-base font-medium text-text">{product.tagline}</p>
     </div>
-    <p class="text-base font-medium text-text">{product.tagline}</p>
-  </div>
 
-  <p class="text-sm text-pretty text-text-muted">{product.description}</p>
+    <p class="text-sm text-pretty text-text-muted">{product.description}</p>
 
-  {
-    product.features.length > 0 && (
+    {product.features.length > 0 && (
       <ul class="flex flex-col gap-2 text-sm text-text-muted" role="list">
         {product.features.map(feature => (
           <li class="flex items-start gap-2.5">
@@ -76,62 +74,52 @@ const hostname = new URL(product.url).hostname;
           </li>
         ))}
       </ul>
-    )
-  }
+    )}
 
-  <div class="mt-auto flex flex-col gap-4 border-t border-border pt-4">
-    <dl class="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
-      <dt class="text-xs font-semibold tracking-caps text-text-subtle uppercase">
-        {t('products.role')}
-      </dt>
-      <dd class="text-text">{product.role}</dd>
-    </dl>
-    <Button href={product.url} external variant="secondary" class="w-full sm:w-auto sm:self-start">
-      <span>{t('products.visit')}</span>
-      <span class="text-text-muted">{hostname}</span>
-      <svg
-        class="size-4 shrink-0"
-        viewBox="0 0 16 16"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
+    <div class="flex flex-col gap-4 border-t border-border pt-4">
+      <dl class="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
+        <dt class="text-xs font-semibold tracking-caps text-text-subtle uppercase">
+          {t('products.role')}
+        </dt>
+        <dd class="text-text">{product.role}</dd>
+      </dl>
+      <Button
+        href={product.url}
+        external
+        variant="secondary"
+        class="w-full sm:w-auto sm:self-start"
       >
-        <path d="M6 3.5h6.5V10M12.5 3.5 4 12" />
-      </svg>
-    </Button>
+        <span>{t('products.visit')}</span>
+        <span class="text-text-muted">{hostname}</span>
+        <svg
+          class="size-4 shrink-0"
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M6 3.5h6.5V10M12.5 3.5 4 12" />
+        </svg>
+      </Button>
+    </div>
   </div>
 </article>
 
 <style>
-  .product-card {
-    transition:
-      transform var(--duration-base) var(--ease-standard),
-      box-shadow var(--duration-base) var(--ease-standard),
-      border-color var(--duration-base) var(--ease-standard),
-      background-color var(--duration-base) var(--ease-standard);
+  .product-plate__bar {
+    background-color: var(--product-accent);
+    transition: height var(--duration-base) var(--ease-standard);
   }
 
-  @media (hover: hover) {
-    .product-card:hover {
-      transform: translateY(-2px);
-    }
+  .product-plate:is(:hover, :has(:focus-visible), [data-active]) .product-plate__bar {
+    height: 0.25rem;
   }
 
-  .product-card:has(:focus-visible) {
-    transform: translateY(-2px);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .product-card {
-      transform: none !important;
-    }
-  }
-
-  :global(:root[data-motion='reduced']) .product-card,
-  :global(:root[data-motion='paused']) .product-card {
-    transform: none !important;
+  .product-plate[data-active] {
+    outline: 1px solid color-mix(in oklab, var(--product-accent) 60%, transparent);
+    outline-offset: -1px;
   }
 </style>

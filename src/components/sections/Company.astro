@@ -24,12 +24,10 @@ const toneFor = (id: string) => (productTones.includes(id) ? (id as ProductTone)
   id={SECTION_IDS.company}
   aria-labelledby="company-title"
   data-station="company"
-  class="relative z-(--z-content) flex min-h-svh flex-col justify-end px-gutter pt-[max(33svh,calc(var(--corner-ui-height,4.25rem)+1rem))] pb-12 lg:justify-center lg:py-[max(var(--spacing-section),calc(var(--corner-ui-height,4.75rem)+1.5rem))]"
+  class="relative z-(--z-content) flex flex-col items-center gap-6 px-gutter py-section"
 >
-  <div class="mx-auto w-full max-w-content">
-    <div
-      class="flex flex-col gap-6 rounded-xl border border-border bg-scrim p-5 md:p-8 lg:max-w-[34rem] lg:p-10 xl:max-w-reading"
-    >
+  <div class="plate" data-plate data-plate-id="company">
+    <div class="flex flex-col gap-6 p-5 md:p-8">
       <SectionHeader
         id="company-title"
         eyebrow={`${company.role} · ${company.legalName}`}
@@ -38,7 +36,9 @@ const toneFor = (id: string) => (productTones.includes(id) ? (id as ProductTone)
       />
 
       <div class="flex flex-col gap-4 text-base text-pretty text-text-muted">
-        {company.summary.map(paragraph => <p>{paragraph}</p>)}
+        {company.summary.map(paragraph => (
+          <p>{paragraph}</p>
+        ))}
       </div>
 
       <div class="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
@@ -47,13 +47,11 @@ const toneFor = (id: string) => (productTones.includes(id) ? (id as ProductTone)
           {t('company.parentBrand')}
         </p>
         <ul class="flex flex-wrap gap-2" role="list">
-          {
-            products.map(product => (
-              <li>
-                <Tag tone={toneFor(product.id)}>{product.name}</Tag>
-              </li>
-            ))
-          }
+          {products.map(product => (
+            <li>
+              <Tag tone={toneFor(product.id)}>{product.name}</Tag>
+            </li>
+          ))}
         </ul>
       </div>
 

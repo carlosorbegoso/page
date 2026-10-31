@@ -20,18 +20,19 @@ import { motionAllowed, readMotion, watchMotion, type MotionState } from '../mot
 import type { Tier } from '../tier';
 import {
   FLUID_IDLE_TEXTURE,
-  FLUID_MAX_SCREEN_PX,
-  FLUID_MAX_WORLD_PX,
+  FLUID_MAX_PX,
+  fluidConsumerCount,
   FluidField,
   FluidPointerInput,
   fluidUniforms
 } from './fluid';
+import { balanceGains, ChapterGrading } from './grading';
 import { GpuTimer } from './gpuTimer';
 import { guessTier, readFxTokens, tierProfile, type FxTokens, type TierProfile } from './settings';
 import { ToneCompensation } from './toneCompensation';
 import { BLOOM_DOWN_FRAG, BLOOM_UP_FRAG, COMPOSITE_FRAG, dofFrag, FULLSCREEN_VERT } from './shaders';
 
-export type FxFeature = 'fluid' | 'dof' | 'chromatic';
+export type FxFeature = 'fluid' | 'dof';
 
 /** Snapshot for the debug overlay and the docs (`window.__fx.stats()` with `?debug`). */
 export interface FxStats {
@@ -46,12 +47,13 @@ export interface FxStats {
   disabled: FxFeature[];
   fluidAwake: boolean;
   dofAmount: number;
+  chapter: string;
   buffer: { width: number; height: number };
 }
 
 /** The pipeline plus what the Stage can read back. */
 export interface CinematicFx extends FxPipeline {
-  /** True while the fluid or the focus transition still moves: OR it into the Stage's `settling`. */
+  /** True while the fluid, a rack focus or a grade transition still moves: OR it into the Stage's `settling`. */
   readonly settling: boolean;
   stats(): FxStats;
 }
@@ -60,8 +62,9 @@ export interface FxOptions {
   tier?: Tier;
 }
 
-const CUT_ORDER: readonly FxFeature[] = ['fluid', 'dof', 'chromatic'];
-const FOCUS_TAU = 0.15;
+const CUT_ORDER: readonly FxFeature[] = ['fluid', 'dof'];
+const RACK_SECONDS = 0.6;
+const AMOUNT_TAU = 0.15;
 const EVALUATE_EVERY_MS = 1000;
 const MIN_SAMPLES = 20;
 
@@ -116,8 +119,14 @@ class CinematicPipeline implements CinematicFx {
   private hasFocus = false;
   private focusDistance = 5;
   private dofAmount = 0;
-  private roomTarget = 1;
-  private roomWeight = 1;
+  private rackFrom = 5;
+  private rackTo = 5;
+  private rackElapsed = RACK_SECONDS;
+  private holdingFocus = false;
+  private chapterEvents = false;
+  private chapter = '';
+  private readonly grading = new ChapterGrading();
+  private readonly balance = new Vector3(1, 1, 1);
   private cssHeight = 0;
   private time = 0;
   private lastEvaluation = 0;
@@ -147,17 +156,15 @@ class CinematicPipeline implements CinematicFx {
       tDepth: { value: null },
       tDof: { value: null },
       tBloom: { value: null },
-      tFluid: fluidUniforms.uFluidVelocity,
       uNear: { value: 0.1 },
       uFar: { value: 60 },
       uFocus: { value: 5 },
       uRange: { value: 2.5 },
       uDofAmount: { value: 0 },
       uBloomStrength: { value: 0.32 },
-      uFluidOn: fluidUniforms.uFluidActive,
-      uFluidScale: fluidUniforms.uFluidScale,
-      uDistortMax: { value: FLUID_MAX_SCREEN_PX / 900 },
-      uChromatic: { value: 0.0006 },
+      uExposure: { value: 1 },
+      uBalance: { value: this.balance },
+      uSplit: { value: 0.2 },
       uVignetteDarkness: { value: 0.3 },
       uVignetteOffset: { value: 0.32 },
       uGrain: { value: 0.035 },
@@ -172,24 +179,42 @@ class CinematicPipeline implements CinematicFx {
     this.input = new FluidPointerInput(() => this.canvas, this.tokens.pointerDamping);
     this.cleanups.push(() => this.input.dispose());
     this.cleanups.push(watchMotion(state => (this.motion = state)));
-    const onEnter = (event: Event) => this.station((event as CustomEvent<{ id: string }>).detail?.id, 0);
-    const onProgress = (event: Event) => {
-      const detail = (event as CustomEvent<{ id: string; progress: number }>).detail;
-      this.station(detail?.id, detail?.progress ?? 0);
+    const listen = (type: string, handler: (id: string) => void) => {
+      const listener = (event: Event) => {
+        const id = (event as CustomEvent<{ id?: string }>).detail?.id;
+        if (typeof id === 'string') handler(id);
+      };
+      window.addEventListener(type, listener);
+      this.cleanups.push(() => window.removeEventListener(type, listener));
     };
-    window.addEventListener('station:enter', onEnter);
-    window.addEventListener('station:progress', onProgress);
-    this.cleanups.push(() => {
-      window.removeEventListener('station:enter', onEnter);
-      window.removeEventListener('station:progress', onProgress);
+    listen('chapter:enter', id => {
+      this.chapterEvents = true;
+      this.enterChapter(id);
+      this.holdingFocus = true;
     });
+    listen('chapter:settled', id => {
+      this.chapterEvents = true;
+      this.enterChapter(id);
+      this.holdingFocus = false;
+      this.rackElapsed = 0;
+      this.rackFrom = this.focusDistance;
+    });
+    listen('station:enter', id => {
+      if (!this.chapterEvents) this.enterChapter(id);
+    });
+  }
+
+  private enterChapter(id: string): void {
+    this.chapter = id;
+    this.grading.enter(id, this.frozen);
   }
 
   get settling(): boolean {
     if (!this.profile.enabled) return false;
     const fluid = this.fluidRunning && Boolean(this.fluid?.awake);
     const focusTarget = this.hasFocus && this.dofEnabled ? 1 : 0;
-    return fluid || Math.abs(this.dofAmount - focusTarget) > 0.01;
+    const racking = this.rackElapsed < RACK_SECONDS;
+    return fluid || racking || this.grading.moving || Math.abs(this.dofAmount - focusTarget) > 0.01;
   }
 
   private get frozen(): boolean {
@@ -197,16 +222,11 @@ class CinematicPipeline implements CinematicFx {
   }
 
   private get fluidRunning(): boolean {
-    return this.profile.fluidSize > 0 && !this.disabled.has('fluid') && !this.frozen;
+    return this.profile.fluidSize > 0 && fluidConsumerCount() > 0 && !this.disabled.has('fluid') && !this.frozen;
   }
 
   private get dofEnabled(): boolean {
     return this.profile.dof !== 'off' && !this.disabled.has('dof');
-  }
-
-  private station(id: string | undefined, progress: number): void {
-    if (!id) return;
-    this.roomTarget = id === 'hero' ? 1 - Math.min(Math.max(progress, 0), 1) : 0;
   }
 
   attachPointer(pointer: PointerField): void {
@@ -263,10 +283,9 @@ class CinematicPipeline implements CinematicFx {
     this.timer.end();
 
     this.updateFocus(camera, dt);
-    this.roomWeight += (this.roomTarget - this.roomWeight) * (this.frozen ? 1 : 1 - Math.exp(-dt / 0.25));
-    const room = this.roomWeight;
+    const grade = this.grading.update(this.frozen ? Number.POSITIVE_INFINITY : dt);
 
-    if (targets.dof && this.dofAmount > 0.001) this.renderDof(renderer, targets, camera, room);
+    if (targets.dof && this.dofAmount > 0.001) this.renderDof(renderer, targets, camera);
     this.renderBloom(renderer, targets);
 
     const u = this.composite.uniforms;
@@ -278,12 +297,13 @@ class CinematicPipeline implements CinematicFx {
     u.uNear!.value = camera.near;
     u.uFar!.value = camera.far;
     u.uFocus!.value = this.focusDistance;
-    u.uRange!.value = lerp(tokens.focusRangeSpace, tokens.focusRangeRoom, room);
+    u.uRange!.value = tokens.focusRange;
     u.uDofAmount!.value = targets.dof ? this.dofAmount : 0;
     u.uBloomStrength!.value = tokens.bloomStrength;
-    u.uDistortMax!.value = FLUID_MAX_SCREEN_PX / this.viewportHeight(renderer);
-    u.uChromatic!.value = this.disabled.has('chromatic') ? 0 : tokens.chromaticOffset;
-    u.uVignetteDarkness!.value = lerp(tokens.vignetteDarknessSpace, tokens.vignetteDarknessRoom, room);
+    u.uExposure!.value = grade.exposure;
+    balanceGains(grade.temperature, this.balance);
+    u.uSplit!.value = grade.split;
+    u.uVignetteDarkness!.value = grade.vignette * (tokens.vignetteDarkness / 0.5);
     u.uVignetteOffset!.value = tokens.vignetteOffset;
     u.uGrain!.value = tokens.grain;
     u.uSeed!.value = this.frozen ? 0 : Math.floor(this.time * 24) % 997;
@@ -324,22 +344,46 @@ class CinematicPipeline implements CinematicFx {
     this.timer?.end();
     fluidUniforms.uFluidVelocity.value = this.fluid.texture;
     fluidUniforms.uFluidActive.value = this.fluid.awake ? 1 : 0;
-    fluidUniforms.uFluidMax.value = FLUID_MAX_WORLD_PX / this.viewportHeight(renderer);
+    fluidUniforms.uFluidMax.value = FLUID_MAX_PX / this.viewportHeight(renderer);
+    fluidUniforms.uFluidViewport.value.set(this.bufferSize.x, this.bufferSize.y);
   }
 
+  /**
+   * Rack focus: the focus distance is held while the camera travels (`chapter:enter`) and pulled to
+   * the new subject in ≤ 600 ms once it settles (`chapter:settled`). Without chapter events, a jump
+   * larger than half the focus range triggers the same rack; small drifts are followed directly.
+   */
   private updateFocus(camera: PerspectiveCamera, dt: number): void {
     const target = this.hasFocus && this.dofEnabled ? 1 : 0;
-    const k = this.frozen ? 1 : 1 - Math.exp(-dt / FOCUS_TAU);
+    const instant = this.frozen;
     if (this.hasFocus) {
       camera.getWorldDirection(this.forward);
-      const distance = Math.max(this.toPoint.subVectors(this.focusPoint, camera.position).dot(this.forward), camera.near);
-      this.focusDistance = this.dofAmount < 0.001 ? distance : this.focusDistance + (distance - this.focusDistance) * k;
+      const desired = Math.max(this.toPoint.subVectors(this.focusPoint, camera.position).dot(this.forward), camera.near);
+      if (this.dofAmount < 0.001 || instant) {
+        this.focusDistance = desired;
+        this.rackElapsed = RACK_SECONDS;
+      } else if (!this.holdingFocus) {
+        if (this.rackElapsed < RACK_SECONDS) {
+          this.rackTo = desired;
+          this.rackElapsed = Math.min(this.rackElapsed + dt, RACK_SECONDS);
+          const t = this.rackElapsed / RACK_SECONDS;
+          const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+          this.focusDistance = this.rackFrom + (this.rackTo - this.rackFrom) * eased;
+        } else if (Math.abs(desired - this.focusDistance) > this.tokens.focusRange * 0.5) {
+          this.rackFrom = this.focusDistance;
+          this.rackTo = desired;
+          this.rackElapsed = 0;
+        } else {
+          this.focusDistance = desired;
+        }
+      }
     }
+    const k = instant ? 1 : 1 - Math.exp(-dt / AMOUNT_TAU);
     this.dofAmount += (target - this.dofAmount) * k;
     if (Math.abs(target - this.dofAmount) < 0.001) this.dofAmount = target;
   }
 
-  private renderDof(renderer: WebGLRenderer, targets: Targets, camera: PerspectiveCamera, room: number): void {
+  private renderDof(renderer: WebGLRenderer, targets: Targets, camera: PerspectiveCamera): void {
     const dofTarget = targets.dof!;
     this.dof ??= material(dofFrag(this.profile.dofTaps), {
       tColor: { value: null },
@@ -357,9 +401,9 @@ class CinematicPipeline implements CinematicFx {
     u.uNear!.value = camera.near;
     u.uFar!.value = camera.far;
     u.uFocus!.value = this.focusDistance;
-    u.uRange!.value = lerp(this.tokens.focusRangeSpace, this.tokens.focusRangeRoom, room);
+    u.uRange!.value = this.tokens.focusRange;
     (u.uTexel!.value as Vector2).set(1 / dofTarget.width, 1 / dofTarget.height);
-    const bokeh = lerp(this.tokens.bokehSpace, this.tokens.bokehRoom, room);
+    const bokeh = this.tokens.bokeh;
     u.uMaxRadius!.value = (bokeh * 3 * (targets.height / 1080)) / this.profile.dofDivisor;
     this.timer?.begin('dof');
     this.quad.material = this.dof;
@@ -444,7 +488,7 @@ class CinematicPipeline implements CinematicFx {
     this.targets = null;
   }
 
-  /** Budget rule of docs/design/desk.md §7: cut fluid → DoF → aberration; bloom stays. */
+  /** Budget rule of docs/design/desk.md §7: cut fluid → DoF; bloom stays. */
   private adapt(): void {
     const timer = this.timer;
     if (!timer?.trusted || timer.sampleCount < MIN_SAMPLES) return;
@@ -489,6 +533,7 @@ class CinematicPipeline implements CinematicFx {
       disabled: [...this.disabled],
       fluidAwake: Boolean(this.fluid?.awake),
       dofAmount: this.dofAmount,
+      chapter: this.chapter,
       buffer: { width: this.bufferSize.x, height: this.bufferSize.y }
     };
   }
@@ -512,13 +557,10 @@ class CinematicPipeline implements CinematicFx {
   }
 }
 
-function lerp(a: number, b: number, t: number): number {
-  return a + (b - a) * t;
-}
-
 /**
- * Creates the cinematic post pipeline (selective bloom, DoF on `setFocus`, fluid refraction,
- * edge chromatic aberration, ACES via the renderer, vignette, grain). GPU resources are built
+ * Creates the cinematic post pipeline for the night desk: selective bloom, chapter rack focus,
+ * chapter grading, ACES via the renderer, vignette and grain, plus the fluid field that feeds the
+ * rain, steam and window-glass materials. GPU resources are built
  * lazily on the first `render`, so it can be created before the renderer exists.
  */
 export function createFxPipeline(options: FxOptions = {}): CinematicFx {

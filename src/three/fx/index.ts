@@ -3,10 +3,14 @@ import { createFxPipeline, type CinematicFx } from './pipeline';
 
 export { createFxPipeline, type CinematicFx, type FxStats } from './pipeline';
 export {
+  FLUID_FRAGMENT_OFFSET,
+  FLUID_PARS,
   FLUID_VERTEX_DISPLACE,
   FLUID_VERTEX_PARS,
   fluidUniforms,
-  withFluidDisplacement
+  registerFluidConsumer,
+  withFluidDisplacement,
+  withFluidFragment
 } from './fluid';
 
 declare global {

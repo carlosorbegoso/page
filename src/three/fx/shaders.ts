@@ -21,7 +21,7 @@ float circleOfConfusion(vec2 uv) {
   float z = viewDepth(uv);
   float d = z - uFocus;
   float c = smoothstep(0.0, 1.0, (abs(d) - uRange * 0.5) / (uRange * 1.5));
-  // The sky shell is made of 1-2 px points: a full bokeh would smear them into dim blotches.
+  // Far points (city lights, stars behind the glass) are 1-2 px: a full bokeh smears them into blotches.
   c = z > 30.0 ? min(c, 0.3) : c;
   return d < 0.0 ? -c : c;
 }
@@ -107,24 +107,26 @@ void main() {
 `;
 }
 
-/** Fused final pass: fluid refraction, edge-only chromatic aberration, DoF mix, bloom, renderer tone mapping, vignette, grain. */
+/** Fused final pass: DoF mix, bloom, chapter grade, renderer tone mapping, vignette, grain. */
 export const COMPOSITE_FRAG = /* glsl */ `
 ${COC_CHUNK}
 uniform sampler2D tScene;
 uniform sampler2D tDof;
 uniform sampler2D tBloom;
-uniform sampler2D tFluid;
 uniform float uDofAmount;
 uniform float uBloomStrength;
-uniform float uFluidOn;
-uniform float uFluidScale;
-uniform float uDistortMax;
-uniform float uChromatic;
+uniform float uExposure;
+uniform vec3 uBalance;
+uniform float uSplit;
 uniform float uVignetteDarkness;
 uniform float uVignetteOffset;
 uniform float uGrain;
 uniform float uSeed;
 varying vec2 vUv;
+
+const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
+const vec3 SHADOW_TINT = vec3(0.92, 0.98, 1.08);
+const vec3 HIGHLIGHT_TINT = vec3(1.07, 1.0, 0.9);
 
 float hash(vec2 p) {
   vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -133,26 +135,20 @@ float hash(vec2 p) {
 }
 
 void main() {
-  vec2 uv = vUv;
-  vec2 flow = texture2D(tFluid, uv).xy * uFluidScale;
-  float flowLength = length(flow);
-  uv -= flow * min(1.0, uDistortMax / max(flowLength, 1e-6)) * uFluidOn;
-
-  vec2 fromCentre = uv - 0.5;
-  float radial = smoothstep(0.35, 1.0, length(fromCentre) * 1.41421356);
-  vec2 shift = fromCentre * (uChromatic * radial / max(length(fromCentre), 1e-4));
-  vec3 color = vec3(
-    texture2D(tScene, uv + shift).r,
-    texture2D(tScene, uv).g,
-    texture2D(tScene, uv - shift).b
-  );
+  vec3 color = texture2D(tScene, vUv).rgb;
 
   if (uDofAmount > 0.001) {
-    float coc = abs(circleOfConfusion(uv));
-    color = mix(color, texture2D(tDof, uv).rgb, smoothstep(0.02, 0.45, coc) * uDofAmount);
+    float coc = abs(circleOfConfusion(vUv));
+    color = mix(color, texture2D(tDof, vUv).rgb, smoothstep(0.02, 0.45, coc) * uDofAmount);
   }
 
-  color += texture2D(tBloom, uv).rgb * uBloomStrength;
+  color += texture2D(tBloom, vUv).rgb * uBloomStrength;
+
+  color *= uExposure * uBalance;
+  // Split toning on a Reinhard-compressed luma, so HDR highlights do not saturate the weight.
+  float l = dot(color, LUMA);
+  float w = smoothstep(0.0, 1.0, l / (1.0 + l));
+  color *= mix(vec3(1.0), mix(SHADOW_TINT, HIGHLIGHT_TINT, w), uSplit);
 
   gl_FragColor = vec4(color, 1.0);
   #include <tonemapping_fragment>
@@ -165,7 +161,7 @@ void main() {
   vec3 c = gl_FragColor.rgb;
   float n = hash(gl_FragCoord.xy + uSeed * 37.0);
   vec3 overlay = mix(2.0 * c * n, 1.0 - 2.0 * (1.0 - c) * (1.0 - n), step(0.5, c));
-  float shadows = 1.0 - 0.6 * dot(c, vec3(0.2126, 0.7152, 0.0722));
+  float shadows = 1.0 - 0.6 * dot(c, LUMA);
   gl_FragColor.rgb = mix(c, overlay, uGrain * 1.5 * shadows);
 }
 `;

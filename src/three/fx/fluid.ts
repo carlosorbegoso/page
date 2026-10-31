@@ -141,17 +141,15 @@ void main() {
 
 /** Velocity is stored in UV units per second; this maps it to a UV displacement before clamping. */
 export const FLUID_DISPLACEMENT_SCALE = 0.006;
-/** Maximum displacement of world materials (nebulae, window glass), in CSS px. */
-export const FLUID_MAX_WORLD_PX = 6;
-/** Maximum on-screen refraction of the final image, in CSS px. */
-export const FLUID_MAX_SCREEN_PX = 2.5;
+/** Maximum displacement of desk materials (rain on the glass, cup steam, window glass), in CSS px. */
+export const FLUID_MAX_PX = 6;
 
 /** Neutral 1×1 velocity bound while the field sleeps or is disabled. */
 export const FLUID_IDLE_TEXTURE = new DataTexture(new Uint8Array(4), 1, 1, RGBAFormat);
 FLUID_IDLE_TEXTURE.needsUpdate = true;
 
 /**
- * Shared uniforms of the fluid field. Engine materials reference these objects (never copies),
+ * Shared uniforms of the fluid field. Desk materials reference these objects (never copies),
  * so they follow the ping-pong texture without re-binding. See docs/3d/fx.md.
  */
 export const fluidUniforms: {
@@ -159,46 +157,99 @@ export const fluidUniforms: {
   uFluidScale: IUniform<number>;
   uFluidMax: IUniform<number>;
   uFluidActive: IUniform<number>;
+  uFluidViewport: IUniform<Vector2>;
 } = {
   uFluidVelocity: { value: FLUID_IDLE_TEXTURE },
   uFluidScale: { value: FLUID_DISPLACEMENT_SCALE },
-  uFluidMax: { value: FLUID_MAX_WORLD_PX / 900 },
-  uFluidActive: { value: 0 }
+  uFluidMax: { value: FLUID_MAX_PX / 900 },
+  uFluidActive: { value: 0 },
+  uFluidViewport: { value: new Vector2(1, 1) }
 };
 
-/** GLSL declarations for a vertex shader that samples the fluid field. */
-export const FLUID_VERTEX_PARS = /* glsl */ `
+let consumers = 0;
+
+/**
+ * Declares that a material samples the field. The simulation only runs while at least one
+ * consumer exists, so a page without rain/steam/glass pays nothing. Returns the release function.
+ */
+export function registerFluidConsumer(): () => void {
+  consumers++;
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    consumers--;
+  };
+}
+
+export function fluidConsumerCount(): number {
+  return consumers;
+}
+
+/** GLSL declarations shared by vertex and fragment use. */
+export const FLUID_PARS = /* glsl */ `
 uniform sampler2D uFluidVelocity;
 uniform float uFluidScale;
 uniform float uFluidMax;
 uniform float uFluidActive;
-`;
-
-/** GLSL block to place after `gl_Position` is written: shifts the vertex in screen space by the clamped flow. */
-export const FLUID_VERTEX_DISPLACE = /* glsl */ `
-if (uFluidActive > 0.5) {
-  vec2 fluidUv = gl_Position.xy / gl_Position.w * 0.5 + 0.5;
-  vec2 fluidShift = texture2D(uFluidVelocity, fluidUv).xy * uFluidScale;
-  fluidShift *= min(1.0, uFluidMax / max(length(fluidShift), 1e-6));
-  gl_Position.xy += fluidShift * 2.0 * gl_Position.w;
+uniform vec2 uFluidViewport;
+vec2 fluidOffsetAt(vec2 screenUv) {
+  if (uFluidActive < 0.5) return vec2(0.0);
+  vec2 shift = texture2D(uFluidVelocity, screenUv).xy * uFluidScale;
+  return shift * min(1.0, uFluidMax / max(length(shift), 1e-6));
 }
 `;
 
+/** @deprecated Kept for existing imports; same as `FLUID_PARS`. */
+export const FLUID_VERTEX_PARS = FLUID_PARS;
+
+/** GLSL block to place after `gl_Position` is written: shifts the vertex in screen space by the clamped flow. */
+export const FLUID_VERTEX_DISPLACE = /* glsl */ `
+gl_Position.xy += fluidOffsetAt(gl_Position.xy / gl_Position.w * 0.5 + 0.5) * 2.0 * gl_Position.w;
+`;
+
 /**
- * Patches any material (built-in or ShaderMaterial) so its vertices drift with the fluid field.
- * Intended for nebulae, the star field and the window glass only — never for text or plates.
+ * GLSL for a fragment shader (rain refraction on the glass, steam wobble): after `FLUID_PARS`,
+ * `fluidOffset()` returns this pixel's clamped UV offset; add it to the UVs you sample.
  */
-export function withFluidDisplacement<T extends Material>(material: T): T {
+export const FLUID_FRAGMENT_OFFSET = /* glsl */ `
+vec2 fluidOffset() { return fluidOffsetAt(gl_FragCoord.xy / uFluidViewport); }
+`;
+
+function patch(material: Material, kind: 'vertex' | 'fragment'): void {
+  const release = registerFluidConsumer();
+  material.addEventListener('dispose', release);
   const previous = material.onBeforeCompile.bind(material);
   material.onBeforeCompile = (shader, renderer) => {
     previous(shader, renderer);
     Object.assign(shader.uniforms, fluidUniforms);
-    const end = shader.vertexShader.lastIndexOf('}');
-    shader.vertexShader = `${FLUID_VERTEX_PARS}\n${shader.vertexShader.slice(0, end)}\n${FLUID_VERTEX_DISPLACE}\n}`;
+    if (kind === 'vertex') {
+      const end = shader.vertexShader.lastIndexOf('}');
+      shader.vertexShader = `${FLUID_PARS}\n${shader.vertexShader.slice(0, end)}\n${FLUID_VERTEX_DISPLACE}\n}`;
+    } else {
+      shader.fragmentShader = `${FLUID_PARS}\n${FLUID_FRAGMENT_OFFSET}\n${shader.fragmentShader}`;
+    }
   };
   const key = material.customProgramCacheKey.bind(material);
-  material.customProgramCacheKey = () => `${key()}|fluid`;
+  material.customProgramCacheKey = () => `${key()}|fluid-${kind}`;
   material.needsUpdate = true;
+}
+
+/**
+ * Patches a material (built-in or ShaderMaterial) so its vertices drift with the fluid field.
+ * Only for the window glass, the rain sheet and the cup steam — never for text or plates.
+ */
+export function withFluidDisplacement<T extends Material>(material: T): T {
+  patch(material, 'vertex');
+  return material;
+}
+
+/**
+ * Makes `fluidOffset()` available in a ShaderMaterial's fragment shader (call it where you sample
+ * your textures, e.g. the rain normal map on the glass). Registers the material as a consumer.
+ */
+export function withFluidFragment<T extends Material>(material: T): T {
+  patch(material, 'fragment');
   return material;
 }
 

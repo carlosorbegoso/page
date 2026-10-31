@@ -8,14 +8,10 @@ export interface FxTokens {
   bloomThreshold: number;
   bloomSmoothing: number;
   grain: number;
-  vignetteDarknessRoom: number;
-  vignetteDarknessSpace: number;
+  vignetteDarkness: number;
   vignetteOffset: number;
-  chromaticOffset: number;
-  bokehRoom: number;
-  bokehSpace: number;
-  focusRangeRoom: number;
-  focusRangeSpace: number;
+  bokeh: number;
+  focusRange: number;
   pointerDamping: number;
 }
 
@@ -26,14 +22,10 @@ export function readFxTokens(): FxTokens {
     bloomThreshold: tokenNumber('--fx-bloom-threshold', 0.88),
     bloomSmoothing: 0.1,
     grain: Math.min(tokenNumber('--fx-grain', 0.035), 0.06),
-    vignetteDarknessRoom: tokenNumber('--fx-vignette-darkness', 0.5),
-    vignetteDarknessSpace: 0.3,
+    vignetteDarkness: tokenNumber('--fx-vignette-darkness', 0.5),
     vignetteOffset: tokenNumber('--fx-vignette-offset', 0.32),
-    chromaticOffset: tokenNumber('--fx-chromatic-offset', 0.0006),
-    bokehRoom: tokenNumber('--fx-dof-bokeh-scale', 2.5),
-    bokehSpace: 1.2,
-    focusRangeRoom: 0.6,
-    focusRangeSpace: 2.5,
+    bokeh: tokenNumber('--fx-dof-bokeh-scale', 2.5),
+    focusRange: 0.6,
     pointerDamping: tokenNumber('--fx-pointer-damping', 0.06)
   };
 }
@@ -52,7 +44,7 @@ export interface TierProfile {
   fluidSize: number;
   pressureIterations: number;
   vorticity: boolean;
-  /** GPU ms of all effects (scene excluded) before cutting fluid → DoF → aberration; 0 = no budget. */
+  /** GPU ms of all effects (scene excluded) before cutting fluid → DoF; 0 = no budget. */
   budgetMs: number;
   /** DoF is switched off when it alone costs more than this; 0 = never. */
   dofCeilingMs: number;
@@ -84,7 +76,7 @@ const PROFILES: Record<Tier, TierProfile> = {
     fluidSize: 128,
     pressureIterations: 6,
     vorticity: false,
-    budgetMs: 0,
+    budgetMs: 4,
     dofCeilingMs: 3
   },
   low: disabledProfile(),

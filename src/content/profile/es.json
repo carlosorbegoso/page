@@ -1,6 +1,6 @@
 {
   "name": "Carlos Orbegoso",
-  "role": "Backend Developer · Java y Quarkus",
+  "role": "Backend Developer · Java/Quarkus · Banca",
   "tagline": "En TCS para el BCP · Cofundador de TUSOCIO IA",
   "location": "Lima, Perú",
   "summary": [
@@ -29,13 +29,25 @@
       "category": "Backend",
       "items": ["Java", "Quarkus", "Spring Boot", "WebFlux", "Microservicios", "APIs REST"]
     },
-    { "category": "Mensajería", "items": ["Kafka", "SQS", "Pub/Sub"] },
+    {
+      "category": "Mensajería",
+      "items": ["Kafka", "SQS", "Pub/Sub"]
+    },
     {
       "category": "Cloud y DevOps",
       "items": ["Docker", "CI/CD", "Azure DevOps", "Azure Functions", "SonarQube"]
     },
-    { "category": "Observabilidad", "items": ["Grafana", "Loki", "Tempo", "Prometheus"] },
-    { "category": "Bases de datos", "items": ["PostgreSQL", "SQL Server", "MongoDB", "DynamoDB"] },
-    { "category": "También", "items": ["Angular", "JavaScript", "Python"] }
+    {
+      "category": "Observabilidad",
+      "items": ["Grafana", "Loki", "Tempo", "Prometheus"]
+    },
+    {
+      "category": "Bases de datos",
+      "items": ["PostgreSQL", "SQL Server", "MongoDB", "DynamoDB"]
+    },
+    {
+      "category": "También",
+      "items": ["Angular", "JavaScript", "Python"]
+    }
   ]
 }

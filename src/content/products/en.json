@@ -6,9 +6,16 @@
       "url": "https://skymek.app",
       "status": "production",
       "role": "Co-founder & owner",
-      "tagline": "Auto repair shop management",
-      "description": "Peruvian SaaS for running auto repair shops. It's my product, and it's already live.",
-      "features": []
+      "tagline": "Software for auto repair shops in Peru",
+      "description": "SkyMek runs an auto repair shop's day from booking to checkout, paper-free: work orders on a board, scheduling, mechanics, inventory and payments in one app. It's live, and I own it.",
+      "features": [
+        "Work orders on a board",
+        "Scheduling and appointments",
+        "Inventory and tools",
+        "Checkout and point of sale",
+        "Quotes and reports with your logo"
+      ],
+      "featured": true
     },
     {
       "id": "parati",
@@ -17,12 +24,8 @@
       "status": "building",
       "role": "Co-founder",
       "tagline": "Digital invitations and gift registry",
-      "description": "Digital invitations with a gift registry where guests chip in via Yape. Creating an event is free.",
-      "features": [
-        "Digital invitations",
-        "Gift registry with Yape contributions",
-        "Creating an event is free"
-      ]
+      "description": "Digital invitations with a gift registry: guests chip in via Yape, and creating an event is free. Still in development.",
+      "features": []
     },
     {
       "id": "ventixs",
@@ -31,7 +34,7 @@
       "status": "building",
       "role": "Co-founder",
       "tagline": "WhatsApp sales bot",
-      "description": "A sales bot that works inside WhatsApp, where your customers already chat.",
+      "description": "A sales bot for WhatsApp, where your customers already chat. Still in development.",
       "features": []
     }
   ]

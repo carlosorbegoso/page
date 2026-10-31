@@ -49,7 +49,8 @@ const experience = defineCollection({
           end: yearMonth.nullable(),
           summary: z.string(),
           highlights: z.array(z.string()),
-          stack: z.array(z.string())
+          stack: z.array(z.string()),
+          compact: z.boolean().optional()
         })
       )
       .min(1)
@@ -69,7 +70,8 @@ const products = defineCollection({
           role: z.string(),
           tagline: z.string(),
           description: z.string(),
-          features: z.array(z.string())
+          features: z.array(z.string()),
+          featured: z.boolean().optional()
         })
       )
       .length(3)

@@ -59,12 +59,10 @@
       "role": "Frontend Developer",
       "start": "2020-01",
       "end": "2021-12",
-      "summary": "Aplicaciones web en una consultora de TI, con foco en usabilidad y velocidad.",
-      "highlights": [
-        "Diseñé y desarrollé aplicaciones web usables e intuitivas.",
-        "Optimicé la velocidad de carga y el rendimiento de las aplicaciones con JavaScript."
-      ],
-      "stack": ["JavaScript", "HTML", "CSS"]
+      "summary": "Aplicaciones web usables y rápidas con JavaScript, en una consultora de TI.",
+      "highlights": [],
+      "stack": ["JavaScript", "HTML", "CSS"],
+      "compact": true
     }
   ]
 }

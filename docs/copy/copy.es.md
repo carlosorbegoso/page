@@ -161,3 +161,27 @@ Tags: JavaScript · HTML · CSS
 - Título [`notFound.title`]: Página no encontrada
 - Cuerpo [`notFound.body`]: Esta página no existe o cambió de lugar.
 - CTA [`notFound.home`]: Volver al inicio
+
+---
+
+## Dirección final «Una noche en el escritorio» (prevalece sobre lo anterior)
+
+- **Rol en el hero** [`profile.role`]: Backend Developer · Java/Quarkus · Banca
+- **Cifras del hero** [`hero.metrics.*`], encabezado oculto/visible "En cifras":
+  - **+30–40 %** — de rendimiento en Intercorp Retail
+  - **Monolito → CQRS** — migración que lideré en Intercorp Retail
+  - **+20 %** — de eficiencia en Baufest, donde lideré un equipo de 3
+- **Experiencia**: orden cronológico inverso (TCS, Intercorp Retail, Baufest). SYSARP en una línea (`compact: true`, sin logros): "Aplicaciones web usables y rápidas con JavaScript, en una consultora de TI."
+- **SkyMek, producto estrella** (`featured: true`). Datos verificados en skymek.app el 2026-10-31.
+  - Tagline: Software para talleres mecánicos en el Perú
+  - Descripción: SkyMek ordena el día de un taller mecánico, de la cita a la caja y sin papeles: órdenes de trabajo en un tablero, agenda, mecánicos, inventario y caja en una sola app. Está en producción y soy su dueño.
+  - Puntos: Órdenes de trabajo en un tablero · Agenda y citas · Inventario y herramientas · Caja y punto de venta · Cotizaciones y reportes con tu logo
+- **Parati** (breve): Invitaciones digitales con mesa de regalos: tus invitados aportan por Yape y crear un evento es gratis. Aún en construcción.
+- **Ventixs** (breve): Un bot de ventas para WhatsApp, el canal donde tus clientes ya conversan. Aún en construcción.
+- **Outro / créditos** [`outro.*`] (reemplaza al footer):
+  - Etiqueta: Créditos
+  - Titular: Se apaga la lámpara. Mañana, más código.
+  - Cuerpo: Gracias por pasar por mi escritorio. Si quieres construir algo, ya sabes dónde encontrarme.
+  - Pie técnico: Hecho con Astro + Three.js · Código en GitHub
+- **Modo lectura** [`reading.*`]: "Modo lectura" / "Volver a la experiencia 3D"; intro "Todo el contenido en una página limpia, sin 3D ni animaciones."; title "Modo lectura · Carlos Orbegoso" (30); description (126): "Experiencia, productos y contacto de Carlos Orbegoso, Backend Developer en Java y Quarkus, en una sola página sin animaciones."
+- **HUD del monograma** [`hud.*`]: "Menú del sitio" (aria), "Abrir menú" / "Cerrar menú". El resto del menú reutiliza `lang.*`, `audio.*`, `motion.*`, `nav.index`, `reading.enter`, `cv.download`.

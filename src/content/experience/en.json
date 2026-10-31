@@ -59,12 +59,10 @@
       "role": "Frontend Developer",
       "start": "2020-01",
       "end": "2021-12",
-      "summary": "Web applications at an IT consultancy, focused on usability and speed.",
-      "highlights": [
-        "Designed and built usable, intuitive web applications.",
-        "Improved load times and application performance with JavaScript."
-      ],
-      "stack": ["JavaScript", "HTML", "CSS"]
+      "summary": "Usable, fast web applications with JavaScript at an IT consultancy.",
+      "highlights": [],
+      "stack": ["JavaScript", "HTML", "CSS"],
+      "compact": true
     }
   ]
 }

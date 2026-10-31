@@ -156,3 +156,27 @@ Tags: JavaScript · HTML · CSS
 - Title [`notFound.title`]: Page not found
 - Body [`notFound.body`]: This page doesn't exist or has moved.
 - CTA [`notFound.home`]: Back to home
+
+---
+
+## Final direction "One night at the desk" (supersedes the above)
+
+- **Hero role** [`profile.role`]: Backend Developer · Java/Quarkus · Banking
+- **Hero metrics** [`hero.metrics.*`], heading "By the numbers":
+  - **+30–40%** — performance gain at Intercorp Retail
+  - **Monolith → CQRS** — migration I led at Intercorp Retail
+  - **+20%** — efficiency at Baufest, where I led a team of 3
+- **Experience**: reverse chronological (TCS, Intercorp Retail, Baufest). SYSARP on one line (`compact: true`, no highlights): "Usable, fast web applications with JavaScript at an IT consultancy."
+- **SkyMek, the flagship** (`featured: true`). Facts checked on skymek.app on 2026-10-31.
+  - Tagline: Software for auto repair shops in Peru
+  - Description: SkyMek runs an auto repair shop's day from booking to checkout, paper-free: work orders on a board, scheduling, mechanics, inventory and payments in one app. It's live, and I own it.
+  - Points: Work orders on a board · Scheduling and appointments · Inventory and tools · Checkout and point of sale · Quotes and reports with your logo
+- **Parati** (short): Digital invitations with a gift registry: guests chip in via Yape, and creating an event is free. Still in development.
+- **Ventixs** (short): A sales bot for WhatsApp, where your customers already chat. Still in development.
+- **Outro / credits** [`outro.*`] (replaces the footer):
+  - Label: Credits
+  - Headline: Lights out. More code tomorrow.
+  - Body: Thanks for stopping by my desk. If you want to build something, you know where to find me.
+  - Tech line: Made with Astro + Three.js · Source on GitHub
+- **Reading mode** [`reading.*`]: "Reading mode" / "Back to the 3D experience"; intro "All the content on one clean page, no 3D or animation."; title "Reading mode · Carlos Orbegoso"; description (125): "Experience, products and contact for Carlos Orbegoso, Java and Quarkus Backend Developer, on a single page with no animation."
+- **Monogram HUD** [`hud.*`]: "Site menu" (aria), "Open menu" / "Close menu". The rest reuses `lang.*`, `audio.*`, `motion.*`, `nav.index`, `reading.enter`, `cv.download`.

@@ -1,11 +1,12 @@
 import { Group, Matrix4, Vector3, type BufferGeometry, type Camera, type Material, type Mesh, type Object3D } from 'three';
-import { FIGURES, MUG, type FigureId } from '../layout';
+import { FIGURE_HEIGHT, FIGURES, MUG, type FigureId } from '../layout';
 import type { AtlasUniforms } from '../materials';
 import { OBJECT_ID } from '../builder';
 import { ProductCards, productFocus } from '../notes/cards';
 import type { ProductId } from '../notes/layout';
 import type { Palette } from '../props';
 import { AlfaLife } from './alfa';
+import type { StoryBeats } from './beats';
 import { BubbleLife, splitDots } from './bubble';
 import { figureParts, mugPart } from './classify';
 import { GiftLife } from './gift';
@@ -20,6 +21,7 @@ export type LifeToy = FigureId | 'mug';
 
 const SLOT: Record<FigureId, number> = { alfa: OBJECT_ID.alfa - 1, ventixs: OBJECT_ID.ventixs - 1, parati: OBJECT_ID.parati - 1, skymek: OBJECT_ID.skymek - 1 };
 const HOVER_LIFT = 0.003;
+const TOY_SECONDS: Record<LifeToy, number> = { alfa: 1.6, parati: 2, ventixs: 1.2, skymek: 1.3, mug: 1.2 };
 
 export interface DeskLifeOptions {
   geometry: BufferGeometry;
@@ -40,6 +42,7 @@ export interface LifeFrame {
   look: LifeLook | null;
   pixelScale: number;
   focused: FigureId | null;
+  shot: string;
 }
 
 export class DeskLife {
@@ -55,7 +58,10 @@ export class DeskLife {
   private readonly frames = new Map<FigureId, Matrix4>((Object.keys(SLOT) as FigureId[]).map(id => [id, new Matrix4()]));
   private readonly disposables: Array<{ dispose(): void }> = [];
   private hovered: string | null = null;
-  private alfaLift = 0;
+  private readonly hoverLift = new Map<FigureId, number>();
+  private readonly busyUntil = new Map<LifeToy, number>();
+  private beats: StoryBeats | null = null;
+  private focused: FigureId | null = null;
   private time = 0;
 
   constructor(options: DeskLifeOptions) {
@@ -79,19 +85,35 @@ export class DeskLife {
     const dots = parts.get('bubbleDots');
     const dotParts = dots ? splitPart(dots, splitDots(dots), 3, options) : [];
     for (const dot of dotParts) this.object3D.add(dot.mesh);
-    this.bubble = new BubbleLife(dotParts, p.burbuDots.color);
+    this.bubble = new BubbleLife(dotParts);
     this.wrench = new WrenchLife(parts.get('wrench'));
     this.mug = new MugLife(workstation.parts.get('mug'), MUG);
     this.pokemon = new PokemonLife(workstation.parts);
     this.object3D.add(this.pokemon.overlays);
     this.disposables.push(this.pokemon);
-    this.object3D.add(this.gift.sparks.points, this.bubble.message);
-    this.disposables.push(this.gift, this.bubble);
+    this.object3D.add(this.gift.sparks.points);
+    this.disposables.push(this.gift);
     this.object3D.add(this.cards.object3D);
     this.disposables.push(this.cards);
   }
 
+  attachBeats(beats: StoryBeats): void {
+    this.beats = beats;
+    this.object3D.add(beats.object3D);
+  }
+
   play(toy: LifeToy, time: number, motion: boolean): void {
+    if (time < (this.busyUntil.get(toy) ?? -1)) return;
+    const told = toy === 'mug' ? 0 : (this.beats?.play(toy, time, motion, this.anchor(toy), this.focused) ?? 0);
+    this.busyUntil.set(toy, time + Math.max(TOY_SECONDS[toy], told));
+    this.animate(toy, time, motion);
+  }
+
+  private anchor(id: FigureId): Vector3 {
+    return FIGURES[id].clone().setY(FIGURES[id].y + FIGURE_HEIGHT[id]);
+  }
+
+  private animate(toy: LifeToy, time: number, motion: boolean): void {
     if (toy === 'alfa') this.alfa?.play(time, motion);
     else if (toy === 'parati') this.gift.play(time, motion);
     else if (toy === 'ventixs') this.bubble.play(time, motion);
@@ -105,41 +127,52 @@ export class DeskLife {
 
   setHover(id: string | null): void {
     this.hovered = id;
-    this.gift.setHover(id === 'parati');
-    this.wrench.setHover(id === 'skymek');
     this.mug.setHover(id === 'mug');
   }
 
   update(dt: number, time: number, frame: LifeFrame): boolean {
     this.time = time;
     const { motion } = frame;
-    const liftGoal = this.hovered === 'alfa' && motion ? HOVER_LIFT : 0;
-    this.alfaLift += (liftGoal - this.alfaLift) * (1 - Math.exp(-14 * dt));
-    this.bubble.setTyping(this.hovered === 'ventixs' || frame.focused === 'ventixs');
+    this.focused = frame.focused;
+    const lifting = this.updateHoverLift(dt, motion);
+    const beats = this.beats?.update(time, frame.shot, frame.focused) ?? false;
     const alfa = this.alfa?.update(dt, time, motion, frame.look ? { ...frame.look, frame: this.frames.get('alfa')! } : null) ?? false;
-    const gift = this.gift.update(time, motion, frame.pixelScale, this.frames.get('parati')!);
-    const bubble = this.bubble.update(dt, time, motion);
-    const wrench = this.wrench.update(dt, time, motion);
+    const gift = this.gift.update(time, frame.pixelScale, this.frames.get('parati')!);
+    const bubble = this.bubble.update(time);
+    const wrench = this.wrench.update(time);
     const mug = this.mug.update(dt, time, motion);
     const pokemon = this.pokemon.update(time, motion);
     const press = this.press.update(time);
     const cards = this.cards.update(dt, productFocus(frame.focused), motion);
-    return alfa || gift || bubble || wrench || mug || pokemon || press || cards || Math.abs(liftGoal - this.alfaLift) > 1e-5;
+    return alfa || gift || bubble || wrench || mug || pokemon || press || cards || lifting || beats;
+  }
+
+  private updateHoverLift(dt: number, motion: boolean): boolean {
+    let moving = false;
+    for (const id of Object.keys(SLOT) as FigureId[]) {
+      const goal = this.hovered === id && motion ? HOVER_LIFT : 0;
+      const lift = this.hoverLift.get(id) ?? 0;
+      const next = Math.abs(goal - lift) < 1e-5 ? goal : lift + (goal - lift) * (1 - Math.exp(-14 * dt));
+      this.hoverLift.set(id, next);
+      moving ||= next !== goal;
+    }
+    return moving;
   }
 
   offset(id: FigureId): FigureOffset {
-    if (id === 'alfa') {
-      const play = this.alfa?.offset(this.time) ?? STILL;
-      return { lift: play.lift + this.alfaLift, yaw: play.yaw };
-    }
+    const play = this.playOffset(id);
+    return { lift: play.lift + (this.hoverLift.get(id) ?? 0), yaw: play.yaw };
+  }
+
+  private playOffset(id: FigureId): FigureOffset {
+    if (id === 'alfa') return this.alfa?.offset(this.time) ?? STILL;
     if (id === 'parati') return this.gift.offset(this.time);
     if (id === 'ventixs') return this.bubble.offset(this.time);
     return STILL;
   }
 
   glow(id: string): number {
-    const own = id === 'parati' ? this.gift.glow(this.time) : id === 'ventixs' ? this.bubble.glow(this.time) : id === 'skymek' ? this.wrench.glow(this.time) : 0;
-    return own + this.press.glow(id, this.time);
+    return id in SLOT || id === 'mug' ? 0 : this.press.glow(id, this.time);
   }
 
   cardTargets(): ReadonlyMap<ProductId, Object3D> {
@@ -170,7 +203,7 @@ export class DeskLife {
   }
 
   poseKey(): string {
-    return `${this.alfa?.poseKey() ?? ''}|${this.gift.poseKey(this.time)}|${this.wrench.poseKey(this.time)}|${this.mug.poseKey()}|${this.pokemon.poseKey()}|${this.cards.poseKey()}`;
+    return `${this.alfa?.poseKey() ?? ''}|${this.gift.poseKey(this.time)}|${this.bubble.poseKey(this.time)}|${this.wrench.poseKey(this.time)}|${this.mug.poseKey()}|${this.pokemon.poseKey()}|${this.cards.poseKey()}`;
   }
 
   dispose(): void {

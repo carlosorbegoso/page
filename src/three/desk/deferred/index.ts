@@ -1,5 +1,6 @@
 import type { StationContext } from '../../contracts';
 import { FolderDetail } from '../folderDetail';
+import { StoryBeats } from '../life/beats';
 import { BioCard } from '../portrait/bio-card';
 import type { Palette } from '../props';
 import { RollerBlind } from '../room-life/blind';
@@ -31,4 +32,8 @@ export function createBioCard(): BioCard {
 
 export function createRollerBlind(): RollerBlind {
   return new RollerBlind();
+}
+
+export function createStoryBeats(): StoryBeats {
+  return new StoryBeats();
 }

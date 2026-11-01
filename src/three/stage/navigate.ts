@@ -1,6 +1,7 @@
 import type { ChapterId, ChapterState, StationPick } from '../contracts';
 import { SECTION_CHAPTERS } from '../sections';
 
+const ACTION_MS: Record<string, number> = { alfa: 1500, parati: 1900, skymek: 2300, ventixs: 1200 };
 const FIGURE_REACTION_MS = 550;
 const PRESS_REACTION_MS = 300;
 
@@ -41,12 +42,12 @@ export class PickNavigator {
     }
     const subMatters = Boolean(pick.product) || pick.sub !== undefined;
     if (state.id === chapter && (!subMatters || state.subIndex === sub)) return;
-    this.schedule(() => this.travel(pick, chapter, sub), figure);
+    this.schedule(() => this.travel(pick, chapter, sub), figure ? (ACTION_MS[id] ?? FIGURE_REACTION_MS) : PRESS_REACTION_MS);
   }
 
-  private schedule(travel: () => void, figure: boolean): void {
+  private schedule(travel: () => void, delay: number): void {
     window.clearTimeout(this.travelTimer);
-    if (this.host.movesAllowed()) this.travelTimer = window.setTimeout(travel, figure ? FIGURE_REACTION_MS : PRESS_REACTION_MS);
+    if (this.host.movesAllowed()) this.travelTimer = window.setTimeout(travel, delay);
     else travel();
   }
 

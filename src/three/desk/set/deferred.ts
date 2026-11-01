@@ -1,5 +1,6 @@
 import type { Group } from 'three';
 import type { StationContext } from '../../contracts';
+import type { DeskLife } from '../life';
 import type { WallPortrait } from '../portrait';
 import type { Palette } from '../props';
 import type { DeskFolders } from './folders';
@@ -14,6 +15,7 @@ export interface LateDeskOptions {
   folders: DeskFolders;
   screens: DeskScreens;
   portrait: WallPortrait | null;
+  life: DeskLife | null;
   disposables: Array<{ dispose(): void }>;
 }
 
@@ -23,7 +25,7 @@ export function firstFrameShown(context: StationContext): Promise<void> {
 }
 
 export async function mountLateDesk(options: LateDeskOptions): Promise<void> {
-  const { context, room, meshes, palette, folders, screens, portrait, disposables } = options;
+  const { context, room, meshes, palette, folders, screens, portrait, life, disposables } = options;
   await firstFrameShown(context);
   try {
     const late = await import('../deferred');
@@ -33,6 +35,7 @@ export async function mountLateDesk(options: LateDeskOptions): Promise<void> {
     folders.detail = detail;
     screens.attachDesktop(late.createLaptopDesktop());
     portrait?.attachBioCard(late.createBioCard());
+    life?.attachBeats(late.createStoryBeats());
     context.invalidate();
   } catch (error) {
     console.error('[desk] late features failed', error);

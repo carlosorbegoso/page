@@ -137,5 +137,7 @@ export const en = {
   'notFound.body':
     "I searched the archive on my desk and this sheet isn't there. It may never have existed, or it has moved.",
   'notFound.home': 'Back to home',
-  'notFound.paper': 'Not found'
+  'notFound.paper': 'Not found',
+  /* folder-detail */
+  'folderDetail.hint': 'Press Enter to take the folder off the shelf and read its sheet.'
 } as const satisfies Record<UiKey, string>;

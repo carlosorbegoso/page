@@ -22,6 +22,7 @@ import { tokenColor, tokenNumber } from '../tokens';
 import { createBackdrop, createRainGlass, createSteam, type Backdrop, type RainGlass, type Steam } from './atmosphere';
 import { createLampBeam, type LampBeam } from './beam';
 import { createSpineLabels } from './spines';
+import { FOLDER_PARK, FolderDetail, follow } from './folderDetail';
 import { StoryClock, storyMinutes } from './clock';
 import { OBJECT_ID, PartBuilder } from './builder';
 import { DESK, FIGURE_HEIGHT, FIGURES, FOLDER, FOLDERS, GLASS_Z, LAMP, LAPTOP, MONITOR, OPEN_FOLDER, PHONE, PRODUCT_FIGURES, ROOM, WINDOW, folderCentre, type FigureId, type FolderId } from './layout';
@@ -269,6 +270,10 @@ export class DeskSet implements ShotProvider {
   private spineLabels = new Map<FolderId, Mesh>();
   private archiveCover: Mesh | null = null;
   private readonly folderPull = new Map<FolderId, number>(FOLDERS.map(id => [id, 0]));
+  private folderDetail: FolderDetail | null = null;
+  private detailShadowPose = '';
+  private readonly origin = new Vector3();
+  private readonly coverRest = new Vector3();
   /** The visitor switched the lamp off by clicking it; the story switches it back on at the next chapter. */
   private lampOff = false;
   private lampToggledAt = -1;
@@ -288,11 +293,19 @@ export class DeskSet implements ShotProvider {
       this.context?.invalidate();
       return;
     }
+    if (detail?.action === 'folder' || detail?.action === 'folder-close') {
+      this.onFolderAction(detail.action, detail.id);
+      return;
+    }
     if (detail?.action !== 'lamp') return;
     this.lampOff = !this.lampOff;
     this.lampToggledAt = this.clock;
     window.dispatchEvent(new CustomEvent('desk:switch', { detail: { on: !this.lampOff } }));
     this.context?.invalidate();
+  };
+  private readonly onFolderKey = (event: KeyboardEvent) => {
+    if (event.key !== 'Escape' || !this.folderDetail?.active) return;
+    this.onFolderAction('folder-close');
   };
   private hoverMix = 0;
 
@@ -354,6 +367,18 @@ export class DeskSet implements ShotProvider {
     }
     this.room.add(roomMesh);
     this.disposables.push(geometry);
+    this.folderDetail = new FolderDetail({
+      material,
+      depthMaterial: roomMesh.customDepthMaterial,
+      shadows: high,
+      palette,
+      renderer: context.renderer,
+      onRedraw: () => context.invalidate()
+    });
+    void context.precompile?.(this.folderDetail.object3D);
+    this.room.add(this.folderDetail.object3D);
+    this.disposables.push(this.folderDetail);
+    window.addEventListener('keydown', this.onFolderKey);
 
     this.buildScreens();
     this.backdrop = createBackdrop();
@@ -493,6 +518,15 @@ export class DeskSet implements ShotProvider {
         sub: EXPERIENCE_ORDER.indexOf(id) + 1
       });
     }
+    const openFolderTurn = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), OPEN_FOLDER.yaw);
+    this.picks.push({
+      object3D: proxy('openFolder', [OPEN_FOLDER.width, 0.03, OPEN_FOLDER.depth], OPEN_FOLDER.centre.clone().add(new Vector3(0, 0.015, 0)), openFolderTurn),
+      key: 'desk:openFolder',
+      label: LABELS.tcs!,
+      target: '#experience',
+      experience: EXPERIENCE_IDS.tcs,
+      sub: EXPERIENCE_ORDER.indexOf('tcs') + 1
+    });
     const lampHead = LAMP.head.clone().addScaledVector(LAMP.aim.clone().sub(LAMP.head).normalize(), 0.06);
     this.picks.push({ object3D: proxy('lamp', [0.16, 0.12, 0.16], lampHead), key: 'desk:lamp', label: LABELS.lamp!, target: '#company', action: 'lamp' });
     const phone = this.phoneSurface();
@@ -748,8 +782,19 @@ export class DeskSet implements ShotProvider {
       }
     }
     const folder = this.chapter === 'experience' ? experienceFolder(this.subIndex) : null;
+    const detail = this.folderDetail;
+    if (detail) {
+      if (detail.active && detail.active !== folder) detail.close();
+      settling ||= detail.update(dt, motion);
+      const pose = detail.poseKey();
+      if (pose !== this.detailShadowPose) {
+        this.detailShadowPose = pose;
+        if (this.context.tier === 'high') this.context.renderer.shadowMap.needsUpdate = true;
+      }
+    }
     for (const id of FOLDERS) {
-      const pullGoal = id === folder ? FOLDER_PULL : OBJECT_ID[id] === this.hoverId ? FOLDER_PULL * 0.6 : 0;
+      const held = detail?.active === id;
+      const pullGoal = id === folder ? FOLDER_PULL : OBJECT_ID[id] === this.hoverId && !held ? FOLDER_PULL * 0.6 : 0;
       const pull = damp(this.folderPull.get(id)!, pullGoal, 7, step);
       this.folderPull.set(id, pull);
       settling ||= Math.abs(pull - pullGoal) > 1e-4;
@@ -836,10 +881,20 @@ export class DeskSet implements ShotProvider {
     uniforms.uHingeOrigin.value.copy(FOLDER_HINGE_ORIGIN);
     for (const id of FOLDERS) {
       const pull = this.folderPull.get(id) ?? 0;
-      uniforms.uPull.value[OBJECT_ID[id]] = pull;
+      const held = this.folderDetail?.shelfPose(id, pull) ?? null;
+      uniforms.uPull.value[OBJECT_ID[id]] = held ? FOLDER_PARK : pull;
       const label = this.spineLabels.get(id);
-      if (label) label.position.x = pull;
-      if (id === FOLDERS[0] && this.archiveCover) this.archiveCover.position.x = (this.archiveCover.userData.restX as number) + pull;
+      if (label) {
+        label.position.x = pull;
+        follow(label, held, this.origin);
+      }
+      const cover = id === FOLDERS[0] ? this.archiveCover : null;
+      if (cover) {
+        cover.position.x = (cover.userData.restX as number) + pull;
+        follow(cover, held, this.coverRest.set(cover.userData.restX as number, cover.position.y, cover.position.z));
+      }
+      const proxy = this.proxies.get(id);
+      if (proxy) follow(proxy, held, proxy.position);
     }
     uniforms.uGlow.value[OBJECT_ID.openFolder] = (this.folderGlow.get('tcs') ?? 0) * 0.25;
     uniforms.uHoverMix.value = this.hoverMix;
@@ -847,6 +902,20 @@ export class DeskSet implements ShotProvider {
       const proxy = this.proxies.get(id);
       if (proxy) proxy.position.y = FIGURES[id].y + FIGURE_HEIGHT[id] / 2 + (this.figureLift.get(id) ?? 0);
     }
+  }
+
+  /** Takes the folder of the current sub-shot off the shelf, or puts it back (`folder-close` only puts it back). */
+  private onFolderAction(action: 'folder' | 'folder-close', id?: string): void {
+    const detail = this.folderDetail;
+    if (!detail || !this.context) return;
+    if (action === 'folder-close') detail.close();
+    else {
+      const folder = this.chapter === 'experience' ? experienceFolder(this.subIndex) : null;
+      if (!folder || (id !== folder && id !== EXPERIENCE_IDS[folder])) return;
+      const eye = this.framing(this.chapter, this.subIndex)?.eye ?? this.context.camera.position;
+      detail.toggle(folder, EXPERIENCE_IDS[folder]!, eye);
+    }
+    this.context.invalidate();
   }
 
   /** Room triangle count and visible meshes (debug overlay, docs). */
@@ -861,6 +930,7 @@ export class DeskSet implements ShotProvider {
 
   dispose(): void {
     window.removeEventListener('desk:action', this.onAction);
+    window.removeEventListener('keydown', this.onFolderKey);
     this.viewportObserver?.disconnect();
     this.viewportObserver = null;
     this.viewportSize = null;

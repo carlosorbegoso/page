@@ -325,6 +325,11 @@ export class Stage {
     }
     const chapter = pick.target.replace('#', '') as ChapterId;
     const sub = pick.sub ?? (pick.product ? ['skymek', 'parati', 'ventixs'].indexOf(pick.product) : 0);
+    const state = this.director.state();
+    if (pick.experience && pick.sub !== undefined && state.id === chapter && state.subIndex === pick.sub) {
+      window.dispatchEvent(new CustomEvent('desk:action', { detail: { action: 'folder', id: pick.experience } }));
+      return;
+    }
     if (SECTION_CHAPTERS.includes(chapter)) this.scrollToChapter(chapter, Math.max(0, sub));
     else document.querySelector(pick.target)?.scrollIntoView({ behavior: this.movesAllowed ? 'smooth' : 'auto' });
     if (pick.product) window.dispatchEvent(new CustomEvent('product:focus', { detail: { id: pick.product, source: 'scene' } }));

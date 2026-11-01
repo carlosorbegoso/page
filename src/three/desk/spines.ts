@@ -2,7 +2,7 @@ import { CanvasTexture, Color, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMat
 import { FOLDER, FOLDERS, folderCentre, type FolderId } from './layout';
 
 /** What an archive box says on its paper label: the company and its years, read bottom to top. */
-const SPINE_TEXT: Record<FolderId, [string, string]> = {
+export const SPINE_TEXT: Record<FolderId, [string, string]> = {
   sysarp: ['SYSARP', '2020 – 2021'],
   baufest: ['BAUFEST', '2022 – 2024'],
   intercorp: ['INTERCORP', '2024 – 2025'],

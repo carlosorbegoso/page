@@ -14,6 +14,7 @@ import {
   Vector3
 } from 'three';
 import { withFluidDisplacement } from '../../fx/fluid';
+import { LATE_DEPTH_CHUNK, LATE_LAYER, lateUniforms } from '../../fx/late';
 import { MUG } from '../layout';
 import { STEAM_FRAGMENT, STEAM_VERTEX } from './steam.glsl';
 
@@ -73,18 +74,20 @@ export function createSteam(options: SteamOptions = { wisps: 6, octaves: 3 }): S
   geometry.setIndex(index);
   geometry.boundingSphere = new Sphere(new Vector3(0, STEAM_SIZE.height / 2, 0), STEAM_SIZE.height);
   const color = STEAM_NIGHT.clone();
+  const uniforms = {
+    uTime: { value: 0 },
+    uStrength: { value: 0.5 },
+    uOcclusion: { value: 0 },
+    uColor: { value: color },
+    uSize: { value: new Vector2(STEAM_SIZE.width, STEAM_SIZE.height) }
+  };
+  const octaves = Math.max(1, Math.round(options.octaves));
   const material = withFluidDisplacement(
     new ShaderMaterial({
       vertexShader: STEAM_VERTEX,
-      fragmentShader: STEAM_FRAGMENT,
-      defines: { STEAM_OCTAVES: Math.max(1, Math.round(options.octaves)) },
-      uniforms: {
-        uTime: { value: 0 },
-        uStrength: { value: 0.5 },
-        uOcclusion: { value: 0 },
-        uColor: { value: color },
-        uSize: { value: new Vector2(STEAM_SIZE.width, STEAM_SIZE.height) }
-      },
+      fragmentShader: LATE_DEPTH_CHUNK + STEAM_FRAGMENT,
+      defines: { STEAM_OCTAVES: octaves },
+      uniforms: { ...uniforms, ...lateUniforms },
       transparent: true,
       depthWrite: false,
       blending: CustomBlending,
@@ -98,6 +101,8 @@ export function createSteam(options: SteamOptions = { wisps: 6, octaves: 3 }): S
   mesh.name = 'desk-steam';
   mesh.position.set(MUG.x, MUG.y + 0.088, MUG.z);
   mesh.renderOrder = 2;
+  /* Drawn after depth of field: transparent steam leaves the far wall in the depth buffer, so the lens smeared it into a still smudge. */
+  mesh.layers.set(LATE_LAYER);
   mesh.raycast = () => undefined;
   return {
     mesh,

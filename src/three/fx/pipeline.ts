@@ -10,6 +10,7 @@ import {
   type Vector3,
   type WebGLRenderer
 } from 'three';
+import { LATE_LAYER, renderLateLayer } from './late';
 import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
 import type { PointerField } from '../contracts';
 import { motionAllowed, readMotion, watchMotion, type MotionState } from '../motion';
@@ -186,7 +187,9 @@ class CinematicPipeline implements CinematicFx {
   render(renderer: WebGLRenderer, scene: Scene, camera: PerspectiveCamera, dt: number): void {
     if (!this.profile.enabled) {
       renderer.setRenderTarget(null);
+      camera.layers.enable(LATE_LAYER);
       renderer.render(scene, camera);
+      camera.layers.disable(LATE_LAYER);
       return;
     }
     this.canvas = renderer.domElement;
@@ -220,6 +223,7 @@ class CinematicPipeline implements CinematicFx {
       { camera, grade, focusDistance: this.focus.distance, dofAmount: this.focus.amount, frozen: this.frozen, time: this.time },
       this.timer
     );
+    renderLateLayer(renderer, scene, camera, targets.scene.depthTexture);
 
     if (this.budget.evaluate(this.timer, this.profile) === 'fluid') fluidUniforms.uFluidActive.value = 0;
   }

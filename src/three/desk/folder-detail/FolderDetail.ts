@@ -21,9 +21,11 @@ import {
 } from './constants';
 import { aimOpenSheet, aimShelfFolder, shelfHoldPose } from './aim';
 import { ease } from './ease';
-import { drawSheet } from './sheet-canvas';
-import { readPlate, type SheetContent } from './sheet-content';
+import { createFlapMesh, FLAP_THICKNESS, flapPose, placeFlap } from './flap';
 import { createSheetMesh, createSheetTexture, createTwinMesh, type SheetMesh } from './mesh';
+import { listenOutsideClick } from './outside-click';
+import { drawSheet } from './sheet-canvas';
+import { readExperience, type SheetContent } from './sheet-content';
 
 export interface FolderDetailOptions {
   material: Material;
@@ -40,13 +42,17 @@ const scratchPosition = new Vector3();
 const ONE = new Vector3(1, 1, 1);
 
 /**
- * Taking the folder you are looking at off the shelf: it slides out, turns its face to the camera
- * and shows a printed sheet with the job's highlights and stack. The TCS shot frames the open
+ * Taking the folder you are looking at off the shelf: it slides out, turns its face to the camera,
+ * opens its cover and shows a printed sheet with the job's dates, role, highlights and stack. The TCS shot frames the open
  * folder on the desk instead, so there the sheet lifts off its right board.
  */
 export class FolderDetail {
   readonly object3D = new Group();
   private readonly twins = new Map<ShelfFolder, Mesh>();
+  private readonly flaps = new Map<ShelfFolder, Mesh>();
+  private readonly flapMatrix = new Matrix4();
+  private readonly stopOutsideClick: () => void;
+  private toggledAt = -Infinity;
   private readonly canvas = document.createElement('canvas');
   private readonly texture: CanvasTexture;
   private readonly shelfSheet: SheetMesh;
@@ -70,8 +76,10 @@ export class FolderDetail {
     for (const id of FOLDERS) {
       if (id === 'tcs') continue;
       const twin = createTwinMesh(id, options);
+      const flap = createFlapMesh(id, options);
       this.twins.set(id, twin);
-      this.object3D.add(twin);
+      this.flaps.set(id, flap);
+      this.object3D.add(twin, flap);
     }
     this.texture = createSheetTexture(this.canvas);
     this.shelfSheet = createSheetMesh('desk-folder-sheet', this.texture, SHEET, false);
@@ -79,6 +87,14 @@ export class FolderDetail {
     this.object3D.add(this.shelfSheet, this.openSheet);
     this.openFrame = new Matrix4().compose(OPEN_FOLDER.centre, new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), OPEN_FOLDER.yaw), ONE);
     void document.fonts?.ready.then(() => this.redrawWithLoadedFonts());
+    this.stopOutsideClick = listenOutsideClick({
+      isOut: () => this.shown !== null && this.goal === 1,
+      lastToggle: () => this.toggledAt,
+      close: () => {
+        this.close();
+        this.options.onRedraw();
+      }
+    });
   }
 
   private redrawWithLoadedFonts(): void {
@@ -94,7 +110,8 @@ export class FolderDetail {
   }
 
   /** Takes the folder out, or puts it back when it is already out. `eye` is the shot's camera position. */
-  toggle(id: FolderId, experience: string, eye: Vector3): void {
+  toggle(id: FolderId, eye: Vector3): void {
+    this.toggledAt = performance.now();
     if (this.shown === id) {
       this.goal = this.goal === 1 ? 0 : 1;
       return;
@@ -102,7 +119,7 @@ export class FolderDetail {
     if (this.shown && this.progress > 0) return;
     this.shown = id;
     this.goal = 1;
-    this.content = readPlate(id, experience);
+    this.content = readExperience(id);
     drawSheet(this.canvas, this.content);
     this.texture.needsUpdate = true;
     this.options.renderer.initTexture(this.texture);
@@ -121,6 +138,7 @@ export class FolderDetail {
     this.progress = motion ? Math.min(Math.max(this.progress + (this.goal ? dt : -dt) / DURATION, 0), 1) : this.goal;
     if (this.progress === 0 && this.goal === 0) {
       for (const twin of this.twins.values()) twin.visible = false;
+      for (const flap of this.flaps.values()) flap.visible = false;
       this.shelfSheet.visible = false;
       this.openSheet.visible = false;
       this.shown = null;
@@ -146,15 +164,22 @@ export class FolderDetail {
     return this.pose;
   }
 
+  /** World transform of the held box's front cover (null while no box is held): the archive cover label rides on it. */
+  coverPose(id: FolderId): Matrix4 | null {
+    if (id !== this.shown || id === 'tcs' || this.progress === 0) return null;
+    return flapPose(id, this.progress, this.pose, this.flapMatrix);
+  }
+
   private placeTwinAndSheet(id: ShelfFolder): void {
     const centre = folderCentre(id);
     const twin = this.twins.get(id)!;
     twin.matrix.copy(this.pose).multiply(scratch.makeTranslation(-FOLDER_PARK, 0, 0));
     twin.matrixWorldNeedsUpdate = true;
     twin.visible = true;
+    placeFlap(this.flaps.get(id)!, flapPose(id, this.progress, this.pose, this.flapMatrix));
     this.shelfSheet.matrix
       .copy(this.pose)
-      .multiply(scratch.makeTranslation(centre.x, centre.y - 0.004, centre.z + FOLDER.spine / 2 + 0.0025))
+      .multiply(scratch.makeTranslation(centre.x, centre.y - 0.004, centre.z + FOLDER.spine / 2 + FLAP_THICKNESS * 0.4))
       .multiply(scratch.makeRotationZ(-0.012));
     this.shelfSheet.matrixWorldNeedsUpdate = true;
     this.shelfSheet.visible = true;
@@ -178,7 +203,8 @@ export class FolderDetail {
   }
 
   dispose(): void {
-    for (const twin of this.twins.values()) twin.geometry.dispose();
+    this.stopOutsideClick();
+    for (const mesh of [...this.twins.values(), ...this.flaps.values()]) mesh.geometry.dispose();
     for (const sheet of [this.shelfSheet, this.openSheet]) {
       sheet.geometry.dispose();
       sheet.material.dispose();

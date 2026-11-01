@@ -13,7 +13,7 @@ export const TURN_START = 0.4;
 export const CLEAR_X = SHELF.x + SHELF.depth + FOLDER.depth / 2 + 0.012;
 export const LIFT = 0.03;
 /** Share of the shot distance the box is brought towards the camera. */
-export const NEARER = 0.76;
+export const NEARER = 0.88;
 export const MAX_FORWARD = 0.36;
 export const FACE_TURN = 0.92;
 export const HOLD_LEAN = 0.06;

@@ -70,6 +70,7 @@ export class DeskSet implements ShotProvider {
     const detail = (event as CustomEvent<{ id?: string; phase?: string }>).detail;
     if (detail?.phase !== 'activate' || !detail.id) return;
     this.life?.press.pulse(detail.id.replace(/^folder-/, ''), this.clock);
+    this.folders.requestFolder(detail.id, () => this.framing.framing(this.chapter, this.subIndex)?.eye ?? this.context.camera.position);
     this.context?.invalidate();
   };
   private readonly onFolderKey = (event: KeyboardEvent) => {

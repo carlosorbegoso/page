@@ -25,7 +25,7 @@ const year = new Date().getFullYear();
     data-plate-mode="surface-monitor"
   >
     <div class="outro-screen flex max-w-measure flex-col gap-4">
-      <p class="outro-label text-xs font-semibold tracking-caps text-accent uppercase">{t('outro.label')}</p>
+      <p class="outro-label text-sm font-medium text-text-muted">{t('outro.label')}</p>
       <h2 id="outro-title" class="font-display text-3xl font-semibold tracking-display text-balance text-text">
         {t('outro.title')}
       </h2>
@@ -71,7 +71,6 @@ const year = new Date().getFullYear();
 
   :global(.is-3d) .outro-label {
     font-size: 3cqh;
-    letter-spacing: var(--tracking-caps);
     color: var(--color-text-muted);
   }
 

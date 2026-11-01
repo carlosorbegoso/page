@@ -7,6 +7,7 @@ import { LAMP_SWITCH } from '../lamp';
 import { CHARIZARD, FIGURE_HEIGHT, FIGURES, FOLDERS, GLASS_Z, LAMP, LAPTOP, MUG, OPEN_FOLDER, PIKACHU, PLANT, PRODUCT_FIGURES, WINDOW, folderCentre, type FigureId } from '../layout';
 import { createPickMaterial, type AtlasUniforms } from '../materials';
 import { damp } from '../math';
+import { BOARD_LAYOUT, boardFaceMatrix, boardPoint, type ProductId } from '../notes/layout';
 import { EXPERIENCE_ORDER, type SurfaceFrame } from '../shots';
 import { EXPERIENCE_IDS } from './story';
 
@@ -46,9 +47,11 @@ export class DeskPicks {
   hoverId = -1;
   private hoverMix = 0;
 
-  build(room: Group, phone: SurfaceFrame, disposables: Array<{ dispose(): void }>): void {
+  build(room: Group, phone: SurfaceFrame, disposables: Array<{ dispose(): void }>, cards?: ReadonlyMap<ProductId, Object3D>): void {
     const proxy = this.proxyFactory(room, disposables);
     this.addFigures(proxy);
+    this.addPostits(proxy);
+    if (cards) this.addVisits(cards);
     this.addFolders(proxy);
     const lampHead = LAMP.head.clone().addScaledVector(LAMP.aim.clone().sub(LAMP.head).normalize(), 0.06);
     this.picks.push({ object3D: proxy('lamp', [0.16, 0.12, 0.16], lampHead), key: 'desk:lamp', label: LABELS.lamp!, target: '#company', action: 'lamp' });
@@ -89,6 +92,27 @@ export class DeskPicks {
     this.picks.push({ object3D: figure('alfa', [0.08, 0.13, 0.07]), key: 'desk:alfa', label: LABELS.alfa!, target: '#company' });
     for (const id of PRODUCT_FIGURES) {
       this.picks.push({ object3D: figure(id, [0.08, 0.08, 0.07]), key: `desk:${id}`, label: LABELS[id]!, target: '#products', product: id });
+    }
+  }
+
+  /** The three post-its on TUSOCIO's cork board, each a shortcut to its product's shot. */
+  private addPostits(proxy: PickProxy): void {
+    const board = new Quaternion().setFromRotationMatrix(boardFaceMatrix());
+    PRODUCT_FIGURES.forEach((id, sub) => {
+      const rect = BOARD_LAYOUT.postits[id];
+      const turn = board.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), rect.rotation));
+      const centre = boardPoint(rect.x + rect.width / 2, rect.y + rect.height / 2, 0.004);
+      const name = LABELS[id]!.es;
+      const label = { es: `${name} · ver producto`, en: `${name} · see product` };
+      this.picks.push({ object3D: proxy(`postit-${id}`, [rect.width, rect.height, 0.004], centre, turn), key: `desk:postit-${id}`, label, target: '#products', product: id, sub });
+    });
+  }
+
+  /** Each product card's "Visit site" box, which moves with the card; the click opens the site only while it stands. */
+  private addVisits(cards: ReadonlyMap<ProductId, Object3D>): void {
+    for (const [id, object3D] of cards) {
+      const name = LABELS[id]!.es;
+      this.picks.push({ object3D, key: `desk:visit-${id}`, label: { es: `Visitar ${name} ↗`, en: `Visit ${name} ↗` }, target: '#products', action: 'visit' });
     }
   }
 

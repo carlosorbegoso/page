@@ -36,7 +36,7 @@ export class PickNavigator {
     if (figure || id === 'mug') emit('desk:action', { action: 'play', id });
     if (id === 'mug') return;
     if (pick.action) {
-      emit('desk:action', { action: pick.action });
+      emit('desk:action', { action: pick.action, id });
       return;
     }
     const chapter = pick.target.replace('#', '') as ChapterId;

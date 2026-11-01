@@ -86,7 +86,7 @@ export interface StationPick {
   /** Sub-shot to land on inside `target` (defaults to the product index, else 0). */
   readonly sub?: number;
   /** A toy instead of a destination: clicking plays with the object (`desk:action`) and stays put. */
-  readonly action?: 'lamp' | 'blind' | 'plant' | 'laptop' | 'battle';
+  readonly action?: 'lamp' | 'blind' | 'plant' | 'laptop' | 'battle' | 'visit';
 }
 
 export interface PointerSample {

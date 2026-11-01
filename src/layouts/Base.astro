@@ -197,5 +197,10 @@ const jsonLd = {
   <body>
     <SkipLink label={t('skipLink')} />
     <slot />
+    <script>
+      import { registerOfflineCache } from '../scripts/offline/register';
+
+      registerOfflineCache();
+    </script>
   </body>
 </html>

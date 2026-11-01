@@ -66,3 +66,4 @@ Qué archivo editar en la web: `<head>`, tokens, HUD, secciones, modo lectura, t
 | Lectura: estilos de pantalla y de impresión A4 | `src/styles/sections/reading/{masthead,sections,print}.css`; botón de imprimir en `src/scripts/reading/print.ts` |
 | Textos de la UI | `src/i18n/<es|en>/meta.ts` (meta, 404, idioma, CV, pie, sonido, hora), `nav.ts` (navegación, HUD, recorrido, historia), `sections.ts` (secciones y lectura), `contact.ts` (contacto y teléfono); `ui.<locale>.ts` los une y define `UiKey` |
 | Contenido (perfil, experiencia, productos) en `es.json` / `en.json` | `src/content/{profile,experience,products}/`, esquemas en `src/content.config.ts`, lectura en `src/lib/content.ts` |
+| Caché del navegador (service worker) y su registro | `public/sw.js`, `src/scripts/offline/register.ts` (lo carga `src/layouts/Base.astro`); estrategias en `docs/3d/budget.md` |

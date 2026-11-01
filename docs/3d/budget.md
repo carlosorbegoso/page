@@ -40,3 +40,17 @@ JS inicial de `src/components/three/boot/` ≈ 3.3 KB gzip (secuencia 2.2 + scri
 ## Draw calls
 
 Se miden con `?debug` (`renderer.info` sin auto-reset: suma todas las pasadas de FX). Objetivo: < 50 por plano.
+
+## Caché del navegador (`public/sw.js`)
+
+GitHub Pages sirve todo con `max-age=600` y no deja cambiar cabeceras, así que la caché larga la da un service worker:
+
+| Qué | Estrategia | Por qué |
+| --- | --- | --- |
+| `_astro/*` | cache-first (`immutable-v1`) | llevan hash en el nombre: nunca cambian |
+| `models/`, `audio/`, `fonts/`, `decoders/`, `images/`, `cv/`, favicon, manifest | stale-while-revalidate (`runtime-v1`) | nombres fijos: se sirven al instante y se actualizan en segundo plano |
+| Navegación (HTML) | network-first, con la copia en caché si no hay red | el HTML siempre llega fresco tras un deploy; sin red, la página abre igual |
+
+- Se registra 4 s después de `load` (`src/scripts/offline/register.ts`), solo en producción y nunca con `?capture`: la primera visita y Lighthouse no lo notan. A partir de la segunda visita el 3D sale de la caché.
+- No cachea peticiones con `Range` (streaming de audio) ni de otros orígenes.
+- Los `_astro/*` viejos se acumulan entre deploys: cambia `VERSION` en `public/sw.js` para vaciar las dos cachés cuando haga falta.

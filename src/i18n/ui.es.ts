@@ -64,7 +64,7 @@ export const es = {
   'company.cta': 'Conoce los productos',
   'company.parentBrand': 'Alfa, la marca madre',
   'products.title': 'Productos',
-  'products.subtitle': 'Tres productos de TUSOCIO IA: uno en producción y dos en camino.',
+  'products.subtitle': 'Tres productos de TUSOCIO IA, los tres en producción.',
   'products.status.production': 'En producción',
   'products.status.building': 'En construcción',
   'products.role': 'Mi rol',

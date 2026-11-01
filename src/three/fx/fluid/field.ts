@@ -149,38 +149,44 @@ export class FluidField {
   /** Advances the field. `aspect` is the canvas width / height, so splats stay round on screen. */
   step(renderer: WebGLRenderer, dt: number, aspect: number, stroke: FluidStroke | null): void {
     const step = Math.min(Math.max(dt, 1 / 240), 1 / 30);
-    if (stroke) {
-      const u = this.splat.uniforms;
-      u.tVelocity!.value = this.velocity.read.texture;
-      (u.uFrom!.value as Vector2).copy(stroke.from);
-      (u.uTo!.value as Vector2).copy(stroke.to);
-      (u.uForce!.value as Vector2).copy(stroke.force);
-      u.uAspect!.value = aspect;
-      this.draw(renderer, this.splat, this.velocity.write);
-      this.velocity.swap();
-      this.energy = Math.max(this.energy, stroke.force.length());
-    }
+    if (stroke) this.splatStroke(renderer, aspect, stroke);
     if (!this.awake) return;
     this.dirty = true;
+    if (this.settings.vorticity) this.confineVorticity(renderer, step);
+    this.project(renderer);
+    this.advectVelocity(renderer, step);
+  }
 
-    if (this.settings.vorticity) {
-      this.curlMaterial.uniforms.tVelocity!.value = this.velocity.read.texture;
-      this.draw(renderer, this.curlMaterial, this.curl);
-      const v = this.vorticityMaterial.uniforms;
-      v.tVelocity!.value = this.velocity.read.texture;
-      v.tCurl!.value = this.curl.texture;
-      v.uDt!.value = step;
-      this.draw(renderer, this.vorticityMaterial, this.velocity.write);
-      this.velocity.swap();
-    }
+  private splatStroke(renderer: WebGLRenderer, aspect: number, stroke: FluidStroke): void {
+    const u = this.splat.uniforms;
+    u.tVelocity!.value = this.velocity.read.texture;
+    (u.uFrom!.value as Vector2).copy(stroke.from);
+    (u.uTo!.value as Vector2).copy(stroke.to);
+    (u.uForce!.value as Vector2).copy(stroke.force);
+    u.uAspect!.value = aspect;
+    this.draw(renderer, this.splat, this.velocity.write);
+    this.velocity.swap();
+    this.energy = Math.max(this.energy, stroke.force.length());
+  }
 
+  private confineVorticity(renderer: WebGLRenderer, step: number): void {
+    this.curlMaterial.uniforms.tVelocity!.value = this.velocity.read.texture;
+    this.draw(renderer, this.curlMaterial, this.curl);
+    const v = this.vorticityMaterial.uniforms;
+    v.tVelocity!.value = this.velocity.read.texture;
+    v.tCurl!.value = this.curl.texture;
+    v.uDt!.value = step;
+    this.draw(renderer, this.vorticityMaterial, this.velocity.write);
+    this.velocity.swap();
+  }
+
+  /** Pressure projection: divergence, Jacobi iterations on a decayed pressure, gradient subtraction. */
+  private project(renderer: WebGLRenderer): void {
     this.divergenceMaterial.uniforms.tVelocity!.value = this.velocity.read.texture;
     this.draw(renderer, this.divergenceMaterial, this.divergence);
-
     this.scale.uniforms.tInput!.value = this.pressure.read.texture;
     this.draw(renderer, this.scale, this.pressure.write);
     this.pressure.swap();
-
     const p = this.pressureMaterial.uniforms;
     p.tDivergence!.value = this.divergence.texture;
     for (let i = 0; i < this.settings.iterations; i++) {
@@ -188,13 +194,14 @@ export class FluidField {
       this.draw(renderer, this.pressureMaterial, this.pressure.write);
       this.pressure.swap();
     }
-
     const g = this.gradient.uniforms;
     g.tPressure!.value = this.pressure.read.texture;
     g.tVelocity!.value = this.velocity.read.texture;
     this.draw(renderer, this.gradient, this.velocity.write);
     this.velocity.swap();
+  }
 
+  private advectVelocity(renderer: WebGLRenderer, step: number): void {
     const dissipation = Math.pow(0.965, step * 60);
     const a = this.advect.uniforms;
     a.tVelocity!.value = this.velocity.read.texture;

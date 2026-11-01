@@ -37,13 +37,9 @@ const STEAM_SIZE = { width: 0.11, height: 0.2 } as const;
 const STEAM_NIGHT = new Color(0.95, 0.88, 0.8);
 const STEAM_DAY = new Color(1.0, 1.0, 1.0);
 
-/**
- * Hot-coffee steam: camera-facing wisps that curl through advected noise, widen and fade with
- * height and drift slightly. Premultiplied blending: additive at night (`uOcclusion` ≈ 0), a
- * light veil by day. Linear HDR output, tone-mapped by the post chain; peaks stay below bloom.
- */
-export function createSteam(options: SteamOptions = { wisps: 6, octaves: 3 }): Steam {
-  const count = Math.max(1, options.wisps);
+/** Camera-facing quads around the cup's centre, each with its corner offsets and a per-wisp seed. */
+function wispGeometry(wisps: number): BufferGeometry {
+  const count = Math.max(1, wisps);
   const positions = new Float32Array(count * 4 * 3);
   const corners = new Float32Array(count * 4 * 2);
   const seeds = new Float32Array(count * 4);
@@ -73,7 +69,10 @@ export function createSteam(options: SteamOptions = { wisps: 6, octaves: 3 }): S
   geometry.setAttribute('seed', new BufferAttribute(seeds, 1));
   geometry.setIndex(index);
   geometry.boundingSphere = new Sphere(new Vector3(0, STEAM_SIZE.height / 2, 0), STEAM_SIZE.height);
-  const color = STEAM_NIGHT.clone();
+  return geometry;
+}
+
+function steamMaterial(color: Color, octaves: number): ShaderMaterial {
   const uniforms = {
     uTime: { value: 0 },
     uStrength: { value: 0.5 },
@@ -81,8 +80,7 @@ export function createSteam(options: SteamOptions = { wisps: 6, octaves: 3 }): S
     uColor: { value: color },
     uSize: { value: new Vector2(STEAM_SIZE.width, STEAM_SIZE.height) }
   };
-  const octaves = Math.max(1, Math.round(options.octaves));
-  const material = withFluidDisplacement(
+  return withFluidDisplacement(
     new ShaderMaterial({
       vertexShader: STEAM_VERTEX,
       fragmentShader: LATE_DEPTH_CHUNK + STEAM_FRAGMENT,
@@ -97,6 +95,17 @@ export function createSteam(options: SteamOptions = { wisps: 6, octaves: 3 }): S
       side: DoubleSide
     })
   );
+}
+
+/**
+ * Hot-coffee steam: camera-facing wisps that curl through advected noise, widen and fade with
+ * height and drift slightly. Premultiplied blending: additive at night (`uOcclusion` ≈ 0), a
+ * light veil by day. Linear HDR output, tone-mapped by the post chain; peaks stay below bloom.
+ */
+export function createSteam(options: SteamOptions = { wisps: 6, octaves: 3 }): Steam {
+  const geometry = wispGeometry(options.wisps);
+  const color = STEAM_NIGHT.clone();
+  const material = steamMaterial(color, Math.max(1, Math.round(options.octaves)));
   const mesh = new Mesh(geometry, material);
   mesh.name = 'desk-steam';
   mesh.position.set(MUG.x, MUG.y + 0.088, MUG.z);

@@ -1,4 +1,4 @@
-import { BufferAttribute, Color, Mesh, PlaneGeometry, ShaderMaterial, type BufferGeometry } from 'three';
+import { BufferAttribute, Color, Mesh, PlaneGeometry, ShaderMaterial, type BufferGeometry, type Texture, type Vector3 } from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { tokenColor } from '../../tokens';
 import { BACKDROP_FRAGMENT, BACKDROP_VERTEX } from './backdrop.glsl';
@@ -26,16 +26,19 @@ export interface Backdrop {
   dispose(): void;
 }
 
-/** Lima sky, Costa Verde cliffs and a three-layer city behind the window (desk.md §4), one draw call. */
-export function createBackdrop(): Backdrop {
-  const { texture, aviation } = cityAtlas();
+/** Sky plus the three city layers merged into one geometry (one draw call). */
+function backdropGeometry(): BufferGeometry {
   const parts = [
     layerQuad(SKY.halfWidth, SKY.bottom, SKY.top, SKY_Z, 0),
     ...CITY_LAYERS.map((layer, index) => layerQuad(layer.halfWidth, layer.bottom, layer.top, layer.z, index + 1))
   ];
   const geometry = mergeGeometries(parts, false)!;
   for (const part of parts) part.dispose();
-  const material = new ShaderMaterial({
+  return geometry;
+}
+
+function backdropMaterial(texture: Texture, aviation: Vector3[]): ShaderMaterial {
+  return new ShaderMaterial({
     vertexShader: BACKDROP_VERTEX,
     fragmentShader: BACKDROP_FRAGMENT,
     uniforms: {
@@ -61,6 +64,13 @@ export function createBackdrop(): Backdrop {
     },
     depthWrite: false
   });
+}
+
+/** Lima sky, Costa Verde cliffs and a three-layer city behind the window (desk.md §4), one draw call. */
+export function createBackdrop(): Backdrop {
+  const { texture, aviation } = cityAtlas();
+  const geometry = backdropGeometry();
+  const material = backdropMaterial(texture, aviation);
   const mesh = new Mesh(geometry, material);
   mesh.name = 'desk-city';
   mesh.renderOrder = -10;

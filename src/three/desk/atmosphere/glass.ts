@@ -13,12 +13,8 @@ export interface RainGlass {
   dispose(): void;
 }
 
-/** Window glass with static droplets, slow trickles and a fake warm lamp reflection. */
-export function createRainGlass(): RainGlass {
-  const width = WINDOW.width - WINDOW.frame * 2;
-  const height = WINDOW.height - WINDOW.frame * 2;
-  const geometry = new PlaneGeometry(width, height);
-  const material = withFluidFragment(
+function glassMaterial(aspect: number): ShaderMaterial {
+  return withFluidFragment(
     new ShaderMaterial({
       vertexShader: GLASS_VERTEX,
       fragmentShader: GLASS_FRAGMENT,
@@ -27,7 +23,7 @@ export function createRainGlass(): RainGlass {
         uRain: { value: tokenColor('--color-rain', '#9db8e8') },
         uLamp: { value: tokenColor('--color-lamp', '#ffb566') },
         uTime: { value: 0 },
-        uAspect: { value: width / height },
+        uAspect: { value: aspect },
         uLampReflection: { value: 1 },
         uDay: { value: 0 },
         uTintDay: { value: tokenColor('--color-window-glass-day', '#dfe6ec') }
@@ -36,6 +32,14 @@ export function createRainGlass(): RainGlass {
       depthWrite: false
     })
   );
+}
+
+/** Window glass with static droplets, slow trickles and a fake warm lamp reflection. */
+export function createRainGlass(): RainGlass {
+  const width = WINDOW.width - WINDOW.frame * 2;
+  const height = WINDOW.height - WINDOW.frame * 2;
+  const geometry = new PlaneGeometry(width, height);
+  const material = glassMaterial(width / height);
   const mesh = new Mesh(geometry, material);
   mesh.name = 'desk-glass';
   mesh.position.set(WINDOW.x, WINDOW.y, GLASS_Z);

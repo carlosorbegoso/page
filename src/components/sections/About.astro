@@ -19,6 +19,11 @@ const profile = await getProfile(locale);
 const body = profile.summary.slice(0, -1);
 const credentials = profile.summary.slice(-1);
 const { degree, institution, status } = profile.education;
+const facts = (['now', 'before', 'night'] as const).map(key => ({
+  label: t(`about.facts.${key}.label`),
+  value: t(`about.facts.${key}.value`),
+  detail: t(`about.facts.${key}.detail`)
+}));
 ---
 
 <section
@@ -57,6 +62,19 @@ const { degree, institution, status } = profile.education;
         <div class="about-bio__text flex flex-col gap-4 text-base text-text-muted">
           {body.map(paragraph => <p class="text-pretty">{paragraph}</p>)}
         </div>
+        <dl class="about-facts hidden" aria-label={t('about.facts.label')}>
+          {
+            facts.map(fact => (
+              <div>
+                <dt>{fact.label}</dt>
+                <dd>
+                  <span class="about-facts__value">{fact.value}</span>
+                  <span class="about-facts__detail">{fact.detail}</span>
+                </dd>
+              </div>
+            ))
+          }
+        </dl>
       </div>
     </div>
   </div>
@@ -238,14 +256,16 @@ const { degree, institution, status } = profile.education;
     width: 1.2cqh;
     height: 1.2cqh;
   }
-  /* Landscape screen as an editorial spread: tall photo on the left, statement and story beside it. */
+  /* Landscape screen as a title card: graded full-bleed portrait on the left, statement and three beats beside it. */
   @container surface (orientation: landscape) {
     :global(.is-3d) .about-bio {
       display: grid;
-      grid-template-columns: 30cqw minmax(0, 1fr);
-      grid-template-rows: auto 1fr;
-      align-content: stretch;
-      gap: 0 5cqw;
+      grid-template-columns: 38cqw minmax(0, 1fr);
+      grid-template-rows: 1fr auto auto 1fr;
+      gap: 0 6cqw;
+      margin: calc(var(--plate-padding) * -1);
+      height: calc(100% + var(--plate-padding) * 2);
+      padding-right: 7cqw;
     }
 
     :global(.is-3d) .about-bio__row {
@@ -253,53 +273,114 @@ const { degree, institution, status } = profile.education;
     }
 
     :global(.is-3d) .about-bio :global(picture) {
+      position: relative;
       grid-column: 1;
-      grid-row: 1 / span 2;
+      grid-row: 1 / -1;
       height: 100%;
+      overflow: hidden;
+    }
+
+    :global(.is-3d) .about-bio :global(picture)::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, transparent 45%, var(--color-screen-bg) 99%),
+        linear-gradient(0deg, rgb(4 8 16 / 0.75), transparent 40%),
+        linear-gradient(160deg, rgb(70 130 255 / 0.18), rgb(255 160 80 / 0.1));
+      mix-blend-mode: normal;
     }
 
     :global(.is-3d) .about-bio__photo {
       width: 100%;
       height: 100%;
       border: 0;
-      border-radius: 0.6cqh;
+      border-radius: 0;
       object-position: 50% 30%;
-      mask-image: linear-gradient(90deg, #000 70%, transparent);
+      filter: saturate(0.55) contrast(1.08) brightness(0.82);
     }
 
     :global(.is-3d) .about-bio :global(header) {
       grid-column: 2;
-      align-self: end;
+      grid-row: 2;
       max-width: none;
-      gap: 1.6cqh;
+      gap: 2cqh;
+    }
+
+    :global(.is-3d) .about-bio :global(header > p:first-child) {
+      display: none;
     }
 
     :global(.is-3d) .about-bio :global(h2) {
-      font-size: 3.4cqh;
-      font-weight: 500;
-      letter-spacing: 0.02em;
-      color: var(--color-text-muted);
+      font-family: var(--font-sans);
+      font-size: 2.8cqh;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-accent);
     }
 
     :global(.is-3d) .about-bio :global(header > p:last-of-type) {
       font-family: var(--font-display);
-      font-size: 8cqh;
+      font-size: 8.4cqh;
       font-weight: 600;
-      line-height: 1.05;
-      letter-spacing: -0.02em;
+      line-height: 1.04;
+      letter-spacing: -0.025em;
       color: var(--color-text);
       text-wrap: balance;
     }
 
     :global(.is-3d) .about-bio__text {
+      display: none;
+    }
+
+    :global(.is-3d) .about-facts {
       grid-column: 2;
-      align-self: start;
-      margin-top: 5cqh;
-      padding-top: 4cqh;
-      border-top: 1px solid rgb(255 255 255 / 0.1);
-      gap: 2.2cqh;
-      font-size: 3.4cqh;
-      line-height: 1.45;
+      grid-row: 3;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0 3.5cqw;
+      margin-top: 8cqh;
+    }
+
+    :global(.is-3d) .about-facts > div {
+      padding-top: 2.4cqh;
+      border-top: 1px solid rgb(255 255 255 / 0.14);
+    }
+
+    :global(.is-3d) .about-facts > div:first-child {
+      border-top-color: var(--color-accent);
+    }
+
+    :global(.is-3d) .about-facts dt {
+      font-size: 2.4cqh;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-text-subtle);
+    }
+
+    :global(.is-3d) .about-facts dd {
+      display: flex;
+      flex-direction: column;
+      gap: 1cqh;
+      margin-top: 1.6cqh;
+    }
+
+    :global(.is-3d) .about-facts__value {
+      font-family: var(--font-display);
+      font-size: 3.8cqh;
+      font-weight: 600;
+      line-height: 1.15;
+      color: var(--color-text);
+      text-wrap: balance;
+    }
+
+    :global(.is-3d) .about-facts__detail {
+      font-size: 2.8cqh;
+      line-height: 1.4;
+      color: var(--color-text-muted);
+      text-wrap: pretty;
     }
 
     /* Spec sheet: education as a headline, the stack as ruled rows of plain text instead of bullets. */

@@ -21,7 +21,8 @@
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    html:not([data-motion='paused']) {
+    /* Not on the 3D stage: GSAP drives smooth scrolls there, and CSS smoothing makes ScrollTo auto-kill itself. */
+    html:not([data-motion='paused']):not(.is-3d) {
       scroll-behavior: smooth;
     }
   }

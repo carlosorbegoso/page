@@ -109,7 +109,7 @@ export class DeskSet implements ShotProvider {
     this.room.add(this.clockWiring.group);
     this.weather.addSteam(this.room, context.tier, this.disposables);
     addContactShadows(this.room, this.disposables);
-    this.pickSet.build(this.room, this.phoneSurface(), this.disposables);
+    this.pickSet.build(this.room, this.phoneSurface(), this.disposables, this.life?.cardTargets());
     this.lights = new LightRig(this.lightRig, high);
     this.weather.addBeam(this.room, this.lights.lamp.position, high, this.disposables);
     if (high) this.enableShadows();

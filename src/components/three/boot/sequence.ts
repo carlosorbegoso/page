@@ -31,7 +31,7 @@ const AUTOMATED = /bot|crawl|spider|slurp|lighthouse|headless/i;
 
 export function warmVisit(): boolean {
   try {
-    return sessionStorage.getItem(WARM_KEY) === '1';
+    return localStorage.getItem(WARM_KEY) === '1';
   } catch {
     return false;
   }
@@ -39,7 +39,7 @@ export function warmVisit(): boolean {
 
 function rememberWarm(): void {
   try {
-    sessionStorage.setItem(WARM_KEY, '1');
+    localStorage.setItem(WARM_KEY, '1');
   } catch {
     return;
   }
@@ -149,17 +149,27 @@ export class BootSequence {
     if (this.tag) this.tag.textContent = 'GET /carlos';
     this.aimAt(detail.monitor ?? null);
     this.nodes.forEach(node => node.setAttribute('data-lit', ''));
-    const cues = this.still() ? STILL_EXIT : elapsed < FAST_LOAD_MS ? FAST_EXIT : NORMAL_EXIT;
-    this.play(cues);
+    const still = this.still();
+    this.root.toggleAttribute('data-still', still);
+    this.play(still ? STILL_EXIT : elapsed < FAST_LOAD_MS ? FAST_EXIT : NORMAL_EXIT);
+  }
+
+  private markOrigin(): Point {
+    const box = this.response?.getBoundingClientRect();
+    if (!box?.width) return { x: innerWidth / 2, y: innerHeight / 2 };
+    return { x: box.left + box.width / 2, y: box.top + box.height / 2 };
   }
 
   private aimAt(monitor: Point | null): void {
-    const target = monitor ?? { x: innerWidth / 2, y: innerHeight / 2 };
+    const origin = this.markOrigin();
+    const target = monitor ?? origin;
     const style = this.root.style;
     style.setProperty('--boot-x', `${target.x}px`);
     style.setProperty('--boot-y', `${target.y}px`);
-    style.setProperty('--boot-dx', `${target.x - innerWidth / 2}px`);
-    style.setProperty('--boot-dy', `${target.y - innerHeight / 2}px`);
+    style.setProperty('--boot-mx', `${origin.x}px`);
+    style.setProperty('--boot-my', `${origin.y}px`);
+    style.setProperty('--boot-dx', `${target.x - origin.x}px`);
+    style.setProperty('--boot-dy', `${target.y - origin.y}px`);
   }
 
   private play(cues: readonly Cue[]): void {

@@ -10,8 +10,8 @@ const FULL_LAMP = 28;
 /** Emission of the frosted diffuser at full power: clears the bloom threshold so the bulb blooms softly. */
 const BULB_EMISSION = 4.2;
 /** Warm bounce from the bulb onto what sits around it (figures, clock, monitor glass), in cd per lamp cd. */
-const BULB_SPILL = 0.07;
-const SPILL_RANGE = 1.6;
+const BULB_SPILL = 0.01;
+const SPILL_RANGE = 0.9;
 
 function haloTexture(): CanvasTexture {
   const canvas = document.createElement('canvas');

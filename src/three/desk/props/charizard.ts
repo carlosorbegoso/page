@@ -5,15 +5,33 @@ import { between, seg, UP } from './geometry';
 import type { Quality } from './palette';
 
 const VINYL = { roughness: 0.42, metalness: 0 } as const;
+/** Moving parts for `life/pokemon`, found by colour (each a hair off its neighbour) and the pivots they turn on. */
+export const CHARIZARD_RIG = {
+  wing: new Color('#e2722c'),
+  membrane: new Color('#2f7d88'),
+  bone: new Color('#e0702e'),
+  claw: new Color('#efe2c7'),
+  tail: new Color('#e47028'),
+  flame: new Color('#ff8a24'),
+  core: new Color('#ffd36a'),
+  wingRoot: (side: number) => new Vector3(side * 0.007, 0.05, -0.012),
+  tailRootAt: new Vector3(0, 0.014, -0.012),
+  tailTip: new Vector3(0.033, 0.021, -0.025)
+} as const;
+
 const FINISH = {
   orange: { color: new Color('#e2702a'), ...VINYL },
+  wing: { color: CHARIZARD_RIG.wing, ...VINYL },
+  bone: { color: CHARIZARD_RIG.bone, ...VINYL },
+  claw: { color: CHARIZARD_RIG.claw, ...VINYL },
+  tail: { color: CHARIZARD_RIG.tail, ...VINYL },
   cream: { color: new Color('#f0d39a'), ...VINYL },
-  membrane: { color: new Color('#2f7d88'), ...VINYL },
+  membrane: { color: CHARIZARD_RIG.membrane, roughness: 0.55, metalness: 0 },
   horn: { color: new Color('#efe2c4'), ...VINYL },
   black: { color: new Color('#141210'), roughness: 0.3, metalness: 0 },
   white: { color: new Color('#f7f4ee'), roughness: 0.25, metalness: 0 },
-  flame: { color: new Color('#ff8a24'), roughness: 0.5, metalness: 0, emissive: 1.6 },
-  core: { color: new Color('#ffd36a'), roughness: 0.5, metalness: 0, emissive: 2.2 }
+  flame: { color: CHARIZARD_RIG.flame, roughness: 0.5, metalness: 0, emissive: 1.8 },
+  core: { color: CHARIZARD_RIG.core, roughness: 0.5, metalness: 0, emissive: 2.4 }
 } satisfies Record<string, Finish>;
 
 type Place = (position: Vector3, rotation?: Quaternion, scale?: Vector3) => Matrix4;
@@ -53,58 +71,62 @@ function buildHead(b: PartBuilder, q: Quality, place: Place): void {
   }
 }
 
-/** Bat wing: a leading edge rising to a tip and a scalloped trailing edge, x outwards, y up. */
-function wingShape(): Shape {
-  const points = [
-    [0, 0],
-    [0.012, 0.014],
-    [0.036, 0.044],
-    [0.031, 0.027],
-    [0.025, 0.025],
-    [0.021, 0.016],
-    [0.014, 0.014],
-    [0.009, 0.005]
-  ];
+/** Bat wing, x outwards and y up: the bone rises to the tip, the membrane scallops back down to the root. */
+const WING_OUTLINE = [
+  [0, 0],
+  [0.013, 0.031],
+  [0.033, 0.052],
+  [0.044, 0.031],
+  [0.036, 0.027],
+  [0.039, 0.013],
+  [0.027, 0.012],
+  [0.024, 0.001],
+  [0.011, 0.003]
+] as const;
+
+function wingShape(inset = 0): Shape {
   const shape = new Shape();
-  shape.moveTo(points[0]![0]!, points[0]![1]!);
-  for (const [x, y] of points.slice(1)) shape.lineTo(x!, y!);
+  const centre = new Vector3(0.024, 0.022, 0);
+  const points = WING_OUTLINE.map(([x, y]) => new Vector3(x, y, 0).lerp(centre, inset));
+  shape.moveTo(points[0]!.x, points[0]!.y);
+  for (const point of points.slice(1)) shape.lineTo(point.x, point.y);
   shape.closePath();
   return shape;
 }
 
-function buildWings(b: PartBuilder, place: Place): void {
-  const shape = wingShape();
+function buildWings(b: PartBuilder, q: Quality, place: Place): void {
+  const bonePath = [new Vector3(0, 0, 0.0004), new Vector3(0.013, 0.031, 0.0004), new Vector3(0.033, 0.052, 0.0004)];
   for (const side of [-1, 1]) {
-    const sweep = new Quaternion().setFromAxisAngle(UP, side * 0.55).multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -0.25));
-    const root = new Vector3(side * 0.007, 0.05, -0.012);
+    const sweep = new Quaternion().setFromAxisAngle(UP, side * 0.42).multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -0.22));
+    const root = CHARIZARD_RIG.wingRoot(side);
     const mirror = new Vector3(side, 1, 1);
-    b.add(new ExtrudeGeometry(shape, { depth: 0.0012, bevelEnabled: false }).translate(0, 0, -0.0012), FINISH.orange, place(root, sweep, mirror));
-    const inner = new ExtrudeGeometry(shape, { depth: 0.0004, bevelEnabled: false }).scale(0.9, 0.9, 1).translate(0.0025, 0.0018, 0);
-    b.add(inner, FINISH.membrane, place(root, sweep, mirror));
+    b.add(new ExtrudeGeometry(wingShape(), { depth: 0.0012, bevelEnabled: false }).translate(0, 0, -0.0012), FINISH.wing, place(root, sweep, mirror));
+    b.add(new ExtrudeGeometry(wingShape(0.12), { depth: 0.0004, bevelEnabled: false }), FINISH.membrane, place(root, sweep, mirror));
+    b.add(new TubeGeometry(new CatmullRomCurve3(bonePath), seg(12, q, 6), 0.0013, 6, false), FINISH.bone, place(root, sweep, mirror));
+    b.add(new ConeGeometry(0.0011, 0.004, 6), FINISH.claw, place(root, sweep, mirror).multiply(new Matrix4().makeTranslation(0.0345, 0.0545, 0.0004)));
   }
 }
 
 function buildTail(b: PartBuilder, q: Quality, place: Place): void {
-  const path = [
-    new Vector3(0, 0.014, -0.012),
-    new Vector3(0.008, 0.008, -0.028),
-    new Vector3(0.024, 0.011, -0.034),
-    new Vector3(0.033, 0.021, -0.025)
-  ];
-  b.add(new TubeGeometry(new CatmullRomCurve3(path), seg(24, q, 12), 0.0036, seg(10, q, 6), false), FINISH.orange, place(new Vector3()));
-  const tip = path[path.length - 1]!;
-  b.add(ball(q, 0.0036), FINISH.orange, place(tip));
-  b.add(new ConeGeometry(0.0048, 0.016, seg(12, q, 8)), FINISH.flame, place(tip.clone().add(new Vector3(0, 0.0085, 0))));
-  b.add(ball(q, 0.0032).scale(1, 1.5, 1), FINISH.core, place(tip.clone().add(new Vector3(0, 0.0055, 0.0016))));
+  const tip = CHARIZARD_RIG.tailTip;
+  const path = [CHARIZARD_RIG.tailRootAt, new Vector3(0.008, 0.008, -0.028), new Vector3(0.024, 0.011, -0.034), tip];
+  b.add(new TubeGeometry(new CatmullRomCurve3(path), seg(24, q, 12), 0.0036, seg(10, q, 6), false), FINISH.tail, place(new Vector3()));
+  b.add(ball(q, 0.0036), FINISH.tail, place(tip));
+  b.add(new ConeGeometry(0.0062, 0.022, seg(14, q, 8)), FINISH.flame, place(tip.clone().add(new Vector3(0, 0.0115, 0))));
+  b.add(ball(q, 0.0042).scale(1, 1.7, 1), FINISH.core, place(tip.clone().add(new Vector3(0, 0.007, 0.0012))));
+}
+
+export function charizardFrame(): Matrix4 {
+  return new Matrix4().compose(CHARIZARD.base, new Quaternion().setFromAxisAngle(UP, CHARIZARD.yaw), new Vector3(1, 1, 1));
 }
 
 /** Carlos's Charizard vinyl figure (about 10 cm) on the monitor stand, left of the column; its tail flame glows. */
 export function buildCharizard(b: PartBuilder, q: Quality): void {
-  const frame = new Matrix4().compose(CHARIZARD.base, new Quaternion().setFromAxisAngle(UP, CHARIZARD.yaw), new Vector3(1, 1, 1));
+  const frame = charizardFrame();
   const place: Place = (position, rotation = new Quaternion(), scale = new Vector3(1, 1, 1)) =>
     new Matrix4().multiplyMatrices(frame, new Matrix4().compose(position, rotation, scale));
   buildTorso(b, q, place);
   buildHead(b, q, place);
-  buildWings(b, place);
+  buildWings(b, q, place);
   buildTail(b, q, place);
 }

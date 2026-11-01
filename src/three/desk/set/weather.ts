@@ -8,6 +8,8 @@ import type { DeskLife } from '../life';
 import type { LightLevels } from './levels';
 
 type Disposables = Array<{ dispose(): void }>;
+/** An additive shaft vanishes against a daylit room: by day it is drawn denser so a lit lamp still shows its cone. */
+const DAY_BEAM_GAIN = 2.5;
 
 function steamStrength(chapter: ChapterId): number {
   if (chapter === 'contact') return 0.9;
@@ -62,7 +64,7 @@ export class DeskWeather {
     this.backdrop.setDay(level.day);
     this.glass.setDay(level.day);
     this.glass.setLampReflection(Math.min(level.lamp / 28, 1));
-    this.beam.setLevel(Math.min(level.lamp / 28, 1.2));
+    this.beam.setLevel(Math.min(level.lamp / 28, 1.2) * (1 + DAY_BEAM_GAIN * level.day));
     this.beam.setPixelScale(canvasHeight, fov);
     this.steam?.setStrength(steamStrength(chapter) * (life?.steamGain() ?? 1), level.day);
   }

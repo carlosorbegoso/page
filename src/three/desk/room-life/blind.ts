@@ -8,7 +8,7 @@ const ROLL_RADIUS = 0.016;
 const TOP = WINDOW.y + WINDOW.height / 2 - ROLL_RADIUS - 0.004;
 const DROP = WINDOW.height - 0.028;
 const WIDTH = WINDOW.width - 0.02;
-const LINEN = '#d9cfbd';
+const LINEN = '#a99e8b';
 /** Light the fabric lets through (it glows like linen against the sky): faint city at night, bright by day. */
 const NIGHT_GLOW = new Color('#3a4258');
 const DAY_GLOW = new Color('#fff3e0');
@@ -75,7 +75,7 @@ export class RollerBlind {
     this.fabric.visible = blind > 0.002;
     this.hem.position.y = -length - 0.006;
     this.fabricMaterial.emissive.copy(NIGHT_GLOW).lerp(DAY_GLOW, day);
-    this.fabricMaterial.emissiveIntensity = 0.25 + 0.55 * day;
+    this.fabricMaterial.emissiveIntensity = 0.08 + 0.3 * day;
   }
 
   dispose(): void {

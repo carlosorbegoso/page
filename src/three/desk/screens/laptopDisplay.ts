@@ -29,8 +29,9 @@ export class LaptopDisplay {
   private readonly scale: number;
   private readonly editor = new LaptopEditor();
   private readonly dashboard = new LaptopDashboard();
-  private readonly codePane: PaneRect = { x: 0, y: MENU_HEIGHT, width: Math.round(WIDTH * 0.6), height: HEIGHT - MENU_HEIGHT };
-  private readonly terminalPane: PaneRect = { x: Math.round(WIDTH * 0.6) + 2, y: MENU_HEIGHT, width: WIDTH - Math.round(WIDTH * 0.6) - 2, height: HEIGHT - MENU_HEIGHT };
+  /** The editor takes the right side: the hero shot crops the laptop's left edge, and typed text must stay in view. */
+  private readonly codePane: PaneRect = { x: WIDTH - Math.round(WIDTH * 0.6), y: MENU_HEIGHT, width: Math.round(WIDTH * 0.6), height: HEIGHT - MENU_HEIGHT };
+  private readonly terminalPane: PaneRect = { x: 0, y: MENU_HEIGHT, width: WIDTH - Math.round(WIDTH * 0.6) - 2, height: HEIGHT - MENU_HEIGHT };
   private readonly boardPane: PaneRect = { x: 0, y: MENU_HEIGHT, width: WIDTH, height: HEIGHT - MENU_HEIGHT };
   private readonly charWidth: number;
   private typedAt = -100;

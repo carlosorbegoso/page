@@ -41,6 +41,8 @@ export class DeskLaptop {
   private readonly viewProjection = new Matrix4();
   private readonly frameInterval: number;
   private readonly stopTyping: () => void;
+  /** True while the lid is moving, so the lamp's shadow map needs a new render. */
+  swinging = false;
   private picture: LaptopPicture | null = null;
   private drawnAt = -Infinity;
   private wokeAt = -Infinity;
@@ -88,6 +90,7 @@ export class DeskLaptop {
     this.time = frame.time;
     this.motion = frame.motion;
     const swinging = this.lid.update(frame.step);
+    this.swinging = swinging;
     const typing = this.keycaps.update(frame.time);
     this.visible = this.inFrame();
     const picture = this.pictureFor(frame, standby);

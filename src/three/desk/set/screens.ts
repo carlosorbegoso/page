@@ -31,9 +31,11 @@ export class DeskScreens {
   private readonly laptop: DeskLaptop;
   private phoneNotified = false;
   private laptopHover = 0;
+  private readonly context: StationContext;
 
   constructor(context: StationContext, options: ScreensOptions) {
     const { room, phone, disposables } = options;
+    this.context = context;
     const screenTexture = createScreenTexture();
     drawScreen(screenTexture, MONITOR.screen.width / MONITOR.screen.height, tokenColor('--color-monitor-glow', '#7fb8ff'));
     this.monitor = new MonitorGlass(room, screenTexture, options.material.envMap);
@@ -78,7 +80,9 @@ export class DeskScreens {
       drawPhone(this.phoneTexture, notify, tokenColor('--color-accent', '#5aa9ff'));
     }
     this.monitor.update(frame.time, frame.motion);
-    return this.laptop.update(frame, frame.chapter === 'outro');
+    const moving = this.laptop.update(frame, frame.chapter === 'outro');
+    if (this.laptop.swinging && this.context.tier === 'high') this.context.renderer.shadowMap.needsUpdate = true;
+    return moving;
   }
 
   apply(level: LightLevels): void {

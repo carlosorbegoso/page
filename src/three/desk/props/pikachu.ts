@@ -1,12 +1,30 @@
-import { CapsuleGeometry, Color, ConeGeometry, ExtrudeGeometry, Matrix4, Quaternion, Shape, SphereGeometry, Vector3 } from 'three';
+import { CapsuleGeometry, Color, ConeGeometry, ExtrudeGeometry, Matrix4, Quaternion, Shape, SphereGeometry, TorusGeometry, Vector3 } from 'three';
 import { PartBuilder, type Finish } from '../builder';
 import { PIKACHU } from '../layout';
 import { seg, UP } from './geometry';
 import type { Quality } from './palette';
 
 const VINYL = { roughness: 0.42, metalness: 0 } as const;
+/**
+ * The ears and the tail move (`life/pokemon`), which finds their triangles by these colours: each is
+ * a hair off the body's so the eye cannot tell, but `sameColor` can.
+ */
+export const PIKACHU_RIG = {
+  ear: new Color('#f2c432'),
+  earTip: new Color('#141214'),
+  tail: new Color('#f2c034'),
+  tailRoot: new Color('#7a4a22'),
+  earRoot: (side: number) => new Vector3(side * 0.011, 0.064, -0.001),
+  tailRootAt: new Vector3(0.004, 0.006, -0.017),
+  cheek: (side: number) => new Vector3(side * 0.0138, 0.0478, 0.016)
+} as const;
+
 const FINISH = {
   yellow: { color: new Color('#f2c22e'), ...VINYL },
+  ear: { color: PIKACHU_RIG.ear, ...VINYL },
+  earTip: { color: PIKACHU_RIG.earTip, roughness: 0.3, metalness: 0 },
+  tail: { color: PIKACHU_RIG.tail, ...VINYL },
+  tailRoot: { color: PIKACHU_RIG.tailRoot, ...VINYL },
   black: { color: new Color('#141210'), roughness: 0.3, metalness: 0 },
   white: { color: new Color('#f7f4ee'), roughness: 0.25, metalness: 0 },
   cheek: { color: new Color('#d8432a'), ...VINYL },
@@ -43,17 +61,17 @@ function buildBodyAndHead(b: PartBuilder, q: Quality, place: Place): void {
 }
 
 function buildEars(b: PartBuilder, q: Quality, place: Place): void {
-  const length = 0.026;
-  const radius = 0.0056;
-  const tipLength = 0.009;
+  const length = 0.031;
+  const radius = 0.0062;
+  const tipLength = 0.011;
   for (const side of [-1, 1]) {
     const tilt = new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), -side * 0.42).multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -0.12));
     const axis = new Vector3(0, 1, 0).applyQuaternion(tilt);
-    const root = new Vector3(side * 0.011, 0.064, -0.001);
+    const root = PIKACHU_RIG.earRoot(side);
     const flat = new Vector3(1, 1, 0.6);
-    b.add(new ConeGeometry(radius, length, seg(16, q, 8)), FINISH.yellow, place(root.clone().addScaledVector(axis, length / 2), tilt, flat));
+    b.add(new ConeGeometry(radius, length, seg(16, q, 8)), FINISH.ear, place(root.clone().addScaledVector(axis, length / 2), tilt, flat));
     const tipRadius = radius * (tipLength / length) * 1.12;
-    b.add(new ConeGeometry(tipRadius, tipLength, seg(16, q, 8)), FINISH.black, place(root.clone().addScaledVector(axis, length - tipLength / 2 + 0.0002), tilt, flat));
+    b.add(new ConeGeometry(tipRadius, tipLength, seg(16, q, 8)), FINISH.earTip, place(root.clone().addScaledVector(axis, length - tipLength / 2 + 0.0002), tilt, flat));
   }
 }
 
@@ -61,16 +79,19 @@ function buildFace(b: PartBuilder, q: Quality, place: Place): void {
   const dot = (r: number, depth: number) => new SphereGeometry(r, seg(14, q, 8), seg(10, q, 6)).scale(1, 1, depth);
   for (const side of [-1, 1]) {
     const eye = onHead(side * 0.0075, 0.0555);
-    b.add(dot(0.0031, 0.45), FINISH.black, place(eye.position, eye.facing));
-    const shine = onHead(side * 0.0075 + 0.0009, 0.0568, 0.0012);
-    b.add(dot(0.001, 0.5), FINISH.white, place(shine.position, shine.facing));
+    b.add(dot(0.0034, 0.45), FINISH.black, place(eye.position, eye.facing));
+    const shine = onHead(side * 0.0075 + 0.001, 0.057, 0.0013);
+    b.add(dot(0.0012, 0.5), FINISH.white, place(shine.position, shine.facing));
     const cheek = onHead(side * 0.0138, 0.0478);
     b.add(dot(0.0041, 0.3), FINISH.cheek, place(cheek.position, cheek.facing));
   }
   const nose = onHead(0, 0.0515);
   b.add(dot(0.0008, 0.6), FINISH.black, place(nose.position, nose.facing));
-  const mouth = onHead(0, 0.0472);
-  b.add(dot(0.0017, 0.35).scale(1.3, 0.8, 1), FINISH.mouth, place(mouth.position, mouth.facing));
+  for (const side of [-1, 1]) {
+    const smile = onHead(side * 0.0016, 0.0482, 0.0002);
+    const arc = new TorusGeometry(0.0016, 0.00042, 4, seg(10, q, 6), Math.PI).rotateZ(Math.PI);
+    b.add(arc, FINISH.mouth, place(smile.position, smile.facing));
+  }
 }
 
 /** Zigzag lightning tail, drawn in its own plane: x runs backwards from the root, y up. */
@@ -100,14 +121,18 @@ function tailGeometry(): ExtrudeGeometry {
 
 function buildTail(b: PartBuilder, place: Place): void {
   const turn = new Quaternion().setFromAxisAngle(UP, 0.55);
-  const root = new Vector3(0.004, 0.006, -0.017);
-  b.add(tailGeometry(), FINISH.yellow, place(root, turn));
-  b.add(new SphereGeometry(0.003, 8, 6), FINISH.brown, place(root.clone().add(new Vector3(0, 0.002, 0)), turn, new Vector3(0.8, 1, 1.4)));
+  const root = PIKACHU_RIG.tailRootAt;
+  b.add(tailGeometry(), FINISH.tail, place(root, turn));
+  b.add(new SphereGeometry(0.003, 8, 6), FINISH.tailRoot, place(root.clone().add(new Vector3(0, 0.002, 0)), turn, new Vector3(0.8, 1, 1.4)));
 }
 
-/** Carlos's Pikachu vinyl figure (about 8 cm with the ears) sitting on the monitor stand, where most desks keep a rubber duck. */
+export function pikachuFrame(): Matrix4 {
+  return new Matrix4().compose(PIKACHU.base, new Quaternion().setFromAxisAngle(UP, PIKACHU.yaw), new Vector3(1, 1, 1));
+}
+
+/** Carlos's Pikachu vinyl figure (about 8 cm with the ears) on the monitor stand, where most desks keep a rubber duck. */
 export function buildPikachu(b: PartBuilder, q: Quality): void {
-  const frame = new Matrix4().compose(PIKACHU.base, new Quaternion().setFromAxisAngle(UP, PIKACHU.yaw), new Vector3(1, 1, 1));
+  const frame = pikachuFrame();
   const place: Place = (position, rotation = new Quaternion(), scale = new Vector3(1, 1, 1)) =>
     new Matrix4().multiplyMatrices(frame, new Matrix4().compose(position, rotation, scale));
   buildBodyAndHead(b, q, place);

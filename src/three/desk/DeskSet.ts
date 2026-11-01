@@ -1,13 +1,13 @@
 import { Group, PCFShadowMap, Vector3, type Matrix4, type Mesh, type MeshBasicMaterial, type Object3D } from 'three';
 import type { ChapterId, ChapterState, PlateAnchor, Shot, ShotProvider, StationContext, StationPick, SurfaceName } from '../contracts';
-import { createSpineLabels } from './spines';
-import { FolderDetail } from './folderDetail';
-import { DeskLife, type LifeToy } from './life';
+import type { DeskLife } from './life';
 import { PHONE } from './layout';
 import type { AtlasUniforms } from './materials';
-import { readPalette, type Palette } from './props';
+import { readPalette } from './props';
 import { SUB_SHOTS, phoneFrame, type SurfaceFrame } from './shots';
+import { createActionListener } from './set/actions';
 import { ClockWiring } from './set/clock-wiring';
+import { addDeskLife, addFolderDetail, addSpines } from './set/extras';
 import { DeskFigures } from './set/figures';
 import { DeskFolders } from './set/folders';
 import type { DeskFrame } from './set/frame';
@@ -15,13 +15,12 @@ import { DeskFraming } from './set/framing';
 import { DeskLevels } from './set/levels';
 import { LightRig } from './set/lighting';
 import { DeskPicks } from './set/picks';
-import { addContactShadows, buildRoomMeshes, type RoomMeshes } from './set/room';
+import { addContactShadows, buildRoomMeshes } from './set/room';
 import { DeskScreens } from './set/screens';
 import { focusedFigure, shotObject, storyRank } from './set/story';
 import { DeskWeather } from './set/weather';
 import { RoomLife } from './room-life';
 
-const LIFE_TOYS: readonly string[] = ['alfa', 'skymek', 'parati', 'ventixs', 'mug'];
 /** Chapters where Alfa is on screen and its head follows the pointer. */
 const ALFA_LOOKS: readonly ChapterId[] = ['company', 'products'];
 
@@ -58,30 +57,15 @@ export class DeskSet implements ShotProvider {
   private shadowPose = '';
   private clock = 0;
   private readonly coarsePointer = matchMedia('(pointer: coarse)');
-  private readonly onAction = (event: Event) => {
-    const detail = (event as CustomEvent<{ action?: string; id?: string }>).detail;
-    if (detail?.action === 'play' && detail.id && LIFE_TOYS.includes(detail.id)) {
-      this.life?.play(detail.id as LifeToy, this.clock, Boolean(this.context?.motion()) && !this.context?.capture);
-      this.context?.invalidate();
-      return;
-    }
-    if (detail?.action === 'folder' || detail?.action === 'folder-close') {
-      this.onFolderAction(detail.action, detail.id);
-      return;
-    }
-    if (detail?.action === 'laptop') {
-      this.screens.toggleLaptop(this.clock);
-      return;
-    }
-    if (this.roomLife?.action(detail?.action)) {
-      this.context?.invalidate();
-      return;
-    }
-    if (detail?.action !== 'lamp') return;
-    const on = this.levels.toggleLamp(this.clock);
-    window.dispatchEvent(new CustomEvent('desk:switch', { detail: { on } }));
-    this.context?.invalidate();
-  };
+  private readonly onAction = createActionListener({
+    clock: () => this.clock,
+    context: () => this.context,
+    life: () => this.life,
+    roomLife: () => this.roomLife,
+    screens: () => this.screens,
+    levels: this.levels,
+    folderAction: (action, id) => this.onFolderAction(action, id)
+  });
   private readonly onInteract = (event: Event) => {
     const detail = (event as CustomEvent<{ id?: string; phase?: string }>).detail;
     if (detail?.phase !== 'activate' || !detail.id) return;
@@ -108,14 +92,15 @@ export class DeskSet implements ShotProvider {
     this.figures.setPivots(meshes.uniforms);
     this.phoneMatrix = meshes.phoneMatrix;
     this.triangles = meshes.triangles;
-    this.addLife(meshes, palette, high);
+    this.life = addDeskLife(this.room, meshes, palette, high, this.disposables);
     this.roomLife = new RoomLife(context, this.levels);
     this.roomLife.build(this.room, { material: meshes.material, depthMaterial: meshes.depthMaterial, palette });
     this.disposables.push(this.roomLife);
-    this.addFolderDetail(meshes, palette, high);
+    this.folders.detail = addFolderDetail(this.room, context, meshes, palette, this.disposables);
+    window.addEventListener('keydown', this.onFolderKey);
     this.screens = new DeskScreens(context, { room: this.room, phone: this.phoneSurface(), material: meshes.material, depthMaterial: meshes.depthMaterial, disposables: this.disposables });
     this.weather.addWindow(this.room, this.disposables);
-    this.addSpines();
+    addSpines(this.room, this.folders, this.disposables);
     window.addEventListener('desk:action', this.onAction);
     window.addEventListener('desk:interact', this.onInteract);
     this.clockWiring = new ClockWiring(context);
@@ -128,37 +113,6 @@ export class DeskSet implements ShotProvider {
     if (high) this.enableShadows();
     this.applyLevels();
     context.invalidate();
-  }
-
-  private addLife(meshes: RoomMeshes, palette: Palette, high: boolean): void {
-    const { material, depthMaterial } = meshes;
-    this.life = new DeskLife({ geometry: meshes.figures.build(), workstation: meshes.workstation.build(), material, depthMaterial, shadows: high, palette });
-    this.room.add(this.life.object3D);
-    this.disposables.push(this.life);
-  }
-
-  private addFolderDetail(meshes: RoomMeshes, palette: Palette, high: boolean): void {
-    const context = this.context;
-    const detail = new FolderDetail({
-      material: meshes.material,
-      depthMaterial: meshes.depthMaterial,
-      shadows: high,
-      palette,
-      renderer: context.renderer,
-      onRedraw: () => context.invalidate()
-    });
-    this.folders.detail = detail;
-    void context.precompile?.(detail.object3D);
-    this.room.add(detail.object3D);
-    this.disposables.push(detail);
-    window.addEventListener('keydown', this.onFolderKey);
-  }
-
-  private addSpines(): void {
-    const spines = createSpineLabels();
-    this.room.add(...spines.meshes.values(), spines.cover);
-    this.folders.attachSpines(spines.meshes, spines.cover);
-    this.disposables.push(spines);
   }
 
   private enableShadows(): void {

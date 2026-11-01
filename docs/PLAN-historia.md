@@ -87,3 +87,43 @@ Regla de oro del movimiento: **la cámara se mueve, o se mueve un objeto, o entr
 7. ¿Qué buscas hoy: un puesto, socios o clientes? Eso decide el botón principal del hero.
 8. ¿«Más de 5 años» o «casi 7»? En total son casi 7; en backend, unos 4,5.
 9. Cifras del hero: ¿cambiamos «Monolito → CQRS» por «3 productos en producción»?
+
+## Estado (2026-11-01)
+Hecho, en commits locales sobre `develop`:
+- **F1:**
+  - orden de la historia;
+  - plano de la estantería;
+  - experiencia cronológica (inversa en el modo lectura);
+  - Tab en orden de capítulos.
+- **F2:**
+  - títulos de acto «De día» y «De noche»;
+  - año en grande en cada trabajo;
+  - paneles del tamaño de un caption;
+  - productos como cartela;
+  - reloj de la historia en el HUD.
+- **F3:**
+  - luz fría en los años de día;
+  - la lámpara hace *click* al llegar a TUSOCIO IA y se apaga al amanecer (`LAMP_SWITCH`);
+  - las ventanas de la ciudad se apagan (`uLate`);
+  - el grade cálido espera a la lámpara (`delay`).
+- **F4:**
+  - las figuras esperan apagadas y se encienden como un neón (`uPresence`);
+  - etiquetas legibles en los lomos (`spines.ts`);
+  - la carpeta del capítulo sale del estante (`uPull`);
+  - la carpeta TCS se abre al llegar a hoy (`uHinge`).
+- **Interacción:**
+  - hover: las carpetas salen y las figuras se levantan;
+  - clic en la lámpara para apagarla o encenderla (`desk:action`, `desk:switch`).
+- **F5:**
+  - stack como `carlos.yml` en el monitor (horizontal);
+  - despertador CC0 de Poly Haven que marca la hora de la historia (`clock.ts`).
+- **Audio:** música CC0 por acto y muestras del interruptor y de la hoja (`music.ts`, créditos en `docs/audio.md`).
+
+Pendiente:
+- Badge «TCS · BCP» con lanyard.
+- Carné UPC y post-its de los cofundadores.
+- Texturas PBR de Poly Haven para el escritorio y la pared (ya descargadas en el scratchpad, sin integrar).
+- Medir FPS en dispositivos reales.
+- Actualizar `docs/3d/desk.md` y `docs/3d/fx.md`.
+- Respuestas de Carlos a las preguntas.
+- Decidir un «modo día».

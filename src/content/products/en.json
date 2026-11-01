@@ -1,0 +1,41 @@
+{
+  "entries": [
+    {
+      "id": "skymek",
+      "name": "SkyMek",
+      "url": "https://skymek.app",
+      "status": "production",
+      "role": "Co-founder & owner",
+      "tagline": "Software for auto repair shops in Peru",
+      "description": "SkyMek runs an auto repair shop's day from booking to checkout, paper-free: work orders on a board, scheduling, mechanics, inventory and payments in one app. It's live, and I own it.",
+      "features": [
+        "Work orders on a board",
+        "Scheduling and appointments",
+        "Inventory and tools",
+        "Checkout and point of sale",
+        "Quotes and reports with your logo"
+      ],
+      "featured": true
+    },
+    {
+      "id": "parati",
+      "name": "Parati",
+      "url": "https://paratipe.com",
+      "status": "production",
+      "role": "Co-founder",
+      "tagline": "Digital invitations and gift registry",
+      "description": "Digital invitations with a gift registry: guests chip in via Yape, and creating an event is free.",
+      "features": []
+    },
+    {
+      "id": "ventixs",
+      "name": "Ventixs",
+      "url": "https://ventixs.com",
+      "status": "production",
+      "role": "Co-founder",
+      "tagline": "WhatsApp sales bot",
+      "description": "A bot that answers and sells on WhatsApp, where your customers already chat.",
+      "features": []
+    }
+  ]
+}

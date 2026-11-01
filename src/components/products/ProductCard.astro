@@ -1,0 +1,157 @@
+---
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import type { CollectionEntry } from 'astro:content';
+import Button from '../ui/Button.astro';
+import Tag from '../ui/Tag.astro';
+import KineticText from '../ui/KineticText.astro';
+import { useTranslations, withBase, type Locale } from '../../i18n/utils';
+
+type Product = CollectionEntry<'products'>['data']['entries'][number];
+
+interface Props {
+  product: Product;
+  locale: Locale;
+  order?: number;
+}
+
+const { product, locale, order } = Astro.props;
+const t = useTranslations(locale);
+const featured = product.featured === true;
+
+const dots: Record<Product['id'], string> = {
+  skymek: 'bg-skymek',
+  parati: 'bg-parati',
+  ventixs: 'bg-ventixs'
+};
+const dot = dots[product.id];
+
+const status =
+  product.status === 'production'
+    ? { tone: 'live' as const, label: t('products.status.production') }
+    : { tone: 'building' as const, label: t('products.status.building') };
+
+const plateId = `product-${product.id}`;
+const titleId = `${plateId}-title`;
+const hostname = new URL(product.url).hostname;
+
+/* Carlos drops the real capture into public/ later; until then the plate renders without it. */
+const screenshotPath = `images/${product.id}-screenshot.webp`;
+const screenshot =
+  featured && existsSync(join(process.cwd(), 'public', screenshotPath)) ? withBase(screenshotPath) : null;
+---
+
+<article
+  aria-labelledby={titleId}
+  class="plate p-(--plate-padding)"
+  data-plate
+  data-plate-id={plateId}
+  data-plate-mode="anchored"
+  data-plate-anchor={plateId}
+  data-plate-order={order}
+  data-plate-accent={product.id}
+  data-product={product.id}
+  data-featured={featured ? '' : undefined}
+>
+  <div class="product-body flex max-w-measure flex-col gap-4 md:gap-5">
+    <slot />
+
+    <header class="flex flex-col gap-2">
+      <Tag tone={status.tone} class="self-start">{status.label}</Tag>
+      <h3
+        id={titleId}
+        class:list={[
+          'flex items-center gap-3 font-display font-semibold tracking-display text-text',
+          featured ? 'plate-display text-4xl' : 'text-2xl'
+        ]}
+      >
+        <span class:list={['size-2.5 shrink-0 rounded-full', dot]} aria-hidden="true"></span>
+        <KineticText text={product.name} split="chars" />
+      </h3>
+      <p class:list={['font-medium text-text', featured ? 'text-lg' : 'text-base']}>{product.tagline}</p>
+    </header>
+
+    {
+      screenshot && (
+        <picture>
+          <source srcset={screenshot} type="image/webp" />
+          <img
+            src={screenshot}
+            alt={`${product.name}: ${product.tagline}`}
+            width="1280"
+            height="800"
+            loading="lazy"
+            decoding="async"
+            class="aspect-[16/10] w-full rounded-md object-cover object-top"
+          />
+        </picture>
+      )
+    }
+
+    <p class:list={['wide-only text-pretty text-text-muted', featured ? 'text-base' : 'text-sm']}>
+      {product.description}
+    </p>
+
+    {
+      product.features.length > 0 && (
+        <ul
+          class="product-features grid gap-x-6 gap-y-2 text-sm text-text-muted sm:grid-cols-2"
+          role="list"
+          data-kinetic-cascade
+        >
+          {product.features.map(feature => (
+            <li class="flex items-start gap-2.5">
+              <span class:list={['mt-[0.55em] size-1.5 shrink-0 rounded-full', dot]} aria-hidden="true" />
+              <span>{feature}</span>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6">
+      <Button
+        href={product.url}
+        external
+        variant={featured ? 'primary' : 'secondary'}
+        class="w-full sm:w-auto"
+      >
+        <span>{t('products.visit')}</span>
+        <span class="text-text-muted">{hostname}</span>
+        <svg
+          class="size-4 shrink-0"
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M6 3.5h6.5V10M12.5 3.5 4 12"></path>
+        </svg>
+      </Button>
+      <dl class="wide-only flex flex-wrap items-baseline gap-x-2 text-sm">
+        <dt class="text-xs font-semibold tracking-caps text-text-subtle uppercase">{t('products.role')}</dt>
+        <dd class="text-text">{product.role}</dd>
+      </dl>
+    </div>
+  </div>
+</article>
+
+<style>
+  /* On the stage each product is a museum label: status, name, what it is and the link. Features live in reading mode. */
+  :global(.is-3d) .product-features {
+    display: none;
+  }
+
+  @media (width < 48rem) {
+    :global(.is-3d) .wide-only {
+      display: none;
+    }
+
+    :global(.is-3d) .product-body {
+      gap: 0.75rem;
+    }
+  }
+</style>

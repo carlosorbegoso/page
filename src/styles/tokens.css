@@ -1,0 +1,359 @@
+/* Absolute /page/ URLs: the CSS is inlined into /page/ and /page/en/, so relative paths would resolve differently per locale. */
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url('/page/fonts/sora-latin-wght.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/page/fonts/inter-latin-wght.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Metric-matched fallbacks (computed from hhea + average advance vs Arial) so the swap does not shift layout. */
+@font-face {
+  font-family: 'Sora Fallback';
+  src: local('Arial'), local('ArialMT'), local('Helvetica Neue'), local('Roboto');
+  size-adjust: 113.79%;
+  ascent-override: 85.24%;
+  descent-override: 25.48%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial'), local('ArialMT'), local('Helvetica Neue'), local('Roboto');
+  size-adjust: 106.73%;
+  ascent-override: 90.76%;
+  descent-override: 22.6%;
+  line-gap-override: 0%;
+}
+
+/* static: the 3D stage reads several of these with getComputedStyle, and no utility class references them. */
+@theme static {
+  --color-*: initial;
+
+  --color-bg: #0a0e14;
+  --color-surface: #111723;
+  --color-surface-raised: #18202e;
+  --color-border: #243042;
+  --color-border-strong: #6a7b94;
+  --color-text: #e9eef5;
+  --color-text-muted: #9ba8bb;
+  --color-text-subtle: #7d8ba0;
+  --color-accent: #5aa9ff;
+  --color-accent-hover: #86c0ff;
+  --color-accent-soft: #10233a;
+  --color-on-accent: #04101f;
+  --color-focus: #8cc8ff;
+  --color-scrim: rgb(10 14 20 / 0.9);
+
+  --color-status-live: #4ade9a;
+  --color-status-building: #f5b94a;
+  --color-danger: #ff7a7a;
+
+  --color-skymek: #f0a43c;
+  --color-skymek-soft: #2a1e0e;
+  --color-parati: #f28ba0;
+  --color-parati-soft: #2c1820;
+  --color-ventixs: #3fcf8e;
+  --color-ventixs-soft: #0e2a1f;
+
+  --color-scene-bg: #0a0e14;
+  --color-alfa-body: #10131a;
+  --color-alfa-signal: #5aa9ff;
+  --color-alfa-ring: #b08a4a;
+  --color-burbu-body: #1f6e52;
+  --color-burbu-signal: #3fcf8e;
+  --color-gift-body: #2a3142;
+  --color-gift-ribbon: #f28ba0;
+  --color-tool-body: #8c97a8;
+  --color-tool-band: #f0a43c;
+
+  --color-sky-zenith: #04060b;
+  --color-sky-horizon: #0a0e14;
+
+  --color-desk-wall: #121722;
+  --color-desk-floor: #17140f;
+  --color-desk-wood: #5a3e2b;
+  --color-desk-metal: #2b313c;
+  --color-desk-fabric: #232a3a;
+  --color-desk-ceramic: #e6e0d4;
+  --color-desk-coffee: #2a1a10;
+  --color-desk-plant: #2f5a44;
+  --color-desk-pot: #8c5a44;
+  --color-desk-paper: #d8d2c4;
+  --color-window-frame: #1a1f29;
+  --color-window-glass: #0b1220;
+  --color-desk-brass: #b08a4a;
+  --color-folder-tcs: #33405a;
+  --color-folder-intercorp: #6b4a35;
+  --color-folder-baufest: #4a5847;
+  --color-folder-sysarp: #7e776a;
+  --color-phone-body: #15181e;
+  --color-phone-screen: #05070b;
+  --color-city-silhouette: #0d121b;
+  --color-city-sodium: #e8a25a;
+  --color-city-led: #8fb4e8;
+  --color-rain: #9db8e8;
+  --color-dawn-low: #e9a47a;
+  --color-dawn-high: #6f86ae;
+  --color-screen-bg: #0b0f16;
+  --color-telescope: #c9ced6;
+  --color-telescope-brass: #b08a4a;
+  --color-monitor-bezel: #0c0f14;
+  --color-monitor-glow: #7fb8ff;
+  --color-lamp: #ffb566;
+  --color-lamp-shade: #1d222b;
+  --color-moonlight: #9db8e8;
+
+  --color-plate-solid: #0b1019;
+  --color-plate-border: #2a3b57;
+  --color-plate-border-active: #3d5a85;
+  --color-plate-pool: rgb(4 6 11 / 0.85);
+  --color-plate-pool-edge: rgb(4 6 11 / 0.7);
+
+  /* Stub names kept as aliases: global.css and SkipLink (not owned by design) still use them. */
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-text);
+  --color-muted: var(--color-text-muted);
+
+  --font-display: 'Sora', 'Sora Fallback', ui-sans-serif, system-ui, sans-serif;
+  --font-sans:
+    'Inter', 'Inter Fallback', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --text-xs: clamp(0.75rem, 0.7292rem + 0.0926vw, 0.8125rem);
+  --text-xs--line-height: 1.5;
+  --text-sm: clamp(0.875rem, 0.8542rem + 0.0926vw, 0.9375rem);
+  --text-sm--line-height: 1.55;
+  --text-base: clamp(1rem, 0.9792rem + 0.0926vw, 1.0625rem);
+  --text-base--line-height: 1.65;
+  --text-lg: clamp(1.125rem, 1.0833rem + 0.1852vw, 1.25rem);
+  --text-lg--line-height: 1.6;
+  --text-xl: clamp(1.25rem, 1.1667rem + 0.3704vw, 1.5rem);
+  --text-xl--line-height: 1.4;
+  --text-2xl: clamp(1.5rem, 1.3333rem + 0.7407vw, 2rem);
+  --text-2xl--line-height: 1.25;
+  --text-3xl: clamp(1.875rem, 1.5833rem + 1.2963vw, 2.75rem);
+  --text-3xl--line-height: 1.15;
+  --text-4xl: clamp(2.25rem, 1.8333rem + 1.8519vw, 3.5rem);
+  --text-4xl--line-height: 1.08;
+  --text-5xl: clamp(2.5rem, 1.8333rem + 2.963vw, 4.5rem);
+  --text-5xl--line-height: 1.04;
+  --text-6xl: clamp(3rem, 2.0833rem + 4.0741vw, 5.75rem);
+  --text-6xl--line-height: 1;
+  --text-display: clamp(2.75rem, 1.5rem + 4.6875vw, 6rem);
+  --text-display--line-height: 1;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.6;
+  --text-meta: 0.8125rem;
+  --text-meta--line-height: 1.4;
+
+  --tracking-display: -0.03em;
+  --tracking-tight: -0.012em;
+  --tracking-normal: 0em;
+  --tracking-caps: 0.08em;
+
+  --leading-tight: 1.15;
+  --leading-snug: 1.35;
+  --leading-normal: 1.65;
+
+  --spacing: 0.25rem;
+  --spacing-gutter: clamp(1rem, 0.5rem + 2.2222vw, 2.5rem);
+  --spacing-stack: clamp(1.5rem, 1.1667rem + 1.4815vw, 2.5rem);
+  --spacing-section: clamp(4rem, 2.6667rem + 5.9259vw, 8rem);
+  --spacing-tap: 2.75rem;
+
+  --container-reading: 40rem;
+  --container-measure: 60ch;
+  --container-content: 72rem;
+  --container-wide: 80rem;
+
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-pill: 999px;
+
+  --shadow-sm: 0 1px 2px 0 var(--shadow-color);
+  --shadow-md: 0 6px 16px -6px var(--shadow-color);
+  --shadow-lg: 0 16px 40px -12px var(--shadow-color);
+  --shadow-focus: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-focus);
+
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+:root {
+  color-scheme: dark;
+
+  --shadow-color: rgb(0 0 0 / 0.55);
+  --scrim-opacity: 0.9;
+
+  --duration-instant: 80ms;
+  --duration-fast: 150ms;
+  --duration-base: 240ms;
+  --duration-slow: 400ms;
+  --duration-scene: 900ms;
+
+  --z-canvas: 0;
+  --z-content: 10;
+  --z-header: 40;
+  --z-sheet: 50;
+  --z-skip: 60;
+
+  --scene-tone-exposure: 1;
+  --alfa-roughness: 0.15;
+  --alfa-metalness: 0;
+  --alfa-signal-intensity: 1;
+  --burbu-roughness: 0.75;
+  --burbu-metalness: 0;
+  --burbu-signal-intensity: 0.8;
+  --gift-roughness: 0.4;
+  --gift-metalness: 0;
+  --gift-ribbon-roughness: 0.35;
+  --gift-ribbon-metalness: 0.05;
+  --tool-roughness: 0.38;
+  --tool-metalness: 1;
+  --tool-band-roughness: 0.4;
+  --tool-band-metalness: 0.6;
+  --alfa-ring-roughness: 0.3;
+  --alfa-ring-metalness: 1;
+
+  --plate-width: 36rem;
+  --plate-padding: clamp(1.25rem, 0.9rem + 1.6vw, 2rem);
+  --plate-radius: 1.25rem;
+  --plate-signal-width: 3rem;
+  --plate-signal-width-active: 6rem;
+  --plate-dormant-opacity: 0;
+  --plate-pool-inset: -35% -30%;
+  --plate-text-halo:
+    0 0 1px rgb(4 6 11 / 0.9), 0 0 6px rgb(4 6 11 / 0.85), 0 0 18px rgb(4 6 11 / 0.7);
+
+  --lamp-intensity: 28;
+  --lamp-angle: 0.62;
+  --lamp-penumbra: 0.75;
+  --monitor-intensity: 5;
+  --moonlight-intensity: 0.45;
+  --desk-ambient-intensity: 0.08;
+  --fx-bloom-strength: 0.32;
+  --fx-bloom-radius: 0.45;
+  --fx-bloom-threshold: 0.88;
+  --fx-grain: 0.035;
+  --fx-vignette-darkness: 0.5;
+  --fx-vignette-offset: 0.32;
+  --fx-chromatic-offset: 0;
+  --fx-dof-bokeh-scale: 2.5;
+  --fx-pointer-damping: 0.06;
+}
+
+@media (width < 48rem) {
+  :root {
+    --plate-width: min(92vw, 26rem);
+    --plate-radius: 1rem;
+  }
+}
+
+/* Light is opt-in and only for the flat fallback: the 3D desk is a night scene by definition, and the hero LCP image is captured dark (PLAN §3.4). */
+:root[data-theme='light']:not(.is-3d) {
+  color-scheme: light;
+
+  --color-bg: #f5f7fa;
+  --color-surface: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-border: #d9dfe8;
+  --color-border-strong: #7a8699;
+  --color-text: #0d1320;
+  --color-text-muted: #4a5568;
+  --color-text-subtle: #5f6b7e;
+  --color-accent: #0a55bd;
+  --color-accent-hover: #084298;
+  --color-accent-soft: #e6effc;
+  --color-on-accent: #ffffff;
+  --color-focus: #0a55bd;
+  --color-scrim: rgb(245 247 250 / 0.9);
+
+  --color-status-live: #0e7a45;
+  --color-status-building: #8f5a00;
+  --color-danger: #c21f1f;
+
+  --color-skymek: #9a5a00;
+  --color-skymek-soft: #fbf0e0;
+  --color-parati: #b4234a;
+  --color-parati-soft: #fce8ed;
+  --color-ventixs: #0e7a45;
+  --color-ventixs-soft: #e3f4ea;
+
+  --color-scene-bg: #f5f7fa;
+  --color-alfa-body: #3a4b66;
+  --color-alfa-signal: #2f86f0;
+  --color-burbu-body: #2a8a64;
+  --color-gift-body: #e3e7ee;
+  --color-gift-ribbon: #d1456a;
+  --color-tool-body: #9aa5b5;
+  --color-tool-band: #d98a1f;
+
+  --shadow-color: rgb(16 24 40 / 0.14);
+
+  --color-plate-solid: #ffffff;
+  --color-plate-border: #d9dfe8;
+  --color-plate-border-active: #7a8699;
+  --scene-tone-exposure: 0.9;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 0.01ms;
+    --duration-fast: 0.01ms;
+    --duration-base: 0.01ms;
+    --duration-slow: 0.01ms;
+    --duration-scene: 0.01ms;
+  }
+
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Same overrides behind the visible "pause animation" control (WCAG 2.2.2), which sets data-motion="paused" on <html>. */
+:root[data-motion='paused'] {
+  --duration-instant: 0.01ms;
+  --duration-fast: 0.01ms;
+  --duration-base: 0.01ms;
+  --duration-slow: 0.01ms;
+  --duration-scene: 0.01ms;
+}
+
+:root[data-motion='paused'] *,
+:root[data-motion='paused'] ::before,
+:root[data-motion='paused'] ::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}

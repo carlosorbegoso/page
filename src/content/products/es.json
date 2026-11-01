@@ -1,0 +1,41 @@
+{
+  "entries": [
+    {
+      "id": "skymek",
+      "name": "SkyMek",
+      "url": "https://skymek.app",
+      "status": "production",
+      "role": "Cofundador y dueño",
+      "tagline": "Software para talleres mecánicos en el Perú",
+      "description": "SkyMek ordena el día de un taller mecánico, de la cita a la caja y sin papeles: órdenes de trabajo en un tablero, agenda, mecánicos, inventario y caja en una sola app. Está en producción y soy su dueño.",
+      "features": [
+        "Órdenes de trabajo en un tablero",
+        "Agenda y citas",
+        "Inventario y herramientas",
+        "Caja y punto de venta",
+        "Cotizaciones y reportes con tu logo"
+      ],
+      "featured": true
+    },
+    {
+      "id": "parati",
+      "name": "Parati",
+      "url": "https://paratipe.com",
+      "status": "production",
+      "role": "Cofundador",
+      "tagline": "Invitaciones digitales y mesa de regalos",
+      "description": "Invitaciones digitales con mesa de regalos: tus invitados aportan por Yape y crear un evento es gratis.",
+      "features": []
+    },
+    {
+      "id": "ventixs",
+      "name": "Ventixs",
+      "url": "https://ventixs.com",
+      "status": "production",
+      "role": "Cofundador",
+      "tagline": "Bot de ventas por WhatsApp",
+      "description": "Un bot que atiende y vende por WhatsApp, el canal donde tus clientes ya conversan.",
+      "features": []
+    }
+  ]
+}

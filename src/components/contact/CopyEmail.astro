@@ -1,0 +1,90 @@
+---
+import Button from '../ui/Button.astro';
+import { useTranslations, type Locale } from '../../i18n/utils';
+
+interface Props {
+  locale: Locale;
+  email: string;
+  class?: string;
+}
+
+const { locale, email, class: className } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<div
+  class:list={['flex flex-col gap-2', className]}
+  data-copy-email={email}
+  data-copied={t('contact.copied')}
+  data-copy-error={t('contact.copyError')}
+>
+  <Button variant="secondary" size="lg" class="w-full" data-copy-trigger hidden>
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      aria-hidden="true"
+      class="shrink-0 fill-none stroke-current"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+      <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
+    </svg>
+    {t('contact.copyEmail')}
+  </Button>
+  <p class="min-h-[1lh] text-sm text-text-muted" aria-live="polite" data-copy-status></p>
+</div>
+
+<script>
+  const RESET_AFTER_MS = 2500;
+
+  function copyWithSelection(text: string): boolean {
+    const field = document.createElement('textarea');
+    field.value = text;
+    field.setAttribute('readonly', '');
+    field.style.position = 'fixed';
+    field.style.opacity = '0';
+    document.body.append(field);
+    field.select();
+    let copied = false;
+    try {
+      copied = document.execCommand('copy');
+    } catch {
+      copied = false;
+    }
+    field.remove();
+    return copied;
+  }
+
+  async function copy(text: string): Promise<boolean> {
+    if (navigator.clipboard?.writeText && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        return copyWithSelection(text);
+      }
+    }
+    return copyWithSelection(text);
+  }
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-copy-email]')) {
+    const trigger = root.querySelector<HTMLButtonElement>('[data-copy-trigger]');
+    const status = root.querySelector<HTMLElement>('[data-copy-status]');
+    if (!trigger || !status) continue;
+
+    const { copyEmail: email = '', copied = '', copyError = '' } = root.dataset;
+    let resetTimer: number | undefined;
+    trigger.hidden = false;
+
+    trigger.addEventListener('click', async () => {
+      const ok = await copy(email);
+      status.textContent = ok ? copied : copyError;
+      status.classList.toggle('text-danger', !ok);
+      window.clearTimeout(resetTimer);
+      if (ok) resetTimer = window.setTimeout(() => (status.textContent = ''), RESET_AFTER_MS);
+    });
+  }
+</script>

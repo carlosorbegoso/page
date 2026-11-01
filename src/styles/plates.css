@@ -1,0 +1,257 @@
+@layer components {
+  .plate {
+    --plate-accent: var(--product-accent, var(--color-accent));
+
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: var(--plate-width);
+    color: var(--color-text);
+    text-align: start;
+  }
+
+  html:not(.is-3d) .plate {
+    border: 1px solid var(--color-plate-border);
+    border-radius: var(--plate-radius);
+    background-color: var(--color-plate-solid);
+    box-shadow: var(--shadow-md);
+    transition: border-color var(--duration-base) var(--ease-standard);
+  }
+
+  html:not(.is-3d) .plate[data-active] {
+    border-color: var(--color-plate-border-active);
+  }
+
+  .plate[data-plate-accent='skymek'] {
+    --plate-accent: var(--color-skymek);
+  }
+
+  .plate[data-plate-accent='parati'] {
+    --plate-accent: var(--color-parati);
+  }
+
+  .plate[data-plate-accent='ventixs'] {
+    --plate-accent: var(--color-ventixs);
+  }
+
+  .plate[data-plate-accent='live'] {
+    --plate-accent: var(--color-status-live);
+  }
+
+  /* Block, not inline: the signal sits above the eyebrow so every line keeps the same left edge. */
+  .plate :is(p:has(+ h1, + h2, + h3), [data-signal])::before {
+    content: '';
+    display: block;
+    width: var(--plate-signal-width);
+    height: 2px;
+    margin-block-end: 0.75rem;
+    border-radius: 2px;
+    background-color: var(--plate-accent);
+    transition:
+      width var(--duration-slow) var(--ease-out),
+      box-shadow var(--duration-slow) var(--ease-standard);
+  }
+
+  .plate[data-active] :is(p:has(+ h1, + h2, + h3), [data-signal])::before {
+    width: var(--plate-signal-width-active);
+  }
+}
+
+/* Unlayered on purpose: the 3D type scale must win over the card utilities the sections ship for the flat fallback. */
+.is-3d .plate {
+  max-width: none;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: visibility 0s linear;
+}
+
+.is-3d .plate p:has(+ h1, + h2, + h3) {
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--text-meta--line-height);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.is-3d .plate :is(h1, h2) {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-display);
+}
+
+.is-3d .plate:not([data-plate-mode^='surface-']) h3 {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--text-2xl--line-height);
+  letter-spacing: var(--tracking-tight);
+}
+
+.is-3d .plate:not([data-plate-mode^='surface-']) p:not(:has(+ h1, + h2, + h3)) {
+  max-width: var(--container-measure);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}
+
+.is-3d .plate:not([data-plate-mode^='surface-']) {
+  width: var(--plate-width);
+  text-shadow: var(--plate-text-halo);
+}
+
+.is-3d .plate:not([data-plate-mode^='surface-']) :is(h2, .plate-display) {
+  font-size: var(--text-display);
+  line-height: var(--text-display--line-height);
+}
+
+/* An edgeless pool of darkness behind loose text keeps AA over the lit scene; it must never read as a rectangle. */
+.is-3d .plate:not([data-plate-mode^='surface-'])::before {
+  content: '';
+  position: absolute;
+  inset: var(--plate-pool-inset);
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    closest-side,
+    var(--color-plate-pool) 0,
+    var(--color-plate-pool) 40%,
+    var(--color-plate-pool-edge) 62%,
+    rgb(4 6 11 / 0.32) 82%,
+    transparent 100%
+  );
+}
+
+/*
+ * Screens have a fixed size set by the engine (--surface-width/height) and must never clip, so
+ * each section sizes its screen content in container units (cqh/cqw) of the plate.
+ */
+.is-3d .plate[data-plate-mode^='surface-'] {
+  container: surface / size;
+  width: var(--surface-width, var(--plate-width));
+  height: var(--surface-height, auto);
+  overflow: hidden;
+  background-color: var(--color-screen-bg);
+  text-shadow: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+.is-3d .plate[data-plate-mode='surface-monitor'] {
+  padding: 4.5% 6%;
+}
+
+.is-3d .plate[data-plate-mode='surface-phone'] {
+  padding: 14% 7% 7%;
+  border-radius: 1.75rem;
+}
+
+.is-3d .plate[data-plate-mode^='surface-'] :is(p:has(+ h1, + h2, + h3), [data-signal])::before {
+  width: 9cqw;
+  margin-block-end: 1.5cqh;
+}
+
+.is-3d .plate[data-plate-mode^='surface-'][data-active] :is(p:has(+ h1, + h2, + h3), [data-signal])::before {
+  width: 14cqw;
+}
+
+.is-3d .plate[data-active] :is(p:has(+ h1, + h2, + h3), [data-signal])::before {
+  box-shadow: 0 0 12px 1px var(--plate-accent);
+}
+
+/* Fade the children, not the plate: opacity below 1 on a CSS3D plate flattens its children's depth. */
+.is-3d .plate > * {
+  transition: opacity var(--duration-slow) var(--ease-standard);
+}
+
+.is-3d .plate[data-dormant] {
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s linear var(--duration-slow);
+}
+
+.is-3d .plate[data-dormant] > * {
+  opacity: var(--plate-dormant-opacity);
+}
+
+/*
+ * Loose text only plays once the camera has landed: it cuts out while the shot moves so it never
+ * slides across scenery, then the lines rise in one after another like a title sequence.
+ */
+.is-3d .plate[data-plate-mode='anchored'] > * > * {
+  opacity: 0;
+  transform: translateY(0.9rem);
+  filter: blur(6px);
+  transition:
+    opacity 180ms var(--ease-in),
+    transform 180ms var(--ease-in),
+    filter 180ms var(--ease-in);
+}
+
+.is-3d .plate[data-plate-mode='anchored'][data-active] > * > * {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  transition:
+    opacity 700ms var(--ease-out),
+    transform 900ms var(--ease-out),
+    filter 700ms var(--ease-out);
+}
+
+.is-3d .plate[data-plate-mode='anchored'][data-active] > * > :nth-child(2) {
+  transition-delay: 90ms;
+}
+
+.is-3d .plate[data-plate-mode='anchored'][data-active] > * > :nth-child(3) {
+  transition-delay: 180ms;
+}
+
+.is-3d .plate[data-plate-mode='anchored'][data-active] > * > :nth-child(4) {
+  transition-delay: 270ms;
+}
+
+.is-3d .plate[data-plate-mode='anchored'][data-active] > * > :nth-child(n + 5) {
+  transition-delay: 360ms;
+}
+
+:root[data-motion='paused'].is-3d .plate[data-plate-mode='anchored'] > * > * {
+  transform: none;
+  filter: none;
+}
+
+@media (forced-colors: active) {
+  .plate {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    text-shadow: none;
+  }
+
+  .plate::before {
+    display: none;
+  }
+}
+
+/* A one-line entry sits on the dark wall already; its pool would only read as a smudge. */
+.is-3d .plate[data-compact]::before {
+  display: none;
+}
+
+/* A lit panel, not a flat fill: a soft backlight bloom, faint scanlines and a glass sheen. */
+.is-3d .plate[data-plate-mode='surface-monitor'] {
+  background:
+    radial-gradient(120% 90% at 30% 35%, rgb(90 169 255 / 0.07), transparent 60%),
+    radial-gradient(140% 120% at 50% 50%, var(--color-screen-bg) 55%, #05070b 100%);
+}
+
+.is-3d .plate[data-plate-mode='surface-monitor']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(115deg, rgb(255 255 255 / 0.045) 0%, transparent 32%),
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 0.018) 0 1px, transparent 1px 3px);
+}

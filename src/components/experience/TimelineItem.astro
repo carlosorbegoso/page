@@ -1,0 +1,195 @@
+---
+import Tag from '../ui/Tag.astro';
+import KineticText from '../ui/KineticText.astro';
+import { splitCounts } from '../../motion/split';
+import { useTranslations, type Locale } from '../../i18n/utils';
+import { formatTimelineMonth } from './dates';
+
+interface Props {
+  locale: Locale;
+  id: string;
+  order: number;
+  company: string;
+  client?: string;
+  role: string;
+  start: string;
+  end: string | null;
+  summary: string;
+  highlights: string[];
+  stack: string[];
+  compact?: boolean;
+}
+
+const {
+  locale,
+  id,
+  order,
+  company,
+  client,
+  role,
+  start,
+  end,
+  summary,
+  highlights,
+  stack,
+  compact = false
+} = Astro.props;
+const t = useTranslations(locale);
+const isCurrent = end === null;
+const plateId = `exp-${id}`;
+const headingId = `experience-${id}`;
+const highlightsId = `${headingId}-highlights`;
+const stackId = `${headingId}-stack`;
+---
+
+<div
+  class="plate group p-(--plate-padding)"
+  data-plate
+  data-plate-id={plateId}
+  data-plate-mode="anchored"
+  data-plate-anchor={plateId}
+  data-plate-order={order}
+  data-experience={id}
+  data-current={isCurrent ? '' : undefined}
+  data-compact={compact ? '' : undefined}
+>
+  {
+    compact ? (
+      <article aria-labelledby={headingId} class="max-w-measure">
+        <span class="era-year" aria-hidden="true">{start.slice(0, 4)}</span>
+        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-text-muted">
+          <span class="tabular-nums">
+            <time datetime={start}>{formatTimelineMonth(start, locale)}</time>
+            {' – '}
+            {end ? <time datetime={end}>{formatTimelineMonth(end, locale)}</time> : t('experience.present')}
+          </span>
+          <h3 id={headingId} class="font-display text-lg font-semibold tracking-tight text-text">
+            {company}
+          </h3>
+          <span class="text-text">{role}</span>
+          <p class="sr-only">{summary}</p>
+        </div>
+      </article>
+    ) : (
+      <article aria-labelledby={headingId} class="flex max-w-measure flex-col gap-4">
+        <header class="flex flex-col gap-1.5">
+          <span class="era-year" aria-hidden="true">{start.slice(0, 4)}</span>
+          <p class="flex items-center gap-2 text-sm font-medium tabular-nums text-text-muted">
+            <span
+              class:list={[
+                'size-2.5 shrink-0 rounded-full',
+                isCurrent ? 'bg-status-live' : 'border-2 border-border-strong group-data-active:border-accent'
+              ]}
+              aria-hidden="true"
+            />
+            <time datetime={start}>{formatTimelineMonth(start, locale)}</time>
+            {' – '}
+            {end ? <time datetime={end}>{formatTimelineMonth(end, locale)}</time> : t('experience.present')}
+          </p>
+          <h3
+            id={headingId}
+            class:list={[
+              'font-display font-semibold tracking-tight text-balance text-text',
+              isCurrent ? 'text-3xl' : 'text-2xl'
+            ]}
+          >
+            <KineticText text={company} split="chars" />
+          </h3>
+          <p class="font-medium text-text">{role}</p>
+          {client && (
+            <p class="wide-only text-sm text-text-muted">
+              {t('experience.client')}: {client}
+            </p>
+          )}
+        </header>
+
+        <p class="stage-hidden text-text-muted">{summary}</p>
+
+        {highlights.length > 0 && (
+          <div class="flex flex-col gap-2">
+            <p id={highlightsId} class="stage-hidden text-xs font-semibold tracking-caps text-text-muted uppercase">
+              {t('experience.highlights')}
+            </p>
+            <ul
+              aria-labelledby={highlightsId}
+              class="flex list-disc flex-col gap-2 pl-5 text-sm text-text marker:text-accent"
+            >
+              {highlights.map(highlight => (
+                <li>
+                  {splitCounts(highlight).map(part =>
+                    part.count === undefined ? (
+                      part.text
+                    ) : (
+                      <>
+                        <span class="sr-only select-none">{part.text}</span>
+                        <span
+                          aria-hidden="true"
+                          data-kinetic-count={part.count}
+                          style={`--k-digits: ${part.text.length}`}
+                        >
+                          {part.text}
+                        </span>
+                      </>
+                    )
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <p id={stackId} class="sr-only">{t('experience.stack')}</p>
+        <ul aria-labelledby={stackId} class="stage-hidden flex flex-wrap gap-x-4 gap-y-2" role="list" data-kinetic-cascade>
+          {stack.map(tech => (
+            <li>
+              <Tag>{tech}</Tag>
+            </li>
+          ))}
+        </ul>
+      </article>
+    )
+  }
+</div>
+
+<style>
+  .era-year {
+    display: none;
+  }
+
+  /* On the stage each job is a title card: the year, who and what, one result. The rest lives in reading mode. */
+  :global(.is-3d) .era-year {
+    display: block;
+    order: -1;
+    margin-bottom: 0.35rem;
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 6.5vw, 5.5rem);
+    font-weight: 600;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text);
+  }
+
+  :global(.is-3d) [data-experience] header > p::before {
+    display: none;
+  }
+
+  :global(.is-3d) .stage-hidden,
+  :global(.is-3d) [data-plate] li:nth-child(n + 2) {
+    display: none;
+  }
+
+  :global(.is-3d) [data-plate] ul.list-disc {
+    padding-left: 0;
+    list-style: none;
+    font-size: var(--text-base);
+    line-height: 1.45;
+    color: var(--color-text);
+  }
+
+  @media (width < 48rem) {
+    :global(.is-3d) .wide-only {
+      display: none;
+    }
+  }
+</style>

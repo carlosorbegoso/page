@@ -1,0 +1,1 @@
+alarm-clock: "Alarm Clock 01" by Poly Haven (https://polyhaven.com/a/alarm_clock_01), CC0 1.0. Textures downscaled to 512 px.

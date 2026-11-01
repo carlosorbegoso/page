@@ -1,0 +1,95 @@
+---
+import { useTranslations, type Locale } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+  display?: 'icon' | 'full';
+  floating?: boolean;
+  class?: string;
+}
+
+const { locale, display = 'icon', floating = false, class: className } = Astro.props;
+const t = useTranslations(locale);
+const iconOnly = display === 'icon';
+---
+
+<button
+  type="button"
+  data-motion-toggle
+  data-label-pause={t('motion.pause')}
+  data-label-play={t('motion.play')}
+  aria-label={iconOnly ? t('motion.pause') : undefined}
+  title={iconOnly ? t('motion.pause') : undefined}
+  class:list={[
+    'group',
+    floating
+      ? 'hud-control hud-icon'
+      : [
+          'inline-flex min-h-tap min-w-tap items-center justify-center gap-2 rounded-md border border-transparent text-sm font-medium text-text-muted',
+          'transition-colors duration-(--duration-fast) ease-standard hover:bg-surface hover:text-text',
+          'focus-visible:shadow-focus focus-visible:outline-none'
+        ],
+    !iconOnly && 'w-full justify-start border-border px-4',
+    className
+  ]}
+>
+  <svg
+    viewBox="0 0 24 24"
+    width={floating ? 14 : 20}
+    height={floating ? 14 : 20}
+    aria-hidden="true"
+    class="shrink-0 fill-current group-data-[state=paused]:hidden"
+  >
+    <rect x="6" y="5" width="4" height="14" rx="1"></rect>
+    <rect x="14" y="5" width="4" height="14" rx="1"></rect>
+  </svg>
+  <svg
+    viewBox="0 0 24 24"
+    width={floating ? 14 : 20}
+    height={floating ? 14 : 20}
+    aria-hidden="true"
+    class="hidden shrink-0 fill-current group-data-[state=paused]:block"
+  >
+    <path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.4-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"></path>
+  </svg>
+  {!iconOnly && <span data-motion-label>{t('motion.pause')}</span>}
+</button>
+
+<script>
+  const STORAGE_KEY = 'motion';
+  const root = document.documentElement;
+
+  const isPaused = () => root.dataset.motion === 'paused';
+
+  function render() {
+    const paused = isPaused();
+    for (const button of document.querySelectorAll<HTMLButtonElement>('[data-motion-toggle]')) {
+      const label = (paused ? button.dataset.labelPlay : button.dataset.labelPause) ?? '';
+      button.dataset.state = paused ? 'paused' : 'running';
+      const text = button.querySelector('[data-motion-label]');
+      if (text) {
+        text.textContent = label;
+      } else {
+        button.setAttribute('aria-label', label);
+        button.title = label;
+      }
+    }
+  }
+
+  function setPaused(paused: boolean) {
+    root.dataset.motion = paused ? 'paused' : 'running';
+    try {
+      localStorage.setItem(STORAGE_KEY, root.dataset.motion);
+    } catch {
+      // Storage can be blocked (private mode, disabled cookies); the toggle still works for this visit.
+    }
+    render();
+    window.dispatchEvent(new CustomEvent('motion:toggle', { detail: { paused } }));
+  }
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-motion-toggle]')) {
+    button.addEventListener('click', () => setPaused(!isPaused()));
+  }
+
+  render();
+</script>

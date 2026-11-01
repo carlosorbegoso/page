@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from './Header.astro';
+import Footer from './Footer.astro';
+import StageCanvas from './three/StageCanvas.astro';
+import HeroFallbackPreload from './three/HeroFallbackPreload.astro';
+import SceneTooltip from './SceneTooltip.astro';
+import Hero from './sections/Hero.astro';
+import About from './sections/About.astro';
+import Company from './sections/Company.astro';
+import Products from './sections/Products.astro';
+import Experience from './sections/Experience.astro';
+import Contact from './sections/Contact.astro';
+import Outro from './sections/Outro.astro';
+import type { Locale } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+---
+
+<Base locale={locale}>
+  <HeroFallbackPreload slot="head" />
+  <StageCanvas />
+  <Header locale={locale} />
+  <main id="main" tabindex="-1" class="relative z-(--z-content)">
+    <Hero locale={locale} />
+    <About locale={locale} />
+    <Experience locale={locale} />
+    <Company locale={locale} />
+    <Products locale={locale} />
+    <Contact locale={locale} />
+    <Outro locale={locale} />
+  </main>
+  <Footer locale={locale} />
+  <SceneTooltip />
+</Base>

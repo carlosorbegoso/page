@@ -1,191 +1,448 @@
 ---
-// Header component - Desktop top header + Mobile bottom navigation
-// Modern tab bar navigation for mobile
+import LangSwitch from './LangSwitch.astro';
+import MotionToggle from './MotionToggle.astro';
+import AudioToggle from './AudioToggle.astro';
+import CopyEmail from './contact/CopyEmail.astro';
+import CvLink from './ui/CvLink.astro';
+import { SECTION_IDS, SITE } from '../config/site';
+import { localeUrl, useTranslations, withBase, type Locale } from '../i18n/utils';
+import { getExperience } from '../lib/content';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const readingUrl = localeUrl(locale, locale === 'es' ? 'lectura' : 'reading');
+const years = (await getExperience(locale)).map(entry => entry.start.slice(0, 4)).toSorted();
+const tonight = (time: string) => `${time} · ${t('story.tonight')}`;
+const night = (time: string) => `${time} · ${t('story.night')}`;
+/** What the HUD shows per chapter and sub-shot: the clock tonight, the year during the day years. */
+const storyBeats: Record<string, string[]> = {
+  hero: [tonight('23:00')],
+  about: [tonight('23:20'), tonight('23:30')],
+  experience: [`${t('story.day')} · ${years[0]} →`, ...years.map(year => `${t('story.day')} · ${year}`)],
+  company: [night('00:30')],
+  products: [night('01:30'), night('02:00'), night('02:30')],
+  contact: [night('03:30')],
+  outro: [`05:58 · ${t('story.dawn')}`]
+};
+const sections = [
+  { id: SECTION_IDS.hero, label: t('nav.hero') },
+  { id: SECTION_IDS.about, label: t('nav.about') },
+  { id: SECTION_IDS.experience, label: t('nav.experience') },
+  { id: SECTION_IDS.company, label: t('nav.company') },
+  { id: SECTION_IDS.products, label: t('nav.products') },
+  { id: SECTION_IDS.contact, label: t('nav.contact') }
+];
+const menuItem =
+  'flex min-h-tap w-full items-center gap-3 rounded-md px-3 text-xs font-medium tracking-caps text-text-muted uppercase transition-colors duration-(--duration-fast) ease-standard hover:bg-surface hover:text-text focus-visible:shadow-focus focus-visible:outline-none';
 ---
 
-<!-- DESKTOP HEADER (hidden on mobile) -->
-<header class="header header-cosmic header-desktop" data-header>
-    <!-- Brand Logo with Constellation Effect -->
-    <div class="nav-brand cosmic-brand">
-        <div class="brand-icon constellation-icon">
-            <svg class="constellation-svg" viewBox="0 0 40 40" fill="none">
-                <defs>
-                    <!-- Neural Mindscape gradient: cyan → purple → primary -->
-                    <linearGradient id="cosmicGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:var(--neural-cyan, #00ffff)" />
-                        <stop offset="50%" style="stop-color:var(--neural-purple, #aa44ff)" />
-                        <stop offset="100%" style="stop-color:var(--neural-primary, #64B5F6)" />
-                    </linearGradient>
-                    <filter id="starGlow" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation="1" result="blur"/>
-                        <feMerge>
-                            <feMergeNode in="blur"/>
-                            <feMergeNode in="SourceGraphic"/>
-                        </feMerge>
-                    </filter>
-                </defs>
-                <circle class="star-node" cx="20" cy="8" r="2.5" fill="url(#cosmicGradient)" filter="url(#starGlow)" />
-                <circle class="star-node" cx="8" cy="20" r="2" fill="url(#cosmicGradient)" filter="url(#starGlow)" />
-                <circle class="star-node" cx="32" cy="20" r="2" fill="url(#cosmicGradient)" filter="url(#starGlow)" />
-                <circle class="star-node" cx="14" cy="32" r="1.5" fill="url(#cosmicGradient)" filter="url(#starGlow)" />
-                <circle class="star-node" cx="26" cy="32" r="1.5" fill="url(#cosmicGradient)" filter="url(#starGlow)" />
-                <line class="constellation-line" x1="20" y1="8" x2="8" y2="20" stroke="url(#cosmicGradient)" stroke-width="0.5" opacity="0.6" />
-                <line class="constellation-line" x1="20" y1="8" x2="32" y2="20" stroke="url(#cosmicGradient)" stroke-width="0.5" opacity="0.6" />
-                <line class="constellation-line" x1="8" y1="20" x2="14" y2="32" stroke="url(#cosmicGradient)" stroke-width="0.5" opacity="0.6" />
-                <line class="constellation-line" x1="32" y1="20" x2="26" y2="32" stroke="url(#cosmicGradient)" stroke-width="0.5" opacity="0.6" />
-                <line class="constellation-line" x1="14" y1="32" x2="26" y2="32" stroke="url(#cosmicGradient)" stroke-width="0.5" opacity="0.6" />
-            </svg>
-            <span class="brand-glow"></span>
-        </div>
-        <span class="brand-text">CO</span>
+<div
+  data-hud
+  class="fixed top-[max(0.5rem,env(safe-area-inset-top))] left-[max(0.5rem,env(safe-area-inset-left))] z-(--z-header) md:top-4 md:left-4"
+>
+  <div class="flex items-center gap-1">
+    <button
+      type="button"
+      data-hud-toggle
+      aria-expanded="false"
+      aria-controls="hud-menu"
+      aria-label={t('hud.label')}
+      aria-describedby="hud-audio-hint"
+      class="group hud-control hud-icon"
+    >
+      <span
+        aria-hidden="true"
+        class="absolute top-2 right-2 hidden size-1.5 rounded-full bg-accent shadow-[0_0_6px_var(--color-accent)] group-data-[audio-hint]:block"
+      ></span>
+      <svg viewBox="0 0 64 64" width="22" height="22" aria-hidden="true">
+        <path
+          d="M43.5 22.4A15 15 0 1 0 43.5 41.6"
+          fill="none"
+          class="stroke-text"
+          stroke-width="7"
+        ></path>
+        <circle cx="47" cy="32" r="4.5" class="fill-accent"></circle>
+      </svg>
+    </button>
+    <span
+      id="hud-audio-hint"
+      data-hud-audio-hint
+      data-label={t('audio.available')}
+      class="sr-only"
+      aria-live="polite"
+    ></span>
+    <span
+      data-hud-chapter
+      data-story-beats={JSON.stringify(storyBeats)}
+      aria-hidden="true"
+      class="font-mono text-xs tracking-caps text-text-muted tabular-nums opacity-0 transition-opacity duration-(--duration-base) ease-standard data-[ready=true]:opacity-100"
+    ></span>
+  </div>
+
+  <div
+    id="hud-menu"
+    data-hud-menu
+    hidden
+    class="hud-menu mt-1 flex w-60 flex-col gap-1 rounded-lg border border-border bg-scrim p-2 shadow-lg backdrop-blur-md"
+  >
+    <div class="flex items-center gap-1 border-b border-border pb-2">
+      <LangSwitch locale={locale} compact hud />
+      <AudioToggle locale={locale} />
+      <MotionToggle locale={locale} floating />
+    </div>
+    <button
+      type="button"
+      data-index-open
+      aria-expanded="false"
+      aria-controls="section-index"
+      aria-haspopup="dialog"
+      class={menuItem}
+    >
+      <svg
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        aria-hidden="true"
+        class="shrink-0 fill-none stroke-current"
+        stroke-width="2"
+        stroke-linecap="round"
+      >
+        <path d="M4 7h16M4 12h16M4 17h10"></path>
+      </svg>
+      {t('nav.index')}
+    </button>
+    <a href={readingUrl} class={menuItem}>
+      <svg
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        aria-hidden="true"
+        class="shrink-0 fill-none stroke-current"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z"></path>
+      </svg>
+      {t('reading.enter')}
+    </a>
+    <a href={withBase(SITE.cvPath)} download type="application/pdf" class={menuItem}>
+      <svg
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        aria-hidden="true"
+        class="shrink-0 fill-none stroke-current"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path>
+      </svg>
+      {t('cv.download')}
+      <span class="sr-only">({t('cv.format')})</span>
+    </a>
+  </div>
+</div>
+
+<dialog
+  id="section-index"
+  data-index
+  aria-labelledby="section-index-title"
+  class:list={[
+    'index-sheet m-0 w-full max-w-none overflow-y-auto border border-border bg-surface-raised p-0 text-text shadow-lg backdrop:bg-scrim',
+    'fixed inset-x-0 top-auto bottom-0 max-h-[85dvh] rounded-t-xl border-b-0',
+    'md:inset-y-0 md:right-0 md:left-auto md:h-dvh md:max-h-none md:w-[24rem] md:rounded-none md:rounded-l-xl md:border-e-0 md:border-b'
+  ]}
+>
+  <div class="flex min-h-full flex-col gap-5 px-gutter pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] md:px-6 md:pt-6">
+    <span
+      class="mx-auto h-1 w-10 rounded-full bg-border-strong md:hidden"
+      aria-hidden="true"
+    ></span>
+    <div class="flex items-center justify-between gap-3">
+      <h2 id="section-index-title" class="font-display text-xl font-semibold tracking-tight">
+        {t('nav.index')}
+      </h2>
+      <button
+        type="button"
+        data-index-close
+        aria-label={t('nav.closeIndex')}
+        class="inline-flex size-tap items-center justify-center rounded-md border border-border text-text transition-colors duration-(--duration-fast) ease-standard hover:bg-surface focus-visible:shadow-focus focus-visible:outline-none"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="22"
+          height="22"
+          aria-hidden="true"
+          class="fill-none stroke-current"
+          stroke-width="2"
+          stroke-linecap="round"
+        >
+          <path d="M6 6l12 12M18 6 6 18"></path>
+        </svg>
+      </button>
     </div>
 
-    <!-- Desktop Navigation -->
-    <nav class="nav-links cosmic-nav" data-nav-links>
-        <a href="#hero" class="nav-link cosmic-link" data-nav-link>
-            <span class="link-glow"></span>
-            <i class="fas fa-home nav-icon"></i>
-            <span class="link-text">Home</span>
-        </a>
-        <a href="#experience" class="nav-link cosmic-link" data-nav-link>
-            <span class="link-glow"></span>
-            <i class="fas fa-briefcase nav-icon"></i>
-            <span class="link-text">Experience</span>
-        </a>
-        <a href="#tech" class="nav-link cosmic-link" data-nav-link>
-            <span class="link-glow"></span>
-            <i class="fas fa-code nav-icon"></i>
-            <span class="link-text">Tech & Projects</span>
-        </a>
-        <a href="#contact" class="nav-link cosmic-link" data-nav-link>
-            <span class="link-glow"></span>
-            <i class="fas fa-envelope nav-icon"></i>
-            <span class="link-text">Contact</span>
-        </a>
+    <nav aria-label={t('nav.label')}>
+      <ol class="flex flex-col gap-1">
+        {sections.map((section, index) => (
+          <li>
+            <a
+              href={`#${section.id}`}
+              data-index-link={section.id}
+              class:list={[
+                'group flex min-h-12 items-center gap-3 rounded-md border-s-2 border-transparent px-4 text-base font-medium text-text-muted',
+                'transition-colors duration-(--duration-fast) ease-standard hover:bg-surface hover:text-text',
+                'focus-visible:shadow-focus focus-visible:outline-none',
+                'aria-[current=true]:border-accent aria-[current=true]:bg-accent-soft aria-[current=true]:text-text'
+              ]}
+            >
+              <span
+                class="font-mono text-xs text-text-subtle tabular-nums group-aria-[current=true]:text-accent"
+                aria-hidden="true"
+              >
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              {section.label}
+            </a>
+          </li>
+        ))}
+      </ol>
     </nav>
 
-    <!-- Desktop Controls -->
-    <div class="nav-controls cosmic-controls">
-        <button class="theme-toggle cosmic-btn weather-btn" id="theme-toggle" aria-label="Change theme" data-theme-toggle>
-            <span class="btn-orbit"></span>
-            <i class="fas fa-sun theme-icon" id="weather-icon"></i>
-            <span class="weather-temp" id="header-temp"></span>
-        </button>
+    <section
+      aria-labelledby="index-actions"
+      class="mt-auto flex flex-col gap-3 border-t border-border pt-5"
+    >
+      <h3
+        id="index-actions"
+        class="font-sans text-xs font-semibold tracking-caps text-text-muted uppercase"
+      >
+        {t('nav.quickActions')}
+      </h3>
+      <CopyEmail locale={locale} email={SITE.email} />
+      <CvLink locale={locale} size="lg" class="w-full" />
+    </section>
+  </div>
+</dialog>
 
-        <div class="time-display cosmic-btn" id="time-display" aria-label="Local time">
-            <i class="fas fa-clock time-icon"></i>
-            <span class="time-text" id="header-time">--:--</span>
-        </div>
+<style>
+  .hud-menu {
+    transform-origin: top left;
+    transition:
+      opacity var(--duration-base) var(--ease-out),
+      translate var(--duration-base) var(--ease-out);
 
-        <button class="language-toggle cosmic-btn" id="language-toggle" aria-label="Change language">
-            <span class="btn-orbit"></span>
-            <i class="fas fa-globe"></i>
-        </button>
-    </div>
+    @starting-style {
+      opacity: 0;
+      translate: 0 -0.25rem;
+    }
+  }
 
-    <!-- Progress Bar -->
-    <div class="header-progress cosmic-progress" data-header-progress></div>
-</header>
+  .index-sheet {
+    --sheet-offset: translateY(100%);
+    transform: var(--sheet-offset);
+    transition:
+      transform var(--duration-slow) var(--ease-out),
+      overlay var(--duration-slow) allow-discrete,
+      display var(--duration-slow) allow-discrete;
+  }
 
-<!-- MOBILE BOTTOM NAVIGATION (hidden on desktop) -->
-<nav class="mobile-bottom-nav" data-mobile-nav>
-    <div class="mobile-nav-glow"></div>
+  @media (width >= 48rem) {
+    .index-sheet {
+      --sheet-offset: translateX(100%);
+    }
+  }
 
-    <a href="#hero" class="mobile-nav-item active" data-nav-section="hero">
-        <div class="nav-item-indicator"></div>
-        <i class="fas fa-home"></i>
-        <span>Home</span>
-    </a>
+  .index-sheet[open] {
+    transform: none;
 
-    <a href="#experience" class="mobile-nav-item" data-nav-section="experience">
-        <div class="nav-item-indicator"></div>
-        <i class="fas fa-briefcase"></i>
-        <span>Work</span>
-    </a>
+    @starting-style {
+      transform: var(--sheet-offset);
+    }
+  }
 
-    <a href="#tech" class="mobile-nav-item" data-nav-section="tech">
-        <div class="nav-item-indicator"></div>
-        <i class="fas fa-code"></i>
-        <span>Tech</span>
-    </a>
+  .index-sheet::backdrop {
+    opacity: 0;
+    transition:
+      opacity var(--duration-slow) var(--ease-out),
+      overlay var(--duration-slow) allow-discrete,
+      display var(--duration-slow) allow-discrete;
+  }
 
-    <a href="#contact" class="mobile-nav-item" data-nav-section="contact">
-        <div class="nav-item-indicator"></div>
-        <i class="fas fa-envelope"></i>
-        <span>Contact</span>
-    </a>
+  .index-sheet[open]::backdrop {
+    opacity: 1;
 
-    <button class="mobile-nav-item mobile-theme-btn" id="mobile-theme-toggle" aria-label="Toggle theme">
-        <div class="nav-item-indicator"></div>
-        <i class="fas fa-moon"></i>
-        <span>Theme</span>
-    </button>
-</nav>
+    @starting-style {
+      opacity: 0;
+    }
+  }
+
+  :global(html:has(.index-sheet[open])) {
+    overflow: hidden;
+  }
+</style>
 
 <script>
-// Mobile bottom navigation active state management
-document.addEventListener('DOMContentLoaded', () => {
-    const mobileNav = document.querySelector('[data-mobile-nav]');
-    const mobileNavItems = document.querySelectorAll('.mobile-nav-item[data-nav-section]');
-    const mobileThemeBtn = document.getElementById('mobile-theme-toggle');
-    const desktopThemeBtn = document.getElementById('theme-toggle');
+  const STATION_SELECTOR = '[data-station]';
+  const hud = document.querySelector<HTMLElement>('[data-hud]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-hud-toggle]');
+  const menu = document.querySelector<HTMLElement>('[data-hud-menu]');
+  const chapter = document.querySelector<HTMLElement>('[data-hud-chapter]');
+  const sheet = document.querySelector<HTMLDialogElement>('[data-index]');
+  const indexButton = document.querySelector<HTMLButtonElement>('[data-index-open]');
+  const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
+  const HOVER_CLOSE_DELAY_MS = 250;
 
-    // Update active state based on scroll position
-    const sections = ['hero', 'experience', 'tech', 'contact'];
+  if (hud && toggle && menu) {
+    let closeTimer: number | undefined;
 
-    const updateActiveNav = () => {
-        let currentSection = 'hero';
-        const scrollY = window.scrollY + window.innerHeight / 3;
+    const isOpen = () => !menu.hidden;
 
-        sections.forEach(sectionId => {
-            const section = document.getElementById(sectionId);
-            if (section && section.offsetTop <= scrollY) {
-                currentSection = sectionId;
-            }
-        });
-
-        mobileNavItems.forEach(item => {
-            const isActive = item.dataset.navSection === currentSection;
-            item.classList.toggle('active', isActive);
-        });
-    };
-
-    // Throttled scroll handler
-    let ticking = false;
-    window.addEventListener('scroll', () => {
-        if (!ticking) {
-            requestAnimationFrame(() => {
-                updateActiveNav();
-                ticking = false;
-            });
-            ticking = true;
-        }
-    });
-
-    // Sync mobile theme toggle with desktop
-    if (mobileThemeBtn && desktopThemeBtn) {
-        mobileThemeBtn.addEventListener('click', () => {
-            desktopThemeBtn.click();
-            // Update icon
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const icon = mobileThemeBtn.querySelector('i');
-            icon.className = currentTheme === 'light' ? 'fas fa-sun' : 'fas fa-moon';
-        });
+    function setOpen(open: boolean, { restoreFocus = false } = {}) {
+      window.clearTimeout(closeTimer);
+      if (open === isOpen()) return;
+      menu!.hidden = !open;
+      toggle!.setAttribute('aria-expanded', String(open));
+      if (!open && restoreFocus) toggle!.focus();
     }
 
-    // Smooth scroll for mobile nav
-    mobileNavItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            const targetId = item.getAttribute('href')?.substring(1);
-            const target = document.getElementById(targetId);
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        });
+    toggle.addEventListener('click', () => setOpen(!isOpen()));
+
+    hud.addEventListener('pointerenter', event => {
+      if (event.pointerType === 'mouse' && finePointer.matches) setOpen(true);
+    });
+    hud.addEventListener('pointerleave', event => {
+      if (event.pointerType !== 'mouse' || !finePointer.matches) return;
+      if (hud.contains(document.activeElement)) return;
+      closeTimer = window.setTimeout(() => setOpen(false), HOVER_CLOSE_DELAY_MS);
     });
 
-    // Initial state
-    updateActiveNav();
-});
+    hud.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && isOpen()) {
+        event.stopPropagation();
+        setOpen(false, { restoreFocus: true });
+      }
+    });
+
+    hud.addEventListener('focusout', event => {
+      const next = event.relatedTarget;
+      if (next instanceof Node && hud.contains(next)) return;
+      if (sheet?.open) return;
+      setOpen(false);
+    });
+
+    document.addEventListener('pointerdown', event => {
+      if (isOpen() && event.target instanceof Node && !hud.contains(event.target)) setOpen(false);
+    });
+
+    indexButton?.addEventListener('click', () => {
+      setOpen(false);
+      sheet?.showModal();
+      indexButton.setAttribute('aria-expanded', 'true');
+    });
+  }
+
+  const audioHint = document.querySelector<HTMLElement>('[data-hud-audio-hint]');
+  const audioToggle = document.querySelector<HTMLButtonElement>('[data-audio-toggle]');
+  const INVITE_HINT_MS = 10_000;
+
+  if (toggle && audioHint) {
+    let inviteTimer: number | undefined;
+    let invited = false;
+
+    const renderHint = () => {
+      const armed = audioToggle?.dataset.state === 'armed';
+      const show = armed || invited;
+      if (show) toggle.dataset.audioHint = '';
+      else delete toggle.dataset.audioHint;
+      audioHint.textContent = show ? (audioHint.dataset.label ?? '') : '';
+    };
+
+    window.addEventListener('audio:invite', () => {
+      invited = true;
+      renderHint();
+      window.clearTimeout(inviteTimer);
+      inviteTimer = window.setTimeout(() => {
+        invited = false;
+        renderHint();
+      }, INVITE_HINT_MS);
+    });
+
+    if (audioToggle) {
+      new MutationObserver(() => {
+        if (audioToggle.dataset.state === 'on') invited = false;
+        renderHint();
+      }).observe(audioToggle, { attributes: true, attributeFilter: ['data-state'] });
+    }
+
+    renderHint();
+  }
+
+  if (sheet) {
+    sheet.addEventListener('close', () => {
+      indexButton?.setAttribute('aria-expanded', 'false');
+      toggle?.focus();
+    });
+    sheet.querySelector('[data-index-close]')?.addEventListener('click', () => sheet.close());
+    sheet.addEventListener('click', event => {
+      if (event.target === sheet) sheet.close();
+    });
+    for (const link of sheet.querySelectorAll('[data-index-link]')) {
+      link.addEventListener('click', () => sheet.close());
+    }
+  }
+
+  const indexLinks = [...document.querySelectorAll<HTMLAnchorElement>('[data-index-link]')];
+  const stations = [...document.querySelectorAll<HTMLElement>(STATION_SELECTOR)];
+  const storyBeats = JSON.parse(chapter?.dataset.storyBeats ?? '{}') as Record<string, string[]>;
+  let activeId: string | null = null;
+
+  function showBeat(id: string, sub: number) {
+    const beats = storyBeats[id];
+    if (!chapter || !beats?.length) return;
+    chapter.textContent = beats[Math.min(Math.max(sub, 0), beats.length - 1)]!;
+    chapter.dataset.ready = 'true';
+  }
+
+  function setActive(id: string | null, sub?: number) {
+    if (!id || (id === activeId && sub === undefined)) return;
+    showBeat(id, sub ?? 0);
+    if (id === activeId) return;
+    activeId = id;
+    for (const link of indexLinks) {
+      if (link.dataset.indexLink === id) link.setAttribute('aria-current', 'true');
+      else link.removeAttribute('aria-current');
+    }
+    window.dispatchEvent(new CustomEvent('section:active', { detail: { id } }));
+  }
+
+  for (const type of ['station:enter', 'chapter:enter']) {
+    window.addEventListener(type, event => {
+      const detail = (event as CustomEvent<{ id?: string; subIndex?: number }>).detail;
+      setActive(detail?.id ?? null, detail?.subIndex);
+    });
+  }
+
+  if ('IntersectionObserver' in window && stations.length > 0) {
+    const visible = new Set<HTMLElement>();
+    const observer = new IntersectionObserver(
+      entries => {
+        for (const entry of entries) {
+          const target = entry.target as HTMLElement;
+          if (entry.isIntersecting) visible.add(target);
+          else visible.delete(target);
+        }
+        const current = stations.find(station => visible.has(station));
+        if (current) setActive(current.dataset.station ?? current.id);
+      },
+      { rootMargin: '-45% 0px -50% 0px' }
+    );
+    for (const station of stations) observer.observe(station);
+  }
 </script>

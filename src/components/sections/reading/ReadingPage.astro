@@ -1,0 +1,76 @@
+---
+import Base from '../../../layouts/Base.astro';
+import ReadingBar from '../../ReadingBar.astro';
+import Footer from '../../Footer.astro';
+import Hero from '../Hero.astro';
+import About from '../About.astro';
+import Company from '../Company.astro';
+import Products from '../Products.astro';
+import Experience from '../Experience.astro';
+import Contact from '../Contact.astro';
+import { useTranslations, type Locale } from '../../../i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+/* noindex: it repeats the server-rendered home word for word; indexing both would only split ranking. */
+---
+
+<Base locale={locale} title={t('reading.metaTitle')} description={t('reading.description')} indexable={false}>
+  <script is:inline slot="head">
+    document.documentElement.dataset.motion = 'paused';
+  </script>
+  <ReadingBar locale={locale} />
+  <main id="main" tabindex="-1" class="reading-page container-content">
+    <p class="reading-page__intro text-sm text-text-muted">{t('reading.intro')}</p>
+    <Hero locale={locale} />
+    <About locale={locale} />
+    <Company locale={locale} />
+    <Products locale={locale} />
+    <Experience locale={locale} order="newest" />
+    <Contact locale={locale} />
+  </main>
+  <Footer locale={locale} />
+</Base>
+
+<style is:global>
+  .reading-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-section);
+    padding-block: var(--spacing-stack) var(--spacing-section);
+  }
+
+  .reading-page__intro {
+    max-width: var(--container-measure);
+  }
+
+  .reading-page [data-station] {
+    min-height: 0;
+    align-items: stretch;
+    gap: var(--spacing-stack);
+    padding: 0;
+  }
+
+  .reading-page [data-station] + [data-station] {
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--spacing-section);
+  }
+
+  .reading-page .plate {
+    max-width: var(--container-measure);
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .reading-page :is([data-product], [data-experience]) + :is([data-product], [data-experience]) {
+    padding-top: var(--spacing-stack);
+    border-top: 1px solid var(--color-border);
+  }
+</style>

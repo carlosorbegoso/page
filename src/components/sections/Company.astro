@@ -1,0 +1,91 @@
+---
+import Button from '../ui/Button.astro';
+import SectionHeader from '../ui/SectionHeader.astro';
+import Tag from '../ui/Tag.astro';
+import { SECTION_IDS } from '../../config/site';
+import { useTranslations, type Locale } from '../../i18n/utils';
+import { getProducts, getProfile } from '../../lib/content';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const { company } = await getProfile(locale);
+const products = await getProducts(locale);
+---
+
+<section
+  id={SECTION_IDS.company}
+  aria-labelledby="company-title"
+  data-station="company"
+  class="relative z-(--z-content) flex min-h-svh flex-col items-center justify-center px-gutter py-section"
+>
+  <div
+    class="plate p-(--plate-padding)"
+    data-plate
+    data-plate-id="company"
+    data-plate-mode="anchored"
+    data-plate-anchor="company"
+  >
+    <div class="flex max-w-measure flex-col gap-6">
+      <SectionHeader
+        id="company-title"
+        eyebrow={`${company.role} · ${company.legalName}`}
+        act={t('story.night')}
+        title={t('company.title')}
+        subtitle={t('company.subtitle')}
+      />
+
+      <div class="company-summary flex flex-col gap-4 text-base text-pretty text-text-muted">
+        {company.summary.map(paragraph => <p>{paragraph}</p>)}
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <p class="text-sm font-medium text-text" data-signal>{t('company.parentBrand')}</p>
+        <ul class="flex flex-wrap gap-x-4 gap-y-2" role="list" data-kinetic-cascade>
+          {
+            products.map(product => (
+              <li>
+                <Tag tone={product.id}>{product.name}</Tag>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="wide-only">
+        <Button href={`#${SECTION_IDS.products}`} size="lg" class="w-full sm:w-auto">
+          {t('company.cta')}
+          <svg
+            class="size-4 shrink-0"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M8 3v10M3.5 8.5 8 13l4.5-4.5"></path>
+          </svg>
+        </Button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Phones in 3D: the panel shares the frame with the figures, so it keeps the headline and the brand line. */
+  @media (width < 48rem) {
+    :global(.is-3d) .wide-only {
+      display: none;
+    }
+  }
+
+  /* On the stage the panel is a caption: the story lives in the room, the full text in reading mode. */
+  :global(.is-3d) .company-summary {
+    display: none;
+  }
+</style>

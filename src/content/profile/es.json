@@ -1,0 +1,53 @@
+{
+  "name": "Carlos Orbegoso",
+  "role": "Backend Developer · Java/Quarkus · Banca",
+  "tagline": "En TCS para el BCP · Cofundador de TUSOCIO IA",
+  "location": "Lima, Perú",
+  "summary": [
+    "Soy desarrollador backend con más de 5 años de experiencia. Hoy trabajo en TCS para el BCP, donde migro servicios a Quarkus y llevo el stack hacia lo cloud-native.",
+    "Antes pasé por Intercorp Retail, Baufest y SYSARP: observabilidad, CQRS, microservicios y mejoras de hasta 40 % en el rendimiento.",
+    "De noche construyo productos propios con TUSOCIO IA, la empresa que fundé con dos amigos.",
+    "Técnico en Computación e Informática por CIBERTEC (2023) y becado en el Bootcamp Java Developer de Alura Latam (2023)."
+  ],
+  "photoAlt": "Carlos Orbegoso con lentes de sol y polera blanca, frente a un muro de piedra",
+  "education": {
+    "institution": "Universidad Peruana de Ciencias Aplicadas (UPC)",
+    "degree": "Ingeniería de Sistemas",
+    "status": "Egresado, estudié en horario nocturno"
+  },
+  "company": {
+    "name": "TUSOCIO IA",
+    "legalName": "TUSOCIO IA S.A.C.",
+    "role": "Cofundador",
+    "summary": [
+      "Desde Lima diseñamos, construimos y operamos nuestros propios productos digitales, de la idea al cliente.",
+      "Hoy tenemos tres productos en producción: SkyMek, Parati y Ventixs. Alfa, nuestra mascota, es la marca madre que los une."
+    ]
+  },
+  "stack": [
+    {
+      "category": "Backend",
+      "items": ["Java", "Quarkus", "Spring Boot", "WebFlux", "Microservicios", "APIs REST"]
+    },
+    {
+      "category": "Mensajería",
+      "items": ["Kafka", "SQS", "Pub/Sub"]
+    },
+    {
+      "category": "Cloud y DevOps",
+      "items": ["Docker", "CI/CD", "Azure DevOps", "Azure Functions", "SonarQube"]
+    },
+    {
+      "category": "Observabilidad",
+      "items": ["Grafana", "Loki", "Tempo", "Prometheus"]
+    },
+    {
+      "category": "Bases de datos",
+      "items": ["PostgreSQL", "SQL Server", "MongoDB", "DynamoDB"]
+    },
+    {
+      "category": "También",
+      "items": ["Angular", "JavaScript", "Python"]
+    }
+  ]
+}

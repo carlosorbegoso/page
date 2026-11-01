@@ -1,0 +1,93 @@
+---
+import ProductCard from '../products/ProductCard.astro';
+import { SECTION_IDS } from '../../config/site';
+import { useTranslations, type Locale } from '../../i18n/utils';
+import { getProducts, getProfile } from '../../lib/content';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const products = (await getProducts(locale)).toSorted(
+  (a, b) => Number(b.featured === true) - Number(a.featured === true)
+);
+const { company } = await getProfile(locale);
+---
+
+<section
+  id={SECTION_IDS.products}
+  aria-labelledby="products-title"
+  data-station="products"
+  data-products-section
+  class="relative z-(--z-content) flex flex-col items-center gap-stack px-gutter py-section"
+>
+  {
+    products.map((product, index) => (
+      <ProductCard product={product} locale={locale} order={index}>
+        {index === 0 && (
+          <>
+            <h2 id="products-title" class="sr-only">{t('products.title')}</h2>
+            <p class="products-eyebrow text-xs font-semibold tracking-caps text-accent uppercase" aria-hidden="true">
+              {company.name} · {t('products.title')}
+            </p>
+          </>
+        )}
+      </ProductCard>
+    ))
+  }
+</section>
+
+<script>
+  type FocusDetail = { id: string | null; source?: string };
+  const SOURCE = 'products-panel';
+
+  const section = document.querySelector<HTMLElement>('[data-products-section]');
+  const plates = section ? Array.from(section.querySelectorAll<HTMLElement>('[data-product]')) : [];
+
+  if (section && plates.length > 0) {
+    let lastSent: string | null | undefined;
+
+    const markActive = (id: string | null) => {
+      for (const plate of plates)
+        plate.toggleAttribute('data-active', plate.dataset.product === id);
+      if (id) section.dataset.activeProduct = id;
+      else delete section.dataset.activeProduct;
+    };
+
+    const publish = (id: string) => {
+      if (id === lastSent) return;
+      lastSent = id;
+      markActive(id);
+      window.dispatchEvent(
+        new CustomEvent<FocusDetail>('product:focus', { detail: { id, source: SOURCE } })
+      );
+    };
+
+    for (const plate of plates) {
+      const id = plate.dataset.product;
+      if (!id) continue;
+      plate.addEventListener('pointerenter', event => {
+        if (event.pointerType === 'mouse') publish(id);
+      });
+      plate.addEventListener('focusin', () => publish(id));
+    }
+
+    window.addEventListener('product:focus', event => {
+      const detail = (event as CustomEvent<FocusDetail>).detail;
+      if (!detail || detail.source === SOURCE) return;
+      const id = detail.id && plates.some(p => p.dataset.product === detail.id) ? detail.id : null;
+      lastSent = id;
+      markActive(id);
+    });
+  }
+</script>
+
+<style>
+  @media (width < 48rem) {
+    :global(.is-3d) .products-eyebrow {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,182 @@
+---
+import { withBase } from '../../i18n/utils';
+
+const fallback = (name: string, width: number, format: string) => withBase(`fallback/${name}-${width}.${format}`);
+const sources = (name: string) => [
+  { media: '(min-width: 1024px)', width: 1440, height: 900 },
+  { media: '(min-width: 768px)', width: 768, height: 1024 },
+  { media: undefined, width: 375, height: 667 }
+].flatMap(({ media, width, height }) =>
+  ['avif', 'webp'].map(format => ({
+    media,
+    width,
+    height,
+    type: `image/${format}`,
+    srcset: fallback(name, width, format)
+  }))
+);
+---
+
+<div data-stage aria-hidden="true">
+  <picture data-stage-fallback="hero">
+    {sources('hero').map(s => <source media={s.media} type={s.type} srcset={s.srcset} width={s.width} height={s.height} />)}
+    <img
+      src={fallback('hero', 375, 'webp')}
+      alt=""
+      width="375"
+      height="667"
+      decoding="async"
+      fetchpriority="high"
+    />
+  </picture>
+</div>
+
+<script>
+  import { onIdle } from '../../three/idle';
+  import { detectTier } from '../../three/tier';
+
+  const BOOT_TIMEOUT_MS = 3000;
+  const INTERACTIONS = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'] as const;
+
+  function whenLoaded(): Promise<void> {
+    if (document.readyState === 'complete') return Promise.resolve();
+    return new Promise(resolve => window.addEventListener('load', () => resolve(), { once: true }));
+  }
+
+  function firstInteractionOrTimeout(): Promise<void> {
+    return new Promise(resolve => {
+      const done = () => {
+        clearTimeout(timer);
+        for (const type of INTERACTIONS) window.removeEventListener(type, done);
+        resolve();
+      };
+      const timer = setTimeout(done, BOOT_TIMEOUT_MS);
+      for (const type of INTERACTIONS) window.addEventListener(type, done, { once: true, passive: true });
+    });
+  }
+
+  async function init(container: HTMLElement): Promise<void> {
+    const params = new URLSearchParams(location.search);
+    const capture = params.has('capture');
+
+    if (!capture) {
+      await whenLoaded();
+      await firstInteractionOrTimeout();
+    }
+    onIdle(async () => {
+      const tier = detectTier(params.get('tier') ?? (capture ? 'high' : null));
+      container.dataset.tier = tier.tier;
+      if (capture || params.has('debug')) console.info('[stage] tier', tier);
+      if (tier.tier === 'none') return;
+      try {
+        const { boot } = await import('../../three/index');
+        await boot({ container, tier, params });
+      } catch (error) {
+        container.dataset.degraded = 'error';
+        console.error('[stage] 3D unavailable', error);
+      }
+    });
+  }
+
+  const container = document.querySelector<HTMLElement>('[data-stage]');
+  if (container) {
+    window.addEventListener('chapter:enter', () => (container.dataset.moving = ''));
+    window.addEventListener('chapter:settled', () => delete container.dataset.moving);
+  }
+  if (container && !container.dataset.booted) {
+    container.dataset.booted = 'true';
+    void init(container);
+  }
+</script>
+
+<style>
+  [data-stage] {
+    position: fixed;
+    inset: 0 0 auto;
+    height: 100vh;
+    height: 100lvh;
+    z-index: var(--z-canvas);
+    pointer-events: none;
+    overflow: hidden;
+    background: linear-gradient(180deg, var(--color-sky-zenith), var(--color-sky-horizon));
+  }
+
+  /* Matte bars frame the canvas like a film gate and close in slightly while the camera moves. */
+  [data-stage][data-ready='true']::before,
+  [data-stage][data-ready='true']::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    z-index: 1;
+    height: var(--letterbox, 3.2vh);
+    background: #000;
+    transition: height 900ms var(--ease-in-out);
+  }
+
+  [data-stage][data-ready='true']::before {
+    top: 0;
+  }
+
+  [data-stage][data-ready='true']::after {
+    bottom: 0;
+  }
+
+  [data-stage][data-moving] {
+    --letterbox: 7vh;
+  }
+
+  @media (orientation: portrait) {
+    [data-stage] {
+      --letterbox: 1.6vh;
+    }
+
+    [data-stage][data-moving] {
+      --letterbox: 4vh;
+    }
+  }
+
+  :global(:root[data-motion='paused']) [data-stage][data-moving] {
+    --letterbox: 3.2vh;
+  }
+
+  [data-stage-fallback] {
+    display: block;
+    height: 100%;
+  }
+
+  [data-stage-fallback] img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  [data-stage] :global([data-stage-canvas]) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity var(--duration-slow) var(--ease-standard);
+  }
+
+  [data-stage][data-ready='true'] :global([data-stage-canvas]) {
+    opacity: 1;
+  }
+
+  [data-stage][data-degraded] :global([data-stage-canvas]) {
+    display: none;
+  }
+
+  :global(.stage-plates) {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-content);
+    pointer-events: none;
+  }
+
+  @media (forced-colors: active) {
+    [data-stage] :global([data-stage-canvas]) {
+      display: none;
+    }
+  }
+</style>

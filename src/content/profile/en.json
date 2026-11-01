@@ -1,0 +1,53 @@
+{
+  "name": "Carlos Orbegoso",
+  "role": "Backend Developer · Java/Quarkus · Banking",
+  "tagline": "At TCS for BCP · Co-founder of TUSOCIO IA",
+  "location": "Lima, Peru",
+  "summary": [
+    "I'm a backend developer with more than five years of experience. Today I work at TCS for BCP, moving services to Quarkus and taking the stack cloud-native.",
+    "Before that: Intercorp Retail, Baufest and SYSARP. Observability, CQRS, microservices and performance gains of up to 40%.",
+    "After hours, I build my own products with TUSOCIO IA, the company I started with two friends.",
+    "IT technician degree from CIBERTEC (2023) and scholarship recipient of Alura Latam's Java Developer Bootcamp (2023)."
+  ],
+  "photoAlt": "Carlos Orbegoso in sunglasses and a white hoodie, in front of a stone wall",
+  "education": {
+    "institution": "Universidad Peruana de Ciencias Aplicadas (UPC)",
+    "degree": "Systems Engineering",
+    "status": "Graduated, studied in the evening program"
+  },
+  "company": {
+    "name": "TUSOCIO IA",
+    "legalName": "TUSOCIO IA S.A.C.",
+    "role": "Co-founder",
+    "summary": [
+      "From Lima we design, build and run our own digital products, from idea to customer.",
+      "We have three products live today: SkyMek, Parati and Ventixs. Alfa, our mascot, is the parent brand that ties them together."
+    ]
+  },
+  "stack": [
+    {
+      "category": "Backend",
+      "items": ["Java", "Quarkus", "Spring Boot", "WebFlux", "Microservices", "REST APIs"]
+    },
+    {
+      "category": "Messaging",
+      "items": ["Kafka", "SQS", "Pub/Sub"]
+    },
+    {
+      "category": "Cloud & DevOps",
+      "items": ["Docker", "CI/CD", "Azure DevOps", "Azure Functions", "SonarQube"]
+    },
+    {
+      "category": "Observability",
+      "items": ["Grafana", "Loki", "Tempo", "Prometheus"]
+    },
+    {
+      "category": "Databases",
+      "items": ["PostgreSQL", "SQL Server", "MongoDB", "DynamoDB"]
+    },
+    {
+      "category": "Also",
+      "items": ["Angular", "JavaScript", "Python"]
+    }
+  ]
+}

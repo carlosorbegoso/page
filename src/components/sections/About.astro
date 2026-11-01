@@ -1,0 +1,768 @@
+---
+import { Picture } from 'astro:assets';
+import SectionHeader from '../ui/SectionHeader.astro';
+import Tag from '../ui/Tag.astro';
+import photo from '../../assets/profile.jpeg';
+import { SECTION_IDS } from '../../config/site';
+import { useTranslations, type Locale } from '../../i18n/utils';
+import { getProfile } from '../../lib/content';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const profile = await getProfile(locale);
+
+/* The last summary paragraph holds the CIBERTEC and Alura credentials, so it moves into the education list. */
+const body = profile.summary.slice(0, -1);
+const credentials = profile.summary.slice(-1);
+const { degree, institution, status } = profile.education;
+/** The stack screen as the file Carlos would have open: one YAML document, built from the same content. */
+type CodeLine = { indent: number; key?: string; value?: string; list?: string[]; comment?: string };
+const codeLines: CodeLine[] = [
+  { indent: 0, comment: '# carlos.yml' },
+  { indent: 0, key: 'education' },
+  { indent: 1, key: 'degree', value: degree },
+  { indent: 1, key: 'school', value: institution },
+  { indent: 1, key: 'status', value: status },
+  { indent: 1, key: 'extra', list: t('about.code.extra').split(', ') },
+  { indent: 0, key: 'stack' },
+  ...profile.stack.map(group => ({ indent: 1, key: group.category.toLowerCase(), list: group.items }))
+];
+const facts = (['now', 'before', 'night'] as const).map(key => ({
+  label: t(`about.facts.${key}.label`),
+  value: t(`about.facts.${key}.value`),
+  detail: t(`about.facts.${key}.detail`)
+}));
+---
+
+<section
+  id={SECTION_IDS.about}
+  aria-labelledby="about-title"
+  data-station="about"
+  class="flex min-h-svh flex-col items-center justify-center gap-stack px-gutter py-section"
+>
+  <div
+    class="plate p-(--plate-padding)"
+    data-plate
+    data-plate-id="about-bio"
+    data-plate-mode="surface-monitor"
+    data-plate-order="0"
+  >
+    <div class="about-bio @container flex flex-col gap-6">
+      <SectionHeader
+        id="about-title"
+        eyebrow={profile.location}
+        title={t('about.title')}
+        subtitle={t('about.subtitle')}
+      />
+
+      <div class="about-bio__row flex flex-col gap-5 @md:flex-row @md:items-start">
+        <Picture
+          src={photo}
+          formats={['avif', 'webp']}
+          widths={[320, 480, 720]}
+          sizes="(min-width: 768px) 22rem, 12rem"
+          alt={profile.photoAlt}
+          loading="lazy"
+          pictureAttributes={{ class: 'shrink-0' }}
+          decoding="async"
+          class="about-bio__photo aspect-square w-28 rounded-lg border border-border object-cover @md:w-36"
+        />
+        <div class="about-bio__text flex flex-col gap-4 text-base text-text-muted">
+          {body.map(paragraph => <p class="text-pretty">{paragraph}</p>)}
+        </div>
+        <dl class="about-facts hidden" aria-label={t('about.facts.label')}>
+          {
+            facts.map(fact => (
+              <div>
+                <dt>{fact.label}</dt>
+                <dd>
+                  <span class="about-facts__value">{fact.value}</span>
+                  <span class="about-facts__detail">{fact.detail}</span>
+                </dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="plate p-(--plate-padding)"
+    data-plate
+    data-plate-id="about-stack"
+    data-plate-mode="surface-monitor"
+    data-plate-order="1"
+  >
+    <div class="about-stack @container flex flex-col gap-6">
+      <div class="about-code" aria-hidden="true">
+        <div class="about-code__bar">
+          <span class="about-code__dots"><i></i><i></i><i></i></span>
+          <span class="about-code__tab">carlos.yml</span>
+        </div>
+        <ol class="about-code__lines">
+          {
+            codeLines.map(line => (
+              <li style={`--indent: ${line.indent}`}>
+                {line.comment && <span class="c-comment">{line.comment}</span>}
+                {line.key && <span class="c-key">{line.key}</span>}
+                {line.key && <span class="c-punct">:</span>}
+                {line.value && <span class="c-string"> {line.value}</span>}
+                {line.list && (
+                  <span class="c-list">
+                    {' '}
+                    <span class="c-punct">[</span>
+                    {line.list.map((item, index) => (
+                      <>
+                        <span class="c-string">{item}</span>
+                        {index < line.list!.length - 1 && <span class="c-punct">, </span>}
+                      </>
+                    ))}
+                    <span class="c-punct">]</span>
+                  </span>
+                )}
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+      <section aria-labelledby="about-education">
+        <h3
+          id="about-education"
+          class="font-display text-xl font-semibold tracking-tight text-text"
+        >
+          {t('about.education')}
+        </h3>
+        <ul class="mt-4 flex flex-col gap-4 text-sm text-text-muted" data-kinetic-cascade>
+          <li class="flex gap-3">
+            <span class="mt-2 size-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true"></span>
+            <span>
+              <span class="block font-medium text-text">{degree}</span>
+              <span class="block">{institution}</span>
+              <span class="block">{status}</span>
+            </span>
+          </li>
+          {
+            credentials.map(item => (
+              <li class="flex gap-3">
+                <span class="mt-2 size-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+                <span class="text-pretty">{item}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section aria-labelledby="about-stack" class="border-t border-border pt-6">
+        <h3 id="about-stack" class="font-display text-xl font-semibold tracking-tight text-text">
+          {t('about.stack')}
+        </h3>
+        <dl class="mt-4 grid gap-4 @md:grid-cols-2">
+          {
+            profile.stack.map(group => (
+              <div>
+                <dt class="text-xs font-semibold tracking-caps text-text-muted uppercase">
+                  {group.category}
+                </dt>
+                <dd class="mt-2">
+                  <ul class="flex flex-wrap gap-2" data-kinetic-cascade>
+                    {group.items.map(item => (
+                      <li>
+                        <Tag>{item}</Tag>
+                      </li>
+                    ))}
+                  </ul>
+                </dd>
+              </div>
+            ))
+          }
+        </dl>
+      </section>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* On the monitor each slide is a fixed-size screen: sizes are shares of its height so nothing clips. */
+  :global(.is-3d) :is(.about-bio, .about-stack) {
+    height: 100%;
+    justify-content: center;
+    gap: 4cqh;
+  }
+
+  :global(.is-3d) .about-bio :global(header) {
+    gap: 1.2cqh;
+  }
+
+  :global(.is-3d) .about-bio :global(header > p:first-child) {
+    font-size: 3.2cqh;
+    line-height: 1.3;
+  }
+
+  :global(.is-3d) .about-bio :global(h2) {
+    font-size: 9cqh;
+    line-height: 1.05;
+  }
+
+  :global(.is-3d) .about-bio :global(header > p:last-child) {
+    font-size: 4cqh;
+    line-height: 1.3;
+  }
+
+  :global(.is-3d) .about-bio__row {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 4cqw;
+  }
+
+  :global(.is-3d) .about-bio__photo {
+    width: 30cqh;
+  }
+
+  :global(.is-3d) .about-bio__text {
+    gap: 2cqh;
+    font-size: 3.7cqh;
+    line-height: 1.4;
+  }
+
+  :global(.is-3d) .about-stack {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    align-content: center;
+    gap: 0 5cqw;
+  }
+
+  :global(.is-3d) .about-stack h3 {
+    font-size: 5.6cqh;
+    line-height: 1.2;
+  }
+
+  :global(.is-3d) .about-stack ul,
+  :global(.is-3d) .about-stack dl {
+    margin-top: 2.5cqh;
+  }
+
+  :global(.is-3d) .about-stack > section:first-child ul {
+    gap: 2.5cqh;
+    font-size: 3.3cqh;
+    line-height: 1.35;
+  }
+
+  :global(.is-3d) .about-stack > section:first-child li {
+    gap: 2cqw;
+  }
+
+  :global(.is-3d) .about-stack > section:first-child li > span:first-child {
+    width: 1.6cqh;
+    height: 1.6cqh;
+    margin-top: 1.6cqh;
+  }
+
+  :global(.is-3d) .about-stack > section + section {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  :global(.is-3d) .about-stack dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3cqh 4cqw;
+  }
+
+  :global(.is-3d) .about-stack dt {
+    font-size: 2.8cqh;
+    line-height: 1.3;
+  }
+
+  :global(.is-3d) .about-stack dd {
+    margin-top: 1cqh;
+  }
+
+  :global(.is-3d) .about-stack dd ul {
+    margin-top: 0;
+    gap: 0.6cqh 2.2cqw;
+    font-size: 3.1cqh;
+    line-height: 1.35;
+  }
+
+  :global(.is-3d) .about-stack :global([data-tone]) {
+    min-height: 0;
+    gap: 1cqw;
+    font-size: inherit;
+    line-height: inherit;
+  }
+
+  :global(.is-3d) .about-stack :global([data-tone] > span[aria-hidden]) {
+    width: 1.2cqh;
+    height: 1.2cqh;
+  }
+  /* Landscape screen as a title card: graded full-bleed portrait on the left, statement and three beats beside it. */
+  @container surface (orientation: landscape) {
+    :global(.is-3d) .about-bio {
+      display: grid;
+      grid-template-columns: 38cqw minmax(0, 1fr);
+      grid-template-rows: 1fr auto auto 1fr;
+      gap: 0 6cqw;
+      margin: calc(var(--plate-padding) * -1);
+      height: calc(100% + var(--plate-padding) * 2);
+      padding-right: 7cqw;
+    }
+
+    :global(.is-3d) .about-bio__row {
+      display: contents;
+    }
+
+    :global(.is-3d) .about-bio :global(picture) {
+      position: relative;
+      grid-column: 1;
+      grid-row: 1 / -1;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    :global(.is-3d) .about-bio :global(picture)::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, transparent 45%, var(--color-screen-bg) 99%),
+        linear-gradient(0deg, rgb(4 8 16 / 0.75), transparent 40%),
+        linear-gradient(160deg, rgb(70 130 255 / 0.18), rgb(255 160 80 / 0.1));
+      mix-blend-mode: normal;
+    }
+
+    :global(.is-3d) .about-bio__photo {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      border-radius: 0;
+      object-position: 50% 30%;
+      filter: saturate(0.55) contrast(1.08) brightness(0.82);
+    }
+
+    :global(.is-3d) .about-bio :global(header) {
+      grid-column: 2;
+      grid-row: 2;
+      max-width: none;
+      gap: 2cqh;
+    }
+
+    :global(.is-3d) .about-bio :global(header > p:first-child) {
+      display: none;
+    }
+
+    :global(.is-3d) .about-bio :global(h2) {
+      font-family: var(--font-sans);
+      font-size: 2.8cqh;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-accent);
+    }
+
+    :global(.is-3d) .about-bio :global(header > p:last-of-type) {
+      font-family: var(--font-display);
+      font-size: 8.4cqh;
+      font-weight: 600;
+      line-height: 1.04;
+      letter-spacing: -0.025em;
+      color: var(--color-text);
+      text-wrap: balance;
+    }
+
+    :global(.is-3d) .about-bio__text {
+      display: none;
+    }
+
+    :global(.is-3d) .about-facts {
+      grid-column: 2;
+      grid-row: 3;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0 3.5cqw;
+      margin-top: 8cqh;
+    }
+
+    :global(.is-3d) .about-facts > div {
+      padding-top: 2.4cqh;
+      border-top: 1px solid rgb(255 255 255 / 0.14);
+    }
+
+    :global(.is-3d) .about-facts > div:first-child {
+      border-top-color: var(--color-accent);
+    }
+
+    :global(.is-3d) .about-facts dt {
+      font-size: 2.4cqh;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-text-subtle);
+    }
+
+    :global(.is-3d) .about-facts dd {
+      display: flex;
+      flex-direction: column;
+      gap: 1cqh;
+      margin-top: 1.6cqh;
+    }
+
+    :global(.is-3d) .about-facts__value {
+      font-family: var(--font-display);
+      font-size: 3.8cqh;
+      font-weight: 600;
+      line-height: 1.15;
+      color: var(--color-text);
+      text-wrap: balance;
+    }
+
+    :global(.is-3d) .about-facts__detail {
+      font-size: 2.8cqh;
+      line-height: 1.4;
+      color: var(--color-text-muted);
+      text-wrap: pretty;
+    }
+
+    /* Spec sheet: education as a headline, the stack as ruled rows of plain text instead of bullets. */
+    :global(.is-3d) .about-stack {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 2fr);
+      gap: 0 6cqw;
+    }
+
+    :global(.is-3d) .about-stack h3 {
+      font-family: var(--font-sans);
+      font-size: 2.8cqh;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+
+    :global(.is-3d) .about-stack > section:first-child ul {
+      margin-top: 4cqh;
+      gap: 4cqh;
+    }
+
+    :global(.is-3d) .about-stack > section:first-child li > span:first-child {
+      display: none;
+    }
+
+    :global(.is-3d) .about-stack > section:first-child li:first-child > span:last-child > span:first-child {
+      margin-bottom: 1.2cqh;
+      font-family: var(--font-display);
+      font-size: 6cqh;
+      font-weight: 600;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+
+    :global(.is-3d) .about-stack > section:first-child li + li {
+      padding-top: 3cqh;
+      border-top: 1px solid rgb(255 255 255 / 0.1);
+      font-size: 2.9cqh;
+    }
+
+    :global(.is-3d) .about-stack dl {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 3cqh;
+    }
+
+    :global(.is-3d) .about-stack dl > div {
+      display: grid;
+      grid-template-columns: 22cqw minmax(0, 1fr);
+      align-items: baseline;
+      padding-block: 2.1cqh;
+      border-top: 1px solid rgb(255 255 255 / 0.08);
+    }
+
+    :global(.is-3d) .about-stack dl > div:last-child {
+      border-bottom: 1px solid rgb(255 255 255 / 0.08);
+    }
+
+    :global(.is-3d) .about-stack dt {
+      font-size: 2.5cqh;
+      letter-spacing: 0.12em;
+    }
+
+    :global(.is-3d) .about-stack dd {
+      margin-top: 0;
+    }
+
+    :global(.is-3d) .about-stack dd ul {
+      gap: 0.4cqh 0;
+      font-size: 3.2cqh;
+      color: var(--color-text);
+    }
+
+    :global(.is-3d) .about-stack dd li:not(:last-child)::after {
+      content: '/';
+      margin-inline: 1.4cqw;
+      color: var(--color-text-subtle);
+    }
+
+    :global(.is-3d) .about-stack :global([data-tone] > span[aria-hidden]) {
+      display: none;
+    }
+  }
+
+  .about-code {
+    display: none;
+  }
+
+  /* Landscape monitor: the stack is the file Carlos has open tonight, not a web table. The semantic list stays for assistive tech. */
+  @container surface (orientation: landscape) {
+    :global(.is-3d) .about-stack {
+      display: block;
+      padding: 0;
+    }
+
+    :global(.is-3d) .about-stack > section {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    :global(.is-3d) .about-code {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      margin: calc(var(--plate-padding) * -1);
+      height: calc(100% + var(--plate-padding) * 2);
+      font-family: var(--font-mono);
+      background: rgb(6 9 15 / 0.55);
+    }
+
+    :global(.is-3d) .about-code__bar {
+      display: flex;
+      align-items: center;
+      gap: 3cqw;
+      height: 8cqh;
+      padding-inline: 3cqw;
+      border-bottom: 1px solid rgb(255 255 255 / 0.07);
+      background: rgb(255 255 255 / 0.03);
+    }
+
+    :global(.is-3d) .about-code__dots {
+      display: flex;
+      gap: 1.2cqh;
+    }
+
+    :global(.is-3d) .about-code__dots i {
+      width: 1.8cqh;
+      height: 1.8cqh;
+      border-radius: 50%;
+      background: rgb(255 255 255 / 0.16);
+    }
+
+    :global(.is-3d) .about-code__tab {
+      padding: 1.2cqh 2.4cqw;
+      border-radius: 1cqh 1cqh 0 0;
+      background: rgb(255 255 255 / 0.06);
+      font-size: 2.6cqh;
+      color: var(--color-text);
+    }
+
+    :global(.is-3d) .about-code__lines {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1.3cqh;
+      margin: 0;
+      padding: 0 5cqw 0 0;
+      list-style: none;
+      counter-reset: line;
+      font-size: 3.4cqh;
+      line-height: 1.4;
+      color: var(--color-text);
+    }
+
+    :global(.is-3d) .about-code__lines li {
+      counter-increment: line;
+      position: relative;
+      padding-left: calc(9cqw + var(--indent) * 3.4cqw);
+      text-indent: 0;
+    }
+
+    :global(.is-3d) .about-code__lines li::before {
+      content: counter(line);
+      position: absolute;
+      left: 0;
+      width: 5.5cqw;
+      text-align: right;
+      color: rgb(255 255 255 / 0.22);
+    }
+
+    :global(.is-3d) .about-code .c-comment {
+      color: var(--color-text-subtle);
+      font-style: italic;
+    }
+
+    :global(.is-3d) .about-code .c-key {
+      color: var(--color-accent);
+    }
+
+    :global(.is-3d) .about-code .c-punct {
+      color: rgb(255 255 255 / 0.4);
+    }
+
+    :global(.is-3d) .about-code .c-string {
+      color: #e8d8b0;
+    }
+  }
+
+  /* Upright monitor: photo as a cover band, then the statement and story; the stack reads as a ruled spec sheet. */
+  @container surface (orientation: portrait) {
+    :global(.is-3d) .about-bio {
+      display: flex;
+      justify-content: flex-start;
+      gap: 0;
+    }
+
+    :global(.is-3d) .about-bio__row {
+      display: contents;
+    }
+
+    :global(.is-3d) .about-bio :global(picture) {
+      order: -1;
+      margin: calc(var(--plate-padding) * -1) calc(var(--plate-padding) * -1) 0;
+    }
+
+    :global(.is-3d) .about-bio__photo {
+      width: 100%;
+      height: 30cqh;
+      border: 0;
+      border-radius: 0;
+      object-position: 50% 18%;
+      mask-image: linear-gradient(180deg, #000 55%, transparent);
+    }
+
+    :global(.is-3d) .about-bio :global(header) {
+      margin-top: -3cqh;
+      gap: 1cqh;
+    }
+
+    :global(.is-3d) .about-bio :global(header > p:first-child) {
+      font-size: 1.7cqh;
+    }
+
+    :global(.is-3d) .about-bio :global(h2) {
+      font-size: 2.2cqh;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--color-text-muted);
+    }
+
+    :global(.is-3d) .about-bio :global(header > p:last-of-type) {
+      font-family: var(--font-display);
+      font-size: 4.4cqh;
+      font-weight: 600;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      color: var(--color-text);
+      text-wrap: balance;
+    }
+
+    :global(.is-3d) .about-bio__text {
+      margin-top: 2.6cqh;
+      padding-top: 2.4cqh;
+      border-top: 1px solid rgb(255 255 255 / 0.1);
+      gap: 1.8cqh;
+      font-size: 2.4cqh;
+      line-height: 1.45;
+    }
+
+    :global(.is-3d) .about-stack {
+      grid-template-columns: minmax(0, 1fr);
+      align-content: center;
+      gap: 3cqh;
+    }
+
+    :global(.is-3d) .about-stack h3 {
+      font-family: var(--font-sans);
+      font-size: 1.9cqh;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+
+    :global(.is-3d) .about-stack ul,
+    :global(.is-3d) .about-stack dl {
+      margin-top: 1.6cqh;
+    }
+
+    :global(.is-3d) .about-stack > section:first-child ul {
+      gap: 1.6cqh;
+      font-size: 2.2cqh;
+      line-height: 1.4;
+    }
+
+    :global(.is-3d) .about-stack > section:first-child li > span:first-child {
+      display: none;
+    }
+
+    :global(.is-3d) .about-stack > section:first-child li:first-child > span:last-child > span:first-child {
+      margin-bottom: 0.6cqh;
+      font-family: var(--font-display);
+      font-size: 4cqh;
+      font-weight: 600;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+    }
+
+    :global(.is-3d) .about-stack > section:first-child li + li {
+      padding-top: 1.6cqh;
+      border-top: 1px solid rgb(255 255 255 / 0.1);
+    }
+
+    :global(.is-3d) .about-stack dl {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    :global(.is-3d) .about-stack dl > div {
+      padding-block: 1.2cqh;
+      border-top: 1px solid rgb(255 255 255 / 0.08);
+    }
+
+    :global(.is-3d) .about-stack dl > div:last-child {
+      border-bottom: 1px solid rgb(255 255 255 / 0.08);
+    }
+
+    :global(.is-3d) .about-stack dt {
+      font-size: 1.65cqh;
+      letter-spacing: 0.12em;
+    }
+
+    :global(.is-3d) .about-stack dd {
+      margin-top: 0.5cqh;
+    }
+
+    :global(.is-3d) .about-stack dd ul {
+      margin-top: 0;
+      gap: 0.2cqh 0;
+      font-size: 2.35cqh;
+      color: var(--color-text);
+    }
+
+    :global(.is-3d) .about-stack dd li:not(:last-child)::after {
+      content: '/';
+      margin-inline: 2cqw;
+      color: var(--color-text-subtle);
+    }
+
+    :global(.is-3d) .about-stack :global([data-tone] > span[aria-hidden]) {
+      display: none;
+    }
+  }
+</style>

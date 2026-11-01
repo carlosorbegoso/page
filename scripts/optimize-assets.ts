@@ -1,0 +1,141 @@
+/**
+ * Reproducible 3D asset pipeline (PLAN §2): `bun run assets`.
+ *
+ * For every `assets-src/models/<mascot>.glb|gltf` (mascot ∈ alfa, burbu, gift, tool) it writes
+ * hashed `public/models/<mascot>.<variant>.<hash>.glb` for two variants:
+ *   high: ≤ 25 k tris, textures ≤ 1024 px
+ *   mid:  ≤ 8 k tris (meshoptimizer simplify), textures ≤ 512 px
+ * Geometry is meshopt-compressed; textures go to KTX2 (ETC1S for colour/emissive, UASTC for
+ * normal / metallic-roughness / occlusion) when KTX-Software (`ktx`) is installed, otherwise they
+ * keep their source format and a warning is printed. It regenerates `src/three/models.generated.ts`
+ * and copies the Basis transcoder into `public/decoders/basis/`. With no sources it exits cleanly.
+ */
+import { createHash } from 'node:crypto';
+import { copyFile, mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { basename, dirname, extname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
+import { NodeIO } from '@gltf-transform/core';
+import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const SRC_DIR = join(ROOT, 'assets-src', 'models');
+const OUT_DIR = join(ROOT, 'public', 'models');
+const DECODER_DIR = join(ROOT, 'public', 'decoders', 'basis');
+const MANIFEST = join(ROOT, 'src', 'three', 'models.generated.ts');
+const CLI = join(ROOT, 'node_modules', '.bin', 'gltf-transform');
+const MASCOTS = ['alfa', 'burbu', 'gift', 'tool'] as const;
+type MascotId = (typeof MASCOTS)[number];
+
+const VARIANTS = {
+  high: { maxTriangles: 25000, textureSize: 1024 },
+  mid: { maxTriangles: 8000, textureSize: 512 }
+} as const;
+type Variant = keyof typeof VARIANTS;
+
+function run(args: string[]): void {
+  const result = spawnSync(CLI, args, { stdio: 'inherit' });
+  if (result.status !== 0) throw new Error(`gltf-transform ${args.join(' ')} failed`);
+}
+
+function hasKtx(): boolean {
+  return spawnSync('ktx', ['--version'], { stdio: 'ignore' }).status === 0;
+}
+
+async function triangles(file: string): Promise<number> {
+  const document = await new NodeIO().registerExtensions(ALL_EXTENSIONS).read(file);
+  let count = 0;
+  for (const mesh of document.getRoot().listMeshes()) {
+    for (const primitive of mesh.listPrimitives()) {
+      const indices = primitive.getIndices();
+      const position = primitive.getAttribute('POSITION');
+      count += Math.floor((indices ? indices.getCount() : (position?.getCount() ?? 0)) / 3);
+    }
+  }
+  return count;
+}
+
+async function hashName(file: string, mascot: MascotId, variant: Variant): Promise<string> {
+  const hash = createHash('sha256').update(await readFile(file)).digest('hex').slice(0, 10);
+  return `${mascot}.${variant}.${hash}.glb`;
+}
+
+async function buildVariant(source: string, mascot: MascotId, variant: Variant, work: string, ktx: boolean) {
+  const { maxTriangles, textureSize } = VARIANTS[variant];
+  const base = join(work, `${mascot}.${variant}.base.glb`);
+  run(['optimize', source, base, '--compress', 'false', '--texture-compress', 'false', '--texture-size', String(textureSize), '--simplify', 'false', '--join-named', 'false', '--palette', 'false']);
+  let current = base;
+  const sourceTris = await triangles(current);
+  if (sourceTris > maxTriangles) {
+    const simplified = join(work, `${mascot}.${variant}.simplified.glb`);
+    run(['simplify', current, simplified, '--ratio', (maxTriangles / sourceTris).toFixed(4), '--error', '0.01']);
+    current = simplified;
+  }
+  if (ktx) {
+    const uastc = join(work, `${mascot}.${variant}.uastc.glb`);
+    run(['uastc', current, uastc, '--slots', '{normalTexture,metallicRoughnessTexture,occlusionTexture}', '--level', '2', '--zstd', '18']);
+    const etc1s = join(work, `${mascot}.${variant}.etc1s.glb`);
+    run(['etc1s', uastc, etc1s, '--slots', '{baseColorTexture,emissiveTexture}', '--quality', '160']);
+    current = etc1s;
+  }
+  const tris = await triangles(current);
+  const compressed = join(work, `${mascot}.${variant}.meshopt.glb`);
+  run(['meshopt', current, compressed, '--level', 'high']);
+  const name = await hashName(compressed, mascot, variant);
+  await copyFile(compressed, join(OUT_DIR, name));
+  const kb = (await stat(compressed)).size / 1024;
+  const flag = tris > maxTriangles ? `  OVER ${maxTriangles} tris` : '';
+  console.log(`${name}: ${tris} tris, ${kb.toFixed(1)} KB${flag}`);
+  return name;
+}
+
+async function copyDecoders(): Promise<void> {
+  await mkdir(DECODER_DIR, { recursive: true });
+  const from = join(ROOT, 'node_modules', 'three', 'examples', 'jsm', 'libs', 'basis');
+  for (const file of ['basis_transcoder.js', 'basis_transcoder.wasm']) await copyFile(join(from, file), join(DECODER_DIR, file));
+}
+
+async function writeManifest(models: Partial<Record<MascotId, Partial<Record<Variant, string>>>>): Promise<void> {
+  const body = `// Generated by scripts/optimize-assets.ts (bun run assets). Do not edit by hand.
+import type { MascotId } from './mascots/types';
+
+export type ModelVariant = 'high' | 'mid';
+
+/** Hashed GLB file names under public/models/, per mascot and tier variant. */
+export const MODELS: Partial<Record<MascotId, Partial<Record<ModelVariant, string>>>> = ${JSON.stringify(models, null, 2)};
+`;
+  await writeFile(MANIFEST, body);
+}
+
+async function main(): Promise<void> {
+  await mkdir(SRC_DIR, { recursive: true });
+  const sources = (await readdir(SRC_DIR)).filter(file => ['.glb', '.gltf'].includes(extname(file)));
+  const mascots = sources.filter(file => (MASCOTS as readonly string[]).includes(basename(file, extname(file))));
+  if (!mascots.length) {
+    console.log(`No GLB/glTF sources in ${SRC_DIR} (expected ${MASCOTS.join(', ')}). Nothing to do.`);
+    return;
+  }
+  const ktx = hasKtx();
+  if (!ktx) console.warn('KTX-Software (`ktx`) not found: textures keep their source format. Install with `brew install ktx`.');
+  await mkdir(OUT_DIR, { recursive: true });
+  for (const file of await readdir(OUT_DIR)) if (file.endsWith('.glb')) await rm(join(OUT_DIR, file));
+  const work = await mkdtemp(join(tmpdir(), 'assets-'));
+  const models: Partial<Record<MascotId, Partial<Record<Variant, string>>>> = {};
+  try {
+    for (const file of mascots) {
+      const mascot = basename(file, extname(file)) as MascotId;
+      models[mascot] = {};
+      for (const variant of Object.keys(VARIANTS) as Variant[]) {
+        models[mascot]![variant] = await buildVariant(join(SRC_DIR, file), mascot, variant, work, ktx);
+      }
+    }
+  } finally {
+    await rm(work, { recursive: true, force: true });
+  }
+  await copyDecoders();
+  await writeManifest(models);
+  console.log(`Manifest written to ${MANIFEST}`);
+}
+
+await main();

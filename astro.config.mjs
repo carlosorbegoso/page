@@ -1,76 +1,27 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
-import robotsTxt from 'astro-robots-txt';
-import compressor from 'astro-compressor';
 
 export default defineConfig({
+  devToolbar: { enabled: false },
   site: 'https://carlosorbegoso.github.io',
   base: '/page',
-
-  // Integraciones SEO y optimización
+  trailingSlash: 'ignore',
+  i18n: {
+    defaultLocale: 'es',
+    locales: ['es', 'en'],
+    routing: { prefixDefaultLocale: false }
+  },
   integrations: [
-    // Genera sitemap.xml automáticamente
     sitemap({
-      changefreq: 'weekly',
-      priority: 0.7,
-      lastmod: new Date(),
-      i18n: {
-        defaultLocale: 'en',
-        locales: {
-          en: 'en-US',
-          es: 'es-PE'
-        }
-      }
-    }),
-
-    // Genera robots.txt
-    robotsTxt({
-      policy: [
-        {
-          userAgent: '*',
-          allow: '/',
-          disallow: ['/api/', '/_astro/'],
-          crawlDelay: 10
-        }
-      ],
-      sitemap: true
-    }),
-
-    // Compresión gzip/brotli (debe ir al final)
-    compressor({
-      gzip: true,
-      brotli: true
+      i18n: { defaultLocale: 'es', locales: { es: 'es-PE', en: 'en-US' } },
+      filter: page => !['/404', '/lectura/', '/en/reading/'].some(path => page.includes(path))
     })
   ],
-
-  vite: {
-    plugins: [tailwindcss()],
-    optimizeDeps: {
-      include: ['three']
-    },
-    build: {
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            three: ['three']
-          }
-        }
-      },
-      // Optimizaciones adicionales
-      cssCodeSplit: true,
-      minify: 'esbuild'  // esbuild es más rápido y viene incluido
-    }
-  },
-
-  // Optimizaciones de build
   build: {
-    inlineStylesheets: 'auto'
+    inlineStylesheets: 'always'
   },
-
-  // Prefetch para navegación más rápida
-  prefetch: {
-    prefetchAll: true,
-    defaultStrategy: 'viewport'
+  vite: {
+    plugins: [tailwindcss()]
   }
 });

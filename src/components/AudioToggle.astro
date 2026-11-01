@@ -1,0 +1,163 @@
+---
+import { useTranslations, type Locale } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<button
+  type="button"
+  data-audio-toggle
+  data-state="off"
+  data-label-enable={t('audio.enable')}
+  data-label-mute={t('audio.mute')}
+  data-label-armed={t('audio.armed')}
+  aria-pressed="false"
+  aria-label={t('audio.enable')}
+  title={t('audio.enable')}
+  hidden
+  class="group hud-control hud-icon"
+>
+  <svg
+    viewBox="0 0 24 24"
+    width="16"
+    height="16"
+    aria-hidden="true"
+    class="shrink-0 fill-none stroke-current"
+    stroke-width="1.75"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path d="M4 9.5h3l4.5-4v13L7 14.5H4z" class="fill-current"></path>
+    <path
+      d="M15.5 9.2a4 4 0 0 1 0 5.6M18 6.8a7.5 7.5 0 0 1 0 10.4"
+      class="hidden group-data-[state=on]:block"
+    ></path>
+    <path d="M16 10l4 4M20 10l-4 4" class="group-data-[state=on]:hidden"></path>
+  </svg>
+  <span
+    aria-hidden="true"
+    class="absolute top-2.5 right-2.5 hidden size-1.5 rounded-full bg-accent group-data-[invite]:block group-data-[state=armed]:block"
+  ></span>
+</button>
+
+<script>
+  import type { Ambience } from '../audio/ambience';
+
+  type State = 'off' | 'armed' | 'on';
+
+  const STORAGE_KEY = 'audio';
+  const INVITE_KEY = 'audio-invited';
+  const INVITE_MS = 10000;
+  const button = document.querySelector<HTMLButtonElement>('[data-audio-toggle]');
+  const AudioContextClass =
+    window.AudioContext ??
+    (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+
+  let context: AudioContext | null = null;
+  let ambience: Promise<Ambience> | null = null;
+
+  function readPreference(): 'on' | 'off' | null {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored === 'on' || stored === 'off' ? stored : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function savePreference(on: boolean) {
+    try {
+      localStorage.setItem(STORAGE_KEY, on ? 'on' : 'off');
+    } catch {
+      // Storage can be blocked (private mode, disabled cookies); the toggle still works for this visit.
+    }
+  }
+
+  function render(target: HTMLButtonElement, state: State) {
+    const label =
+      (state === 'on'
+        ? target.dataset.labelMute
+        : state === 'armed'
+          ? target.dataset.labelArmed
+          : target.dataset.labelEnable) ?? '';
+    target.dataset.state = state;
+    target.setAttribute('aria-pressed', String(state === 'on'));
+    target.setAttribute('aria-label', label);
+    target.title = label;
+  }
+
+  function loadAmbience(): Promise<Ambience> {
+    // The context must be created inside the gesture handler, before any await, or Safari keeps it suspended.
+    context ??= new AudioContextClass({ latencyHint: 'playback' });
+    void context.resume();
+    const audioContext = context;
+    ambience ??= import('../audio/ambience').then(module => module.createAmbience(audioContext));
+    return ambience;
+  }
+
+  function enable(target: HTMLButtonElement) {
+    render(target, 'on');
+    savePreference(true);
+    loadAmbience()
+      .then(instance => instance.start())
+      .catch(() => render(target, 'off'));
+  }
+
+  function disable(target: HTMLButtonElement) {
+    render(target, 'off');
+    savePreference(false);
+    void ambience?.then(instance => instance.stop());
+  }
+
+  if (button && AudioContextClass) {
+    button.hidden = false;
+    const gestureEvents = ['pointerup', 'keydown'] as const;
+
+    const onFirstGesture = (event: Event) => {
+      if (event instanceof KeyboardEvent && event.key === 'Escape') return;
+      if (event.target instanceof Node && button.contains(event.target)) return;
+      stopWaiting();
+      enable(button);
+    };
+    const stopWaiting = () => {
+      for (const type of gestureEvents) window.removeEventListener(type, onFirstGesture, true);
+    };
+
+    const endInvite = () => delete button.dataset.invite;
+
+    const invite = () => {
+      try {
+        if (sessionStorage.getItem(INVITE_KEY)) return;
+        sessionStorage.setItem(INVITE_KEY, '1');
+      } catch {
+        return;
+      }
+      if (button.dataset.state !== 'off') return;
+      button.dataset.invite = '';
+      window.dispatchEvent(new CustomEvent('audio:invite'));
+      setTimeout(endInvite, INVITE_MS);
+    };
+
+    button.addEventListener('click', () => {
+      stopWaiting();
+      endInvite();
+      if (button.dataset.state === 'on') disable(button);
+      else enable(button);
+    });
+
+    const preference = readPreference();
+    if (preference === 'on') {
+      render(button, 'armed');
+      for (const type of gestureEvents) window.addEventListener(type, onFirstGesture, true);
+    } else {
+      render(button, 'off');
+      if (preference === null)
+        window.addEventListener('scroll', invite, { once: true, passive: true });
+    }
+  }
+</script>

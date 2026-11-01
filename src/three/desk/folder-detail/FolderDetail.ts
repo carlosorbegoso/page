@@ -1,42 +1,29 @@
 import {
-  CanvasTexture,
-  Color,
-  Euler,
   Group,
   Matrix4,
-  Mesh,
-  MeshBasicMaterial,
-  PlaneGeometry,
   Quaternion,
-  SRGBColorSpace,
   Vector3,
+  type CanvasTexture,
+  type Mesh,
   type Material,
   type WebGLRenderer
 } from 'three';
 import { FOLDER, FOLDERS, OPEN_FOLDER, folderCentre, type FolderId } from '../layout';
 import type { Palette } from '../props';
 import {
-  CLEAR_X,
   DURATION,
-  FACE_TURN,
   FOLDER_PARK,
-  HOLD_LEAN,
-  LIFT,
-  MAX_FORWARD,
-  NEARER,
   OPEN_SHEET,
   OPEN_SHEET_FORWARD,
   OPEN_SHEET_LIFT,
   SHEET,
-  SHEET_LEVEL,
-  SLIDE_END,
-  TURN_START,
   type ShelfFolder
 } from './constants';
+import { aimOpenSheet, aimShelfFolder, shelfHoldPose } from './aim';
 import { ease } from './ease';
-import { CANVAS, drawSheet } from './sheet-canvas';
+import { drawSheet } from './sheet-canvas';
 import { readPlate, type SheetContent } from './sheet-content';
-import { buildTwin } from './twin';
+import { createSheetMesh, createSheetTexture, createTwinMesh, type SheetMesh } from './mesh';
 
 export interface FolderDetailOptions {
   material: Material;
@@ -50,7 +37,6 @@ export interface FolderDetailOptions {
 const scratch = new Matrix4();
 const scratchQuaternion = new Quaternion();
 const scratchPosition = new Vector3();
-const IDENTITY = new Quaternion();
 const ONE = new Vector3(1, 1, 1);
 
 /**
@@ -63,8 +49,8 @@ export class FolderDetail {
   private readonly twins = new Map<ShelfFolder, Mesh>();
   private readonly canvas = document.createElement('canvas');
   private readonly texture: CanvasTexture;
-  private readonly shelfSheet: Mesh<PlaneGeometry, MeshBasicMaterial>;
-  private readonly openSheet: Mesh<PlaneGeometry, MeshBasicMaterial>;
+  private readonly shelfSheet: SheetMesh;
+  private readonly openSheet: SheetMesh;
   private readonly openFrame: Matrix4;
   /** The open-folder sheet hinges on its near edge, like a page lifted off the board. */
   private readonly openEdge = new Vector3(OPEN_FOLDER.width / 4, 0.0095, OPEN_SHEET.height / 2);
@@ -83,43 +69,23 @@ export class FolderDetail {
     this.object3D.name = 'desk-folder-detail';
     for (const id of FOLDERS) {
       if (id === 'tcs') continue;
-      const geometry = buildTwin(id, options.palette).build();
-      const twin = new Mesh(geometry, options.material);
-      twin.name = `desk-folder-twin-${id}`;
-      twin.castShadow = options.shadows;
-      twin.receiveShadow = options.shadows;
-      if (options.depthMaterial) twin.customDepthMaterial = options.depthMaterial;
-      twin.matrixAutoUpdate = false;
-      twin.visible = false;
-      twin.raycast = () => undefined;
+      const twin = createTwinMesh(id, options);
       this.twins.set(id, twin);
       this.object3D.add(twin);
     }
-    this.canvas.width = CANVAS.width;
-    this.canvas.height = CANVAS.height;
-    this.texture = new CanvasTexture(this.canvas);
-    this.texture.colorSpace = SRGBColorSpace;
-    this.texture.anisotropy = 8;
-    const sheet = (size: { width: number; height: number }, transparent: boolean) => {
-      const material = new MeshBasicMaterial({ map: this.texture, color: new Color(SHEET_LEVEL, SHEET_LEVEL, SHEET_LEVEL), transparent });
-      const mesh = new Mesh(new PlaneGeometry(size.width, size.height), material);
-      mesh.matrixAutoUpdate = false;
-      mesh.visible = false;
-      mesh.raycast = () => undefined;
-      this.object3D.add(mesh);
-      return mesh;
-    };
-    this.shelfSheet = sheet(SHEET, false);
-    this.shelfSheet.name = 'desk-folder-sheet';
-    this.openSheet = sheet(OPEN_SHEET, true);
-    this.openSheet.name = 'desk-open-folder-sheet';
+    this.texture = createSheetTexture(this.canvas);
+    this.shelfSheet = createSheetMesh('desk-folder-sheet', this.texture, SHEET, false);
+    this.openSheet = createSheetMesh('desk-open-folder-sheet', this.texture, OPEN_SHEET, true);
+    this.object3D.add(this.shelfSheet, this.openSheet);
     this.openFrame = new Matrix4().compose(OPEN_FOLDER.centre, new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), OPEN_FOLDER.yaw), ONE);
-    void document.fonts?.ready.then(() => {
-      if (!this.content) return;
-      drawSheet(this.canvas, this.content);
-      this.texture.needsUpdate = true;
-      options.onRedraw();
-    });
+    void document.fonts?.ready.then(() => this.redrawWithLoadedFonts());
+  }
+
+  private redrawWithLoadedFonts(): void {
+    if (!this.content) return;
+    drawSheet(this.canvas, this.content);
+    this.texture.needsUpdate = true;
+    this.options.onRedraw();
   }
 
   /** The folder out of the shelf (or on its way back), else null. */
@@ -141,7 +107,7 @@ export class FolderDetail {
     this.texture.needsUpdate = true;
     this.options.renderer.initTexture(this.texture);
     if (id === 'tcs') this.aimOpenSheet(eye);
-    else this.aimShelfFolder(id, eye);
+    else aimShelfFolder(id, eye, this.targetAt, this.targetTurn);
   }
 
   close(): void {
@@ -175,18 +141,14 @@ export class FolderDetail {
    */
   shelfPose(id: FolderId, pull: number): Matrix4 | null {
     if (id !== this.shown || id === 'tcs' || this.progress === 0) return null;
+    shelfHoldPose(id, this.progress, pull, this.targetAt, this.targetTurn, this.pose);
+    this.placeTwinAndSheet(id);
+    return this.pose;
+  }
+
+  private placeTwinAndSheet(id: ShelfFolder): void {
     const centre = folderCentre(id);
-    const slide = ease(this.progress / SLIDE_END);
-    const turn = ease((this.progress - TURN_START) / (1 - TURN_START));
-    const fromX = centre.x + pull;
-    scratchPosition.set(
-      fromX + (this.targetAt.x - fromX) * slide,
-      centre.y + (this.targetAt.y - centre.y) * slide,
-      centre.z + (this.targetAt.z - centre.z) * turn
-    );
-    scratchQuaternion.copy(IDENTITY).slerp(this.targetTurn, turn);
-    this.pose.compose(scratchPosition, scratchQuaternion, ONE).multiply(scratch.makeTranslation(-centre.x, -centre.y, -centre.z));
-    const twin = this.twins.get(id as ShelfFolder)!;
+    const twin = this.twins.get(id)!;
     twin.matrix.copy(this.pose).multiply(scratch.makeTranslation(-FOLDER_PARK, 0, 0));
     twin.matrixWorldNeedsUpdate = true;
     twin.visible = true;
@@ -196,29 +158,11 @@ export class FolderDetail {
       .multiply(scratch.makeRotationZ(-0.012));
     this.shelfSheet.matrixWorldNeedsUpdate = true;
     this.shelfSheet.visible = true;
-    return this.pose;
-  }
-
-  private aimShelfFolder(id: FolderId, eye: Vector3): void {
-    const centre = folderCentre(id);
-    const forward = scratchPosition.copy(folderCentre(id)).setX(centre.x + FOLDER.depth / 2).sub(eye).setY(0);
-    const distance = forward.length();
-    forward.normalize();
-    const x = Math.max(CLEAR_X, centre.x);
-    const nearer = distance * NEARER;
-    const z = Math.abs(forward.z) > 0.3 ? eye.z + (nearer - (x - eye.x) * forward.x) / forward.z : centre.z;
-    this.targetAt.set(x, centre.y + LIFT, centre.z + Math.min(Math.max(z - centre.z, 0), MAX_FORWARD));
-    const toEye = eye.clone().sub(this.targetAt);
-    const yaw = Math.atan2(toEye.x, toEye.z) * FACE_TURN;
-    const elevation = Math.asin(Math.min(Math.max(toEye.y / toEye.length(), -1), 1));
-    this.targetTurn.setFromEuler(new Euler(-elevation * FACE_TURN - HOLD_LEAN, yaw, 0, 'YXZ'));
   }
 
   private aimOpenSheet(eye: Vector3): void {
     this.openTakenEdge.copy(this.openEdge).add(new Vector3(0, OPEN_SHEET_LIFT, OPEN_SHEET_FORWARD));
-    const local = eye.clone().applyMatrix4(scratch.copy(this.openFrame).invert()).sub(this.openTakenEdge).normalize();
-    const facing = new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), local);
-    this.openTaken.copy(IDENTITY).slerp(facing, 0.85).multiply(this.openFlat);
+    aimOpenSheet(eye, this.openFrame, this.openTakenEdge, this.openFlat, this.openTaken);
   }
 
   private placeOpenSheet(): void {

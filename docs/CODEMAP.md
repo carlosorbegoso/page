@@ -98,6 +98,12 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Siluetas y ventanas de la ciudad (atlas), luces de aviación | `src/three/desk/atmosphere/city-atlas.ts` |
 | Lluvia en el vidrio de la ventana | `src/three/desk/atmosphere/glass.ts`, GLSL en `glass.glsl.ts` |
 | Vapor del café | `src/three/desk/atmosphere/steam.ts`, GLSL en `steam.glsl.ts` |
+| Sacar la carpeta del estante: estado, toggle, update | `src/three/desk/folder-detail/FolderDetail.ts` (`desk/folderDetail.ts` solo reexporta) |
+| Dónde se sostiene la carpeta, giro hacia la cámara | `src/three/desk/folder-detail/aim.ts`, tiempos en `constants.ts` |
+| Hoja impresa de la carpeta (dibujo, ajuste de líneas) | `src/three/desk/folder-detail/sheet-canvas.ts`, `wrap.ts` |
+| Qué texto lleva la hoja (se lee de la placa de experiencia) | `src/three/desk/folder-detail/sheet-content.ts` |
+| Gemela de la caja y mallas de la hoja | `src/three/desk/folder-detail/twin.ts`, `mesh.ts` |
+| Objetos que viajan con la carpeta (`follow`) | `src/three/desk/folder-detail/follow.ts` |
 | Reloj despertador | `src/three/desk/clock.ts`, `src/three/desk/clock/` |
 | Figuras animadas | `src/three/desk/life/` |
 | Página 404: montaje, orden de arranque, disposer | `src/three/notfound/scene.ts` |

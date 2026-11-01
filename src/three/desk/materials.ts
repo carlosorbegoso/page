@@ -12,6 +12,7 @@ import {
   RGBADepthPacking,
   Scene,
   SRGBColorSpace,
+  Matrix3,
   Vector3,
   type Texture,
   type WebGLRenderer
@@ -40,6 +41,9 @@ export interface AtlasUniforms {
   uPresence: { value: number[] };
   /** Metres an object slides out along +X (a folder pulled off the shelf). */
   uPull: { value: number[] };
+  /** Rotation of the TCS folder's left board about its spine, and a point on that spine. */
+  uHinge: { value: Matrix3 };
+  uHingeOrigin: { value: Vector3 };
 }
 
 const VERTEX_DECLARATIONS = /* glsl */ `
@@ -47,6 +51,8 @@ uniform vec3 uFigPivot[${FIGURE_SLOTS}];
 uniform float uFigLift[${FIGURE_SLOTS}];
 uniform float uFigYaw[${FIGURE_SLOTS}];
 uniform float uPull[${OBJECT_SLOTS}];
+uniform mat3 uHinge;
+uniform vec3 uHingeOrigin;
 attribute vec4 pbr;
 attribute float oid;
 varying vec4 vPbr;
@@ -69,6 +75,7 @@ if (figure >= 0 && figure < ${FIGURE_SLOTS}) {
   transformed = vec3(yawC * q.x + yawS * q.z, q.y, -yawS * q.x + yawC * q.z) + pivot + vec3(0.0, uFigLift[figure], 0.0);
 }
 transformed.x += uPull[clamp(int(oid + 0.5), 0, ${OBJECT_SLOTS - 1})];
+if (abs(oid - 11.0) < 0.5) transformed = uHinge * (transformed - uHingeOrigin) + uHingeOrigin;
 `;
 
 const FRAGMENT_DECLARATIONS = /* glsl */ `
@@ -136,7 +143,9 @@ export function createAtlasMaterial(
     uSignal: { value: new Array<number>(OBJECT_SLOTS).fill(1) },
     uGlow: { value: new Array<number>(OBJECT_SLOTS).fill(0) },
     uPresence: { value: new Array<number>(OBJECT_SLOTS).fill(1) },
-    uPull: { value: new Array<number>(OBJECT_SLOTS).fill(0) }
+    uPull: { value: new Array<number>(OBJECT_SLOTS).fill(0) },
+    uHinge: { value: new Matrix3() },
+    uHingeOrigin: { value: new Vector3() }
   };
   material.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, {
@@ -150,6 +159,8 @@ export function createAtlasMaterial(
       uGlow: uniforms.uGlow,
       uPresence: uniforms.uPresence,
       uPull: uniforms.uPull,
+      uHinge: uniforms.uHinge,
+      uHingeOrigin: uniforms.uHingeOrigin,
       uRoomBounds: { value: roomBounds },
       uDeskBounds: { value: deskBounds },
       uDeskTop: { value: deskTop }
@@ -160,7 +171,8 @@ export function createAtlasMaterial(
         '#include <beginnormal_vertex>',
         `#include <beginnormal_vertex>
         ${FIGURE_YAW}
-        objectNormal = vec3(yawC * objectNormal.x + yawS * objectNormal.z, objectNormal.y, -yawS * objectNormal.x + yawC * objectNormal.z);`
+        objectNormal = vec3(yawC * objectNormal.x + yawS * objectNormal.z, objectNormal.y, -yawS * objectNormal.x + yawC * objectNormal.z);
+        if (abs(oid - 11.0) < 0.5) objectNormal = uHinge * objectNormal;`
       )
       .replace('#include <begin_vertex>', `#include <begin_vertex>\n${FIGURE_TRANSFORM}`)
       .replace(
@@ -189,7 +201,7 @@ export function createAtlasMaterial(
         totalEmissiveRadiance += uHoverColor * hovered * uHoverMix * (0.05 + 0.6 * rim);`
       );
   };
-  material.customProgramCacheKey = () => 'desk-atlas-v4';
+  material.customProgramCacheKey = () => 'desk-atlas-v5';
   return { material, uniforms };
 }
 
@@ -200,7 +212,14 @@ export function createAtlasMaterial(
 export function createAtlasDepthMaterial(uniforms: AtlasUniforms): MeshDepthMaterial {
   const material = new MeshDepthMaterial({ depthPacking: RGBADepthPacking });
   material.onBeforeCompile = shader => {
-    Object.assign(shader.uniforms, { uFigPivot: uniforms.uFigPivot, uFigLift: uniforms.uFigLift, uFigYaw: uniforms.uFigYaw, uPull: uniforms.uPull });
+    Object.assign(shader.uniforms, {
+      uFigPivot: uniforms.uFigPivot,
+      uFigLift: uniforms.uFigLift,
+      uFigYaw: uniforms.uFigYaw,
+      uPull: uniforms.uPull,
+      uHinge: uniforms.uHinge,
+      uHingeOrigin: uniforms.uHingeOrigin
+    });
     shader.vertexShader = shader.vertexShader
       .replace(
         '#include <common>',
@@ -209,11 +228,13 @@ uniform vec3 uFigPivot[${FIGURE_SLOTS}];
 uniform float uFigLift[${FIGURE_SLOTS}];
 uniform float uFigYaw[${FIGURE_SLOTS}];
 uniform float uPull[${OBJECT_SLOTS}];
+uniform mat3 uHinge;
+uniform vec3 uHingeOrigin;
 attribute float oid;`
       )
       .replace('#include <begin_vertex>', `#include <begin_vertex>\n${FIGURE_YAW}\n${FIGURE_TRANSFORM}`);
   };
-  material.customProgramCacheKey = () => 'desk-atlas-depth-v2';
+  material.customProgramCacheKey = () => 'desk-atlas-depth-v3';
   return material;
 }
 

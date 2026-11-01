@@ -33,7 +33,9 @@ export const OBJECT_ID = {
   intercorp: 7,
   tcs: 8,
   openFolder: 9,
-  phone: 10
+  phone: 10,
+  /** Left board of the TCS folder: it swings open on its spine (`uHinge`). */
+  openFolderCover: 11
 } as const;
 
 export function placementMatrix(placement: Placement = {}): Matrix4 {

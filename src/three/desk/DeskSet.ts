@@ -14,7 +14,7 @@ import {
   Vector3,
   type CanvasTexture,
   type Color,
-  type Matrix4,
+  Matrix4,
   type Texture
 } from 'three';
 import { CHAPTERS, type ChapterId, type ChapterState, type PlateAnchor, type Shot, type ShotProvider, type StationContext, type StationPick, type SurfaceName } from '../contracts';
@@ -24,7 +24,7 @@ import { createLampBeam, type LampBeam } from './beam';
 import { createSpineLabels } from './spines';
 import { StoryClock, storyMinutes } from './clock';
 import { OBJECT_ID, PartBuilder } from './builder';
-import { DESK, FIGURE_HEIGHT, FIGURES, FOLDER, FOLDERS, GLASS_Z, LAMP, MONITOR, PHONE, PRODUCT_FIGURES, ROOM, WINDOW, folderCentre, type FigureId, type FolderId } from './layout';
+import { DESK, FIGURE_HEIGHT, FIGURES, FOLDER, FOLDERS, GLASS_Z, LAMP, MONITOR, OPEN_FOLDER, PHONE, PRODUCT_FIGURES, ROOM, WINDOW, folderCentre, type FigureId, type FolderId } from './layout';
 import {
   bakeNightEnvironment,
   createAtlasDepthMaterial,
@@ -120,6 +120,10 @@ const FIGURE_INTRO: Record<FigureId, [ChapterId, number]> = {
   ventixs: ['products', 2]
 };
 const DIM_PRESENCE = 0.18;
+const FOLDER_OPENS_AT = storyRank('experience', EXPERIENCE_ORDER.length);
+const FOLDER_OPEN_DELAY = 0.3;
+const FOLDER_HINGE_AXIS = new Vector3(Math.sin(OPEN_FOLDER.yaw), 0, Math.cos(OPEN_FOLDER.yaw));
+const FOLDER_HINGE_ORIGIN = OPEN_FOLDER.centre.clone().add(new Vector3(0, 0.009, 0));
 /** Metres a folder slides off the shelf when its year is told (or under the pointer). */
 const FOLDER_PULL = 0.03;
 /** Seconds after the camera lands before a figure lights up, like a neon tube starting. */
@@ -237,6 +241,9 @@ export class DeskSet implements ShotProvider {
   private storySwitched = false;
   private clockModel: StoryClock | null = null;
   private clockMinutes = 60;
+  /** 0 closed … 1 open: the TCS folder stays shut until the story reaches today. */
+  private folderOpen = 0;
+  private readonly hingeMatrix = new Matrix4();
   private clock = 0;
   private readonly onAction = (event: Event) => {
     if ((event as CustomEvent<{ action?: string }>).detail?.action !== 'lamp') return;
@@ -599,6 +606,14 @@ export class DeskSet implements ShotProvider {
       level.monitor = damp(level.monitor, light.monitor, 5, step);
     }
     level.late = damp(level.late, LATENESS[this.chapter], 1.2, step);
+    const rank = storyRank(this.chapter, this.subIndex);
+    const openGoal = rank >= FOLDER_OPENS_AT ? 1 : 0;
+    const opening = motion && rank === FOLDER_OPENS_AT && openGoal > this.folderOpen;
+    if (!opening || (this.settledAt >= 0 && time - this.settledAt >= FOLDER_OPEN_DELAY)) {
+      this.folderOpen = damp(this.folderOpen, openGoal, opening ? 3.2 : motion ? 5 : 10, step);
+      if (Math.abs(this.folderOpen - openGoal) < 0.001) this.folderOpen = openGoal;
+    }
+    settling ||= this.folderOpen !== openGoal;
     const minutesGoal = storyMinutes(this.chapter, this.subIndex);
     const minutes = damp(this.clockMinutes, minutesGoal, 1.6, step);
     if (Math.abs(minutes - this.clockMinutes) > 0.01 || Math.abs(minutes - minutesGoal) < 0.01) {
@@ -618,7 +633,6 @@ export class DeskSet implements ShotProvider {
     settling ||= Math.abs(level.lamp - light.lamp) > 0.05 || Math.abs(level.dawn - (this.chapter === 'outro' ? 1 : 0)) > 0.002;
     settling ||= Math.abs(level.alfaYaw - alfaGoal) > 1e-3 || Math.abs(level.phone - (this.chapter === 'contact' ? 1 : 0)) > 0.002;
 
-    const rank = storyRank(this.chapter, this.subIndex);
     for (const id of FIGURE_ORDER) {
       const [introChapter, introSub] = FIGURE_INTRO[id];
       const introRank = storyRank(introChapter, introSub);
@@ -732,6 +746,9 @@ export class DeskSet implements ShotProvider {
     for (const id of FOLDERS) uniforms.uGlow.value[OBJECT_ID[id]] = (this.folderGlow.get(id) ?? 0) * 0.32;
     for (const id of PRODUCT_FIGURES) uniforms.uGlow.value[OBJECT_ID[id]] = ((this.figureLift.get(id) ?? 0) / FIGURE_LIFT) * FOCUS_BOUNCE;
     for (const id of FIGURE_ORDER) uniforms.uPresence.value[OBJECT_ID[id]] = this.presence.get(id) ?? 1;
+    const closed = 1 - this.folderOpen;
+    uniforms.uHinge.value.setFromMatrix4(this.hingeMatrix.makeRotationAxis(FOLDER_HINGE_AXIS, -Math.PI * 0.985 * (closed * closed * (3 - 2 * closed))));
+    uniforms.uHingeOrigin.value.copy(FOLDER_HINGE_ORIGIN);
     for (const id of FOLDERS) {
       const pull = this.folderPull.get(id) ?? 0;
       uniforms.uPull.value[OBJECT_ID[id]] = pull;

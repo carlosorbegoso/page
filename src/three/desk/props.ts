@@ -327,7 +327,7 @@ export function buildOpenFolder(b: PartBuilder, p: Palette): void {
     new Matrix4().multiplyMatrices(frame, new Matrix4().compose(new Vector3(x, y, z), new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), rz), new Vector3(1, 1, 1)));
   const half = width / 2;
   const id = OBJECT_ID.openFolder;
-  b.add(new RoundedBoxGeometry(half - 0.004, 0.004, depth, 1, 0.0015), p.folders.tcs, at(-half / 2, 0.002, 0, 0.02), id);
+  b.add(new RoundedBoxGeometry(half - 0.004, 0.004, depth, 1, 0.0015), p.folders.tcs, at(-half / 2, 0.002, 0, 0.02), OBJECT_ID.openFolderCover);
   b.add(new RoundedBoxGeometry(half - 0.004, 0.004, depth, 1, 0.0015), p.folders.tcs, at(half / 2, 0.002, 0, -0.02), id);
   b.add(new BoxGeometry(0.012, 0.006, depth), shade(p.folders.tcs, 0.7), at(0, 0.003, 0), id);
   b.add(new BoxGeometry(half - 0.03, 0.002, depth - 0.03), p.paper, at(half / 2, 0.006, 0, -0.02), id);
@@ -335,7 +335,7 @@ export function buildOpenFolder(b: PartBuilder, p: Palette): void {
   for (let line = 0; line < 7; line++) {
     b.add(new BoxGeometry(0.11 + (line % 3) * 0.02, 0.0004, 0.004), shade(p.bookDark, 0.8), at(half / 2 - 0.02, 0.0086, -0.09 + line * 0.022), id);
   }
-  b.add(new BoxGeometry(half - 0.04, 0.002, depth - 0.04), shade(p.paper, 0.85), at(-half / 2, 0.005, 0, 0.02), id);
+  b.add(new BoxGeometry(half - 0.04, 0.002, depth - 0.04), shade(p.paper, 0.85), at(-half / 2, 0.005, 0, 0.02), OBJECT_ID.openFolderCover);
 }
 
 /** Phone on a small walnut stand; the glass itself is a separate mesh (the `phone` surface). */

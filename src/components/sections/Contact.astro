@@ -51,7 +51,10 @@ const { locale } = Astro.props;
     transition:
       transform 120ms ease-out,
       filter 120ms ease-out,
-      background-color 120ms ease-out;
+      color var(--duration-fast) ease-out,
+      background-color var(--duration-fast) ease-out,
+      border-color var(--duration-fast) ease-out,
+      box-shadow var(--duration-fast) ease-out;
     -webkit-tap-highlight-color: transparent;
   }
 

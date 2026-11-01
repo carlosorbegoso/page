@@ -22,7 +22,7 @@ const night = (time: string) => `${time} · ${t('story.night')}`;
 const storyBeats: Record<string, string[]> = {
   hero: [tonight('23:00')],
   about: [tonight('23:20'), tonight('23:30')],
-  experience: [`${t('story.day')} · ${years[0]} – ${t('experience.present')}`, ...years.map(year => `${t('story.day')} · ${year}`)],
+  experience: [`${t('story.day')} · ${years[0]} →`, ...years.map(year => `${t('story.day')} · ${year}`)],
   company: [night('00:30')],
   products: [night('01:30'), night('02:00'), night('02:30')],
   contact: [night('03:30')],

@@ -85,7 +85,11 @@ Qué archivo editar en el escritorio 3D: encuadres (shots), luz, props, figuras,
 | Reloj despertador | `src/three/desk/clock.ts`, `src/three/desk/clock/` |
 | Figuras animadas | `src/three/desk/life/` |
 | Tarjetas impresas de los productos (se acuestan en el escritorio y se paran en su plano) | `src/three/desk/notes/cards/` |
-| Batalla de Pikachu y Charizard al hacer clic (piezas, efectos, línea de tiempo) | `src/three/desk/life/pokemon/` |
+| Piezas de Pikachu y Charizard (clasificador de triángulos, va en el arranque) | `src/three/desk/life/pokemon/parts.ts` |
+| Vida de Pikachu y Charizard (orejas, cola, chispas, alas, llama) y la batalla al hacer clic; llega con `deferred` | `src/three/desk/life/pokemon/index.ts`; entra por `createPokemonLife` en `desk/deferred/index.ts` y `DeskLife.attachPokemon` |
+| Tiempos de la batalla (beat sheet) | `src/three/desk/life/pokemon/timeline/beats.ts`; un archivo por golpe: `face-off`, `flight`, `flamethrower`, `quick-attack`, `thunderbolt`, `impact`, `finale`; versión tranquila en `calm.ts`; sonidos en `cues.ts` |
+| Poses de Pikachu (cuerpo, orejas, cola, mejillas) y Charizard (cuerpo, aleteo con pliegue de membrana, cola, llama) | `src/three/desk/life/pokemon/pose/{pikachu,charizard,body,idle}.ts` |
+| Efectos de la batalla: lanzallamas (shader), rayo ramificado, partículas (brasas, chispas, humo), estela de Ataque Rápido, destello de luz | `src/three/desk/life/pokemon/effects/` (`fire.ts`+`fire.glsl.ts`, `bolt.ts`, `particles.ts`+`particles.glsl.ts`, `bursts.ts`, `trail.ts`, `flash-light.ts`, ensamblador `battle-visuals.ts`) |
 | Haz de luz visible de la lámpara | `src/three/desk/beam.ts` |
 | Etiquetas de los lomos | `src/three/desk/spines.ts` |
 | Ensamblar primitivas en una malla (`PartBuilder`, ids de objeto) | `src/three/desk/builder.ts` |

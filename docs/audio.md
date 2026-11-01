@@ -71,7 +71,7 @@ Todo en Re mayor: cualquier crossfade es consonante. Dos osciladores por nota (t
 
 El objeto se elige por prefijo del id (`soundFor`): `folder`/`paper` → `folder`, `skymek` → `wrench`, `ventixs` → `chat`, `parati` → `gift`, `alfa` → `toy`, `window` → `blind`, `macbook` → `laptop`; `lamp` no suena (la lámpara usa las muestras del interruptor).
 
-**Pausa** (`motion:toggle {paused: true}`, `data-motion="paused"`, `prefers-reduced-motion`): siguen el cuarto, el pad y la música; se callan teclas, tocks, chime, hoja, swells y el seguimiento de `chapter:progress`. El foley de objetos sí suena (responde a un clic del usuario).
+**Pausa** (`motion:toggle {paused: true}`, `data-motion="paused"`, `prefers-reduced-motion`): siguen el cuarto, el pad y la música; se callan teclas, tocks, chime, hoja, swells y el seguimiento de `chapter:progress`. El foley de objetos sí suena (responde a un clic del usuario); la batalla tranquila solo suena una vez `spark`.
 
 ## Cadena de nodos (`mix-graph.ts`)
 
@@ -105,6 +105,7 @@ hallSend → Convolver 3.6 s ─┴→ master (0 → MASTER_LEVEL) → limitador
 | `desk:key` | — | Tecla. Contrato: quien teclee el titular emite uno por carácter |
 | `desk:switch` | `{ on }` | Muestra del interruptor |
 | `desk:interact`, `desk:action`, `desk:clock` | `{ id, phase }`, `{ action, id }`, — | Foley de objetos |
+| `desk:battle` | `{ sound }` | Batalla Pokémon (`battle-voices.ts`): `growl`, `flap`, `flame`, `quick`, `spark`, `thunder`, `impact`, `land`, `chirp`, `roar`. Los emite `PokemonLife` al pasar cada tiempo de `timeline/cues.ts`; si el reloj salta más de 0.5 s (pestaña oculta) no los repone. El tipo `BattleSound` está duplicado en los dos lados a propósito: el audio no importa nada de three |
 | `motion:toggle` | `{ paused }` | Pausa |
 | `audio:invite` | — | Lo emite el toggle (ver abajo) |
 

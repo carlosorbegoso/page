@@ -1,4 +1,4 @@
-import type { Group } from 'three';
+import type { Group, PointLight } from 'three';
 import type { StationContext } from '../../contracts';
 import type { DeskLife } from '../life';
 import type { WallPortrait } from '../portrait';
@@ -17,6 +17,7 @@ export interface LateDeskOptions {
   portrait: WallPortrait | null;
   life: DeskLife | null;
   disposables: Array<{ dispose(): void }>;
+  flashLight: () => PointLight | null;
 }
 
 export function firstFrameShown(context: StationContext): Promise<void> {
@@ -25,10 +26,11 @@ export function firstFrameShown(context: StationContext): Promise<void> {
 }
 
 export async function mountLateDesk(options: LateDeskOptions): Promise<void> {
-  const { context, room, meshes, palette, folders, screens, portrait, life, disposables } = options;
+  const { context, room, meshes, palette, folders, screens, portrait, life, disposables, flashLight } = options;
   await firstFrameShown(context);
   try {
     const late = await import('../deferred');
+    life?.attachPokemon(parts => late.createPokemonLife(parts, flashLight()));
     const detail = late.createFolderDetail(context, meshes, palette);
     room.add(detail.object3D);
     disposables.push(detail);

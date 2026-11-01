@@ -1,3 +1,4 @@
+import { BATTLE_LEVEL, BATTLE_VOICES, type BattleSound } from './battle-voices';
 import { BEAT_LEVEL, BEAT_VOICES, type BeatSound } from './beat-voices';
 import { DESK_VOICES, type DeskSound } from './desk-voices';
 import { vary } from './synth';
@@ -83,6 +84,10 @@ export function listenDeskSounds({ context, output, noise, canPlay, signal }: Op
   on<{ sound?: BeatSound }>('desk:beat', detail => {
     const sound = detail?.sound;
     if (sound && sound in BEAT_VOICES && canPlay()) BEAT_VOICES[sound](context, output, noise, BEAT_LEVEL[sound], vary(1, PITCH_SPREAD));
+  });
+  on<{ sound?: BattleSound }>('desk:battle', detail => {
+    const sound = detail?.sound;
+    if (sound && sound in BATTLE_VOICES && canPlay()) BATTLE_VOICES[sound](context, output, noise, BATTLE_LEVEL[sound], vary(1, PITCH_SPREAD));
   });
   on<{ id?: string }>('chapter:enter', detail => {
     if (detail?.id !== 'contact' || performance.now() - lastContactBuzz < CONTACT_BUZZ_GAP_MS) return;

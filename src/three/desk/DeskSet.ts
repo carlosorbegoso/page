@@ -99,7 +99,7 @@ export class DeskSet implements ShotProvider {
     this.disposables.push(this.portrait);
     window.addEventListener('keydown', this.onFolderKey);
     this.screens = new DeskScreens(context, { room: this.room, phone: this.phoneSurface(), material: meshes.material, depthMaterial: meshes.depthMaterial, disposables: this.disposables });
-    const late = mountLateDesk({ context, room: this.room, meshes, palette, folders: this.folders, screens: this.screens, portrait: this.portrait, life: this.life, disposables: this.disposables });
+    const late = mountLateDesk({ context, room: this.room, meshes, palette, folders: this.folders, screens: this.screens, portrait: this.portrait, life: this.life, disposables: this.disposables, flashLight: () => this.lights.monitorLight });
     this.weather.addWindow(this.room, this.disposables);
     addSpines(this.room, this.folders, this.disposables);
     window.addEventListener('desk:action', this.onAction);

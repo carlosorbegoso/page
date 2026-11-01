@@ -35,7 +35,7 @@ export function createActionListener(host: DeskActionHost): (event: Event) => vo
       return;
     }
     if (detail?.action === 'battle') {
-      host.life()?.battle(host.clock(), Boolean(context?.motion()) && !context?.capture);
+      if (!context?.capture) host.life()?.battle();
       context?.invalidate();
       return;
     }

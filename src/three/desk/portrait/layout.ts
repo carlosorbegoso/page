@@ -6,7 +6,7 @@ export const PORTRAIT_PHOTO = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}i
 const FRAME_DEPTH = 0.022;
 
 export const PORTRAIT = {
-  centre: new Vector3(-0.645, 1.16, ROOM.back + FRAME_DEPTH / 2 + 0.004),
+  centre: new Vector3(-0.645, 1.3, ROOM.back + FRAME_DEPTH / 2 + 0.004),
   width: 0.27,
   height: 0.34,
   depth: FRAME_DEPTH,
@@ -23,8 +23,8 @@ export const PICTURE_LIGHT = {
   hoodRadius: 0.014
 } as const;
 
-const BIO_CARD_SIZE = { width: 0.26, height: 0.16, thickness: 0.0012 };
-const BIO_CARD_GAP = 0.03;
+const BIO_CARD_SIZE = { width: 0.26, height: 0.17, thickness: 0.0012 };
+const BIO_CARD_GAP = 0.02;
 
 export const BIO_CARD = {
   ...BIO_CARD_SIZE,

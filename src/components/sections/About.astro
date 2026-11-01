@@ -6,6 +6,7 @@ import type { Locale } from '../../i18n/utils';
 import '../../styles/sections/about/monitor.css';
 import '../../styles/sections/about/monitor-landscape.css';
 import '../../styles/sections/about/code.css';
+import '../../styles/sections/about/code-portrait.css';
 import '../../styles/sections/about/anchored.css';
 
 interface Props {
@@ -26,7 +27,7 @@ const { locale } = Astro.props;
     data-plate
     data-plate-id="about-bio"
     data-plate-anchor="about-bio"
-    data-plate-stacked
+    data-plate-stacked="printed"
     data-plate-mode="surface-monitor"
     data-plate-order="0"
   >
@@ -38,7 +39,6 @@ const { locale } = Astro.props;
     data-plate
     data-plate-id="about-stack"
     data-plate-anchor="about-stack"
-    data-plate-stacked
     data-plate-mode="surface-monitor"
     data-plate-order="1"
   >

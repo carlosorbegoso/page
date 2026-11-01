@@ -1,6 +1,7 @@
 import { Group, type PerspectiveCamera, type Texture } from 'three';
 import type { DeskFrame } from '../set/frame';
 import type { LightLevels } from '../set/levels';
+import type { BioCard } from './bio-card';
 import { createFrame } from './frame';
 import { PortraitGlass } from './glass';
 import { PortraitInspect } from './inspect';
@@ -15,6 +16,7 @@ export class WallPortrait {
   private readonly frame = createFrame();
   private readonly print: ReturnType<typeof createPrint>;
   private readonly inspect: PortraitInspect;
+  private bioCard: BioCard | null = null;
 
   constructor(camera: PerspectiveCamera, environment: Texture | null, invalidate: () => void) {
     this.print = createPrint(invalidate);
@@ -29,12 +31,18 @@ export class WallPortrait {
     this.group.name = 'desk-portrait';
   }
 
+  attachBioCard(card: BioCard): void {
+    this.bioCard = card;
+    this.group.add(card.group);
+  }
+
   setHover(hovered: boolean): void {
     this.glass.setHover(hovered);
   }
 
   update(frame: DeskFrame): boolean {
     this.inspect.update(frame);
+    this.bioCard?.update();
     return this.glass.update(frame);
   }
 
@@ -46,6 +54,7 @@ export class WallPortrait {
   dispose(): void {
     this.inspect.dispose();
     this.print.dispose();
+    this.bioCard?.dispose();
     this.frame.dispose();
     this.glass.dispose();
     this.light.dispose();

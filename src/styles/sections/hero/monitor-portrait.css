@@ -1,0 +1,58 @@
+@media (width < 48rem) and (orientation: portrait) {
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] {
+    padding-inline: 4cqw;
+    padding-bottom: 3.5cqw;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-screen h1 {
+    gap: 1cqw;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-name {
+    font-size: 3.9cqw;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-role {
+    display: none;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-headline {
+    max-width: none;
+    margin-top: 2cqw;
+    font-size: 6.8cqw;
+    line-height: 1.05;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-metrics {
+    display: none;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-ctas {
+    grid-template-columns: repeat(3, auto);
+    justify-content: start;
+    gap: 2cqw;
+    margin-top: 3.5cqw;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-ctas > * {
+    min-height: 11.5cqw;
+    padding: 0 2.6cqw;
+    border: 1px solid rgb(255 255 255 / 0.25);
+    border-radius: 2cqw;
+    background: rgb(255 255 255 / 0.06);
+    font-size: 3.9cqw;
+    white-space: nowrap;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-ctas > :first-child {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-bg);
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-ctas svg {
+    display: none;
+  }
+}

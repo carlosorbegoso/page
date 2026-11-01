@@ -22,3 +22,16 @@ export const PICTURE_LIGHT = {
   hoodLength: 0.17,
   hoodRadius: 0.014
 } as const;
+
+const BIO_CARD_SIZE = { width: 0.26, height: 0.16, thickness: 0.0012 };
+const BIO_CARD_GAP = 0.03;
+
+export const BIO_CARD = {
+  ...BIO_CARD_SIZE,
+  centre: new Vector3(
+    PORTRAIT.centre.x,
+    PORTRAIT.centre.y - PORTRAIT.height / 2 - BIO_CARD_GAP - BIO_CARD_SIZE.height / 2,
+    ROOM.back + BIO_CARD_SIZE.thickness / 2 + 0.002
+  ),
+  tilt: -0.012
+} as const;

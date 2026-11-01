@@ -2,6 +2,7 @@
 import ExternalLink from '../ui/ExternalLink.astro';
 import { SITE } from '../../config/site';
 import { useTranslations, type Locale } from '../../i18n/utils';
+import '../../styles/sections/outro/monitor-portrait.css';
 
 interface Props {
   locale: Locale;
@@ -23,7 +24,6 @@ const year = new Date().getFullYear();
     data-plate
     data-plate-id="outro"
     data-plate-anchor="outro"
-    data-plate-stacked
     data-plate-mode="surface-monitor"
   >
     <div class="outro-screen flex max-w-measure flex-col gap-4">

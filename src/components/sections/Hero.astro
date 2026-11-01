@@ -5,6 +5,7 @@ import KineticText from '../ui/KineticText.astro';
 import { SECTION_IDS } from '../../config/site';
 import { useTranslations, type Locale } from '../../i18n/utils';
 import { getProfile } from '../../lib/content';
+import '../../styles/sections/hero/monitor-portrait.css';
 
 interface Props {
   locale: Locale;
@@ -31,7 +32,6 @@ const metrics = [
     data-plate
     data-plate-id="hero"
     data-plate-anchor="hero"
-    data-plate-stacked
     data-plate-mode="surface-monitor"
   >
     <div class="hero-screen @container flex flex-col">

@@ -10,7 +10,7 @@ const { locale } = Astro.props;
 const t = useTranslations(locale);
 const profile = await getProfile(locale);
 const { degree, institution, status } = profile.education;
-type CodeLine = { indent: number; key?: string; value?: string; list?: string[]; comment?: string };
+type CodeLine = { indent: number; key?: string; value?: string; list?: string[]; comment?: string; brief?: boolean };
 const codeLines: CodeLine[] = [
   { indent: 0, comment: '# carlos.yml' },
   { indent: 0, key: 'education' },
@@ -18,8 +18,13 @@ const codeLines: CodeLine[] = [
   { indent: 1, key: 'school', value: institution },
   { indent: 1, key: 'status', value: status },
   { indent: 1, key: 'extra', list: t('about.code.extra').split(', ') },
-  { indent: 0, key: 'stack' },
-  ...profile.stack.map(group => ({ indent: 1, key: group.category.toLowerCase(), list: group.items }))
+  { indent: 0, key: 'stack', brief: true },
+  ...profile.stack.map((group, index) => ({
+    indent: 1,
+    key: group.category.toLowerCase(),
+    list: group.items,
+    brief: index < profile.stack.length - 1
+  }))
 ];
 ---
 
@@ -31,7 +36,7 @@ const codeLines: CodeLine[] = [
   <ol class="about-code__lines">
     {
       codeLines.map(line => (
-        <li style={`--indent: ${line.indent}`}>
+        <li style={`--indent: ${line.indent}`} data-brief={line.brief ? '' : undefined}>
           {line.comment && <span class="c-comment">{line.comment}</span>}
           {line.key && <span class="c-key">{line.key}</span>}
           {line.key && <span class="c-punct">:</span>}

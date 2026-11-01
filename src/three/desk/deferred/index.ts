@@ -1,5 +1,6 @@
 import type { StationContext } from '../../contracts';
 import { FolderDetail } from '../folderDetail';
+import { BioCard } from '../portrait/bio-card';
 import type { Palette } from '../props';
 import { LaptopDesktop } from '../screens/desktop';
 import { DESKTOP_SIZE } from '../screens/laptopDisplay';
@@ -21,4 +22,8 @@ export function createFolderDetail(context: StationContext, meshes: RoomMeshes, 
 
 export function createLaptopDesktop(): LaptopDesktop {
   return new LaptopDesktop(DESKTOP_SIZE);
+}
+
+export function createBioCard(): BioCard {
+  return new BioCard();
 }

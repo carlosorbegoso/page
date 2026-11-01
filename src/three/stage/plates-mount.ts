@@ -18,6 +18,7 @@ function applyPlateModes(stacked: boolean): void {
   for (const plate of document.querySelectorAll<HTMLElement>('[data-plate-stacked]')) {
     plate.dataset.plateWide ??= plate.dataset.plateMode ?? '';
     plate.dataset.plateMode = stacked ? STACKED_MODE : plate.dataset.plateWide;
+    plate.toggleAttribute('data-plate-printed', stacked && plate.dataset.plateStacked === 'printed');
   }
 }
 

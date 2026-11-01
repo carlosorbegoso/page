@@ -63,7 +63,7 @@ export const es = {
   'story.day': 'De día',
   'story.night': 'De noche',
   'story.dawn': 'Amanece',
-  'about.code.extra': 'CIBERTEC 2023, Alura Java Bootcamp 2023',
+  'about.code.extra': 'Técnico titulado CIBERTEC 2023, Alura Java Bootcamp 2023',
   'time.toDay': 'Ver la oficina de día',
   'time.toNight': 'Ver la oficina de noche',
   'story.today': 'Hoy',

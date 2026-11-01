@@ -7,13 +7,14 @@
     "Soy desarrollador backend con más de 5 años de experiencia. Hoy trabajo en TCS para el BCP, donde migro servicios a Quarkus y llevo el stack hacia lo cloud-native.",
     "Antes pasé por Intercorp Retail, Baufest y SYSARP: observabilidad, CQRS, microservicios y mejoras de hasta 40 % en el rendimiento.",
     "De noche construyo productos propios con TUSOCIO IA, la empresa que fundé con dos amigos.",
-    "Técnico en Computación e Informática por CIBERTEC (2023) y becado en el Bootcamp Java Developer de Alura Latam (2023)."
+    "Técnico titulado en Computación e Informática por CIBERTEC (2023).",
+    "Aparte, becado en el Bootcamp Java Developer de Alura Latam (2023)."
   ],
   "photoAlt": "Carlos Orbegoso con lentes de sol y polera blanca, frente a un muro de piedra",
   "education": {
     "institution": "Universidad Peruana de Ciencias Aplicadas (UPC)",
     "degree": "Ingeniería de Sistemas",
-    "status": "Egresado, estudié en horario nocturno"
+    "status": "Egresado"
   },
   "company": {
     "name": "TUSOCIO IA",

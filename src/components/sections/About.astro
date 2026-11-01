@@ -15,9 +15,9 @@ const { locale } = Astro.props;
 const t = useTranslations(locale);
 const profile = await getProfile(locale);
 
-/* The last summary paragraph holds the CIBERTEC and Alura credentials, so it moves into the education list. */
-const body = profile.summary.slice(0, -1);
-const credentials = profile.summary.slice(-1);
+/* The last two summary paragraphs are the CIBERTEC and Alura credentials, so they move into the education list. */
+const body = profile.summary.slice(0, -2);
+const credentials = profile.summary.slice(-2);
 const { degree, institution, status } = profile.education;
 /** The stack screen as the file Carlos would have open: one YAML document, built from the same content. */
 type CodeLine = { indent: number; key?: string; value?: string; list?: string[]; comment?: string };

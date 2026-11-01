@@ -19,9 +19,9 @@ const profile = await getProfile(locale);
 const experience = [...(await getExperience(locale))].sort((a, b) => b.start.localeCompare(a.start));
 const products = await getProducts(locale);
 
-/* Same split as About.astro: the last summary paragraph holds the CIBERTEC and Alura credentials. */
-const summary = profile.summary.slice(0, -1);
-const credentials = profile.summary.slice(-1);
+/* Same split as About.astro: the last two summary paragraphs are the CIBERTEC and Alura credentials. */
+const summary = profile.summary.slice(0, -2);
+const credentials = profile.summary.slice(-2);
 
 const readingPaths: Record<Locale, string> = {
   es: localeUrl('es', 'lectura'),

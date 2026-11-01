@@ -218,6 +218,9 @@ export class Ambience {
     on<{ source?: string }>('product:focus', detail => this.onSceneSelect(detail?.source));
     on<{ source?: string }>('experience:focus', detail => this.onSceneSelect(detail?.source));
     on<unknown>('desk:key', () => this.onKey());
+    on<unknown>('time:toggle', () => {
+      if (this.enabled && this.chapter) this.music.follow(this.chapter);
+    });
     on<{ on?: boolean }>('desk:switch', detail => {
       if (this.enabled) void this.music.playSample(detail?.on === false ? 'switchOff' : 'switchOn', LEVELS.sample);
     });

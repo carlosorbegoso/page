@@ -23,8 +23,20 @@ const STORY_MINUTES: Record<ChapterId, number[]> = {
   outro: [478]
 };
 
-export function storyMinutes(chapter: ChapterId, subIndex: number): number {
-  const list = STORY_MINUTES[chapter];
+/** By day, minutes after 10:00 (same 12-hour dial): a morning at the office until nightfall. */
+const STORY_MINUTES_DAY: Record<ChapterId, number[]> = {
+  intro: [0],
+  hero: [0],
+  about: [20, 40],
+  experience: [60, 65, 70, 75, 80],
+  company: [490],
+  products: [500, 510, 520],
+  contact: [530],
+  outro: [545]
+};
+
+export function storyMinutes(chapter: ChapterId, subIndex: number, day = false): number {
+  const list = (day ? STORY_MINUTES_DAY : STORY_MINUTES)[chapter];
   return list[Math.min(Math.max(subIndex, 0), list.length - 1)]!;
 }
 

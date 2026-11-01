@@ -203,6 +203,11 @@ class CinematicPipeline implements CinematicFx {
       window.addEventListener(type, listener);
       this.cleanups.push(() => window.removeEventListener(type, listener));
     };
+    const onTime = () => {
+      if (this.chapter) this.grading.enter(this.chapter, this.frozen, true);
+    };
+    window.addEventListener('time:toggle', onTime);
+    this.cleanups.push(() => window.removeEventListener('time:toggle', onTime));
     listen('chapter:enter', (id, detail) => {
       this.chapterEvents = true;
       this.enterChapter(id);

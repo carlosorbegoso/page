@@ -32,6 +32,20 @@ const GRADES: Record<string, Grade & { seconds?: number; delay?: number }> = {
   outro: { exposure: 1.3, temperature: 0.35, split: 0.2, contrast: 0.15, vignette: 0.35, focusRange: 0.8, bokeh: 1, seconds: 2.5 }
 };
 
+/** Overcast daylight: flatter, brighter, less vignette; the warmth comes back towards nightfall. */
+const GRADES_DAY: Record<string, Partial<Grade>> = {
+  intro: { exposure: 0.95, temperature: 0.05, split: 0.12, contrast: 0.12, vignette: 0.25 },
+  hero: { exposure: 0.95, temperature: 0.05, split: 0.12, contrast: 0.12, vignette: 0.25 },
+  about: { exposure: 0.95, temperature: 0, split: 0.1, contrast: 0.1, vignette: 0.22 },
+  experience: { exposure: 1, temperature: 0.02, split: 0.1, contrast: 0.12, vignette: 0.3 },
+  company: { exposure: 1, temperature: 0.3, split: 0.3, contrast: 0.2, vignette: 0.35 },
+  products: { exposure: 1, temperature: 0.28, split: 0.3, contrast: 0.22, vignette: 0.4 },
+  contact: { exposure: 0.95, temperature: 0.2, split: 0.25, contrast: 0.16, vignette: 0.35 },
+  outro: { exposure: 0.85, temperature: 0.15, split: 0.4, contrast: 0.2, vignette: 0.5 }
+};
+
+const isDay = () => typeof document !== 'undefined' && document.documentElement.dataset.time === 'day';
+
 const NEUTRAL = GRADES.hero!;
 
 function easeInOut(t: number): number {
@@ -60,9 +74,10 @@ export class ChapterGrading {
   private chapter = '';
 
   /** Starts the transition to `chapter`; unknown ids keep the current grade. */
-  enter(chapter: string, instant: boolean): void {
-    const target = GRADES[chapter];
-    if (!target || chapter === this.chapter) return;
+  enter(chapter: string, instant: boolean, force = false): void {
+    const night = GRADES[chapter];
+    if (!night || (chapter === this.chapter && !force)) return;
+    const target = { ...night, ...(isDay() ? GRADES_DAY[chapter] : undefined) };
     this.chapter = chapter;
     this.from = { ...this.current };
     this.to = {
@@ -74,8 +89,8 @@ export class ChapterGrading {
       focusRange: target.focusRange,
       bokeh: target.bokeh
     };
-    this.duration = instant ? 0 : (target.seconds ?? DEFAULT_SECONDS);
-    this.elapsed = instant ? 0 : -(target.delay ?? 0);
+    this.duration = instant ? 0 : force ? DEFAULT_SECONDS : (target.seconds ?? DEFAULT_SECONDS);
+    this.elapsed = instant || force ? 0 : -(target.delay ?? 0);
     if (this.duration === 0) this.current = { ...this.to };
   }
 

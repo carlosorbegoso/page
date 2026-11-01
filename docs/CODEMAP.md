@@ -73,7 +73,8 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | `damp`, `towards`, `seeded` | `src/three/desk/math.ts` |
 | Colores y acabados de la habitación (`readPalette`) | `src/three/desk/props/palette.ts` |
 | Paredes, suelo, ventana, escritorio, estantes, silla | `src/three/desk/props/room.ts` |
-| Monitor, teclado, taza, laptop, teléfono, lámpara | `src/three/desk/props/workstation.ts` |
+| Monitor, teclado, taza, teléfono, lámpara | `src/three/desk/props/workstation.ts` |
+| Laptop (carcasa, teclas, tapa, cable USB-C) | `src/three/desk/props/laptop.ts` |
 | Carpeta abierta de TCS (tapas, bolsillo, hojas, clip, ligas) | `src/three/desk/props/openFolder.ts` |
 | Planta y telescopio | `src/three/desk/props/decor.ts` |
 | Coleccionables (Alfa, Burbu, regalo, llave) | `src/three/desk/props/figures.ts` |

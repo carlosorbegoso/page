@@ -4,11 +4,5 @@ export { buildFigures } from './figures';
 export { buildOpenFolder } from './openFolder';
 export { readPalette, type Palette, type Quality } from './palette';
 export { buildContactShadows, contactShadowSpots } from './shadows';
-export {
-  buildLamp,
-  buildLaptop,
-  buildMonitorHead,
-  buildPhone,
-  buildWorkstation,
-  laptopScreenFrame
-} from './workstation';
+export { buildLaptop, laptopScreenFrame } from './laptop';
+export { buildLamp, buildMonitorHead, buildPhone, buildWorkstation } from './workstation';

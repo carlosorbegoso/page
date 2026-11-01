@@ -1,6 +1,8 @@
+import type { Group } from 'three';
 import type { StationContext } from '../../contracts';
 import { FolderDetail } from '../folderDetail';
 import { StoryBeats } from '../life/beats';
+import { StackedPrints } from '../notes/stacked';
 import { BioCard } from '../portrait/bio-card';
 import type { Palette } from '../props';
 import { RollerBlind } from '../room-life/blind';
@@ -36,4 +38,8 @@ export function createRollerBlind(): RollerBlind {
 
 export function createStoryBeats(): StoryBeats {
   return new StoryBeats();
+}
+
+export function createStackedPrints(room: Group, invalidate: () => void): StackedPrints {
+  return new StackedPrints(room, invalidate);
 }

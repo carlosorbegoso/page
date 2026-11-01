@@ -21,7 +21,9 @@ import { createFlapInside } from './flap-inside';
 import { createSheetMesh, createSheetTexture, createTwinMesh, type SheetMesh } from './mesh';
 import { listenOutsideClick } from './outside-click';
 import { OPEN_SHEET_EDGE, OPEN_SHEET_FLAT, OPEN_SHEET_TAKEN_EDGE, sheetMatrix, takenSheetTurn } from './open-sheet-pose';
+import { stackedLayout } from '../../scenes/common';
 import { drawSheet } from './sheet-canvas';
+import { drawStackedSheet } from './sheet-stacked';
 import { readExperience, type SheetContent } from './sheet-content';
 
 export interface FolderDetailOptions {
@@ -94,9 +96,14 @@ export class FolderDetail {
 
   private redrawWithLoadedFonts(): void {
     if (!this.content) return;
-    drawSheet(this.canvas, this.content);
-    this.texture.needsUpdate = true;
+    this.drawContent(this.content);
     this.options.onRedraw();
+  }
+
+  private drawContent(content: SheetContent): void {
+    const stacked = this.shown === 'tcs' && stackedLayout({ width: innerWidth, height: innerHeight });
+    (stacked ? drawStackedSheet : drawSheet)(this.canvas, content);
+    this.texture.needsUpdate = true;
   }
 
   get active(): FolderId | null {
@@ -117,8 +124,7 @@ export class FolderDetail {
     this.shown = id;
     this.goal = 1;
     this.content = readExperience(id);
-    drawSheet(this.canvas, this.content);
-    this.texture.needsUpdate = true;
+    this.drawContent(this.content);
     this.options.renderer.initTexture(this.texture);
     if (id === 'tcs') takenSheetTurn(eye, this.openTaken);
     else aimShelfFolder(id, this.options.camera, this.targetAt, this.targetTurn);

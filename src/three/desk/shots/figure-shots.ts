@@ -3,6 +3,7 @@ import { FIGURE_HEIGHT, FIGURES, type FigureId } from '../layout';
 import { boardCorners } from '../notes/layout';
 import { TEXT_LEFT, type ShotContext } from './context';
 import { storyShot } from './portrait-fit';
+import { printedCompanyShot } from './printed-shots';
 import { centreOf, figurePoints, othersThan } from './protagonists';
 import type { Framing, Place, Setup } from './types';
 
@@ -19,6 +20,7 @@ function placeFor(ctx: ShotContext, landscape: Place): Place {
 }
 
 export function companyShot(ctx: ShotContext): Framing {
+  if (ctx.stacked) return printedCompanyShot(ctx);
   const board = boardCorners();
   const points = [...board, ...figurePoints('alfa')];
   const aim = centreOf(points);

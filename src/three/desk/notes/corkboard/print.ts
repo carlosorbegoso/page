@@ -1,7 +1,7 @@
 import { Group, Matrix4 } from 'three';
 import { readCompany } from '../content';
 import { boardFaceMatrix, CORKBOARD } from '../layout';
-import { printedFace, printFonts, whenFontsReady, type PrintedFace } from '../paper';
+import { printedFace, printFonts, whenFontsReady, type PrintSurface } from '../paper';
 import { drawAlfaCard, drawNote } from './cards';
 import { drawCork, drawPinShadows } from './cork';
 import { drawPostits, drawTitle } from './postits';
@@ -14,7 +14,7 @@ export interface CorkboardPrint {
   dispose(): void;
 }
 
-function drawBoard(face: PrintedFace): void {
+export function drawBoard(face: PrintSurface): void {
   const board: BoardCanvas = { context: face.context, scale: face.scale, fonts: printFonts() };
   const company = readCompany();
   drawCork(board);

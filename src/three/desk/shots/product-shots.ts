@@ -4,6 +4,7 @@ import { cardCorners } from '../notes/layout';
 import { TEXT_LEFT, type ShotContext, type SideLayout } from './context';
 import { clearOfText, placeBeside, type TextSide } from './beside-text';
 import { storyShot } from './portrait-fit';
+import { printedProductShot } from './printed-shots';
 import { centreOf, figurePoints, othersThan } from './protagonists';
 import type { Framing, Setup } from './types';
 
@@ -52,6 +53,7 @@ function framedPoints(ctx: ShotContext, id: ProductId, setup: ProductSetup): { p
 }
 
 function productShot(ctx: ShotContext, id: ProductId): Framing {
+  if (ctx.stacked) return printedProductShot(ctx, id);
   const setup = PRODUCT_SETUP[id];
   const { points, aim } = framedPoints(ctx, id, setup);
   const place = ctx.portrait ? { sx: 0.5, sy: ctx.subjectY } : placeBeside(ctx, setup.text, { sx: 0.5, sy: 0.5 });

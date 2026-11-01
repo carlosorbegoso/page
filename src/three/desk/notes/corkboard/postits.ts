@@ -63,14 +63,14 @@ function drawPostit(board: BoardCanvas, id: ProductId): void {
   });
 }
 
-export function drawTitle(board: BoardCanvas, title: string): void {
+export function drawTitle(board: BoardCanvas, title: string, smallest: number = TITLE.smallest): void {
   const { context } = board;
   const rect = { ...BOARD_LAYOUT.title, rotation: TITLE.rotation };
   inRect(board, rect, width => {
     context.fillStyle = MARKER;
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    fitFont(board, title, '700', width, TITLE.largest, TITLE.smallest);
+    fitFont(board, title, '700', width, TITLE.largest, smallest);
     context.fillText(title, 0, 0);
   });
 }

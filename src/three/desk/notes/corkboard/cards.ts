@@ -10,12 +10,12 @@ const KRAFT = '#c7a374';
 const TEXT = { role: 0.0098, phrase: 0.0104, brand: 0.0118 } as const;
 const PAD = 0.008;
 
-function cardShadow(board: BoardCanvas, draw: () => void): void {
+export function cardShadow(board: BoardCanvas, draw: () => void): void {
   const s = board.scale;
   withShadow(board.context, s * 0.003, s * 0.0008, s * 0.0016, 0.4, draw);
 }
 
-function drawRules(board: BoardCanvas, width: number, height: number, top: number, step: number): void {
+export function drawRules(board: BoardCanvas, width: number, height: number, top: number, step: number): void {
   const { context, scale } = board;
   const left = -width / 2;
   context.lineWidth = Math.max(1, scale * 0.00025);
@@ -33,7 +33,7 @@ function drawRules(board: BoardCanvas, width: number, height: number, top: numbe
   }
 }
 
-function writeLines(context: CanvasRenderingContext2D, lines: string[], x: number, firstBaseline: number, step: number): number {
+export function writeLines(context: CanvasRenderingContext2D, lines: string[], x: number, firstBaseline: number, step: number): number {
   lines.forEach((line, index) => context.fillText(line, x, firstBaseline + index * step));
   return firstBaseline + (lines.length - 1) * step;
 }

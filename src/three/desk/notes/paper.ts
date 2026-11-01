@@ -14,6 +14,8 @@ export interface PrintedFace {
   dispose(): void;
 }
 
+export type PrintSurface = Pick<PrintedFace, 'canvas' | 'context' | 'texture' | 'scale'>;
+
 export interface PrintFonts {
   display: string;
   body: string;

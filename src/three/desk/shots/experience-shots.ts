@@ -3,6 +3,7 @@ import { FOLDERS, OPEN_FOLDER, folderSpine, type FolderId } from '../layout';
 import { clearOfText, placeBeside } from './beside-text';
 import { TEXT_LEFT, type ShotContext } from './context';
 import { storyShot } from './portrait-fit';
+import { printedSheetShot } from './printed-shots';
 import { centreOf, coverPoints, folderPoints, FOLDER_PULL, takenSheetPoints } from './protagonists';
 import { EXPERIENCE_ANCHOR, EXPERIENCE_ORDER } from './story';
 import type { Framing, Place, Setup } from './types';
@@ -35,6 +36,7 @@ function shelfShot(ctx: ShotContext, place: Place, panel: Place): Framing {
 }
 
 function openFolderShot(ctx: ShotContext, sx: number, panel: Place): Framing {
+  if (ctx.stacked) return printedSheetShot(ctx, EXPERIENCE_ANCHOR.tcs);
   const focus = OPEN_FOLDER.centre.clone().add(new Vector3(0, 0.06, 0));
   const sheet = takenSheetPoints();
   const points = sheet;

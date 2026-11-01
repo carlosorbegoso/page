@@ -36,6 +36,8 @@ export interface AtlasUniforms {
   uSignal: { value: number[] };
   /** Extra self-illumination (albedo × value) per object id: folder labels, highlights. */
   uGlow: { value: number[] };
+  /** 1 lit and in colour … 0 dim and grey: a figure waits in the dark until the story introduces it. */
+  uPresence: { value: number[] };
 }
 
 const VERTEX_DECLARATIONS = /* glsl */ `
@@ -75,6 +77,7 @@ uniform float uHoverMix;
 uniform vec3 uHoverColor;
 uniform float uSignal[${OBJECT_SLOTS}];
 uniform float uGlow[${OBJECT_SLOTS}];
+uniform float uPresence[${OBJECT_SLOTS}];
 uniform vec4 uRoomBounds;
 uniform vec4 uDeskBounds;
 uniform float uDeskTop;
@@ -127,7 +130,8 @@ export function createAtlasMaterial(
     uFigLift: { value: new Array<number>(FIGURE_SLOTS).fill(0) },
     uFigYaw: { value: new Array<number>(FIGURE_SLOTS).fill(0) },
     uSignal: { value: new Array<number>(OBJECT_SLOTS).fill(1) },
-    uGlow: { value: new Array<number>(OBJECT_SLOTS).fill(0) }
+    uGlow: { value: new Array<number>(OBJECT_SLOTS).fill(0) },
+    uPresence: { value: new Array<number>(OBJECT_SLOTS).fill(1) }
   };
   material.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, {
@@ -139,6 +143,7 @@ export function createAtlasMaterial(
       uFigYaw: uniforms.uFigYaw,
       uSignal: uniforms.uSignal,
       uGlow: uniforms.uGlow,
+      uPresence: uniforms.uPresence,
       uRoomBounds: { value: roomBounds },
       uDeskBounds: { value: deskBounds },
       uDeskTop: { value: deskTop }
@@ -162,7 +167,9 @@ export function createAtlasMaterial(
         '#include <color_fragment>',
         `#include <color_fragment>
         if (vPbr.w > 0.0) diffuseColor.rgb *= mix(1.0, woodGrain(vRoomPosition), vPbr.w);
-        diffuseColor.rgb *= roomOcclusion(vRoomPosition, normalize(vRoomNormal));`
+        diffuseColor.rgb *= roomOcclusion(vRoomPosition, normalize(vRoomNormal));
+        float presence = uPresence[clamp(int(vOid + 0.5), 0, ${OBJECT_SLOTS - 1})];
+        diffuseColor.rgb = mix(vec3(dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722))), diffuseColor.rgb, presence) * (0.3 + 0.7 * presence);`
       )
       .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = vPbr.x;')
       .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\nmetalnessFactor = vPbr.y;')
@@ -170,13 +177,13 @@ export function createAtlasMaterial(
         '#include <emissivemap_fragment>',
         `#include <emissivemap_fragment>
         int objectId = clamp(int(vOid + 0.5), 0, ${OBJECT_SLOTS - 1});
-        totalEmissiveRadiance += diffuseColor.rgb * (vPbr.z * uSignal[objectId] + uGlow[objectId]);
+        totalEmissiveRadiance += diffuseColor.rgb * (vPbr.z * uSignal[objectId] * uPresence[objectId] + uGlow[objectId]);
         float hovered = (1.0 - step(0.5, abs(vOid - uHoverId))) * step(0.5, vOid);
         float rim = pow(1.0 - abs(dot(normalize(normal), normalize(vViewPosition))), 2.5);
         totalEmissiveRadiance += uHoverColor * hovered * uHoverMix * (0.05 + 0.6 * rim);`
       );
   };
-  material.customProgramCacheKey = () => 'desk-atlas-v2';
+  material.customProgramCacheKey = () => 'desk-atlas-v3';
   return { material, uniforms };
 }
 

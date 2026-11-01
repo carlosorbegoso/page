@@ -17,7 +17,7 @@ import {
   type Matrix4,
   type Texture
 } from 'three';
-import type { ChapterId, ChapterState, PlateAnchor, Shot, ShotProvider, StationContext, StationPick, SurfaceName } from '../contracts';
+import { CHAPTERS, type ChapterId, type ChapterState, type PlateAnchor, type Shot, type ShotProvider, type StationContext, type StationPick, type SurfaceName } from '../contracts';
 import { tokenColor, tokenNumber } from '../tokens';
 import { createBackdrop, createRainGlass, createSteam, type Backdrop, type RainGlass, type Steam } from './atmosphere';
 import { createLampBeam, type LampBeam } from './beam';
@@ -110,6 +110,21 @@ const LAMP_SWITCH: Partial<Record<ChapterId, number>> = { company: 0.3, outro: 0
 /** How late the night is per chapter: city windows go dark as the story advances. */
 const LATENESS: Record<ChapterId, number> = { intro: 0, hero: 0, about: 0.05, experience: 0.1, company: 0.25, products: 0.35, contact: 0.5, outro: 0.6 };
 
+/** Where the story introduces each figure; before that it waits dim and grey on the plinth. */
+const FIGURE_INTRO: Record<FigureId, [ChapterId, number]> = {
+  alfa: ['company', 0],
+  skymek: ['products', 0],
+  parati: ['products', 1],
+  ventixs: ['products', 2]
+};
+const DIM_PRESENCE = 0.18;
+/** Seconds after the camera lands before a figure lights up, like a neon tube starting. */
+const PRESENCE_DELAY = 0.2;
+
+function storyRank(chapter: ChapterId, subIndex: number): number {
+  return CHAPTERS.indexOf(chapter) * 10 + subIndex;
+}
+
 const FIGURE_ORDER: readonly FigureId[] = ['alfa', 'ventixs', 'parati', 'skymek'];
 const ALFA_TURN = 20 * (Math.PI / 180);
 const MAX_TURN_SPEED = 0.05;
@@ -133,6 +148,13 @@ const EXPERIENCE_IDS: Record<string, string> = { tcs: 'tcs', intercorp: 'interco
 
 function damp(current: number, goal: number, rate: number, dt: number): number {
   return current + (goal - current) * (1 - Math.exp(-rate * dt));
+}
+
+/** A neon tube starting: one flash, a beat of dark, then a fast ramp to full. */
+function neonStart(current: number, since: number, dt: number): number {
+  if (since < 0.06) return 1;
+  if (since < 0.18) return DIM_PRESENCE;
+  return damp(current, 1, 9, dt);
 }
 
 /** A tungsten lamp switching: a short flicker, then the filament settles fast (no smooth fade). */
@@ -194,6 +216,8 @@ export class DeskSet implements ShotProvider {
   private introStart = -1;
   private readonly level = { lamp: 0, monitor: 0, moon: 0.45, shelf: 0, dawn: 0, phone: 0, alfaSignal: 1, alfaYaw: 0, late: 0 };
   private settledAt = -1;
+  private readonly presence = new Map<FigureId, number>(FIGURE_ORDER.map(id => [id, 1]));
+  private readonly neonSince = new Map<FigureId, number>();
   private readonly figureLift = new Map<FigureId, number>(FIGURE_ORDER.map(id => [id, 0]));
   private readonly figureYaw = new Map<FigureId, number>(FIGURE_ORDER.map(id => [id, 0]));
   private readonly folderGlow = new Map<string, number>(FOLDERS.map(id => [id, 0]));
@@ -542,6 +566,23 @@ export class DeskSet implements ShotProvider {
     settling ||= Math.abs(level.lamp - light.lamp) > 0.05 || Math.abs(level.dawn - (this.chapter === 'outro' ? 1 : 0)) > 0.002;
     settling ||= Math.abs(level.alfaYaw - alfaGoal) > 1e-3 || Math.abs(level.phone - (this.chapter === 'contact' ? 1 : 0)) > 0.002;
 
+    const rank = storyRank(this.chapter, this.subIndex);
+    for (const id of FIGURE_ORDER) {
+      const [introChapter, introSub] = FIGURE_INTRO[id];
+      const introRank = storyRank(introChapter, introSub);
+      const goal = this.chapter === 'outro' || rank >= introRank ? 1 : DIM_PRESENCE;
+      const current = this.presence.get(id)!;
+      const ready = this.settledAt >= 0 && time - this.settledAt >= PRESENCE_DELAY;
+      if (motion && rank === introRank && ready && current < 0.5 && !this.neonSince.has(id)) this.neonSince.set(id, time);
+      if (rank !== introRank) this.neonSince.delete(id);
+      const started = this.neonSince.get(id);
+      let next = current;
+      if (started !== undefined) next = neonStart(current, time - started, step);
+      else if (!motion || rank !== introRank || goal < current) next = damp(current, goal, motion ? 4 : 10, step);
+      this.presence.set(id, next);
+      settling ||= Math.abs(next - goal) > 0.003;
+    }
+
     const focused = this.chapter === 'products' ? PRODUCT_FIGURES[Math.min(this.subIndex, PRODUCT_FIGURES.length - 1)] : null;
     for (const id of PRODUCT_FIGURES) {
       const goal = id === focused ? FIGURE_LIFT : 0;
@@ -634,6 +675,7 @@ export class DeskSet implements ShotProvider {
     uniforms.uSignal.value[OBJECT_ID.alfa] = level.alfaSignal;
     for (const id of FOLDERS) uniforms.uGlow.value[OBJECT_ID[id]] = (this.folderGlow.get(id) ?? 0) * 0.32;
     for (const id of PRODUCT_FIGURES) uniforms.uGlow.value[OBJECT_ID[id]] = ((this.figureLift.get(id) ?? 0) / FIGURE_LIFT) * FOCUS_BOUNCE;
+    for (const id of FIGURE_ORDER) uniforms.uPresence.value[OBJECT_ID[id]] = this.presence.get(id) ?? 1;
     uniforms.uGlow.value[OBJECT_ID.openFolder] = (this.folderGlow.get('tcs') ?? 0) * 0.25;
     uniforms.uHoverMix.value = this.hoverMix;
     for (const id of PRODUCT_FIGURES) {

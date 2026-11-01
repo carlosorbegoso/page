@@ -55,7 +55,8 @@ export class StoryClock {
   private faceNormal = new Vector3(1, 0, 0);
   private disposed = false;
 
-  constructor(onReady: () => void) {
+  /** `prepare` compiles the model's shaders before it joins the scene (no first-frame link stall). */
+  constructor(onReady: () => void, prepare?: (model: Object3D) => Promise<void>) {
     this.group.name = 'desk-clock';
     this.group.position.copy(CLOCK_POSITION);
     this.group.scale.setScalar(CLOCK_SCALE);
@@ -96,8 +97,12 @@ export class StoryClock {
             material.emissiveIntensity = DIAL_GLOW;
           }
         });
-        this.group.add(gltf.scene);
-        onReady();
+        const show = () => {
+          if (this.disposed) return;
+          this.group.add(gltf.scene);
+          onReady();
+        };
+        void (prepare?.(gltf.scene) ?? Promise.resolve()).catch(() => undefined).then(show);
       })
       .catch(() => undefined);
   }

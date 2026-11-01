@@ -122,6 +122,11 @@ export interface StationContext {
   /** @deprecated Legacy station framing; returns the chapter shot. */
   readingPose(id: ChapterId): StationCameraPose;
   invalidate(): void;
+  /**
+   * Compiles the shaders of an object that is not in the scene yet, with the scene's lights and the
+   * render state the next frame will use, so adding it does not stall that frame.
+   */
+  precompile?(object: Object3D): Promise<void>;
 }
 
 /**
@@ -152,6 +157,11 @@ export interface ShotProvider {
 /** Post-processing pipeline. When none is registered the Stage renders directly. */
 export interface FxPipeline {
   render(renderer: WebGLRenderer, scene: Scene, camera: PerspectiveCamera, dt: number): void;
+  /**
+   * Compiles every program `render` will use (scene into the pipeline's own target, and its passes).
+   * `object` compiles only that object, lit by `scene`, for meshes that are added later.
+   */
+  precompile?(renderer: WebGLRenderer, scene: Scene, camera: PerspectiveCamera, object?: Object3D): Promise<void>;
   /** World point to keep in focus (rack focus ≤ 600 ms), or null. */
   setFocus(point: Vector3 | null): void;
   resize(width: number, height: number, pixelRatio: number): void;

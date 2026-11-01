@@ -1,4 +1,4 @@
-import { ACESFilmicToneMapping, PerspectiveCamera, SRGBColorSpace, Vector3, WebGLRenderer } from 'three';
+import { ACESFilmicToneMapping, PerspectiveCamera, SRGBColorSpace, Vector3, WebGLRenderer, type Object3D } from 'three';
 import { bindRenderer } from './assets';
 import {
   onRegistryChange,
@@ -178,11 +178,13 @@ export class Stage {
     this.cleanups.push(onRegistryChange(() => void this.syncRegistry()));
     await yieldToMain();
 
+    /* Read before the plates move into their layers: afterwards scrollY would force that whole re-layout synchronously. */
+    const atTop = scrollY < 4;
     if (!capture) this.mountPlates();
-    const first = this.firstChapter();
+    const first = this.firstChapter(atTop);
     this.director.request({ id: first.id, subIndex: first.sub, shot: this.shotFor(first.id, first.sub) }, 'instant');
     this.director.update(this.camera, 0, this.fov(), { x: 0, y: 0 }, true);
-    await this.renderer.compileAsync(this.world.scene, this.camera);
+    await this.precompile();
     progress(0.96);
     await yieldToMain();
     // The idle window starts when the scene is first seen: a long boot would otherwise skip the power-on.
@@ -206,10 +208,10 @@ export class Stage {
   }
 
   /** Capture / forced chapter, else `intro` when the page starts at the top, else the hero. */
-  private firstChapter(): { id: ChapterId; sub: number } {
+  private firstChapter(atTop: boolean): { id: ChapterId; sub: number } {
     const fixed = this.options.capture ?? (this.options.forcedChapter ? { chapter: this.options.forcedChapter, sub: this.options.forcedSub ?? 0 } : null);
     if (fixed) return { id: fixed.chapter, sub: fixed.sub };
-    if (scrollY < 4 && this.movesAllowed) {
+    if (atTop && this.movesAllowed) {
       this.introUntil = Number.POSITIVE_INFINITY;
       return { id: 'intro', sub: 0 };
     }
@@ -266,7 +268,8 @@ export class Stage {
       surface: name => this.world.surface(name),
       anchor: name => this.world.anchor(name),
       scrollTo: (chapter, sub) => this.scrollToChapter(chapter, sub),
-      reduced: () => !this.movesAllowed
+      reduced: () => !this.movesAllowed,
+      invalidate: () => this.invalidate()
     });
     if (!plates.mount()) return;
     this.plates = plates;
@@ -323,8 +326,19 @@ export class Stage {
       motion: () => this.idleMotion(),
       fov: () => this.fov(),
       readingPose: id => this.world.shot(id, 0),
-      invalidate: () => this.invalidate()
+      invalidate: () => this.invalidate(),
+      precompile: object => this.precompile(object)
     };
+  }
+
+  private async precompile(object?: Object3D): Promise<void> {
+    /* A model can finish loading while the desk set is still loading, before the pipeline is attached. */
+    if (!this.fx) this.attachFx();
+    if (this.fx?.precompile) {
+      await this.fx.precompile(this.renderer, this.world.scene, this.camera, object);
+      return;
+    }
+    await (object ? this.renderer.compileAsync(object, this.camera, this.world.scene) : this.renderer.compileAsync(this.world.scene, this.camera));
   }
 
   /** Loads the registered desk set (or legacy hero module) and the FX pipeline. */

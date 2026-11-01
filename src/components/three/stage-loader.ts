@@ -76,6 +76,8 @@ export function startStageLoader(container: HTMLElement): void {
   let frame = 0;
   let finished = false;
   let veil = -1;
+  /* Kept from scroll events: reading scrollY in every tick, after the status text was written, forces a style recalc. */
+  let atTop = scrollY < 4;
 
   const still = () => reducedQuery.matches || root.dataset.motion === 'paused';
   const day = () => root.dataset.time === 'day';
@@ -160,7 +162,7 @@ export function startStageLoader(container: HTMLElement): void {
 
   function draw(time: number, since: number, dt: number): void {
     const moving = !still();
-    const intro = handoff ? handoff.intro : scrollY < 4 && moving;
+    const intro = handoff ? handoff.intro : atTop && moving;
     const warm = smooth(0, 1, shown);
     const scene = handoff ? 1 - clamp01(since / CANVAS_FADE_S) : 1;
     const light = handoff ? (handoff.intro && !day() ? 1 - smooth(LAMP_RAMP[0], LAMP_RAMP[1], since) : scene) : 1;
@@ -250,6 +252,9 @@ export function startStageLoader(container: HTMLElement): void {
     schedule();
   };
   const onLoad = () => setProgress(0.12);
+  const onScroll = () => {
+    atTop = scrollY < 4;
+  };
   const onResize = () => {
     measure();
     schedule();
@@ -269,6 +274,7 @@ export function startStageLoader(container: HTMLElement): void {
     window.removeEventListener('stage:reveal', onReveal);
     window.removeEventListener('load', onLoad);
     window.removeEventListener('resize', onResize);
+    window.removeEventListener('scroll', onScroll);
     document.removeEventListener('visibilitychange', onVisibility);
     canvas!.dataset.leaving = '';
     status!.dataset.leaving = '';
@@ -282,6 +288,7 @@ export function startStageLoader(container: HTMLElement): void {
   window.addEventListener('stage:progress', onProgress);
   window.addEventListener('stage:reveal', onReveal);
   window.addEventListener('resize', onResize, { passive: true });
+  window.addEventListener('scroll', onScroll, { passive: true });
   document.addEventListener('visibilitychange', onVisibility);
   observer.observe(container, { attributes: true, attributeFilter: ['data-tier', 'data-degraded'] });
   if (document.readyState === 'complete') setProgress(0.12);

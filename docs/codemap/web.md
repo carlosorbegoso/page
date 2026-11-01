@@ -20,7 +20,7 @@ Qué archivo editar en la web: `<head>`, tokens, HUD, secciones, modo lectura, t
 ## Tokens de diseño
 | Para cambiar… | Edita |
 | --- | --- |
-| Fuentes (`@font-face`, familias, pesos) | `src/styles/tokens/fonts.css` |
+| Fuentes (`@font-face`, familias, pesos, fallbacks métricos, `--font-hand`) | `src/styles/tokens/fonts.css` · archivos y licencias en `public/fonts/` |
 | Colores (UI, escena, marcas, día) | `src/styles/tokens/colors.css` (Base.astro lee `--color-bg` de aquí para theme-color) |
 | Tipografía fluida, espaciado, radios, sombras, easing | `src/styles/tokens/scale.css` |
 | Duraciones, z-index, materiales, placas, luces y fx del Stage | `src/styles/tokens/stage.css` |

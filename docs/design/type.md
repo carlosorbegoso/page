@@ -1,26 +1,39 @@
 # Tipografía y escala
 
-Fuentes Geist, carga, pesos y escala de texto (`--text-*`, `--tracking-*`); léelo antes de cambiar una fuente, un tamaño o el texto de los paneles 3D.
+Fuentes (Bricolage Grotesque, Geist, Geist Mono, Caveat), carga, pesos y escala de texto (`--text-*`, `--tracking-*`); léelo antes de cambiar una fuente, un tamaño o el texto de los paneles 3D.
 
 Valores: `src/styles/tokens/fonts.css` y `src/styles/tokens/scale.css`. Si algo difiere, manda el CSS.
 
-## Familias (`--font-display`, `--font-sans`, `--font-mono`)
+## Familias (`--font-display`, `--font-sans`, `--font-mono`, `--font-hand`)
 
 | Token | Familia | Archivo | Peso | Ejes |
 |---|---|---|---|---|
-| `--font-display` (h1–h4, cifras) | Geist variable | `public/fonts/geist-latin-wght.woff2` | 29 KB | wght 100–900 |
-| `--font-sans` (texto, UI) | Geist variable (mismo archivo) | — | — | — |
+| `--font-display` (h1–h4, cifras, tarjetas impresas) | Bricolage Grotesque variable | `public/fonts/bricolage-grotesque-latin-opsz-wght.woff2` | 71 KB | opsz 12–96, wght 400–700 |
+| `--font-sans` (texto, UI) | Geist variable | `public/fonts/geist-latin-wght.woff2` | 29 KB | wght 100–900 |
 | `--font-mono` (código) | Geist Mono variable | `public/fonts/geist-mono-latin-wght.woff2` | 23 KB | wght 100–900 |
+| `--font-hand` (corcho, post-its) | Caveat 700 | `public/fonts/caveat-latin-700.woff2` | 27 KB | estática 700 |
 
-- Licencia: `public/fonts/OFL-Geist.txt` (OFL 1.1).
-- Por qué una sola familia: Geist es geométrica, técnica y muy legible en tamaños pequeños; display y texto comparten archivo, así el primer frame carga una sola fuente.
-- Subset latin (`unicode-range` U+0000–00FF + puntuación general, €, ™, flechas): cubre á é í ó ú ü ñ ¿ ¡ « » “ ” — ·.
+- Licencias (OFL 1.1): `public/fonts/OFL-Geist.txt`, `OFL-BricolageGrotesque.txt`, `OFL-Caveat.txt`.
+- Por qué Bricolage: grotesca con trazos de tinta y aperturas amplias; con el eje `opsz` el navegador elige el corte por tamaño (`font-optical-sizing: auto`), así el titular del monitor gana contraste y tensión y las cifras pequeñas siguen abiertas. Geist sigue en el texto porque es la más legible en el teléfono.
+- Por qué Caveat: letra de mano autoalojada, igual en todos los dispositivos (antes caía en Bradley Hand, Marker Felt o Comic Sans según el sistema).
+- Origen: paquetes `@fontsource-variable/*` 5.3.0 (`npm pack` en una carpeta temporal, sin dependencia en `package.json`). Bricolage se recortó con `fonttools varLib.instancer` a wght 400–700; Caveat se fijó en 700 y se le quitó `calt` (las alternativas contextuales costaban 23 KB y no se notan en textos de una o dos palabras). Ambas con `pyftsubset` al mismo `unicode-range` latin.
+- Subset latin (`unicode-range` U+0000–00FF + puntuación general, €, ™, flechas ↑ ↓): cubre á é í ó ú ü ñ ¿ ¡ « » “ ” — ·. La → (U+2192) no está en el rango y sale de la fuente del sistema.
+
+### Mano (`--font-hand`)
+
+- Solo existe el 700: un `400` pedido en canvas resuelve al 700.
+- `printFonts()` (`src/three/desk/notes/paper.ts`) lee el token; el primer dibujo del canvas pide la fuente y `whenFontsReady` redibuja cuando `document.fonts.ready` resuelve.
+- Sin fallback métrico: solo se usa en canvas, que se redibuja; no hay layout que mover.
+
+### Canvas y `opsz`
+
+`context.font` no fija el eje `opsz`, así que el texto de las tarjetas, carpetas y la ficha del retrato usa el corte por defecto del archivo (opsz 96, el de titular). A los tamaños de canvas (32–84 px) se lee bien.
 
 ## Carga y fallback
 
 - `font-display: swap`.
-- Fallback métrico: `Geist Fallback` sobre Arial / Helvetica Neue / Roboto (`size-adjust` 101.8 %, `ascent-override` 98.7 %, `descent-override` 29 %); `Geist Mono Fallback` sobre Menlo / Consolas / Courier New.
-- Preload solo de `geist-latin-wght.woff2` (en `src/layouts/Base.astro`).
+- Fallback métrico: `Bricolage Fallback` sobre Arial / Helvetica Neue / Roboto (`size-adjust` 101.7 %, `ascent-override` 91.5 %, `descent-override` 26.6 %); `Geist Fallback` sobre las mismas (101.8 %, 98.7 %, 29 %); `Geist Mono Fallback` sobre Menlo / Consolas / Courier New. Calculados con anchos medios de una frase real frente a Arial (fonttools).
+- Preload de `bricolage-grotesque-latin-opsz-wght.woff2`, `geist-latin-wght.woff2` y `geist-mono-latin-wght.woff2` (en `src/layouts/Base.astro`): las tres aparecen en el hero. Caveat no se precarga.
 
 ## Pesos (`--font-weight-*`)
 
@@ -32,8 +45,8 @@ Estilos en `src/styles/plates/loose.css`. Una sola escala en pantalla y un solo 
 
 | Rol | Token | Valor |
 |---|---|---|
-| Titular (h1, h2, `.plate-display`) | `--text-display` | Geist 600, `clamp(40px, min(1.5rem + 4.69vw, 8.5vh), 96px)`: 72 px a 1024, 96 px a 1536; el `vh` lo frena en pantallas bajas. `--tracking-display` −0.035em, interlineado 1 |
-| h3 | `--text-2xl` | Geist 600, `--tracking-tight` |
+| Titular (h1, h2, `.plate-display`) | `--text-display` | Bricolage 600, `clamp(40px, min(1.5rem + 4.69vw, 8.5vh), 96px)`: 72 px a 1024, 96 px a 1536; el `vh` lo frena en pantallas bajas. `--tracking-display` −0.02em, interlineado 1 |
+| h3 | `--text-2xl` | Bricolage 600, `--tracking-tight` |
 | Cuerpo | `--text-body` | 17 px, interlineado 1.6 |
 | Eyebrow (el `p` antes de un título) | `--text-sm` | 600, `text-muted`, interlineado `--text-meta--line-height` |
 | Medida | `--container-measure` | 60ch |
@@ -59,7 +72,7 @@ Para la UI fija (HUD, menús), el modo lectura y el 404. Las `clamp()` combinan 
 
 ## Tracking y leading (`--tracking-*`, `--leading-*`)
 
-- `tracking-display` −0.035em: `text-3xl` en adelante.
+- `tracking-display` −0.02em: `text-3xl` en adelante. Bajó de −0.035em con Bricolage: el corte opsz 96 ya viene apretado y a −0.035em la b y la a se tocan.
 - `tracking-tight` −0.012em: `text-xl`, `text-2xl`.
 - `tracking-caps` 0.1em: etiquetas en mayúsculas `text-xs`.
 - `--leading-tight` 1.15 · `--leading-snug` 1.35 · `--leading-normal` 1.65.

@@ -1,4 +1,3 @@
-/* Upright phones: the printed card in the shot is too small to read, so the panel becomes that card. */
 @media (width < 48rem) {
   .is-3d .plate[data-product] {
     --color-text: #1c2230;

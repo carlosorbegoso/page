@@ -10,7 +10,6 @@ const HEIGHT = Math.round((WIDTH * FOLDER.height) / FOLDER.depth);
 const POCKET_TOP = 0.62;
 const LABEL = '#e4ddcc';
 const INK = '#1c2230';
-/** Just inside the cover's inner face, so it never fights the board for depth. */
 const INSET = 0.0004;
 
 function boardColour(palette: Palette, id: ShelfFolder, shade: number): string {
@@ -54,7 +53,6 @@ function drawIndexLabel(context: CanvasRenderingContext2D, id: ShelfFolder): voi
   context.fillText(years, x + 24, y + 138);
 }
 
-/** The cover's inside: darker board, a pocket across the foot and the box's index label. */
 function drawInside(canvas: HTMLCanvasElement, palette: Palette, id: ShelfFolder): void {
   const context = canvas.getContext('2d')!;
   context.textBaseline = 'alphabetic';
@@ -65,10 +63,6 @@ function drawInside(canvas: HTMLCanvasElement, palette: Palette, id: ShelfFolder
   drawIndexLabel(context, id);
 }
 
-/**
- * Inner face of a held box's cover, a child of the flap so it opens with it. Unlit like the sheet.
- * The flap's atlas shader adds the shelf park to its vertices; this plain material does not, so it is placed parked.
- */
 export function createFlapInside(id: ShelfFolder, palette: Palette): Mesh<PlaneGeometry, MeshBasicMaterial> {
   const canvas = document.createElement('canvas');
   canvas.width = WIDTH;

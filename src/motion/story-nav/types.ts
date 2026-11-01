@@ -9,9 +9,7 @@ export interface StoryShot {
 
 export interface StoryNavHost {
   gsap: typeof Gsap;
-  /** Every sub-shot in story order with its current scroll position (recomputed on each call). */
   shots(): StoryShot[];
-  /** Index (into `shots()`) of the sub-shot ScrollTrigger considers active, or -1. */
   activeIndex(): number;
 }
 
@@ -21,10 +19,8 @@ export type StoryTourState = 'playing' | 'paused' | 'finished';
 
 export type SettledShot = { id: ChapterId; subIndex: number };
 
-/** Mutable state every navigation module reads and writes, shared by reference. */
 export interface NavState {
   tween: ReturnType<(typeof Gsap)['to']> | null;
-  /** Shot the running tween is heading to, so a step during it starts from there. */
   targetIndex: number | null;
   snapTimer: number;
   lastWheel: number;

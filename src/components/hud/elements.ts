@@ -10,7 +10,6 @@ export interface HudElements {
   quickTour: HTMLButtonElement | null;
 }
 
-/** The sheet's opener when it was not the index button, so focus returns to the right control on close. */
 export interface IndexOpener {
   current: HTMLButtonElement | null;
 }

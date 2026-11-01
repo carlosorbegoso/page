@@ -50,7 +50,6 @@ function endSwipe(screen: HTMLElement, swipe: Swipe, event: PointerEvent, onBack
   else screen.style.transform = '';
 }
 
-/** Edge-free swipe right to go back: the screen follows the finger and closes past 30 % of its width. */
 export function bindSwipeBack(screen: HTMLElement, onBack: () => void): void {
   const swipe: Swipe = { start: null, dragging: false, offset: 0 };
   screen.addEventListener('pointerdown', event => beginSwipe(screen, swipe, event));

@@ -156,7 +156,6 @@ const stackId = `${headingId}-stack`;
     display: none;
   }
 
-  /* On the stage each job is a title card: the year, who and what, one result. The rest lives in reading mode. */
   :global(.is-3d) .era-year {
     display: block;
     order: -1;
@@ -174,7 +173,6 @@ const stackId = `${headingId}-stack`;
     display: none;
   }
 
-  /* In 3D the opened folder's sheet tells the job, so the entry stays only for screen readers; Tab still reveals it. */
   :global(.is-3d) [data-experience]:not(:focus-visible) {
     position: absolute;
     width: 1px;
@@ -204,7 +202,6 @@ const stackId = `${headingId}-stack`;
       display: none;
     }
 
-    /* On phones the one-line entry stacks like the others: dates, company, role. */
     :global(.is-3d) .compact-line {
       flex-direction: column;
       align-items: flex-start;

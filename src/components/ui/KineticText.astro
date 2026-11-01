@@ -4,18 +4,12 @@ import { firstInRequest } from '../../motion/once';
 import { splitCounts, splitWords, type SplitMode } from '../../motion/split';
 
 interface Props {
-  /** Element to render (default `span`, so it can live inside headings and paragraphs). */
   as?: HTMLTag;
-  /** Text to animate. When omitted, the default slot is used if it is plain text. */
   text?: string;
   split?: SplitMode;
-  /** Extra delay before the first unit, in ms. */
   delay?: number;
-  /** Slow highlight that drifts across the text once it has settled (headlines only). */
   shine?: boolean;
-  /** Typewriter: characters appear one by one behind a soft cursor (implies `split="chars"`). */
   type?: boolean;
-  /** Figures followed by `%` count up from 0 when revealed; the rest of the text is left unsplit. */
   counts?: boolean;
   class?: string;
 }

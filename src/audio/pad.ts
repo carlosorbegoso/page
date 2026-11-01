@@ -2,7 +2,6 @@ import { midiToHz, type ChapterPreset } from './chapters';
 
 const DETUNE_CENTS = 7;
 
-/** The chapter chord: a detuned triangle and sine per note, faded as one layer. */
 export class ChordLayer {
   private readonly output: GainNode;
   private readonly oscillators: OscillatorNode[] = [];

@@ -1,12 +1,7 @@
-/* A one-line entry sits on the dark wall already; its pool would only read as a smudge. */
 .is-3d .plate[data-compact]::before {
   display: none;
 }
 
-/*
- * A lit panel, not a flat fill: a soft backlight bloom, faint scanlines and a glass sheen. At 85 %
- * the 3D glass reflection shows through; even a white reflection keeps light text above 9:1.
- */
 .is-3d .plate[data-plate-mode='surface-monitor'] {
   background:
     radial-gradient(120% 90% at 30% 35%, rgb(90 169 255 / 0.07), transparent 60%),
@@ -23,12 +18,10 @@
     repeating-linear-gradient(0deg, rgb(255 255 255 / 0.018) 0 1px, transparent 1px 3px);
 }
 
-/* No accent rule above the eyebrows: the type hierarchy carries each panel on its own. */
 .plate :is(p:has(+ h1, + h2, + h3), [data-signal])::before {
   display: none;
 }
 
-/* Links on the stage are bare text; keyboard users still need to see where they are. */
 .is-3d .plate :is(a, button):focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 4px;

@@ -11,22 +11,17 @@ import { FIGURE_INTRO, storyRank } from './story';
 export const FIGURE_ORDER: readonly FigureId[] = ['alfa', 'ventixs', 'parati', 'skymek'];
 const DIM_PRESENCE = 0.18;
 const DIM_PRESENCE_DAY = 0.5;
-/** Seconds after the camera lands before a figure lights up, like a neon tube starting. */
 const PRESENCE_DELAY = 0.2;
 const FIGURE_LIFT = 0.012;
-/** Hover answers with a few millimetres of lift, eased in ~180 ms (the focus lift stays slow). */
 const HOVER_LIFT = 0.003;
-/** Warm bounce on the focused figure (desk.md §5: +10 %), as self-illumination of its albedo. */
 const FOCUS_BOUNCE = 0.03;
 
-/** A neon tube starting: one flash, a beat of dark, then a fast ramp to full. */
 function neonStart(current: number, since: number, dt: number): number {
   if (since < 0.06) return 1;
   if (since < 0.18) return DIM_PRESENCE;
   return damp(current, 1, 9, dt);
 }
 
-/** The collectibles on the plinth: dim until the story introduces them, then lit; the focused one lifts and turns. */
 export class DeskFigures {
   private readonly presence = new Map<FigureId, number>(FIGURE_ORDER.map(id => [id, 1]));
   private readonly neonSince = new Map<FigureId, number>();
@@ -58,7 +53,6 @@ export class DeskFigures {
     return settling;
   }
 
-  /** Lift and turn of the product figures; runs after `DeskLife` so the order of the original frame is kept. */
   updateLift(frame: DeskFrame, focused: FigureId | null, hoverId: number): boolean {
     const { motion, step, dt } = frame;
     let settling = false;
@@ -75,7 +69,6 @@ export class DeskFigures {
     return settling;
   }
 
-  /** Rounded lift and turn of the figures and their moving parts: the lamp shadow is re-rendered only when it changes. */
   poseKey(level: LightLevels, life: DeskLife | null): string {
     const parts = [Math.round(level.alfaYaw * 200)];
     for (const id of FIGURE_ORDER) {
@@ -98,7 +91,6 @@ export class DeskFigures {
     for (const id of FIGURE_ORDER) uniforms.uPresence.value[OBJECT_ID[id]] = this.presence.get(id) ?? 1;
   }
 
-  /** Keeps the product pick proxies on their lifted figures. */
   applyProxies(proxies: Map<string, Mesh>): void {
     for (const id of PRODUCT_FIGURES) {
       const proxy = proxies.get(id);

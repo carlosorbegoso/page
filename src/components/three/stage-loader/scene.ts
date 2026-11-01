@@ -5,7 +5,6 @@ const LAMP_RGB = '255,181,102';
 const MONITOR_RGB = '127,184,255';
 const SUN_RGB = '255,241,220';
 
-/** One frame's inputs: canvas size in CSS px, warm-up, fades and whether anything may move. */
 export interface LoaderFrame {
   width: number;
   height: number;
@@ -16,7 +15,6 @@ export interface LoaderFrame {
   light: number;
 }
 
-/** By day: a morning haze and a sunbeam with drifting dust. */
 export function paintDay(painter: Painter, f: LoaderFrame): void {
   const { ctx } = painter;
   const minSide = Math.min(f.width, f.height);
@@ -29,7 +27,6 @@ export function paintDay(painter: Painter, f: LoaderFrame): void {
   painter.motesAlong({ origin: sun, direction: beam, length: f.height * 1.1, spread: minSide * 0.3 }, SUN_RGB, 0.55 * f.light, f.moving ? f.time : 0);
 }
 
-/** At night: the room dims by `veil` while the lamp filament warms up and dust drifts in its cone. */
 export function paintNight(painter: Painter, f: LoaderFrame, veil: number, lamp: Point, cone: Point): void {
   const { ctx } = painter;
   const minSide = Math.min(f.width, f.height);
@@ -44,7 +41,6 @@ export function paintNight(painter: Painter, f: LoaderFrame, veil: number, lamp:
   painter.motesAlong({ origin: lamp, direction: cone, length: minSide * 0.6, spread: minSide * 0.18 }, LAMP_RGB, 0.8 * filament, f.moving ? f.time : 0);
 }
 
-/** The thin boot line along the bottom of the monitor, its head at `shown`. */
 export function paintBootLine(painter: Painter, f: LoaderFrame, poster: PosterFrame, shown: number): void {
   const { ctx, scale } = painter;
   const [left, right, bottom] = poster.monitor;

@@ -7,9 +7,7 @@ import type { DeskFrame } from '../set/frame';
 const CLUMPS = 3;
 const STIFFNESS = 46;
 const DAMPING = 3.2;
-/** Largest lean a clump reaches (rad), so even a hard rustle stays a plant, not a whip. */
 const MAX_LEAN = 0.09;
-/** Pointer distance (NDC) under which a passing hand stirs the leaves. */
 const NEAR = 0.22;
 const LEAF_HEIGHT = 0.16;
 
@@ -34,7 +32,6 @@ export interface PlantPointer {
   camera: PerspectiveCamera;
 }
 
-/** The window plant's foliage in three clumps on springs: a hand passing nearby stirs it, a click rustles it. */
 export class SwayingPlant {
   readonly group = new Group();
   private readonly clumps: Clump[] = [];
@@ -58,12 +55,10 @@ export class SwayingPlant {
     this.group.name = 'desk-plant';
   }
 
-  /** Pushes the leaves sideways (`x` across the screen, `y` towards the wall). */
   nudge(x: number, y: number): void {
     this.clumps.forEach((clump, index) => clump.speed.add(new Vector2(x, y).multiplyScalar(clump.give * (index % 2 ? -0.7 : 1))));
   }
 
-  /** A click: a quick shake of every clump in alternating directions. */
   rustle(): void {
     this.clumps.forEach((clump, index) => clump.speed.add(new Vector2(index % 2 ? -1.6 : 1.8, 0.6 * (index - 1))));
   }

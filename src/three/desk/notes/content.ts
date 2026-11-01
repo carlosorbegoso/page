@@ -7,20 +7,15 @@ import { es } from '../../../i18n/ui.es';
 import type { ProductId } from './layout';
 
 export interface CompanyPrint {
-  /** Handwritten across the top of the board: "TUSOCIO IA". */
   title: string;
-  /** "Cofundador · TUSOCIO IA S.A.C." */
   role: string;
-  /** The company in one sentence. */
   phrase: string;
-  /** "Alfa, la marca madre". */
   parentBrand: string;
 }
 
 export interface ProductPrint {
   id: ProductId;
   name: string;
-  /** "En producción" / "En construcción". */
   status: string;
   tagline: string;
   description: string;
@@ -44,7 +39,6 @@ function english(): boolean {
   return document.documentElement.lang.startsWith('en');
 }
 
-/** The board's text, from the same profile and UI strings the page uses, in the page's language. */
 export function readCompany(): CompanyPrint {
   const isEnglish = english();
   const ui = isEnglish ? en : es;
@@ -57,7 +51,6 @@ export function readCompany(): CompanyPrint {
   };
 }
 
-/** A product card's text, from the products content in the page's language. */
 export function readProduct(id: ProductId): ProductPrint {
   const isEnglish = english();
   const ui = isEnglish ? en : es;

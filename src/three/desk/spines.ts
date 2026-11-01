@@ -2,7 +2,6 @@ import { CanvasTexture, Color, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMat
 import { drawArchiveCover } from './archive-cover';
 import { FOLDER, FOLDERS, folderCentre, type FolderId } from './layout';
 
-/** What an archive box says on its paper label: the company and its years, read bottom to top. */
 export const SPINE_TEXT: Record<FolderId, [string, string]> = {
   sysarp: ['SYSARP', '2020 – 2021'],
   baufest: ['BAUFEST', '2022 – 2024'],
@@ -10,7 +9,6 @@ export const SPINE_TEXT: Record<FolderId, [string, string]> = {
   tcs: ['TCS · BCP', '2025 →']
 };
 
-/** Paper label on each spine, matching `buildShelf` in props.ts. */
 export const SPINE_LABEL = { length: 0.15, width: FOLDER.spine * 0.62, lift: 0.055 } as const;
 
 const ROW = 256;
@@ -41,9 +39,7 @@ function drawLabels(canvas: HTMLCanvasElement): void {
 }
 
 export interface SpineLabels {
-  /** One mesh per folder so a label slides out with its box. */
   meshes: Map<FolderId, Mesh>;
-  /** Cover sheet on the first box's outer face; slides out with it. */
   cover: Mesh;
   dispose(): void;
 }
@@ -107,13 +103,11 @@ function coverMesh(material: MeshBasicMaterial): Mesh {
   return cover;
 }
 
-/** Printed text over the paper labels of the four folders, sharing one texture. */
 export function createSpineLabels(): SpineLabels {
   const texture = labelTexture();
   const material = new MeshStandardMaterial({ map: texture, transparent: true, roughness: 0.85, metalness: 0, depthWrite: false });
   const meshes = labelMeshes(material);
   const coverMap = coverTexture();
-  /* Unlit on purpose: the side face only catches grazing light, so a lit sheet read as a black hole. */
   const coverMaterial = new MeshBasicMaterial({ map: coverMap, color: new Color(COVER_LEVEL, COVER_LEVEL, COVER_LEVEL) });
   const cover = coverMesh(coverMaterial);
   return {

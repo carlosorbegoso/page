@@ -31,14 +31,12 @@ export interface RoomMeshes {
   material: MeshStandardMaterial;
   uniforms: AtlasUniforms;
   depthMaterial: Material | undefined;
-  /** Static geometry of the animated collectibles and the workstation, handed to `DeskLife`. */
   figures: PartBuilder;
   workstation: PartBuilder;
   phoneMatrix: Matrix4;
   triangles: number;
 }
 
-/** The atlas material and the merged static room: walls, furniture, props, the monitor head. */
 export function buildRoomMeshes(room: Group, context: StationContext, palette: Palette, disposables: Array<{ dispose(): void }>): RoomMeshes {
   const high = context.tier === 'high';
   const q = high ? 1 : 0.6;

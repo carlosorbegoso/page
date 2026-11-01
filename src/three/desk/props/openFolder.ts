@@ -5,7 +5,6 @@ import { OPEN_FOLDER } from '../layout';
 import { seeded, shade, UP } from './geometry';
 import type { Palette } from './palette';
 
-/** Both boards rise slightly towards the spine, so everything on a board shares its roll. */
 const BOARD_ROLL = 0.02;
 const BOARD_TOP = 0.004;
 
@@ -32,7 +31,6 @@ function addSheet(b: PartBuilder, side: Side, paper: Finish, size: [number, numb
   b.add(new BoxGeometry(size[0], 0.0006, size[1]), paper, side.place(at[0], at[1], at[2], yaw), side.id);
 }
 
-/** Printed text as thin grey bars: a heading, then paragraph lines of varying length. */
 function addPrint(b: PartBuilder, side: Side, p: Palette, origin: [number, number, number], width: number, lines: number, yaw: number, seed: number): void {
   const ink = shade(p.bookDark, 0.7);
   const faint: Finish = { ...shade(p.paper, 0.62), roughness: 0.9 };
@@ -69,7 +67,6 @@ function buildBoards(b: PartBuilder, p: Palette, left: Side, right: Side, depth:
   }
 }
 
-/** Inside pocket of the left board: a die-cut flap with a clipped outer corner and a thumb notch. */
 function pocketGeometry(width: number, top: number, bottom: number): ExtrudeGeometry {
   const w = width / 2;
   const notch = 0.022;
@@ -138,7 +135,6 @@ function buildRightPage(b: PartBuilder, p: Palette, right: Side, depth: number):
   }
 }
 
-/** Open TCS folder (linen boards, pocket, a clipped stack of printed sheets) left of the keyboard. */
 export function buildOpenFolder(b: PartBuilder, p: Palette): void {
   const { width, depth } = OPEN_FOLDER;
   const boardWidth = width / 2 - 0.004;

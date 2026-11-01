@@ -6,16 +6,12 @@ import { shade, UP } from './geometry';
 import { LAPTOP_KEYBOARD } from './laptopKeys';
 import type { Palette } from './palette';
 
-/** Rubber feet lift the case off the desk, so a dark contact line separates it from the wood. */
 const LAPTOP_FOOT = 0.0011;
-/** Height of the deck (top of the case) above the desk. */
 export const LAPTOP_DECK = LAPTOP_FOOT + LAPTOP.base;
 const LAPTOP_LID_HEIGHT = LAPTOP.depth - 0.004;
-/** The panel sits above the lid centre: a thin top bezel and a deeper chin, as on a MacBook. */
 const LAPTOP_SCREEN_RISE = 0.0035;
 const KEYBOARD_Z = -LAPTOP.depth / 2 + 0.017 + LAPTOP_KEYBOARD.depth / 2;
 
-/** The lid in its own hinge frame: it stands along +Y with the glass facing +Z, and turns about X. */
 export const LAPTOP_LID = {
   height: LAPTOP_LID_HEIGHT,
   glass: new Vector3(0, LAPTOP_LID_HEIGHT / 2 + LAPTOP_SCREEN_RISE, LAPTOP.lid / 2 + 0.0008)
@@ -25,17 +21,14 @@ export function laptopFrame(): Matrix4 {
   return new Matrix4().compose(LAPTOP.centre, new Quaternion().setFromAxisAngle(UP, LAPTOP.yaw), new Vector3(1, 1, 1));
 }
 
-/** World matrix of the hinge axis with the lid upright (no lean): the lid mesh turns about its local X. */
 export function laptopHingeMatrix(): Matrix4 {
   return laptopFrame().multiply(new Matrix4().makeTranslation(0, LAPTOP_DECK, -LAPTOP.depth / 2 + 0.004));
 }
 
-/** World matrix of the keyboard centre at keycap height; `laptopKeys()` positions are relative to it. */
 export function laptopKeyboardMatrix(): Matrix4 {
   return laptopFrame().multiply(new Matrix4().makeTranslation(0, LAPTOP_DECK + 0.0007, KEYBOARD_Z));
 }
 
-/** MacBook-like case in space grey: feet, deck, keyboard well, grilles, trackpad, hinge barrel and cable. Keycaps and lid are separate meshes. */
 export function buildLaptop(b: PartBuilder, p: Palette): void {
   const frame = laptopFrame();
   const shell: Finish = { color: new Color('#5d626b'), roughness: 0.32, metalness: 0.9 };
@@ -71,7 +64,6 @@ export function buildLaptop(b: PartBuilder, p: Palette): void {
   buildLaptopCable(b, frame, rubber);
 }
 
-/** The lid in its hinge frame (see `LAPTOP_LID`): aluminium shell, black glass border and the camera dot. */
 export function buildLaptopLid(b: PartBuilder): void {
   const shell: Finish = { color: new Color('#5d626b'), roughness: 0.32, metalness: 0.9 };
   const glass: Finish = { color: new Color('#050608'), roughness: 0.24, metalness: 0.1 };
@@ -83,7 +75,6 @@ export function buildLaptopLid(b: PartBuilder): void {
   b.add(new CylinderGeometry(0.0011, 0.0011, 0.0004, 10), { color: new Color('#182030'), roughness: 0.1, metalness: 0.3 }, camera);
 }
 
-/** USB-C lead from the laptop's right-hand port, across the desk and behind the stand, up into the monitor's back. */
 function buildLaptopCable(b: PartBuilder, laptop: Matrix4, finish: Finish): void {
   const { width, base } = LAPTOP;
   const portY = LAPTOP_FOOT + base * 0.5;

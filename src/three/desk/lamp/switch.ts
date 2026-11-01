@@ -4,16 +4,12 @@ import { LAMP } from '../layout';
 import { damp } from '../math';
 import type { DeskFrame } from '../set/frame';
 
-/** Top of the lamp's weighted base (`buildLamp`: an 18 mm disc of radius 7 cm). */
 const BASE_TOP = 0.018;
-/** The rocker sits on the base's front-left rim, the side that faces the chair. */
 export const LAMP_SWITCH = LAMP.base.clone().add(new Vector3(-0.034, BASE_TOP, 0.044));
 const YAW = Math.atan2(-0.034, 0.044);
-/** Rocker tilt either side of centre (rad). */
 const ROCK = 0.32;
 const HOVER_DIP = 0.0012;
 
-/** A small rocker switch on the lamp base: it snaps to on or off with the lamp and dips under the pointer. */
 export class LampSwitch {
   readonly group = new Group();
   private readonly rocker: Mesh;
@@ -45,7 +41,6 @@ export class LampSwitch {
     this.hovered = hovered;
   }
 
-  /** Follows the lamp's switch state (on rocks the front edge down). Returns whether it still moves. */
   update(frame: DeskFrame, on: boolean): boolean {
     const angleGoal = on ? -ROCK : ROCK;
     const dipGoal = this.hovered ? HOVER_DIP : 0;

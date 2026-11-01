@@ -1,4 +1,3 @@
-/* Upright phones: the cork board is too small to read, so the panel becomes the index card pinned to it. */
 @media (width < 48rem) {
   .is-3d .plate[data-plate-id='company'] {
     --color-text: #1c2230;

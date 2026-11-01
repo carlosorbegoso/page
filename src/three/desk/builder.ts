@@ -1,14 +1,11 @@
 import { BufferAttribute, BufferGeometry, Color, Euler, Matrix4, Quaternion, Vector3 } from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
-/** Surface parameters baked per vertex into the atlas material. */
 export interface Finish {
   color: Color;
   roughness: number;
   metalness: number;
-  /** Emission as a multiple of the albedo (signal lines, lamp diffuser). */
   emissive?: number;
-  /** 0..1 strength of the procedural wood grain. */
   grain?: number;
 }
 
@@ -18,10 +15,6 @@ export interface Placement {
   scale?: [number, number, number] | number;
 }
 
-/**
- * Object ids baked per vertex (0 = static). 1–4 are the figures the vertex shader can lift and
- * turn; the rest only take hover and per-object light (`uGlow`, `uSignal`).
- */
 export const OBJECT_ID = {
   none: 0,
   alfa: 1,
@@ -34,7 +27,6 @@ export const OBJECT_ID = {
   tcs: 8,
   openFolder: 9,
   phone: 10,
-  /** Left board of the TCS folder: it swings open on its spine (`uHinge`). */
   openFolderCover: 11
 } as const;
 
@@ -46,11 +38,6 @@ export function placementMatrix(placement: Placement = {}): Matrix4 {
   return new Matrix4().compose(position, quaternion, scale);
 }
 
-/**
- * Accumulates transformed primitives with their finish and merges them into one indexed
- * geometry (position, normal, color, pbr, oid): one draw call for everything sharing the
- * atlas material.
- */
 export class PartBuilder {
   private readonly parts: BufferGeometry[] = [];
   private triangles = 0;
@@ -114,7 +101,6 @@ function flipWinding(geometry: BufferGeometry): void {
   }
 }
 
-/** Duplicates a single-sided surface with flipped winding and normals (leaves). */
 export function doubleSided(geometry: BufferGeometry): BufferGeometry {
   const back = geometry.clone();
   flipWinding(back.index ? back : back.setIndex(sequentialIndex(back.getAttribute('position').count)));

@@ -18,7 +18,6 @@ interface Props {
   title?: string;
   description?: string;
   indexable?: boolean;
-  /** Root-relative URL of this same page in every locale; defaults to the home pages. */
   alternates?: Record<Locale, string>;
   colorScheme?: 'dark' | 'dark light';
   pageType?: 'ProfilePage' | 'WebPage';
@@ -37,7 +36,6 @@ const themeColor = tokensCss.match(/--color-bg:\s*(#[0-9a-f]{3,8})/i)?.[1] ?? '#
 const site = Astro.site!;
 const absolute = (path: string) => new URL(path, site).href;
 const canonical = absolute(Astro.url.pathname.replace(/\/?$/, '/'));
-/* Language-only hreflang: es-PE/en-US would leave Spanish speakers outside Peru and English speakers outside the US unmatched. */
 const alternates = LOCALES.map(l => ({ hreflang: l, href: absolute(localizedPaths[l]) }));
 const xDefault = absolute(localizedPaths[DEFAULT_LOCALE]);
 const siteHome = absolute(localeUrl(DEFAULT_LOCALE));

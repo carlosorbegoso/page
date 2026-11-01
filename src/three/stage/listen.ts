@@ -62,7 +62,6 @@ function listenTheme(host: ListenHost, cleanups: Cleanups): void {
   cleanups.push(() => themeObserver.disconnect());
 }
 
-/** Window, document and canvas listeners that keep the stage measured, awake and clickable. */
 export function listenStage(host: ListenHost, cleanups: Cleanups): void {
   onWindow(cleanups, 'resize', () => host.measure());
   onWindow(cleanups, 'orientationchange', () => host.measure(true));

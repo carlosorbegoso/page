@@ -7,7 +7,6 @@ export function stopKeys(root: HTMLElement): void {
 
 const msOf = (value: string) => Number.parseFloat(value) * (value.trim().endsWith('ms') ? 1 : 1000) || 0;
 
-/** The desk audio plays a mechanical key for every typed character (`desk:key`), in step with the CSS stagger. */
 export function typeKeys(root: HTMLElement): void {
   stopKeys(root);
   const style = getComputedStyle(root);

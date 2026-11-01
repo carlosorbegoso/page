@@ -5,15 +5,11 @@ import { createContactShadow } from './shadow';
 import type { Mascot, MascotId } from './types';
 
 export interface MascotRig {
-  /** Group moved by the idle float/turn. */
   motion: Object3D;
   signals: MeshStandardMaterial[];
   materials: Material[];
-  /** Mascot-specific reaction to focus weight. */
   focus?: (weight: number) => void;
-  /** Per-signal multiplier for idle signal animation (breathing, typing dots). */
   signalPulse?: (time: number, index: number) => number;
-  /** Extra idle motion (e.g. the wrench turning on its long axis). */
   idle?: (time: number) => void;
 }
 
@@ -26,7 +22,6 @@ export interface MascotRecipe<G extends Record<string, BufferGeometry>> {
 }
 
 export interface MascotOptions {
-  /** Baked contact shadow under the mascot (off for bodies floating in space). */
   shadow?: boolean;
 }
 
@@ -80,10 +75,6 @@ class RiggedMascot implements Mascot {
   }
 }
 
-/**
- * Builds a procedural mascot. Geometry is shared through the asset cache (Hero and
- * Ventures both use Alfa); materials are per instance so each scene drives its own signal.
- */
 export async function buildMascot<G extends Record<string, BufferGeometry>>(
   recipe: MascotRecipe<G>,
   options: MascotOptions = {}

@@ -7,7 +7,6 @@ import { drawCork, drawPinShadows } from './cork';
 import { drawPostits, drawTitle } from './postits';
 import { corkArea, type BoardCanvas } from './surface';
 
-/** In front of the cork panel and behind the frame's lip, so the print never z-fights either. */
 const PRINT_LIFT = 0.0008;
 
 export interface CorkboardPrint {
@@ -27,10 +26,6 @@ function drawBoard(face: PrintedFace): void {
   face.texture.needsUpdate = true;
 }
 
-/**
- * Everything pinned to TUSOCIO's cork board, printed on one face over the cork: the handwritten
- * title, the role and phrase card, the Alfa card and the three product post-its, at `BOARD_LAYOUT`.
- */
 export function createCorkboardPrint(): CorkboardPrint {
   const { width, height } = corkArea();
   const face = printedFace('desk-corkboard-print', width, height);

@@ -175,11 +175,6 @@ function observeMode(phone: Phone): void {
   });
 }
 
-/**
- * Turns the Contact plate into a working smartphone while it is the CSS3D `surface-phone`
- * (status bar clock, taps with ripple and haptics, Mail screen, link sheet, toasts, banner).
- * Any other mode leaves the plain section and its native links untouched.
- */
 export function initPhone(plate: HTMLElement): void {
   const home = plate.querySelector<HTMLElement>('[data-phone-home]');
   const toastEl = plate.querySelector<HTMLElement>('[data-phone-toast]');

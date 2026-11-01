@@ -6,7 +6,6 @@ function samePageHash(event: MouseEvent): string {
   return link && link.origin === location.origin && link.pathname === location.pathname ? link.hash.slice(1) : '';
 }
 
-/** In-page links to a chapter (#products, the index) travel to its first shot, not to the bare spacer. */
 export function createAnchorClickHandler(host: StoryNavHost, scroller: Scroller): (event: MouseEvent) => void {
   return event => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return;

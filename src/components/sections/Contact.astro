@@ -44,7 +44,6 @@ const { locale } = Astro.props;
 </script>
 
 <style>
-  /* Phone taps: pressed state and ripple only on the 3D phone, where controls must feel physical. */
   :global(.is-3d [data-plate-mode='surface-phone'][data-phone-on]) :global(:is(a[href], button)) {
     position: relative;
     overflow: hidden;

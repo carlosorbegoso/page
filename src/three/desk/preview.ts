@@ -11,11 +11,8 @@ export interface DeskPreviewOptions {
 export interface DeskPreview {
   set: DeskSet;
   renderer: WebGLRenderer;
-  /** Settles a chapter's actions and renders its shot. */
   show(chapter: ChapterId, subIndex?: number): { calls: number; triangles: number };
-  /** Renders from an arbitrary eye/target (close-ups for review). */
   renderFrom(eye: [number, number, number], target: [number, number, number], fov?: number): void;
-  /** Shows a sample HTML block on a CSS3D surface at 1:1 (or hides it with null). */
   surface(name: SurfaceName | null, html?: string): void;
   checks(): ShotCheck[];
   dispose(): void;
@@ -155,7 +152,6 @@ function previewApi(rig: PreviewRig, width: number, height: number, fov: number)
   };
 }
 
-/** Stand-alone render of the desk set (own renderer, no engine) to review shots and actions. */
 export async function mountDeskPreview(container: HTMLElement, options: DeskPreviewOptions = {}): Promise<DeskPreview> {
   const width = container.clientWidth;
   const height = container.clientHeight;

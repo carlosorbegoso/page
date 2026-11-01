@@ -9,11 +9,6 @@ const UP_SECONDS = 0.16;
 const PRESS_SECONDS = DOWN_SECONDS + HOLD_SECONDS + UP_SECONDS;
 const FALLBACK_CODES = 'KeyFKeyJKeyDKeyKKeySKeyLKeyAKeyGKeyH'.match(/Key./g)!;
 
-/**
- * The laptop keycaps as one instanced mesh, so a single key can sink when the matching key is
- * pressed on the real keyboard (`press`). Unknown codes press a home-row key picked from the code,
- * so every key the visitor types still moves something.
- */
 export class LaptopKeycaps {
   readonly mesh: InstancedMesh;
   private readonly keys: LaptopKey[];
@@ -41,7 +36,6 @@ export class LaptopKeycaps {
     this.mesh.computeBoundingSphere();
   }
 
-  /** Sinks the key for a `KeyboardEvent.code`; returns false when nothing was pressed. */
   press(code: string, time: number): boolean {
     const i = this.index.get(code) ?? this.index.get(fallbackCode(code));
     if (i === undefined) return false;
@@ -49,7 +43,6 @@ export class LaptopKeycaps {
     return true;
   }
 
-  /** Moves the pressed keys; returns true while one is still travelling. */
   update(time: number): boolean {
     let moving = 0;
     for (let i = 0; i < this.keys.length; i++) {

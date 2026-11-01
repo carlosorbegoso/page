@@ -8,11 +8,6 @@ import { PORTRAIT } from './layout';
 import { PictureLight } from './light';
 import { createPrint } from './photo';
 
-/**
- * Carlos's framed photo on the wall: frame and contact shadow, the toned print in its mat, the glass
- * with its reflections and hover glint, the brass picture light for the night, and the click that
- * brings the camera closer.
- */
 export class WallPortrait {
   readonly group = new Group();
   private readonly glass = new PortraitGlass();

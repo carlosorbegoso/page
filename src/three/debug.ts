@@ -1,7 +1,6 @@
 import type { WebGLRenderer } from 'three';
 import { cacheSnapshot } from './assets';
 
-/** Read-only view of the Stage the overlay needs. */
 interface StageMetrics {
   readonly tierName: string;
   chapterLabel(): string;
@@ -19,11 +18,6 @@ interface StationMetrics {
   dpr: number;
 }
 
-/**
- * Minimal `?debug` overlay (replaces stats.js): FPS from the p75 frame time, DPR,
- * draw calls, triangles and GPU memory. Metrics per station are saved to localStorage
- * (`stage:metrics`) so they can be copied into docs/QA.md.
- */
 export class DebugOverlay {
   private readonly el = document.createElement('pre');
   private lastPaint = 0;
@@ -57,7 +51,6 @@ export class DebugOverlay {
     this.notes = [...this.notes.slice(-3), message];
   }
 
-  /** Called after each rendered frame; repaints at most twice a second. */
   frame(now: number): void {
     const station = this.stage.chapterLabel();
     const p75 = this.stage.p75FrameMs();
@@ -109,7 +102,6 @@ export class DebugOverlay {
         })
       );
     } catch {
-      /* storage can be unavailable (private mode); the overlay still works */
     }
   }
 

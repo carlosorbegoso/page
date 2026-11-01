@@ -4,7 +4,6 @@ import { StoryClock, storyMinutes } from '../clock';
 import { damp } from '../math';
 import type { DeskFrame } from './frame';
 
-/** The alarm clock on the desk: its hands follow the story's hour, and it rings when clicked. */
 export class ClockWiring {
   readonly model: StoryClock;
   private minutes = 60;
@@ -35,7 +34,6 @@ export class ClockWiring {
     return this.minutes !== minutesGoal;
   }
 
-  /** True while it rings. */
   ring(frame: DeskFrame): boolean {
     return this.model.update(frame.time, frame.motion);
   }

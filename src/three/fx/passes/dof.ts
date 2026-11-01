@@ -7,7 +7,6 @@ import { dofFrag } from '../shaders';
 import type { Targets } from '../targets';
 import { passMaterial } from './material';
 
-/** Gather bokeh into the DoF target; the material is built lazily with the tier's tap count. */
 export class DofPass {
   private built: ShaderMaterial | null = null;
 

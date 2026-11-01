@@ -7,7 +7,6 @@ const PROGRESS_MS = 1100;
 export type ToastVariant = 'done' | 'progress' | 'error';
 export type Toast = ReturnType<typeof createToast>;
 
-/** iOS-like pill under the island; the element is the phone's only live region. */
 export function createToast(el: HTMLElement, text: HTMLElement) {
   let timer: number | undefined;
 
@@ -30,7 +29,6 @@ export function createToast(el: HTMLElement, text: HTMLElement) {
     if (duration > 0) timer = window.setTimeout(hide, duration);
   }
 
-  /** Shows a filling progress pill, then calls `done` once it is full. */
   function progress(message: string, done: () => void): void {
     const duration = reducedMotion() ? 300 : PROGRESS_MS;
     el.style.setProperty('--phone-progress', `${duration}ms`);
@@ -42,7 +40,6 @@ export function createToast(el: HTMLElement, text: HTMLElement) {
   return { show, hide, progress, strings: el.dataset };
 }
 
-/** Mirrors the CopyEmail status line into the toast (the line itself is hidden on the phone). */
 export function mirrorCopyStatus(
   status: HTMLElement | null,
   toast: Toast,

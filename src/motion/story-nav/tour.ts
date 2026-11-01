@@ -7,7 +7,6 @@ const READ_MIN_MS = 4000;
 const READ_MAX_MS = 10000;
 const READ_BASE_MS = 1500;
 const READ_MS_PER_CHAR = 45;
-/** Plates get `data-active` on the frame after `chapter:settled`; measure the text once they have it. */
 const PLATE_FLAG_DELAY_MS = 120;
 
 interface TourRun {
@@ -42,7 +41,6 @@ function clearTourTimers(tour: TourRun): void {
   tour.offSettled = null;
 }
 
-/** Waits for `chapter:settled` on `shot` (or any settle without one), with a timeout fallback. */
 function waitForSettle(tour: TourRun, shot: StoryShot | undefined, done: () => void): void {
   const onSettled = (event: Event) => {
     const detail = (event as CustomEvent<SettledShot>).detail;
@@ -53,7 +51,6 @@ function waitForSettle(tour: TourRun, shot: StoryShot | undefined, done: () => v
   tour.settleTimer = window.setTimeout(done, SETTLE_FALLBACK_MS);
 }
 
-/** The auto tour: travel to each shot, wait for it to settle, pause long enough to read it, go on. */
 class AutoTour implements Tour {
   private run: TourRun | null = null;
 
@@ -97,7 +94,6 @@ class AutoTour implements Tour {
     }, PLATE_FLAG_DELAY_MS);
   }
 
-  /** At the very top the Stage holds the power-on and defers chapters, so `chapter:settled` may never come. */
   private afterSettled(shot: StoryShot | undefined, next: () => void): void {
     if (!this.run) return;
     clearTourTimers(this.run);

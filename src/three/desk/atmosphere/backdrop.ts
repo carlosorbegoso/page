@@ -4,7 +4,6 @@ import { tokenColor } from '../../tokens';
 import { BACKDROP_FRAGMENT, BACKDROP_VERTEX } from './backdrop.glsl';
 import { CITY_LAYERS, cityAtlas, SKY, SKY_Z } from './city-atlas';
 
-/** Quad facing +Z with a per-vertex layer index (0 = sky, 1..3 = city layers far → near). */
 function layerQuad(halfWidth: number, bottom: number, top: number, z: number, layer: number): BufferGeometry {
   const quad = new PlaneGeometry(halfWidth * 2, top - bottom).translate(0, (top + bottom) / 2, z);
   const uv = quad.getAttribute('uv');
@@ -16,17 +15,13 @@ function layerQuad(halfWidth: number, bottom: number, top: number, z: number, la
 
 export interface Backdrop {
   mesh: Mesh<BufferGeometry, ShaderMaterial>;
-  /** 0 night … 1 first light over the Pacific: warm horizon band, cloud deck lit from below, city switching off. */
   setDawn(value: number): void;
-  /** 0 early night … 1 every city window dark (the story clock). */
   setLateness(value: number): void;
-  /** 0 night … 1 Lima's overcast daylight ("panza de burro"): grey cloud deck, buildings fading into the sea fog. */
   setDay(value: number): void;
   setTime(time: number): void;
   dispose(): void;
 }
 
-/** Sky plus the three city layers merged into one geometry (one draw call). */
 function backdropGeometry(): BufferGeometry {
   const parts = [
     layerQuad(SKY.halfWidth, SKY.bottom, SKY.top, SKY_Z, 0),
@@ -66,7 +61,6 @@ function backdropMaterial(texture: Texture, aviation: Vector3[]): ShaderMaterial
   });
 }
 
-/** Lima sky, Costa Verde cliffs and a three-layer city behind the window (desk.md §4), one draw call. */
 export function createBackdrop(): Backdrop {
   const { texture, aviation } = cityAtlas();
   const geometry = backdropGeometry();

@@ -4,21 +4,15 @@ import type { ChapterId } from '../contracts';
 import { createClockParts, type ClockParts } from './clock/parts';
 import { DESK, HERO_EYE } from './layout';
 
-/** CC0 "Alarm Clock 01" from Poly Haven (public/models/alarm-clock/CREDITS.txt). */
 const URL = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}models/alarm-clock/alarm-clock.gltf`;
-/** A faint luminous dial: the clock sits outside the lamp's cone and would read as a black disc. */
 const DIAL_GLOW = 0.22;
-/** Back right, between the monitor and the lamp: in the wide shots, below the frame in the close ones. */
 export const CLOCK_POSITION = new Vector3(0.57, DESK.top, -0.41);
 const CLOCK_SCALE = 0.8;
-/** Window event that rings the alarm (dispatched when the clock is clicked). */
 export const CLOCK_RING_EVENT = 'desk:clock';
 const RING_SECONDS = 1.2;
-/** The winding crown turns about one revolution every half minute. */
 const CROWN_SPEED = 0.21;
 const SECOND_STEP = Math.PI / 30;
 
-/** The story clock, in minutes after 22:00, per chapter and sub-shot (matches the HUD beats). */
 const STORY_MINUTES: Record<ChapterId, number[]> = {
   intro: [60],
   hero: [60],
@@ -30,7 +24,6 @@ const STORY_MINUTES: Record<ChapterId, number[]> = {
   outro: [478]
 };
 
-/** By day, minutes after 10:00 (same 12-hour dial): a morning at the office until nightfall. */
 const STORY_MINUTES_DAY: Record<ChapterId, number[]> = {
   intro: [0],
   hero: [0],
@@ -50,12 +43,10 @@ export function storyMinutes(chapter: ChapterId, subIndex: number, day = false):
 interface Hand {
   node: Object3D;
   rest: Quaternion;
-  /** Unit direction the hand points to at rest, in the clock's space. */
   restDirection: Vector3;
   turnsPerHour: number;
 }
 
-/** An analog desk clock whose hands show the story hour; the hands sweep forward between chapters. */
 export class StoryClock {
   readonly group = new Group();
   private hands: Hand[] = [];
@@ -75,8 +66,6 @@ export class StoryClock {
     this.wake?.();
   };
 
-  /** `prepare` compiles the model's shaders before it joins the scene (no first-frame link stall). */
-  /** `wake` asks the on-demand loop for a frame when the alarm is rung while nothing else animates. */
   constructor(
     onReady: () => void,
     prepare?: (model: Object3D) => Promise<void>,
@@ -103,7 +92,6 @@ export class StoryClock {
       .catch(() => undefined);
   }
 
-  /** Points the hands at `minutes` after 22:00. */
   show(minutes: number): void {
     const up = new Vector3(0, 1, 0).projectOnPlane(this.faceNormal).normalize();
     const hours = 10 + minutes / 60;
@@ -115,11 +103,6 @@ export class StoryClock {
     }
   }
 
-  /**
-   * Advances the living parts: the second hand ticks with real seconds, the crown winds and a
-   * pending ring plays. Returns true while the case itself moves (ring or reduced-motion nudge):
-   * keep rendering and refresh the shadow map on those frames.
-   */
   update(time: number, motion: boolean): boolean {
     if (!this.parts) return false;
     this.tickSeconds(Date.now() / 1000, motion);
@@ -176,7 +159,6 @@ export class StoryClock {
     if (this.parts) this.parts.hammer.rotation.z = hammer;
   }
 
-  /** Quartz step: the hand jumps on the second, overshoots by a sixth of a step and settles. */
   private tickSeconds(now: number, motion: boolean): void {
     const hand = this.secondHand;
     if (!hand) return;
@@ -201,12 +183,10 @@ function handOf(scene: Object3D, name: string, turnsPerHour: number): Hand | nul
 function secondHandOf(scene: Object3D): { node: Object3D; rest: Quaternion; restDirection: Vector3 } | null {
   const second = scene.getObjectByName('second_hand');
   if (!second) return null;
-  /* Unlike the other two hands, the second hand's mesh is modelled along its local +Y. */
   const restDirection = new Vector3(0, 1, 0).applyQuaternion(second.quaternion).normalize();
   return { node: second, rest: second.quaternion.clone(), restDirection };
 }
 
-/* The glass ships with an opaque JPG as base colour, which would paint the dial black. */
 function clearGlass(material: MeshStandardMaterial): void {
   material.map = null;
   material.color.setScalar(1);

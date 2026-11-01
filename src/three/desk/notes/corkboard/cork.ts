@@ -4,7 +4,6 @@ import { toCanvas, type BoardCanvas } from './surface';
 
 const CORK_BASE = '#b98d5c';
 const SPECKLE = ['#8a5f34', '#9b6d3f', '#a77a49', '#c99d6a', '#d6b080', '#74502c'];
-/** Granules per square metre of cork. */
 const GRANULE_DENSITY = 900_000;
 
 function speckle(board: BoardCanvas): void {
@@ -39,7 +38,6 @@ function frameShade(context: CanvasRenderingContext2D, reach: number): void {
   }
 }
 
-/** Warm tan cork with seeded granules and the frame's shade along its edges. */
 export function drawCork(board: BoardCanvas): void {
   const { context, scale } = board;
   context.fillStyle = CORK_BASE;
@@ -48,7 +46,6 @@ export function drawCork(board: BoardCanvas): void {
   frameShade(context, scale * 0.01);
 }
 
-/** Soft shadows the push pin heads cast down and to the right of where they go in. */
 export function drawPinShadows(board: BoardCanvas): void {
   const { context, scale } = board;
   for (const pin of pinSpots()) {

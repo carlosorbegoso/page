@@ -8,7 +8,6 @@ export interface RainGlass {
   mesh: Mesh<PlaneGeometry, ShaderMaterial>;
   setTime(time: number): void;
   setLampReflection(level: number): void;
-  /** By day only a light drizzle is left on a pale glass. */
   setDay(value: number): void;
   dispose(): void;
 }
@@ -34,7 +33,6 @@ function glassMaterial(aspect: number): ShaderMaterial {
   );
 }
 
-/** Window glass with static droplets, slow trickles and a fake warm lamp reflection. */
 export function createRainGlass(): RainGlass {
   const width = WINDOW.width - WINDOW.frame * 2;
   const height = WINDOW.height - WINDOW.frame * 2;

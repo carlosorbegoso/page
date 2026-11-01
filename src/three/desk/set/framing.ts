@@ -2,9 +2,7 @@ import { Vector3 } from 'three';
 import type { ChapterId, PlateAnchor, Shot, StationContext, SurfaceName } from '../../contracts';
 import { framings, monitorFrame, panelAnchor, toShot, type Framing, type SurfaceFrame, type Viewport } from '../shots';
 
-/** Camera framings for the canvas size: shots, CSS3D surfaces, panel anchors and focus points. */
 export class DeskFraming {
-  /** Canvas CSS size, read once per resize instead of forcing a layout from every frame. */
   private size: { width: number; height: number } | null = null;
   private observer: ResizeObserver | null = null;
   private readonly onViewportChange = () => {
@@ -19,12 +17,10 @@ export class DeskFraming {
   viewport(): Viewport {
     const canvas = this.context.renderer.domElement;
     if (!this.observer) {
-      /* Layout is clean inside a ResizeObserver callback, so reading the size there costs nothing. */
       this.observer = new ResizeObserver(() => {
         this.size = this.read(canvas);
       });
       this.observer.observe(canvas);
-      /* Capture so the cache is cleared before the Stage's own resize listener asks for a new shot. */
       window.addEventListener('resize', this.onViewportChange, { capture: true, passive: true });
       window.addEventListener('orientationchange', this.onViewportChange, { capture: true, passive: true });
     }
@@ -47,11 +43,6 @@ export class DeskFraming {
     return framing ? toShot(framing, this.viewport()) : null;
   }
 
-  /**
-   * CSS3D surface with a fixed `scale` (1 CSS px = 1 screen px from the shot that reads it:
-   * `hero`/`about` for the monitor, `contact` for the phone) and its physical `size`, so the
-   * engine can size the plate to the glass.
-   */
   surface(name: SurfaceName, chapter: ChapterId): PlateAnchor | null {
     const frame = name === 'monitor' ? monitorFrame() : this.phoneSurface();
     const reader: ChapterId = name === 'phone' ? 'contact' : chapter === 'about' ? 'about' : 'hero';

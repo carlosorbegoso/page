@@ -1,13 +1,11 @@
 import type { StoryShot } from './types';
 
-/** The active shot, or the last one once the page is scrolled past it, else -1 (the top). */
 export function currentIndex(shots: StoryShot[], active: number): number {
   if (active >= 0) return active;
   const last = shots.at(-1);
   return last && scrollY > last.top ? shots.length - 1 : -1;
 }
 
-/** Index of the resting point nearest to the scroll position: -1 is the top of the page. */
 export function nearestIndex(shots: StoryShot[]): number {
   let best = -1;
   let distance = scrollY;
@@ -21,7 +19,6 @@ export function nearestIndex(shots: StoryShot[]): number {
   return best;
 }
 
-/** Steps from where the page is (or is already heading), so a stale active shot never skips one. */
 export function stepIndex(shots: StoryShot[], direction: 1 | -1, active: number, targetIndex: number | null): number {
   let next: number;
   if (targetIndex !== null) next = targetIndex + direction;

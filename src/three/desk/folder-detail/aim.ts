@@ -13,30 +13,23 @@ const UP = new Vector3(0, 1, 0);
 const scratchEye = new Vector3();
 const scratchForward = new Vector3();
 const scratchRay = new Vector3();
-/** Slight turn that keeps the spine label in view while the cover opens on the other edge. */
 const HOLD_YAW = 0.12;
-/** The held box never comes nearer than this share of the shelf distance (the depth of field racks onto it). */
 const FOCUS_SHARE = 0.6;
 const SPOT_STEP = 0.04;
 const SCREEN_EDGE = 0.94;
 const PUSH_STEP = 1.08;
 const MAX_PUSH = 1.8;
 const MIN_PULL = 0.75;
-/** Screen width of the opened cover, in box widths. */
 const COVER_WIDTH = Math.cos(Math.PI - FLAP_OPEN);
 
-/** Beyond the near end of the stack a held box only has to clear the wall. */
 const STACK_FRONT_Z = folderCentre(FOLDERS[0]).z + FOLDER.spine / 2 + FOLDER.depth / 2 + 0.02;
 const WALL_X = ROOM.left + FOLDER.depth / 2 + 0.03;
 
 interface HoldSpot {
-  /** NDC centre of the box and the part of its cover kept on screen. */
   x: number;
   y: number;
-  /** Share of the screen height and width they may fill. */
   height: number;
   width: number;
-  /** Box widths of opened cover kept on screen; a tall screen lets the cover run off its left edge. */
   cover: number;
 }
 
@@ -44,7 +37,6 @@ function clearOfShelf(at: Vector3): boolean {
   return at.x >= CLEAR_X || (at.z >= STACK_FRONT_Z && at.x >= WALL_X);
 }
 
-/** The open box is the shot's subject (the experience panel is hidden in 3D): centred and large. */
 function holdSpot(aspect: number): HoldSpot {
   return aspect >= 1
     ? { x: 0.06, y: -0.02, height: 0.64, width: 0.78, cover: COVER_WIDTH }
@@ -58,7 +50,6 @@ function placeOnRay(camera: PerspectiveCamera, x: number, y: number, depth: numb
   return out.copy(eye).addScaledVector(ray, depth / ray.dot(forward));
 }
 
-/** Back from the fitting distance first; a shot too close to the shelf then lets the box come nearer, a little larger. */
 function depthsToTry(nearest: number): number[] {
   const depths: number[] = [];
   for (let depth = nearest; depth <= nearest * MAX_PUSH; depth *= PUSH_STEP) depths.push(depth);
@@ -66,7 +57,6 @@ function depthsToTry(nearest: number): number[] {
   return depths;
 }
 
-/** Screen x positions for the box centre within [lo, hi], nearest to `preferred` first. */
 function* candidatesAround(preferred: number, lo: number, hi: number): Generator<number> {
   const start = Math.min(Math.max(preferred, lo), hi);
   for (let offset = 0; start + offset <= hi || start - offset >= lo; offset += SPOT_STEP) {
@@ -75,7 +65,6 @@ function* candidatesAround(preferred: number, lo: number, hi: number): Generator
   }
 }
 
-/** Searches outwards from the spot, then further back, for a box centre clear of the shelf with the box and its kept cover on screen. */
 function findClearSpot(camera: PerspectiveCamera, spot: HoldSpot, nearest: number, tan: number, targetAt: Vector3): boolean {
   for (const depth of depthsToTry(nearest)) {
     const halfBox = FOLDER.depth / 2 / (depth * tan * camera.aspect);
@@ -88,11 +77,6 @@ function findClearSpot(camera: PerspectiveCamera, spot: HoldSpot, nearest: numbe
   return false;
 }
 
-/**
- * Where the visitor holds a shelf box: near the shot's focus distance (the shelf), so depth of field
- * keeps the sheet sharp, pushed back only when the box and its opened cover would not fit. It sits on
- * the ray through `holdSpot`, moved sideways (and back) until it clears the stack and the wall.
- */
 export function aimShelfFolder(id: FolderId, camera: PerspectiveCamera, targetAt: Vector3, targetTurn: Quaternion): void {
   camera.updateMatrixWorld();
   const forward = camera.getWorldDirection(scratchForward);
@@ -109,7 +93,6 @@ export function aimShelfFolder(id: FolderId, camera: PerspectiveCamera, targetAt
   targetTurn.setFromRotationMatrix(scratch).multiply(scratchQuaternion.setFromAxisAngle(UP, -HOLD_YAW));
 }
 
-/** Rest-to-held world transform at `progress`: slide out first, then turn and come forward. */
 export function shelfHoldPose(id: FolderId, progress: number, pull: number, targetAt: Vector3, targetTurn: Quaternion, out: Matrix4): Matrix4 {
   const centre = folderCentre(id);
   const slide = ease(progress / SLIDE_END);
@@ -124,7 +107,6 @@ export function shelfHoldPose(id: FolderId, progress: number, pull: number, targ
   return out.compose(scratchPosition, scratchQuaternion, ONE).multiply(scratch.makeTranslation(-centre.x, -centre.y, -centre.z));
 }
 
-/** Turn of the open-folder sheet once lifted towards `eye`, in the open folder's frame. */
 export function aimOpenSheet(eye: Vector3, openFrame: Matrix4, takenEdge: Vector3, flat: Quaternion, out: Quaternion): void {
   const local = eye.clone().applyMatrix4(scratch.copy(openFrame).invert()).sub(takenEdge).normalize();
   const facing = new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), local);

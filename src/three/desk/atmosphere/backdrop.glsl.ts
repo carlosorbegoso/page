@@ -41,7 +41,6 @@ varying vec2 vUv;
 varying float vLayer;
 
 const float HORIZON = 1.0;
-// Overcast stays below the bloom threshold (--fx-bloom-threshold) so the window never burns out by day.
 const float DAY_CEILING = 0.72;
 
 float hash(vec2 p) { return fract(sin(dot(p, vec2(41.3, 289.1))) * 43758.5453); }

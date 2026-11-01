@@ -6,11 +6,6 @@ import { Sky } from './scenes/Sky';
 const FALLBACK_SHOT: Shot = { position: new Vector3(0, 1.3, 3.2), target: new Vector3(0, 1, 0) };
 const MINIMAL_SKY_STARS = 900;
 
-/**
- * Adapts the pre-migration desk (a legacy `StationModule` registered for `hero`) to the chapter
- * director: its reading pose is the hero shot, `about` pushes in 0.4 m, the other chapters hold
- * the hero shot until the desk provides real ones through `ShotProvider`.
- */
 class LegacyDeskShots {
   constructor(private readonly module: StationModule) {}
 
@@ -30,10 +25,6 @@ class LegacyDeskShots {
   }
 }
 
-/**
- * The single scene: the desk set (shot provider or legacy module), a minimal night sky that only
- * shows through the window, and a fallback light rig when no set is registered.
- */
 export class World {
   readonly scene = new Scene();
   private sky: Sky | undefined;

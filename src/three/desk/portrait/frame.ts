@@ -3,11 +3,9 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { ROOM } from '../layout';
 import { PORTRAIT } from './layout';
 
-/** How far the shadow reaches past the frame, and how far it drops (the picture light is above). */
 const SHADOW_SPREAD = 0.05;
 const SHADOW_DROP = 0.018;
 
-/** Four mitred-looking bars of matte black wood, plus a thin back board the mat rests on. */
 function mouldingGeometry(): BufferGeometry {
   const { width, height, depth, moulding } = PORTRAIT;
   const bars = [
@@ -22,7 +20,6 @@ function mouldingGeometry(): BufferGeometry {
   return merged;
 }
 
-/** A soft dark halo drawn with the canvas shadow blur (the rectangle itself stays off-canvas). */
 function shadowTexture(widthPx: number, heightPx: number, blur: number): CanvasTexture {
   const canvas = document.createElement('canvas');
   canvas.width = widthPx;
@@ -36,7 +33,6 @@ function shadowTexture(widthPx: number, heightPx: number, blur: number): CanvasT
   return new CanvasTexture(canvas);
 }
 
-/** The frame itself and its contact shadow on the wall. */
 export function createFrame(): { group: Group; dispose(): void } {
   const group = new Group();
   const geometry = mouldingGeometry();

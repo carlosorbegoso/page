@@ -3,7 +3,6 @@ import { tokenColor, tokenNumber } from '../../tokens';
 import type { Finish } from '../builder';
 import type { FolderId } from '../layout';
 
-/** Segment multiplier: 1 on `high`, lower on `mid`. */
 export type Quality = number;
 
 export interface Palette {
@@ -52,16 +51,10 @@ export interface Palette {
   phone: Finish;
 }
 
-/**
- * The wall and floor tokens describe how the surfaces should *look* at night; as albedos they
- * are near-black paint (< 1 % reflectance) and would render pure black, so they are lifted.
- */
 const PERCEIVED_TO_ALBEDO = { wall: 3.5, floor: 2 } as const;
 
-/** One finish family for the collectibles (matte ceramic, satin glaze, brass accents), so they read as a designed set. */
 const COLLECTIBLE = { matte: 0.62, satin: 0.4 } as const;
 
-/** Brand colour as a glaze: desaturated by `mute` (0–1) and scaled in value. */
 function ceramic(color: Color, mute: number, value: number): Color {
   const hsl = { h: 0, s: 0, l: 0 };
   color.getHSL(hsl);
@@ -123,7 +116,6 @@ function readCollectibleFinishes(brass: Finish): Pick<Palette, CollectibleKey> {
   };
 }
 
-/** Room finishes read from the design tokens (desk.md §2–3, mascots.md §2). */
 export function readPalette(): Palette {
   const brass: Finish = { color: c('--color-desk-brass', '#b08a4a'), roughness: 0.38, metalness: 1 };
   return {

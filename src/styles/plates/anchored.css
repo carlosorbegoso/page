@@ -1,7 +1,3 @@
-/*
- * Loose text only plays once the camera has landed: it cuts out while the shot moves so it never
- * slides across scenery, then the lines rise in one after another like a title sequence.
- */
 .is-3d .plate[data-plate-mode='anchored'] > * > * {
   opacity: 0;
   transform: translateY(0.9rem);

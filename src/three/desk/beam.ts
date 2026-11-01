@@ -47,7 +47,6 @@ float noise(vec3 p) {
 }
 void main() {
   vec3 view = normalize(cameraPosition - vWorld);
-  // A thin cone looks densest through its core: weight by how square-on the surface faces the eye.
   float core = pow(abs(dot(normalize(vNormal), view)), 1.6);
   float falloff = (1.0 - 0.75 * vAlong) * smoothstep(0.0, 0.08, vAlong) * smoothstep(1.0, 0.8, vAlong);
   float haze = 0.65 + 0.35 * noise(vWorld * 9.0 + vec3(0.0, -uTime * 0.03, uTime * 0.02));
@@ -96,9 +95,7 @@ void main() {
 export interface LampBeam {
   group: Group;
   setTime(time: number): void;
-  /** Lamp level 0…1 (the beam follows the intro flicker and the outro switch-off). */
   setLevel(level: number): void;
-  /** Drawing-buffer height in px, so the motes keep their size across DPR. */
   setPixelScale(height: number, fov: number): void;
   dispose(): void;
 }
@@ -106,10 +103,8 @@ export interface LampBeam {
 export interface LampBeamOptions {
   apex: Vector3;
   aim: Vector3;
-  /** Half angle of the visible shaft (radians), narrower than the light's own cone. */
   angle: number;
   color: Color;
-  /** 0 for no dust motes (mid tier). */
   motes: number;
 }
 
@@ -189,11 +184,6 @@ function createDust(shape: BeamShape, motes: number): Points<BufferGeometry, Sha
   return dust;
 }
 
-/**
- * The lamp's visible shaft of light: an open additive cone from the bulb to the desk with slow
- * haze, plus dust motes that only glow while they drift inside it. Static without `setTime`
- * (reduced motion, capture).
- */
 export function createLampBeam(options: LampBeamOptions): LampBeam {
   const { apex, aim, angle, color, motes } = options;
   const axis = aim.clone().sub(apex);

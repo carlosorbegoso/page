@@ -5,7 +5,6 @@ import { bindSwipeBack } from './swipe';
 interface MailHost {
   plate: HTMLElement;
   template: HTMLTemplateElement | null;
-  /** Called with true while the screen is up, so the home layer goes inert. */
   covered(open: boolean): void;
 }
 
@@ -46,7 +45,6 @@ function syncDraft(state: MailState): void {
   send.href = mailtoHref(state.screen.dataset.email ?? '', state.draft);
 }
 
-/** Enter in the subject moves to the message, like a mail composer; it never submits. */
 function focusMessageOnEnter(state: MailState, event: KeyboardEvent): void {
   if (event.key === 'Enter' && (event.target as Element).matches('[data-phone-subject]')) {
     event.preventDefault();
@@ -80,7 +78,6 @@ function dismissScreen(host: MailHost, state: MailState, leaving: HTMLElement, r
   afterTransition(() => leaving.remove());
 }
 
-/** Shift+Tab off the first control wraps to Send instead of landing in the inert home. */
 function wrapFocusToSend(screen: HTMLElement | null, event: KeyboardEvent): void {
   if (!screen || event.key !== 'Tab' || !event.shiftKey) return;
   const items = [...screen.querySelectorAll<HTMLElement>(FOCUSABLE)];
@@ -91,7 +88,6 @@ function wrapFocusToSend(screen: HTMLElement | null, event: KeyboardEvent): void
   focusQuietly(items.at(-1));
 }
 
-/** In-phone Mail composer; Send is a real `mailto:` link whose href follows the fields. */
 export function createMail(host: MailHost) {
   const state: MailState = { draft: { subject: '', message: '', edited: false }, screen: null, origin: null };
   const sync = () => syncDraft(state);

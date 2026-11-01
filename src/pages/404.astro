@@ -95,7 +95,6 @@ const paperLabel = `${es('notFound.paper')} · ${en('notFound.paper')}`;
     background: linear-gradient(180deg, var(--color-sky-zenith), var(--color-sky-horizon));
   }
 
-  /* Scrim between canvas and copy: keeps body text at AA contrast wherever the lamp lands. */
   [data-nf-stage]::after {
     content: '';
     position: absolute;
@@ -129,7 +128,6 @@ const paperLabel = `${es('notFound.paper')} · ${en('notFound.paper')}`;
       background: linear-gradient(0deg, var(--color-bg) 0%, rgb(10 14 20 / 0.86) 46%, rgb(10 14 20 / 0) 66%);
     }
 
-    /* Reserved whether or not WebGL boots, so the scene never shifts the copy. */
     .nf-content {
       justify-content: flex-end;
       padding-top: 38svh;

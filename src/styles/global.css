@@ -15,7 +15,6 @@
 @import './motion/reveal.css';
 @import './motion/keyframes.css';
 
-/* Height reserved by the floating corner controls (Header.astro); sections pad their top by it. */
 :root {
   --corner-ui-height: calc(max(0.75rem, env(safe-area-inset-top)) + var(--spacing-tap) + 0.75rem);
 
@@ -33,7 +32,6 @@
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    /* Not on the 3D stage: GSAP drives smooth scrolls there, and CSS smoothing makes ScrollTo auto-kill itself. */
     html:not([data-motion='paused']):not(.is-3d) {
       scroll-behavior: smooth;
     }
@@ -94,7 +92,6 @@
   }
 }
 
-/* In 3D the outro chapter paints the credits; the HTML footer stays for no-WebGL and reading mode. */
 html.is-3d [data-site-footer] {
   display: none;
 }
@@ -187,7 +184,6 @@ html.is-3d [data-site-footer] {
   }
 }
 
-/* The poster stands alone until the stage mounts its plates (StageCanvas inline script). */
 html.stage-pending:not(.is-3d) main {
   visibility: hidden;
 }

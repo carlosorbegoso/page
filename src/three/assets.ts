@@ -11,10 +11,6 @@ interface Entry<T> {
 const GRACE_MS = 5000;
 const cache = new Map<string, Entry<unknown>>();
 
-/**
- * Returns the shared asset for `key`, creating it on first use. Every acquire must be
- * paired with a `release(key)`; the asset is disposed a few seconds after the last release.
- */
 export function acquire<T>(key: string, create: () => Promise<T>, dispose: (value: T) => void): Promise<T> {
   let entry = cache.get(key) as Entry<T> | undefined;
   if (!entry) {
@@ -42,7 +38,6 @@ export function release(key: string, graceMs = GRACE_MS): void {
   }, graceMs);
 }
 
-/** Keys currently held, with their reference counts (debug overlay). */
 export function cacheSnapshot(): Record<string, number> {
   return Object.fromEntries([...cache].map(([key, entry]) => [key, entry.refs]));
 }
@@ -50,7 +45,6 @@ export function cacheSnapshot(): Record<string, number> {
 let loaderPromise: Promise<(url: string) => Promise<GLTF>> | undefined;
 let rendererForLoaders: WebGLRenderer | undefined;
 
-/** The renderer is needed by KTX2Loader.detectSupport before the first texture is decoded. */
 export function bindRenderer(renderer: WebGLRenderer): void {
   rendererForLoaders = renderer;
 }
@@ -72,7 +66,6 @@ function gltfLoader(): Promise<(url: string) => Promise<GLTF>> {
   return loaderPromise;
 }
 
-/** Loads a GLB (meshopt + KTX2) through the shared cache. Loaders are fetched only on first use. */
 export function acquireGltf(url: string): Promise<GLTF> {
   return acquire(
     url,

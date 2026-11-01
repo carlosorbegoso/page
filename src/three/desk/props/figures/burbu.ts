@@ -6,7 +6,6 @@ import { seg, shade } from '../geometry';
 import type { Palette, Quality } from '../palette';
 import { FRONT, standing } from './frame';
 
-/** Ventixs: a round chat bubble with its tail at the lower left and three typing dots, standing on a puck with a green light line. */
 export function buildBurbu(b: PartBuilder, p: Palette, q: Quality): void {
   const id = OBJECT_ID.ventixs;
   const at = standing(FIGURES.ventixs, -0.26);
@@ -36,7 +35,6 @@ export function buildBurbu(b: PartBuilder, p: Palette, q: Quality): void {
   }).translate(0, 0, -depth / 2);
   bubble.deleteAttribute('uv');
 
-  /** Turns the bubble so the tail tip and the bottom of the round both rest on the puck, then centres that footprint. */
   const reach = Math.hypot(tip.x, tip.y) + bevel;
   const rest = Math.PI + Math.asin((r + bevel) / reach);
   const turn = rest - Math.atan2(tip.y, tip.x);

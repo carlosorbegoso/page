@@ -1,4 +1,3 @@
-/** The text row under the loader: clock that runs towards the story's start time, label and percent. */
 export class LoaderStatus {
   readonly label: HTMLElement;
   private readonly clock: HTMLElement;

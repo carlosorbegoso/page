@@ -1,4 +1,3 @@
-/** Greedy word wrap of `text` to lines no wider than `width` in the context's current font. */
 export function wrap(context: CanvasRenderingContext2D, text: string, width: number): string[] {
   const lines: string[] = [];
   let line = '';

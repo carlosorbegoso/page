@@ -29,21 +29,18 @@ interface ExperienceEntry {
   stack: string[];
 }
 
-/** Content ids of the experience entries, by shelf folder. */
 export const FOLDER_EXPERIENCE: Record<FolderId, string> = { sysarp: 'sysarp', baufest: 'baufest', intercorp: 'intercorp-retail', tcs: 'tcs' };
 
 function pageIsEnglish(): boolean {
   return document.documentElement.lang.startsWith('en');
 }
 
-/** "jun 2025", like the timeline (es-PE adds an abbreviation dot that the timeline drops). */
 function month(value: string, english: boolean): string {
   const [year, monthIndex] = value.split('-').map(Number);
   const date = new Date(Date.UTC(year!, monthIndex! - 1, 1));
   return new Intl.DateTimeFormat(english ? 'en-US' : 'es-PE', { month: 'short', year: 'numeric', timeZone: 'UTC' }).format(date).replace('.', '');
 }
 
-/** The job printed on a folder's sheet, read from the experience content in the page's language. */
 export function readExperience(folder: FolderId): SheetContent {
   const english = pageIsEnglish();
   const ui = english ? en : es;

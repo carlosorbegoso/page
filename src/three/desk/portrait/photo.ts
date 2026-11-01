@@ -3,7 +3,6 @@ import { PORTRAIT, PORTRAIT_PHOTO } from './layout';
 
 const PIXELS_PER_METRE = 2300;
 const MAT = '#d3ccbc';
-/** Where the face sits in the source photo: crop around 30 % from the top, like `object-position`. */
 const FOCUS_Y = 0.3;
 
 interface Box {
@@ -20,7 +19,6 @@ function matSize(): { width: number; height: number } {
 function photoBox(canvas: HTMLCanvasElement): Box {
   const width = Math.round(PORTRAIT.photo.width * PIXELS_PER_METRE);
   const height = Math.round(PORTRAIT.photo.height * PIXELS_PER_METRE);
-  /* A mat is cut with a slightly heavier bottom border, as framers do. */
   return { x: Math.round((canvas.width - width) / 2), y: Math.round((canvas.height - height) / 2 - canvas.height * 0.015), width, height };
 }
 
@@ -37,7 +35,6 @@ function drawMat(context: CanvasRenderingContext2D, box: Box): void {
   context.fillRect(box.x, box.y, box.width, box.height);
 }
 
-/** Black and white with a slight warm tone and a touch of contrast, so the print matches the room's grade. */
 function gradePhoto(context: CanvasRenderingContext2D, box: Box): void {
   const image = context.getImageData(box.x, box.y, box.width, box.height);
   const data = image.data;
@@ -62,10 +59,6 @@ function drawPhoto(context: CanvasRenderingContext2D, box: Box, image: HTMLImage
   gradePhoto(context, box);
 }
 
-/**
- * The mat and the print as one canvas texture. The mat is drawn at once with a neutral print; the
- * photo is drawn into the same texture when it arrives, so the material never changes program.
- */
 export function createPrint(onReady: () => void): { mesh: Mesh<PlaneGeometry, MeshStandardMaterial>; dispose(): void } {
   const size = matSize();
   const canvas = document.createElement('canvas');

@@ -3,7 +3,6 @@ import type { Tier } from '../tier';
 import { tokenColor, tokenNumber } from '../tokens';
 import type { World } from '../world';
 
-/** The page's single canvas and WebGL renderer (ACES, sRGB); capture mode keeps the drawing buffer for screenshots. */
 export function createStageRenderer(tier: Tier, capture: boolean, pixelRatio: number): { canvas: HTMLCanvasElement; renderer: WebGLRenderer } {
   const canvas = document.createElement('canvas');
   canvas.setAttribute('aria-hidden', 'true');
@@ -23,7 +22,6 @@ export function createStageRenderer(tier: Tier, capture: boolean, pixelRatio: nu
   return { canvas, renderer };
 }
 
-/** Clear colour and exposure from the design tokens (re-read when the theme changes). */
 export function applyStageTokens(renderer: WebGLRenderer, world: World | undefined): void {
   renderer.setClearColor(tokenColor('--color-sky-horizon', '#0a0e14'), 1);
   renderer.toneMappingExposure = tokenNumber('--scene-tone-exposure', 1);

@@ -10,7 +10,6 @@ export interface ShotCheck {
   to: string;
   yaw: number;
   pitch: number;
-  /** Angle between the two view directions (what the director limits). */
   angle: number;
   distance: number;
   ok: boolean;
@@ -43,7 +42,6 @@ function compare(fromName: string, fromFraming: Framing, toName: string, toFrami
   return { from: fromName, to: toName, yaw, pitch, angle, distance, ok: angle <= SHOT_LIMITS.degrees && distance <= SHOT_LIMITS.metres };
 }
 
-/** Yaw / pitch / distance between consecutive shots against the anti-motion-sickness limits. */
 export function checkShots(view: Viewport, phone: SurfaceFrame): ShotCheck[] {
   const order = storyOrder(framings(view, phone));
   const result: ShotCheck[] = [];

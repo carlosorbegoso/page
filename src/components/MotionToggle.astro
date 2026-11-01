@@ -81,7 +81,6 @@ const iconOnly = display === 'icon';
     try {
       localStorage.setItem(STORAGE_KEY, root.dataset.motion);
     } catch {
-      // Storage can be blocked (private mode, disabled cookies); the toggle still works for this visit.
     }
     render();
     window.dispatchEvent(new CustomEvent('motion:toggle', { detail: { paused } }));

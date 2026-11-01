@@ -13,7 +13,6 @@ function snapBlocked(state: NavState): boolean {
   return Boolean(state.tween) || state.touches > 0 || state.pointerHeld || !moves();
 }
 
-/** A gentle settle on the nearest shot once the visitor has stopped scrolling. */
 export function createSnapper(host: StoryNavHost, state: NavState, scroller: Scroller): Snapper {
   function trySnap(): void {
     state.snapTimer = 0;

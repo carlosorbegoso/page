@@ -15,7 +15,6 @@ export interface RoomLifeOptions {
   palette: Palette;
 }
 
-/** The lamp's bulb and switch, the window blind and the plant: the room's small physical replies to the visitor. */
 export class RoomLife {
   private readonly bulb = new LampBulb();
   private readonly lampSwitch = new LampSwitch();
@@ -34,7 +33,6 @@ export class RoomLife {
     room.add(this.bulb.group, this.lampSwitch.group, this.blind.group, this.plant.group);
   }
 
-  /** Reacts to the pick under the pointer (`desk:lamp`, `desk:window`, `desk:plant`, or anything else / null). */
   setHover(name: string | null): void {
     const toy = name === 'lamp' || name === 'window' || name === 'plant' ? name : null;
     if (toy === this.hovered) return;
@@ -44,7 +42,6 @@ export class RoomLife {
     if (toy === 'plant') this.plant.nudge(0.5, 0.1);
   }
 
-  /** Handles a `desk:action`; returns whether it was one of the room's toys. */
   action(action: string | undefined): boolean {
     if (action === 'blind') {
       this.levels.toggleBlind();

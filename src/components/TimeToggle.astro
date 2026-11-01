@@ -48,7 +48,6 @@ const t = useTranslations(locale);
       try {
         localStorage.setItem(STORAGE_KEY, next);
       } catch {
-        /* Private mode: the choice lasts for this page only. */
       }
       render();
       window.dispatchEvent(new CustomEvent('time:toggle', { detail: { day: next === 'day' } }));

@@ -3,7 +3,6 @@ import type { ChapterId, ChapterState, Shot } from './contracts';
 import { damp } from './scenes/common';
 import { CameraDetour } from './stage/detour';
 
-/** Anti-motion-sickness limits (PLAN, final section). Enforced here, not by convention. */
 export const CAMERA_LIMITS = {
   minDuration: 0.9,
   maxDuration: 1.4,
@@ -13,7 +12,6 @@ export const CAMERA_LIMITS = {
   parallaxPitchDeg: 0.8,
   fovDesktop: 30,
   fovTouch: 40,
-  /** Upright phones: a taller lens so the room fits the top half of the frame above the panels. */
   fovStacked: 52,
   breathMetres: 0.006,
   breathDegrees: 0.12,
@@ -22,10 +20,8 @@ export const CAMERA_LIMITS = {
 
 const DEG = Math.PI / 180;
 const UP = new Vector3(0, 1, 0);
-/** Seconds for the settled breathing to fade in, so it never starts with a jump. */
 const BREATH_FADE_SECONDS = 2.5;
 
-/** Quintic smootherstep: zero velocity and acceleration at both ends, a lower peak speed than power2.inOut. */
 export function cinematicEase(t: number): number {
   const x = Math.min(Math.max(t, 0), 1);
   return x * x * x * (x * (x * 6 - 15) + 10);
@@ -38,10 +34,8 @@ export interface DirectorRequest {
 }
 
 export interface DirectorEvents {
-  /** `duration` is the camera move in seconds (0 for an instant jump or a dissolve cut). */
   onEnter(id: ChapterId, subIndex: number, duration: number): void;
   onSettled(id: ChapterId, subIndex: number): void;
-  /** Reduced motion / pause: the caller dissolves and the director cuts. */
   dissolve(cut: () => void): void;
 }
 
@@ -51,12 +45,6 @@ function viewAngleDeg(a: Shot, b: Shot): number {
   return Math.acos(Math.min(1, Math.max(-1, da.dot(db)))) / DEG;
 }
 
-/**
- * Camera director: one fixed shot per chapter (or sub-shot), moves only between shots.
- * Roll is always 0 (lookAt with world +Y), FOV is fixed per device, transitions last
- * 0.9–1.4 s with a quintic ease and are lengthened so speed never exceeds 20°/s or 1 m/s.
- * Cursor parallax (≤ 1.5° yaw, ≤ 0.8° pitch) and a slow breathing drift only run while settled.
- */
 export class CameraDirector {
   private from: Shot | null = null;
   private to: Shot | null = null;
@@ -78,9 +66,7 @@ export class CameraDirector {
   private readonly breathRight = new Vector3();
   private readonly breathUp = new Vector3();
   private readonly breathForward = new Vector3();
-  /** Seconds the last transition would have needed at the speed limits (debug: > 1.4 means the shot pair is too far apart). */
   lastRequiredSeconds = 0;
-  /** Close look at a prop on top of the chapter's shot (`desk:detour`). */
   readonly detour = new CameraDetour();
 
   constructor(private readonly events: DirectorEvents) {}
@@ -97,7 +83,6 @@ export class CameraDirector {
     return this.settled;
   }
 
-  /** Current target (rack focus point while nothing else is given). */
   get focus(): Vector3 {
     return this.target;
   }
@@ -113,10 +98,6 @@ export class CameraDirector {
     };
   }
 
-  /**
-   * Requests a chapter shot. `instant` (capture, first frame) jumps without events delay;
-   * `cut` (reduced motion / pause) dissolves and jumps.
-   */
   request(next: DirectorRequest, mode: 'move' | 'cut' | 'instant'): void {
     if (this.pendingCut) {
       this.pendingCut = next;
@@ -151,10 +132,6 @@ export class CameraDirector {
     this.events.onEnter(next.id, next.subIndex, this.duration);
   }
 
-  /**
-   * The chapter only changes at the cut, behind the dissolve: switching it before would show the
-   * new chapter's plates and props from the old camera while the frame fades out.
-   */
   private cut(next: DirectorRequest): void {
     this.pendingCut = next;
     this.settled = false;
@@ -170,7 +147,6 @@ export class CameraDirector {
     });
   }
 
-  /** Refreshes the target shot of the current chapter (resize, provider changes) without moving events. */
   refresh(shot: Shot): void {
     if (!this.current) return;
     this.current = { ...this.current, shot };
@@ -191,10 +167,6 @@ export class CameraDirector {
     if (this.current) this.events.onSettled(this.current.id, this.current.subIndex);
   }
 
-  /**
-   * Advances the transition and applies the pose. `pointer` is the normalised pointer (0 when
-   * not allowed). Returns true while the camera still moves (transition or parallax easing).
-   */
   update(camera: PerspectiveCamera, dt: number, fov: number, pointer: { x: number; y: number }, reduced: boolean): boolean {
     let moving = false;
     if (!this.settled && this.from && this.to) {
@@ -238,12 +210,6 @@ export class CameraDirector {
     return moving;
   }
 
-  /**
-   * Slow settled drift on top of the pose `update` applied: a small truck and dolly (≤ 6 mm) and
-   * a look offset (≤ 0.12°) on incommensurate periods ≥ 11 s, re-aimed with world +Y so roll stays
-   * 0. It fades in after the camera settles and out as soon as it moves. Returns a function that
-   * puts the camera back, so the 2D panels and the CSS3D surfaces keep the steady pose.
-   */
   breathe(camera: PerspectiveCamera, dt: number, enabled: boolean): () => void {
     const goal = enabled && this.settled ? 1 : 0;
     const rate = goal > this.breathLevel || this.settled ? 1 / BREATH_FADE_SECONDS : 4;
@@ -282,7 +248,6 @@ export class CameraDirector {
     };
   }
 
-  /** True while the breathing still fades in or out (the Stage keeps rendering). */
   get breathing(): boolean {
     return this.breathLevel > 0;
   }

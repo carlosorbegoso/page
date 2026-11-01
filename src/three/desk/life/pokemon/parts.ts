@@ -15,7 +15,6 @@ export type PokemonPartName =
   | 'charizardTail'
   | 'charizardFlame';
 
-/** Both figures share their black and white; the distance to each base tells them apart. */
 const REACH = 0.065;
 const HEIGHT = 0.13;
 const PIKACHU_LOCAL = pikachuFrame().invert();
@@ -44,7 +43,6 @@ function charizardPart(centroid: Vector3, color: TriangleInfo['color']): Pokemon
   return matches(color, CHARIZARD_COLORS) ? 'charizardBody' : null;
 }
 
-/** Names the moving part of Pikachu or Charizard a workstation triangle belongs to (null = it stays put). */
 export function pokemonPart({ oid, centroid, color }: TriangleInfo): PokemonPartName | null {
   if (oid !== OBJECT_ID.none) return null;
   if (near(centroid, PIKACHU.base)) return pikachuPart(centroid, color);

@@ -21,19 +21,11 @@ function patch(material: Material, kind: 'vertex' | 'fragment'): void {
   material.needsUpdate = true;
 }
 
-/**
- * Patches a material (built-in or ShaderMaterial) so its vertices drift with the fluid field.
- * Only for the window glass, the rain sheet and the cup steam — never for text or plates.
- */
 export function withFluidDisplacement<T extends Material>(material: T): T {
   patch(material, 'vertex');
   return material;
 }
 
-/**
- * Makes `fluidOffset()` available in a ShaderMaterial's fragment shader (call it where you sample
- * your textures, e.g. the rain normal map on the glass). Registers the material as a consumer.
- */
 export function withFluidFragment<T extends Material>(material: T): T {
   patch(material, 'fragment');
   return material;

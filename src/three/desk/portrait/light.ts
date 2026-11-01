@@ -2,7 +2,6 @@ import { BoxGeometry, Color, CylinderGeometry, Group, Mesh, MeshStandardMaterial
 import type { LightLevels } from '../set/levels';
 import { PICTURE_LIGHT, PORTRAIT } from './layout';
 
-/** Candela at night (the room scales its physical light tokens down, see `set/lighting.ts`). */
 const NIGHT_INTENSITY = 0.16;
 const WARM = new Color('#ffcf8f');
 const BULB_EMISSION = 2.4;
@@ -16,10 +15,6 @@ function armGeometry(): BufferGeometry {
   return geometry.translate(0, (to.y - from.y) / 2, (to.z - from.z) / 2);
 }
 
-/**
- * A brass picture light over the frame. It switches on with the night (`level.day` → 0): the
- * strip under the hood glows and a short warm spot washes the print and the wall around it.
- */
 export class PictureLight {
   readonly group = new Group();
   private readonly spot: SpotLight;

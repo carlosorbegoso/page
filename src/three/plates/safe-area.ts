@@ -2,21 +2,17 @@ import { layoutKind } from '../scenes/common';
 import type { SafeInsets, Viewport } from './types';
 
 const SAFE_Y = 24;
-/** Clear of the HUD row and the top letterbox bar: a panel never starts under the story clock. */
 const SAFE_TOP_MIN = 84;
 const SAFE_TOP_SHARE = 0.11;
-/** Touch HUD: tap-sized row at max(0.5rem, safe-area-inset-top), plus a breathing gap below it. */
 const HUD_TOP_TOUCH = 8;
 const HUD_CLEARANCE_TOUCH = 62;
 
-/** Vertical room a panel may use, between the HUD and the bottom edge. */
 export interface PanelRoom {
   desktop: boolean;
   top: number;
   bottom: number;
 }
 
-/** `env(safe-area-inset-top/bottom)` in px (notch, home indicator on iOS), resolved by style alone: no layout pass. */
 export function measureSafeArea(): SafeInsets {
   const probe = document.createElement('div');
   probe.style.cssText =

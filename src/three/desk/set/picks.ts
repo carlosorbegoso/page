@@ -42,7 +42,6 @@ const HOVER_ACCENT: Partial<Record<keyof typeof OBJECT_ID, string>> = {
 
 type PickProxy = (key: string, size: [number, number, number], position: Vector3, quaternion?: Quaternion) => Mesh;
 
-/** Invisible click proxies for the navigable props, and the hover highlight they drive. */
 export class DeskPicks {
   readonly picks: StationPick[] = [];
   readonly proxies = new Map<string, Mesh>();
@@ -73,7 +72,6 @@ export class DeskPicks {
     this.picks.push({ object3D: proxy('clock', [0.12, 0.14, 0.08], CLOCK_POSITION.clone().add(new Vector3(0, 0.07, 0))), key: 'desk:clock', label: LABELS.clock!, target: '#hero' });
   }
 
-  /** Invisible boxes that share one non-rendering material; each is registered under its key. */
   private proxyFactory(room: Group, disposables: Array<{ dispose(): void }>): PickProxy {
     const material = createPickMaterial();
     disposables.push(material);
@@ -99,7 +97,6 @@ export class DeskPicks {
     }
   }
 
-  /** The three post-its on TUSOCIO's cork board, each a shortcut to its product's shot. */
   private addPostits(proxy: PickProxy): void {
     const board = new Quaternion().setFromRotationMatrix(boardFaceMatrix());
     PRODUCT_FIGURES.forEach((id, sub) => {
@@ -112,7 +109,6 @@ export class DeskPicks {
     });
   }
 
-  /** Each product card's "Visit site" box, which moves with the card; the click opens the site only while it stands. */
   private addVisits(cards: ReadonlyMap<ProductId, Object3D>): void {
     for (const [id, object3D] of cards) {
       const name = LABELS[id]!.es;
@@ -120,7 +116,6 @@ export class DeskPicks {
     }
   }
 
-  /** The four archive box files and the open TCS folder on the desk. */
   private addFolders(proxy: PickProxy): void {
     for (const id of FOLDERS) {
       const experience = { target: '#experience', experience: EXPERIENCE_IDS[id], sub: EXPERIENCE_ORDER.indexOf(id) + 1 };
@@ -132,7 +127,6 @@ export class DeskPicks {
   }
 
 
-  /** The window (its panes clear of the monitor) lowers the blind; the plant rustles. Neither moves the camera. */
   private addRoomToys(proxy: PickProxy): void {
     const left = WINDOW.x - WINDOW.width / 2;
     const right = WINDOW.x + WINDOW.width / 2;
@@ -146,14 +140,12 @@ export class DeskPicks {
     this.picks.push({ object3D: plant, key: 'desk:plant', label: LABELS.plant!, target: '#hero', action: 'plant' });
   }
 
-  /** The MacBook: a click shuts or opens its lid; it never moves the camera. */
   private addLaptop(proxy: PickProxy): void {
     const turn = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), LAPTOP.yaw);
     const centre = LAPTOP.centre.clone().add(new Vector3(0, 0.07, -0.02).applyQuaternion(turn));
     this.picks.push({ object3D: proxy('laptop', [LAPTOP.width, 0.15, LAPTOP.depth + 0.04], centre, turn), key: 'desk:laptop', label: LABELS.laptop!, target: '#hero', action: 'laptop' });
   }
 
-  /** Finds the pick an object belongs to (walking up the parents). */
   resolve(object: Object3D): StationPick | null {
     let node: Object3D | null = object;
     while (node) {
@@ -164,7 +156,6 @@ export class DeskPicks {
     return null;
   }
 
-  /** Points the highlight at a pick (or clears it); returns the hovered object's name and whether the id changed. */
   hover(object: Object3D | null, uniforms: AtlasUniforms): { name: keyof typeof OBJECT_ID | undefined; changed: boolean } {
     const pick = object ? this.resolve(object) : null;
     const name = pick?.key.slice(5) as keyof typeof OBJECT_ID | undefined;

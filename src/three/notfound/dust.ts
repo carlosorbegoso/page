@@ -23,7 +23,6 @@ function scatterInBeam(count: number, beam: LampBeam): { positions: Float32Array
   return { positions, seeds };
 }
 
-/** Dust motes drifting inside the lamp beam; returns their animated uniforms. */
 export function addDust(scene: Scene, beam: LampBeam, quality: NotFoundQuality): DustUniforms {
   const { positions, seeds } = scatterInBeam(quality === 'high' ? 320 : 160, beam);
   const geometry = new BufferGeometry();

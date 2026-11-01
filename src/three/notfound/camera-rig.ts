@@ -3,7 +3,6 @@ import { DEG, TARGET } from './constants';
 
 const UP = new Vector3(0, 1, 0);
 
-/** Pointer or tilt target in [-1, 1] and the eased value the camera follows. */
 export interface PointerState {
   x: number;
   y: number;
@@ -14,14 +13,12 @@ export interface PointerState {
 export interface CameraRig {
   camera: PerspectiveCamera;
   pointer: PointerState;
-  /** Fits the renderer and projection to the container; returns the viewport height in device pixels. */
   layout(container: HTMLElement, renderer: WebGLRenderer): number;
   place(time: number): void;
   centre(): void;
 }
 
 function shiftProjectionAwayFromCopy(camera: PerspectiveCamera, width: number, height: number, portrait: boolean): void {
-  // The HTML copy sits left on landscape and below on portrait; shifting the projection keeps the sheet clear of it.
   if (portrait) camera.setViewOffset(width, height, width * 0.14, height * 0.23, width, height);
   else camera.setViewOffset(width, height, -width * 0.2, -height * 0.06, width, height);
 }

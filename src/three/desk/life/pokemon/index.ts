@@ -19,7 +19,6 @@ const PIKACHU_CHEST = new Vector3(0, 0.035, 0.01);
 const PIKACHU_CROWN = new Vector3(0, 0.074, 0);
 const CHARIZARD_CHEST = new Vector3(0, 0.045, 0.012);
 
-/** Phase 0..1 of the event running at `time` in a repeating `period`, or −1 between events. */
 function eventPhase(time: number, period: number, seconds: number, offset = 0): { t: number; index: number } {
   const shifted = time + offset;
   const index = Math.floor(shifted / period);
@@ -32,7 +31,6 @@ function hash(n: number): number {
   return x - Math.floor(x);
 }
 
-/** T(base + offset)·R(axis, tilt)·Ry(yaw)·T(−base): a figure turning and tilting on its own base. */
 function onBase(out: Matrix4, base: Vector3, offset: Vector3, yaw: number, axis: Vector3, tilt: number): Matrix4 {
   const turn = new Matrix4().makeRotationY(yaw);
   const lean = new Matrix4().makeRotationAxis(axis, tilt);
@@ -43,11 +41,6 @@ function onBase(out: Matrix4, base: Vector3, offset: Vector3, yaw: number, axis:
     .multiply(new Matrix4().makeTranslation(-base.x, -base.y, -base.z));
 }
 
-/**
- * Pikachu and Charizard: idle life (ear twitches, a swaying tail, cheek sparks; breathing wings and a
- * flickering tail flame) and, on a click, a short battle — Pikachu walks over, Charizard roars and
- * breathes fire, Pikachu dodges and answers with a thunderbolt, then walks home.
- */
 export class PokemonLife {
   readonly overlays = new Group();
   private motion = false;
@@ -72,7 +65,6 @@ export class PokemonLife {
     this.overlays.add(...this.cheeks, this.flameGlow, this.impact, this.fire.object3D, this.bolt.object3D);
   }
 
-  /** Starts the battle; with reduced motion Pikachu only sparks its cheeks. */
   battle(time: number, motion: boolean): void {
     if (!motion) {
       this.sparkAt = time;
@@ -81,7 +73,6 @@ export class PokemonLife {
     if (this.startedAt < 0) this.startedAt = time;
   }
 
-  /** A battle, once started, plays to the end even if the stage's idle-motion window closes meanwhile. */
   update(time: number, motion: boolean): boolean {
     if (this.startedAt >= 0 && time - this.startedAt > BATTLE_SECONDS) this.startedAt = -1;
     if (this.sparkAt >= 0 && time - this.sparkAt > 0.8) this.sparkAt = -1;

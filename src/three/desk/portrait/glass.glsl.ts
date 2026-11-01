@@ -10,10 +10,6 @@ void main() {
 }
 `;
 
-/**
- * Additive sheen over the print: a soft cool pane (the window) and a small warm spot (the lamp)
- * that slide with the view, plus a diagonal glint that sweeps across on hover.
- */
 export const PORTRAIT_GLASS_FRAGMENT = /* glsl */ `
 uniform vec3 uWindow;
 uniform vec3 uLamp;

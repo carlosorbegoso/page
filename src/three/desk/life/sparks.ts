@@ -23,11 +23,6 @@ function sparksMaterial(): ShaderMaterial {
   });
 }
 
-/**
- * A small burst of confetti-like sparks that rise, drift and fade (Parati's gift opening).
- * The sparks write depth: the depth-of-field pass reads it, and without it a spark would take the
- * blur of the far wall behind it and vanish.
- */
 export class Sparks {
   readonly points: Points<BufferGeometry, ShaderMaterial>;
   private readonly positions: Float32Array;
@@ -65,7 +60,6 @@ export class Sparks {
     });
   }
 
-  /** Moves the sparks; `pixelScale` is the drawing buffer height over 2·tan(fov/2). Returns true while alive. */
   update(time: number, pixelScale: number): boolean {
     if (this.startedAt < 0) return false;
     const age = time - this.startedAt;

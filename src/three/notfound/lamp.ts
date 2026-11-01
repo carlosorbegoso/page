@@ -23,7 +23,6 @@ const DOWN = new Vector3(0, -1, 0);
 const LAMP_BASE = new Vector3(-1.35, 0.03, -1.05);
 const LAMP_ELBOW = new Vector3(-1.2, 1.25, -1.15);
 
-/** Where the lamp points and how far its light cone reaches, shared with the dust and the spot. */
 export interface LampBeam {
   color: Color;
   direction: Vector3;
@@ -69,7 +68,6 @@ function addVisibleBeam(scene: Scene, direction: Vector3, color: Color, length: 
   return beam;
 }
 
-/** Desk lamp: arm, shade, bulb and the volumetric beam aimed at the folder. */
 export function buildLamp(scene: Scene, materials: RoomMaterials): LampBeam {
   const direction = TARGET.clone().sub(LAMP_HEAD).normalize();
   const color = tokenColor('--color-lamp', '#ffb566');

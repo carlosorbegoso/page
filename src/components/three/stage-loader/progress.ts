@@ -2,7 +2,6 @@ const CHECKPOINTS = [0.04, 0.12, 0.3, 0.55, 0.7, 0.78, 0.88, 0.96, 1];
 
 export const FIRST_CHECKPOINT = CHECKPOINTS[0]!;
 
-/** Load progress that only moves forward and creeps towards the next checkpoint while waiting. */
 export class LoadProgress {
   private checkpoint = 0;
   private checkpointAt = performance.now();

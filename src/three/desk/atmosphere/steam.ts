@@ -19,16 +19,13 @@ import { MUG } from '../layout';
 import { STEAM_FRAGMENT, STEAM_VERTEX } from './steam.glsl';
 
 export interface SteamOptions {
-  /** Billboard wisps rising from the cup (6 on `high`, 4 on `mid`). */
   wisps: number;
-  /** Noise octaves per sample; fewer on `mid`. */
   octaves: number;
 }
 
 export interface Steam {
   mesh: Mesh<BufferGeometry, ShaderMaterial>;
   setTime(time: number): void;
-  /** `level` 0..1 is the chapter's presence; `day` 0..1 switches to a paler grey veil that reads against the bright window. */
   setStrength(level: number, day?: number): void;
   dispose(): void;
 }
@@ -37,7 +34,6 @@ const STEAM_SIZE = { width: 0.11, height: 0.2 } as const;
 const STEAM_NIGHT = new Color(0.95, 0.88, 0.8);
 const STEAM_DAY = new Color(1.0, 1.0, 1.0);
 
-/** Camera-facing quads around the cup's centre, each with its corner offsets and a per-wisp seed. */
 function wispGeometry(wisps: number): BufferGeometry {
   const count = Math.max(1, wisps);
   const positions = new Float32Array(count * 4 * 3);
@@ -97,11 +93,6 @@ function steamMaterial(color: Color, octaves: number): ShaderMaterial {
   );
 }
 
-/**
- * Hot-coffee steam: camera-facing wisps that curl through advected noise, widen and fade with
- * height and drift slightly. Premultiplied blending: additive at night (`uOcclusion` ≈ 0), a
- * light veil by day. Linear HDR output, tone-mapped by the post chain; peaks stay below bloom.
- */
 export function createSteam(options: SteamOptions = { wisps: 6, octaves: 3 }): Steam {
   const geometry = wispGeometry(options.wisps);
   const color = STEAM_NIGHT.clone();
@@ -110,7 +101,6 @@ export function createSteam(options: SteamOptions = { wisps: 6, octaves: 3 }): S
   mesh.name = 'desk-steam';
   mesh.position.set(MUG.x, MUG.y + 0.088, MUG.z);
   mesh.renderOrder = 2;
-  /* Drawn after depth of field: transparent steam leaves the far wall in the depth buffer, so the lens smeared it into a still smudge. */
   mesh.layers.set(LATE_LAYER);
   mesh.raycast = () => undefined;
   return {

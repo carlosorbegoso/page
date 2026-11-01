@@ -6,7 +6,6 @@ import type { Palette } from '../props';
 import { SPINE_LABEL } from '../spines';
 import type { ShelfFolder } from './constants';
 
-/** The shelf box twin: same atlas finish and object id, so glow and hover still reach it. */
 export function buildTwin(id: ShelfFolder, palette: Palette): PartBuilder {
   const builder = new PartBuilder();
   const centre = folderCentre(id);

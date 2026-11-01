@@ -132,11 +132,6 @@ function placeNebulae(glow: Texture, nebulaCount: number): Sprite[] {
   });
 }
 
-/**
- * Minimal night sky seen through the desk window: one Points draw call (per-star size, colour,
- * twinkle) on a dome that follows the camera, optional faint nebulae and a zenith→horizon
- * background gradient from the remaining sky tokens.
- */
 export class Sky {
   readonly root = new Group();
   background: Texture | null = null;
@@ -164,7 +159,6 @@ export class Sky {
     this.applyTokens();
   }
 
-  /** Keeps the dome centred on the camera; animates twinkle when motion is allowed. */
   update(time: number, motion: boolean, camera: Vector3, pixelRatio: number): void {
     this.root.position.copy(camera);
     this.material.uniforms.time!.value = motion ? time : 0;

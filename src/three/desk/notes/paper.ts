@@ -2,9 +2,7 @@ import { CanvasTexture, Color, Mesh, MeshStandardMaterial, PlaneGeometry, SRGBCo
 
 export { wrap } from '../folder-detail/wrap';
 
-/** Texels per metre: the board and the cards are read up close, so their ink stays crisp at 2× DPR. */
 export const PRINT_DENSITY = 4200;
-/** The desk lamp washes lit paper out; printed faces are darkened a little so the ink keeps its contrast. */
 export const PAPER_LEVEL = 0.8;
 
 export interface PrintedFace {
@@ -12,7 +10,6 @@ export interface PrintedFace {
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
   texture: CanvasTexture;
-  /** Canvas pixels per metre of the face. */
   scale: number;
   dispose(): void;
 }
@@ -21,7 +18,6 @@ export interface PrintFonts {
   display: string;
   body: string;
   mono: string;
-  /** Marker handwriting for the board's title and the post-its (system hand fonts, then cursive). */
   hand: string;
 }
 
@@ -36,11 +32,6 @@ export function printFonts(): PrintFonts {
   };
 }
 
-/**
- * A flat printed face of `width` × `height` metres in the XY plane (facing +Z, origin at its centre)
- * with a canvas texture to draw on at `density` texels per metre. Not pickable: clicks go through
- * the desk's pick proxies.
- */
 export function printedFace(name: string, width: number, height: number, density = PRINT_DENSITY): PrintedFace {
   const canvas = document.createElement('canvas');
   canvas.width = Math.round(width * density);
@@ -76,7 +67,6 @@ export function printedFace(name: string, width: number, height: number, density
   };
 }
 
-/** Redraws once the page's web fonts are ready, so the first print never falls back to system fonts. */
 export function whenFontsReady(draw: () => void): void {
   draw();
   void document.fonts?.ready.then(draw);

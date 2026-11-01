@@ -17,7 +17,6 @@ import { DESK, KEYBOARD, LAMP, MONITOR, MUG, PHONE } from '../layout';
 import { along, rod, seg, shade, UP } from './geometry';
 import type { Palette, Quality } from './palette';
 
-/** Coffee surface height inside the mug: high enough that the wide shot sees the dark disc and its crema. */
 const COFFEE_LEVEL = 0.085;
 
 function buildMonitorStand(b: PartBuilder, p: Palette): void {
@@ -75,14 +74,12 @@ function buildMug(b: PartBuilder, p: Palette, q: Quality): void {
   });
 }
 
-/** Monitor stand (static) and the keyboard group in front of it. */
 export function buildWorkstation(b: PartBuilder, p: Palette, q: Quality): void {
   buildMonitorStand(b, p);
   buildKeyboard(b, p);
   buildMug(b, p, q);
 }
 
-/** Monitor head (bezel, housing, VESA plate) centred on the screen, facing +Z: a separate mesh that pivots to portrait. */
 export function buildMonitorHead(b: PartBuilder, p: Palette, q: Quality): void {
   const { width, height } = MONITOR.screen;
   const e = MONITOR.bezel;
@@ -91,7 +88,6 @@ export function buildMonitorHead(b: PartBuilder, p: Palette, q: Quality): void {
   b.add(new RoundedBoxGeometry(0.11, 0.11, 0.012, 1, 0.004), p.metal, { position: [0, 0, -MONITOR.depth / 2 - 0.032] });
 }
 
-/** Phone on a small walnut stand; the glass itself is a separate mesh (the `phone` surface). */
 export function buildPhone(b: PartBuilder, p: Palette): Matrix4 {
   const { base, yaw, lean, size } = PHONE;
   const stand = new Matrix4().compose(base, new Quaternion().setFromAxisAngle(UP, yaw), new Vector3(1, 1, 1));

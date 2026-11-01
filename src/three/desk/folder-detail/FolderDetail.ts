@@ -37,7 +37,6 @@ export interface FolderDetailOptions {
   shadows: boolean;
   palette: Palette;
   renderer: WebGLRenderer;
-  /** The live camera: a shelf box is held at a fixed spot of the screen. */
   camera: PerspectiveCamera;
   onRedraw: () => void;
 }
@@ -55,11 +54,6 @@ function disposeInside(flap: Mesh): void {
   }
 }
 
-/**
- * Taking the folder you are looking at off the shelf: it slides out, turns its face to the camera,
- * opens its cover and shows a printed sheet with the job's dates, role, highlights and stack. The TCS shot frames the open
- * folder on the desk instead, so there the sheet lifts off its right board.
- */
 export class FolderDetail {
   readonly object3D = new Group();
   private readonly twins = new Map<ShelfFolder, Mesh>();
@@ -72,7 +66,6 @@ export class FolderDetail {
   private readonly shelfSheet: SheetMesh;
   private readonly openSheet: SheetMesh;
   private readonly openFrame: Matrix4;
-  /** The open-folder sheet hinges on its near edge, like a page lifted off the board. */
   private readonly openEdge = new Vector3(OPEN_FOLDER.width / 4, 0.0095, OPEN_SHEET.height / 2);
   private readonly openFlat = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -Math.PI / 2);
   private readonly openTaken = new Quaternion();
@@ -119,17 +112,14 @@ export class FolderDetail {
     this.options.onRedraw();
   }
 
-  /** The folder out of the shelf (or on its way back), else null. */
   get active(): FolderId | null {
     return this.shown;
   }
 
-  /** Where a shelf box is held while it is out (or coming out), for the depth of field; null otherwise. */
   get heldFocus(): Vector3 | null {
     return this.shown && this.shown !== 'tcs' && this.goal === 1 ? this.targetAt : null;
   }
 
-  /** Takes the folder out, or puts it back when it is already out. `eye` (the shot's camera position) aims the TCS sheet. */
   toggle(id: FolderId, eye: Vector3): void {
     this.toggledAt = performance.now();
     if (this.shown === id) {
@@ -151,7 +141,6 @@ export class FolderDetail {
     this.goal = 0;
   }
 
-  /** Advances the 0.6 s take / return; instant without motion. Returns true while it moves. */
   update(dt: number, motion: boolean): boolean {
     if (!this.shown) return false;
     const before = this.progress;
@@ -168,15 +157,10 @@ export class FolderDetail {
     return this.progress !== this.goal || before !== this.progress;
   }
 
-  /** Changes only while the pose does, so the lamp shadow is re-rendered only then. */
   poseKey(): string {
     return this.shown && this.shown !== 'tcs' ? `${this.shown}:${Math.round(this.progress * 400)}` : '';
   }
 
-  /**
-   * World transform from the box's rest place to where the visitor holds it, or null when that box
-   * sits on the shelf. Also places its twin and sheet.
-   */
   shelfPose(id: FolderId, pull: number): Matrix4 | null {
     if (id !== this.shown || id === 'tcs' || this.progress === 0) return null;
     shelfHoldPose(id, this.progress, pull, this.targetAt, this.targetTurn, this.pose);
@@ -184,7 +168,6 @@ export class FolderDetail {
     return this.pose;
   }
 
-  /** World transform of the held box's front cover (null while no box is held): the archive cover label rides on it. */
   coverPose(id: FolderId): Matrix4 | null {
     if (id !== this.shown || id === 'tcs' || this.progress === 0) return null;
     return flapPose(id, this.progress, this.pose, this.flapMatrix);

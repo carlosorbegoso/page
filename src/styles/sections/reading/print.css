@@ -1,4 +1,3 @@
-/* Reading page (CV) printed on A4. */
 @media print {
   @page {
     size: A4;

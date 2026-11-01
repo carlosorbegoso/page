@@ -6,7 +6,6 @@ import type { Palette, Quality } from '../../props/palette';
 import { boardFaceMatrix, CORKBOARD } from '../layout';
 import { pinSpots } from './pins';
 
-/** How far the frame stands proud of the cork face, so the print sits inside a lip. */
 export const FRAME_LIP = 0.004;
 const CORK: Finish = { color: new Color('#9c7448'), roughness: 0.95, metalness: 0 };
 const PIN = { head: 0.0034, collar: 0.0026, needle: 0.0006, reach: 0.0062 } as const;
@@ -49,7 +48,6 @@ function buildPins(b: PartBuilder, q: Quality): void {
   }
 }
 
-/** TUSOCIO's cork board: a rounded wooden frame, the cork panel behind the print and its push pins (static). */
 export function buildCorkboard(b: PartBuilder, p: Palette, q: Quality): void {
   buildFrame(b, shade(p.wood, 1.45, 0.06));
   buildCork(b);

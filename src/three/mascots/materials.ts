@@ -11,7 +11,6 @@ export interface SurfaceTokens {
 export interface SignalTokens {
   color: string;
   intensity: string;
-  /** Multiplier over the intensity token (for secondary signals). */
   scale?: number;
 }
 
@@ -21,7 +20,6 @@ interface TokenUserData {
   baseIntensity?: number;
 }
 
-/** Body/accent material whose values come from design tokens. */
 export function surfaceMaterial(tokens: SurfaceTokens): MeshStandardMaterial {
   const material = new MeshStandardMaterial({ flatShading: tokens.flatShading ?? false });
   (material.userData as TokenUserData).surface = tokens;
@@ -29,7 +27,6 @@ export function surfaceMaterial(tokens: SurfaceTokens): MeshStandardMaterial {
   return material;
 }
 
-/** Emissive "signal line" material (the family trait instead of eyes). */
 export function signalMaterial(tokens: SignalTokens): MeshStandardMaterial {
   const material = new MeshStandardMaterial({ roughness: 0.4, metalness: 0 });
   (material.userData as TokenUserData).signal = tokens;
@@ -54,7 +51,6 @@ export function applyMaterialTokens(material: Material): void {
   }
 }
 
-/** Nominal emissive intensity of a signal material (from its token). */
 export function baseIntensity(material: Material): number {
   return (material.userData as TokenUserData).baseIntensity ?? (material as MeshStandardMaterial).emissiveIntensity;
 }

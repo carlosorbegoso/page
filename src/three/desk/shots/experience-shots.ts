@@ -6,10 +6,6 @@ import { coverPoints, folderPoints, FOLDER_PULL, openFolderPoints } from './prot
 import { EXPERIENCE_ANCHOR, EXPERIENCE_ORDER } from './story';
 import type { Framing, Place } from './types';
 
-/**
- * The whole shelf opens the day years. It also bridges the cut from the monitor: about → the first
- * folder alone turns about 35°, past SHOT_LIMITS; through the shelf each cut stays under 25°.
- */
 function shelfShot(ctx: ShotContext, place: Place, panel: Place): Framing {
   const shelfFocus = folderSpine('baufest').lerp(folderSpine('intercorp'), 0.5);
   return {
@@ -52,7 +48,6 @@ function shelfFolderShot(ctx: ShotContext, id: Exclude<FolderId, 'tcs'>, place: 
   };
 }
 
-/** Portrait keeps the archive cover sheet in frame with the current box, so it looks along the stack less steeply. */
 export function experienceShots(ctx: ShotContext): Framing[] {
   const layout = ctx.layoutFor(TEXT_LEFT);
   const place = { sx: layout.sx, sy: ctx.portrait ? ctx.subjectY : 0.5 };

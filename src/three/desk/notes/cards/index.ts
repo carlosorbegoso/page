@@ -5,7 +5,6 @@ import { cardFaceMatrix, PRODUCT_CARD, type ProductId } from '../layout';
 import { PAPER_LEVEL, printedFace, whenFontsReady, type PrintedFace } from '../paper';
 import { drawProductCard } from './print';
 
-/** Angular frequency of the raise spring, critically damped: it settles in about half a second. */
 const OMEGA = 11;
 const RAISED = 0.9;
 
@@ -18,12 +17,10 @@ interface Card {
   speed: number;
 }
 
-/** The product a focused figure stands for, or null when the focus isn't a product. */
 export function productFocus(id: string | null): ProductId | null {
   return (PRODUCT_FIGURES as readonly string[]).includes(id ?? '') ? (id as ProductId) : null;
 }
 
-/** A lying card's link isn't offered: its pick box ignores the raycaster until the card stands. */
 const skipRaycast = (): void => undefined;
 
 function placed<T extends Object3D>(object: T, z: number): T {
@@ -33,10 +30,6 @@ function placed<T extends Object3D>(object: T, z: number): T {
   return object;
 }
 
-/**
- * The three product cards: printed paper lying on the desk in front of the plinth, each standing up
- * on its front edge to face the camera during its own product's shot and lying down again after.
- */
 export class ProductCards {
   readonly object3D = new Group();
   private readonly cards: Card[];
@@ -70,7 +63,6 @@ export class ProductCards {
     return { id, group, face, pick, raise: 0, speed: 0 };
   }
 
-  /** Eases each card up while its product is focused and down otherwise; true while one moves. */
   update(dt: number, focused: ProductId | null, motion: boolean): boolean {
     let moving = false;
     for (const card of this.cards) {
@@ -93,7 +85,6 @@ export class ProductCards {
     return moving;
   }
 
-  /** Writes each card's matrix for its current raise, and lets its pick box be hit only while it stands. */
   pose(): void {
     for (const card of this.cards) {
       card.group.matrix.copy(cardFaceMatrix(card.id, card.raise));
@@ -106,12 +97,10 @@ export class ProductCards {
     return (this.cards.find(card => card.id === id)?.raise ?? 0) > RAISED;
   }
 
-  /** One invisible box per card over its printed face, which the raycaster hits. */
   targets(): ReadonlyMap<ProductId, Object3D> {
     return this.picks;
   }
 
-  /** Changes whenever a card moves enough for the lamp shadow to need a new render. */
   poseKey(): string {
     return this.cards.map(card => card.raise.toFixed(2)).join(',');
   }

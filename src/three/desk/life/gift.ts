@@ -7,7 +7,6 @@ const SECONDS = 1.35;
 const POP = 0.016;
 const SHAKE_SECONDS = 0.45;
 
-/** Parati's gift box: a click pops the lid up, a few sparks rise out of the box, and the lid settles back. */
 export class GiftLife {
   readonly sparks: Sparks;
   private startedAt = -1;

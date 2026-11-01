@@ -1,4 +1,3 @@
-/* In 3D the photo hangs framed on the office wall: the figure stays in the page for screen readers only. */
 .is-3d [data-plate-id^='about'] .about-bio__portrait {
   position: absolute;
   width: 1px;
@@ -9,7 +8,6 @@
   white-space: nowrap;
 }
 
-/* On the monitor each slide is a fixed-size screen: sizes are shares of its height so nothing clips. */
 .is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] :is(.about-bio, .about-stack) {
   height: 100%;
   justify-content: center;

@@ -18,7 +18,6 @@ import {
 } from '../layout';
 import { CORKBOARD } from '../notes/layout';
 
-/** Rectangles (centre x/z and size) that receive a soft contact shadow, in room space. */
 export function contactShadowSpots(): Array<{ x: number; y: number; z: number; w: number; d: number; yaw?: number }> {
   const top = DESK.top + 0.0012;
   const plinthTop = PLINTH.centre.y + PLINTH.height + 0.0012;
@@ -47,7 +46,6 @@ export function contactShadowSpots(): Array<{ x: number; y: number; z: number; w
   ];
 }
 
-/** Merges the contact-shadow quads into one geometry (uv kept for the blob texture). */
 export function buildContactShadows(): BufferGeometry {
   const quads = contactShadowSpots().map(spot =>
     new PlaneGeometry(spot.w, spot.d).rotateX(-Math.PI / 2).rotateY(spot.yaw ?? 0).translate(spot.x, spot.y, spot.z)

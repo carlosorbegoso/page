@@ -9,12 +9,10 @@ import { RoomTone } from './room';
 import { listenUiSounds } from './ui-sounds';
 import { playChime } from './voices';
 
-/** Master level at full volume. Keep it low: this is a background bed, not music. */
 export const MASTER_LEVEL = 0.11;
 
 const LEVELS = {
   pad: 0.32,
-  /** The pad steps back to a colour once a music track is actually playing. */
   padUnderMusic: 0.12,
   music: 2.2,
   sample: 0.5,
@@ -93,7 +91,6 @@ export class Ambience {
     this.listen();
   }
 
-  /** Fades the bed in. Safe to call repeatedly. */
   async start(): Promise<void> {
     this.enabled = true;
     if (this.context.state !== 'running') await this.context.resume();
@@ -104,7 +101,6 @@ export class Ambience {
     this.rampMaster(MASTER_LEVEL, FADE_IN_SECONDS);
   }
 
-  /** Fades out, then suspends the context so it costs no CPU while muted. */
   async stop(): Promise<void> {
     this.enabled = false;
     this.rampMaster(0, FADE_OUT_SECONDS);
@@ -146,7 +142,6 @@ export class Ambience {
     document.addEventListener('visibilitychange', () => void this.onVisibility(), options);
   }
 
-  /** Chapter events win; station and section events only drive the sound until they arrive. */
   private accepts(source: Source): boolean {
     const rank: Record<Source, number> = { chapter: 0, station: 1, section: 2 };
     if (this.driver === null || rank[source] < rank[this.driver]) this.driver = source;
@@ -216,7 +211,6 @@ export class Ambience {
     gain.setTargetAtTime(1, now + 1.8, 1.2);
   }
 
-  /** Only the dawn follows the scroll: the chord keeps opening as the outro is read. */
   private onProgress(detail: ChapterDetail | undefined): void {
     if (this.paused || this.chapter !== 'outro' || detail?.id !== 'outro') return;
     const progress = Math.min(1, Math.max(0, Number(detail.progress) || 0));

@@ -26,10 +26,6 @@ function fonts(): { display: string; mono: string } {
   };
 }
 
-/**
- * The archive cover glued on the first box: the experience chapter's title card (act, years, title,
- * subtitle) over the index of the boxes, so the 3D shot carries what the hidden HTML panel says.
- */
 export function drawArchiveCover(canvas: HTMLCanvasElement, rows: readonly (readonly [string, string])[]): void {
   const context = canvas.getContext('2d')!;
   const { display, mono } = fonts();

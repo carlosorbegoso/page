@@ -10,7 +10,6 @@ export interface StageLoopHost {
   canRun(): boolean;
   motionAllowed(): boolean;
   settled(): boolean;
-  /** Draws one frame; returns whether something still moves. */
   render(dt: number, now: number): boolean;
   afterRender(now: number): void;
   finishIntro(): void;
@@ -18,7 +17,6 @@ export interface StageLoopHost {
   degrade(): void;
 }
 
-/** Frame-time samples for the once-a-second DPR decision. */
 class FrameBudget {
   readonly sampler = new FrameSampler(60);
   private readonly workSampler = new FrameSampler(60);
@@ -47,15 +45,10 @@ class FrameBudget {
   }
 }
 
-/**
- * On-demand render loop: runs while something moves or the visitor was active in the last 8 s,
- * renders every `frameDivisor`-th frame when settled, and adapts the DPR to the frame budget.
- */
 export class StageLoop {
   refreshMs = 1000 / 60;
   frameDivisor = 1;
   dpr!: DprController;
-  /** End of the intro hold (ms); +∞ until the scene is revealed, 0 when there is no intro. */
   introUntil = 0;
   lastInteraction = performance.now();
   readonly clockStart = performance.now();
@@ -80,7 +73,6 @@ export class StageLoop {
     return !this.host.capture && this.host.motionAllowed() && (tier === 'high' || tier === 'mid') && performance.now() - this.lastInteraction < IDLE_WINDOW_MS;
   }
 
-  /** Requests a render; starts the loop if it is allowed to run. */
   invalidate(): void {
     if (!this.host.canRun() || this.running) return;
     this.running = true;
@@ -121,7 +113,6 @@ export class StageLoop {
     else if (!settling) this.stop();
   }
 
-  /** Settled idle frames render at 1/`frameDivisor` of the refresh rate. */
   private skips(now: number, continuous: boolean): boolean {
     this.frameCount++;
     const recentlyActive = now - this.lastInteraction < 300;

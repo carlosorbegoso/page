@@ -4,7 +4,6 @@ const KEY_UNITS = 14.5;
 const FUNCTION_KEYS = ['Escape', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'Power'];
 const letters = (row: string) => [...row].map(letter => `Key${letter}`);
 
-/** Key widths in key units and their `KeyboardEvent.code`, back to front; the first row is the half-height function row. */
 const KEY_ROWS: readonly (readonly (readonly [number, string])[])[] = [
   FUNCTION_KEYS.map((code, index) => [index === 0 ? 1.5 : 1, code] as const),
   [
@@ -28,7 +27,6 @@ const KEY_ROWS: readonly (readonly (readonly [number, string])[])[] = [
   ]
 ];
 
-/** One keycap on the laptop deck, in the laptop's own frame (x right, z towards the user). */
 export interface LaptopKey {
   code: string;
   x: number;
@@ -39,7 +37,6 @@ export interface LaptopKey {
 
 export const LAPTOP_KEYBOARD = { width: KEY_UNITS * KEY_PITCH, depth: 5.5 * KEY_PITCH, capHeight: 0.0012 } as const;
 
-/** Every keycap of the MacBook layout, inverted-T arrows included, centred on the keyboard well. */
 export function laptopKeys(): LaptopKey[] {
   const keys: LaptopKey[] = [];
   const add = (code: string, x: number, z: number, width: number, depth: number) => keys.push({ code, x, z, width: width - KEY_GAP, depth: depth - KEY_GAP });

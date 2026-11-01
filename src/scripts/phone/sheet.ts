@@ -37,7 +37,6 @@ function closeAfterTransition(leaving: HTMLDialogElement): void {
   });
 }
 
-/** Action sheet asked before leaving the site; its "Open" button is a real new-tab link. */
 export function createSheet(host: SheetHost) {
   let dialog: HTMLDialogElement | null = null;
   let origin: HTMLElement | null = null;

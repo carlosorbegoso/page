@@ -32,7 +32,6 @@ function hundredthText(value: number): string {
   return (hundredths[n] ??= (n / 100).toFixed(2));
 }
 
-/** A fixed-size ring of samples drawn oldest to newest. */
 class Series {
   readonly values = new Float32Array(SAMPLES);
   head = 0;
@@ -51,10 +50,6 @@ class Series {
   }
 }
 
-/**
- * A small Grafana board for the API (Prometheus metrics): request rate, p95/p99 latency, error
- * rate and JVM heap, sampled every half second from smooth noise so the lines keep crawling.
- */
 export class LaptopDashboard {
   private readonly rps = new Series();
   private readonly p95 = new Series();

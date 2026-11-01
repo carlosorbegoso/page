@@ -13,7 +13,6 @@ function clockText(lang: string): string {
     .join('');
 }
 
-/** Status bar clock in local time, redrawn on each minute boundary while the page is visible. */
 export function createClock(el: HTMLElement | null) {
   let timer: number | undefined;
   let running = false;

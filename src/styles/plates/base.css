@@ -38,7 +38,6 @@
     --plate-accent: var(--color-status-live);
   }
 
-  /* Block, not inline: the signal sits above the eyebrow so every line keeps the same left edge. */
   .plate :is(p:has(+ h1, + h2, + h3), [data-signal])::before {
     content: '';
     display: block;

@@ -6,7 +6,6 @@ const SECONDS = 1.1;
 const HOVER_ROLL = 0.14;
 const TWIST = 0.18;
 
-/** Principal axes of a cloud of points (power iteration with deflation on the covariance). */
 function axes(points: Vector3[], centre: Vector3): { length: Vector3; normal: Vector3 } {
   const m = [0, 0, 0, 0, 0, 0, 0, 0, 0];
   for (const point of points) {
@@ -28,10 +27,6 @@ function axes(points: Vector3[], centre: Vector3): { length: Vector3; normal: Ve
   return { length, normal: new Vector3().crossVectors(length, width).normalize() };
 }
 
-/**
- * SkyMek's wrench: under the pointer it rolls a little in its cradle; a click lifts it and gives two
- * ratchet twists about its ring end, like tightening a bolt, before it drops back.
- */
 export class WrenchLife {
   private readonly length: Vector3;
   private readonly normal: Vector3;
@@ -99,7 +94,6 @@ function smooth(t: number): number {
   return x * x * (3 - 2 * x);
 }
 
-/** A ratchet stroke: fast with a small metallic overshoot. */
 function snap(t: number): number {
   if (t <= 0) return 0;
   if (t >= 1) return 1;

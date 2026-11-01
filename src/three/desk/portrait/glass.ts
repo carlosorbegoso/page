@@ -7,13 +7,10 @@ import { PORTRAIT_GLASS_FRAGMENT, PORTRAIT_GLASS_VERTEX } from './glass.glsl';
 
 const GLINT_SECONDS = 0.85;
 const GLINT_PEAK = 0.2;
-/** Under reduced motion the hover shows a still sheen instead of the sweep. */
 const STILL_GLINT = 0.12;
-/** Level the story calls "on" for the desk lamp (cd). */
 const FULL_LAMP = 28;
 const DAYLIGHT = new Color('#e8eef6');
 
-/** The glass over the print: faint window and lamp reflections, and a glint that sweeps on hover. */
 export class PortraitGlass {
   readonly mesh: Mesh<PlaneGeometry, ShaderMaterial>;
   private readonly moon = tokenColor('--color-moonlight', '#9db8e8');

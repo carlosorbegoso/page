@@ -1,4 +1,3 @@
-/* Reading page (CV): page column, links and masthead. */
 .cv {
   display: flex;
   flex-direction: column;

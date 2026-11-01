@@ -6,10 +6,6 @@ import { seg, shade, UP } from '../geometry';
 import type { Palette, Quality } from '../palette';
 import { FRONT, standing } from './frame';
 
-/**
- * `life/classify` lifts everything above 4.28 cm with the lid, so the base and its ribbon stay below
- * that and every bow and lid piece above it.
- */
 const BOX = { base: 0.056, baseH: 0.044, lid: 0.06, lidH: 0.013, band: 0.0095 } as const;
 const LID_Y = BOX.baseH - 0.001 + BOX.lidH / 2;
 const TOP = LID_Y + BOX.lidH / 2;
@@ -17,7 +13,6 @@ const TOP = LID_Y + BOX.lidH / 2;
 type Put = (geometry: BufferGeometry, finish: Finish, matrix: Matrix4) => void;
 type At = (x: number, y: number, z: number, rotation?: Quaternion) => Matrix4;
 
-/** A flat ribbon end with a V cut, lying along +Z from the knot. */
 function ribbonTail(width: number, length: number): ExtrudeGeometry {
   const notch = width * 0.45;
   const shape = new Shape();
@@ -31,7 +26,6 @@ function ribbonTail(width: number, length: number): ExtrudeGeometry {
   return new ExtrudeGeometry(shape, { depth: thickness, bevelEnabled: false }).rotateX(Math.PI / 2).translate(0, thickness / 2, 0);
 }
 
-/** One bow loop: a thin satin band bent into a teardrop, wide across the loop's plane. */
 function bowLoop(size: number, q: Quality): TubeGeometry {
   const path = [
     [0, 0],
@@ -82,7 +76,6 @@ function buildBow(put: Put, at: At, p: Palette, q: Quality): void {
   }
 }
 
-/** A kraft luggage tag with a brass grommet and two ink lines, hung on twine from the bow. */
 function buildTag(put: Put, at: At, q: Quality): void {
   const { base, baseH, lid } = BOX;
   const kraft: Finish = { color: new Color('#c9a273'), roughness: 0.85, metalness: 0 };
@@ -115,7 +108,6 @@ function buildTag(put: Put, at: At, q: Quality): void {
   put(new TubeGeometry(new CatmullRomCurve3([hole, sag, knot]), 16, 0.00035, 4, false), twine, new Matrix4());
 }
 
-/** Parati: a pink lacquered gift box, satin ribbon with stitched edges, a four-loop bow, a glowing seam under the lid and a kraft tag. */
 export function buildGift(b: PartBuilder, p: Palette, q: Quality): void {
   const id = OBJECT_ID.parati;
   const frame = standing(FIGURES.parati, -0.2);

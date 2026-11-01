@@ -37,7 +37,6 @@ const plateId = `product-${product.id}`;
 const titleId = `${plateId}-title`;
 const hostname = new URL(product.url).hostname;
 
-/* Carlos drops the real capture into public/ later; until then the plate renders without it. */
 const screenshotPath = `images/${product.id}-screenshot.webp`;
 const screenshot =
   featured && existsSync(join(process.cwd(), 'public', screenshotPath)) ? withBase(screenshotPath) : null;

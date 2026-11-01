@@ -1,7 +1,6 @@
 import { html, is3d } from './env';
 import { groups, setLive, setPlate, stationOf } from './groups';
 
-/** Set once the camera director speaks: from then on text only enters when its chapter has settled. */
 export const chapterState = { events: false, settled: null as string | null };
 
 function chapterOf(owner: HTMLElement): string | undefined {
@@ -51,7 +50,6 @@ export const plateObserver = new MutationObserver(records => {
 
 let mode: '3d' | 'flat' | null = null;
 
-/** Forces the next `applyMode` to re-evaluate every plate. */
 export function resetMode(): void {
   mode = null;
 }

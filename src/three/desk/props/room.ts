@@ -105,7 +105,6 @@ export function buildDesk(b: PartBuilder, p: Palette, q: Quality): void {
   b.add(new RoundedBoxGeometry(legX * 2, 0.05, 0.02, 1, 0.005), p.metal, { position: [0, legTop - 0.04, -postZ] });
 }
 
-/** Left-wall shelves: a box below, the four archive box files in the middle, books and brass on top. */
 export function buildShelves(b: PartBuilder, p: Palette, q: Quality): void {
   const x = SHELF.x + SHELF.depth / 2;
   const z = SHELF.z;

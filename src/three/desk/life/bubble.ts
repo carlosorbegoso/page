@@ -7,10 +7,6 @@ const MESSAGE_SECONDS = 1.2;
 const TYPING_RATE = 7.2;
 const TYPING_HOP = 0.0024;
 
-/**
- * Splits the typing-dot triangles into the three dots, ordered along the bubble (left to right as
- * built), by their spread from the group's centre.
- */
 export function splitDots(part: RigPart): number[] {
   const centre = part.centre;
   const far = part.centroids.reduce((best, point) => (point.distanceToSquared(centre) > best.distanceToSquared(centre) ? point : best), centre);
@@ -19,10 +15,6 @@ export function splitDots(part: RigPart): number[] {
   return part.centroids.map(point => Math.min(2, Math.max(0, Math.round(point.clone().sub(centre).dot(axis) / reach + 1))));
 }
 
-/**
- * Ventixs's chat bubble: under the pointer (or while its product is on screen) the three dots bob in
- * sequence like someone typing; a click bounces the bubble and a tiny message pops out and floats up.
- */
 export class BubbleLife {
   readonly message: Mesh<CapsuleGeometry, MeshBasicMaterial>;
   private startedAt = -1;
@@ -53,7 +45,6 @@ export class BubbleLife {
     this.gentle = !motion;
   }
 
-  /** Dots type while the pointer is over the bubble or its product is the one on screen. */
   setTyping(typing: boolean): void {
     this.typingGoal = typing;
   }

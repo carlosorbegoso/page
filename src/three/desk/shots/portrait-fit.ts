@@ -5,24 +5,16 @@ import { fitDistance, inside, overlaps, projector, screenBox } from './projectio
 import { centreOf, OCCLUDERS } from './protagonists';
 import type { Place, Region, Setup } from './types';
 
-/** The frame grown by the depth-of-field halo: a neighbour outside it reads as fully out. */
 const HALO: Region = { left: -0.04, right: 1.04, top: -0.04, bottom: 1.04 };
-/** Breathing room around protagonists fitted to the stage, as a share of the tightest distance. */
 const BREATH = 1.12;
 
-/** A small change of a portrait shot that may swing a sliced neighbour wholly out of frame. */
 interface Nudge {
-  /** Degrees added to the heading. */
   turn: number;
-  /** Degrees added to the pitch (negative looks further down). */
   tilt: number;
-  /** Added to the subject's screen x. */
   shift: number;
-  /** Dolly factor: in to the tightest fit to lose a neighbour at the edge, out so a tall one behind fits whole. */
   back: number;
 }
 
-/** Tried in order, gentlest first, before a sliced neighbour joins the subjects. */
 const NUDGES: Nudge[] = [0, -6, -12].flatMap(tilt =>
   [1, 1 / BREATH, 1.15, 1.3, 1.5].flatMap(back =>
     [0, 0.05, -0.05, 0.1, -0.1].flatMap(shift => [0, 4, -4, 8, -8, 12, -12].map(turn => ({ turn, tilt, shift, back })))
@@ -32,7 +24,6 @@ const NUDGES: Nudge[] = [0, -6, -12].flatMap(tilt =>
 export type StoryFrame = { eye: Vector3; aim?: Vector3; sx: number; sy: number };
 type FittedFrame = { eye: Vector3; aim: Vector3; sx: number; sy: number };
 
-/** One portrait story shot being fitted: its blended pose and the neighbours it must not slice. */
 interface PortraitFit {
   ctx: ShotContext;
   focus: Vector3;
@@ -92,12 +83,6 @@ function fitPortrait(fit: PortraitFit, subjects: Vector3[]): FittedFrame {
   }
 }
 
-/**
- * A story shot: `landscape` verbatim on desktop, blended towards `portrait` by aspect, and in
- * portrait as close as `subjects` fit `stage` (with `BREATH`), aimed at their centre. A neighbour the edge
- * or the HUD would slice, and no nudge clears, joins the subjects (nearest first), so each one
- * ends up wholly in frame or wholly out.
- */
 export function storyShot(
   ctx: ShotContext,
   focus: Vector3,

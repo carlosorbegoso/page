@@ -19,13 +19,10 @@ import { WrenchLife } from './wrench';
 export type LifeToy = FigureId | 'mug';
 
 const SLOT: Record<FigureId, number> = { alfa: OBJECT_ID.alfa - 1, ventixs: OBJECT_ID.ventixs - 1, parati: OBJECT_ID.parati - 1, skymek: OBJECT_ID.skymek - 1 };
-/** Hover lift of Alfa (the products lift theirs in DeskSet): a few millimetres, eased in ~180 ms. */
 const HOVER_LIFT = 0.003;
 
 export interface DeskLifeOptions {
-  /** The figures and their plinth, built on their own. */
   geometry: BufferGeometry;
-  /** The workstation (keyboard, mug…), built on its own so the mug can turn. */
   workstation: BufferGeometry;
   material: Material;
   depthMaterial?: Material;
@@ -42,16 +39,9 @@ export interface LifeFrame {
   motion: boolean;
   look: LifeLook | null;
   pixelScale: number;
-  /** The product whose sub-shot is on screen, if any. */
   focused: FigureId | null;
 }
 
-/**
- * The desk objects come alive: the figures geometry is split into its moving parts (Alfa's head,
- * eyes and antenna, Parati's lid, Ventixs's typing dots, SkyMek's wrench) and the mug out of the
- * workstation; each runs its idle life, its hover response and its click reaction. Call `update`
- * before the levels are applied and `pose` after.
- */
 export class DeskLife {
   readonly object3D = new Group();
   readonly press = new PressPulse();
@@ -109,12 +99,10 @@ export class DeskLife {
     else this.mug.play(time, motion);
   }
 
-  /** Pikachu and Charizard fight (Pikachu only sparks when motion is reduced). */
   battle(time: number, motion: boolean): void {
     this.pokemon.battle(time, motion);
   }
 
-  /** The pick under the pointer (its key without `desk:`), or null. */
   setHover(id: string | null): void {
     this.hovered = id;
     this.gift.setHover(id === 'parati');
@@ -122,7 +110,6 @@ export class DeskLife {
     this.mug.setHover(id === 'mug');
   }
 
-  /** Advances every object; returns true while one of them is moving. */
   update(dt: number, time: number, frame: LifeFrame): boolean {
     this.time = time;
     const { motion } = frame;
@@ -150,18 +137,15 @@ export class DeskLife {
     return STILL;
   }
 
-  /** Extra self-illumination of an object from its reaction or a press pulse. */
   glow(id: string): number {
     const own = id === 'parati' ? this.gift.glow(this.time) : id === 'ventixs' ? this.bubble.glow(this.time) : id === 'skymek' ? this.wrench.glow(this.time) : 0;
     return own + this.press.glow(id, this.time);
   }
 
-  /** The invisible pick box over each product card's printed face. */
   cardTargets(): ReadonlyMap<ProductId, Object3D> {
     return this.cards.targets();
   }
 
-  /** Whether a product card stands facing the camera (its link is clickable then). */
   cardRaised(id: ProductId): boolean {
     return this.cards.isRaised(id);
   }
@@ -174,7 +158,6 @@ export class DeskLife {
     return this.mug.steamGain(this.time);
   }
 
-  /** Writes the part matrices for the figure transforms the atlas shader applies this frame. */
   pose(uniforms: AtlasUniforms): void {
     for (const [id, frame] of this.frames) figureFrame(uniforms, SLOT[id], frame);
     this.alfa?.pose(this.time, this.frames.get('alfa')!);
@@ -186,7 +169,6 @@ export class DeskLife {
     this.cards.pose();
   }
 
-  /** Changes whenever a part moves enough for the lamp shadow to need a new render. */
   poseKey(): string {
     return `${this.alfa?.poseKey() ?? ''}|${this.gift.poseKey(this.time)}|${this.wrench.poseKey(this.time)}|${this.mug.poseKey()}|${this.pokemon.poseKey()}|${this.cards.poseKey()}`;
   }

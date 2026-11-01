@@ -1,11 +1,9 @@
 import { dialogOpen, type NavState, type StoryGotoDetail } from './types';
 
-/** A wheel gesture ends after this long without wheel events; a flick's momentum tail has no such gap. */
 const WHEEL_GESTURE_GAP_MS = 160;
 const WHEEL_STEP_PX = 40;
 const WHEEL_LINE_PX = 16;
 
-/** The wheel belongs to something else: a scrollable box under the pointer, a dialog or the HUD menu. */
 function wheelOwnedElsewhere(event: WheelEvent): boolean {
   if (dialogOpen()) return true;
   for (let el = event.target instanceof Element ? event.target : null; el && el !== document.body; el = el.parentElement) {
@@ -29,10 +27,6 @@ function wheelPixels(event: WheelEvent): number {
   return event.deltaY * scale;
 }
 
-/**
- * One wheel gesture moves at most one shot: the first ~40 px in a direction step through
- * `story:goto`; the rest of the gesture, and any wheel while a step tween runs, is swallowed.
- */
 export function createWheelHandler(state: NavState, interrupt: (event: Event) => void): (event: WheelEvent) => void {
   return event => {
     startGestureIfIdle(state, performance.now());

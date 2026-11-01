@@ -7,7 +7,6 @@ import { getExperience } from '../../lib/content';
 
 interface Props {
   locale: Locale;
-  /** `story` tells the career from the first job (the 3D walk); `newest` leads with today (reading mode). */
   order?: 'story' | 'newest';
 }
 
@@ -73,7 +72,6 @@ const firstYear = entries.map(entry => entry.start).toSorted()[0]?.slice(0, 4);
 </script>
 
 <style>
-  /* In 3D the archive box's cover sheet carries this title card; the panel stays for screen readers only. */
   :global(.is-3d) [data-plate-id='exp-intro'] {
     position: absolute;
     width: 1px;

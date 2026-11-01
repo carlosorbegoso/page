@@ -10,7 +10,6 @@ export function smoothstep(edge0: number, edge1: number, x: number): number {
   return t * t * (3 - 2 * t);
 }
 
-/** GSAP's power2.inOut. */
 export function power2InOut(t: number): number {
   const x = Math.min(Math.max(t, 0), 1);
   return x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2;
@@ -24,10 +23,6 @@ export function layoutKind(width: number): LayoutKind {
   return 'phone';
 }
 
-/**
- * A phone held upright: the room fills the top of the frame like a film shot and every chapter's
- * text sits under it as a 2D panel, the monitor chapters included (the phone surface stays).
- */
 export function stackedLayout(view: { width: number; height: number }): boolean {
   return layoutKind(view.width) === 'phone' && view.width < view.height;
 }
@@ -62,7 +57,6 @@ function bakeGlow(): Texture {
   return texture;
 }
 
-/** Soft radial glow, shared with refcount. */
 export function acquireGlow(): Promise<Texture> {
   return acquire(GLOW_KEY, async () => bakeGlow(), texture => texture.dispose());
 }
@@ -71,7 +65,6 @@ export function releaseGlow(): void {
   release(GLOW_KEY);
 }
 
-/** Additive camera-facing glow sprite. */
 export function glowSprite(texture: Texture, size: number, opacity: number): Sprite {
   const sprite = new Sprite(
     new SpriteMaterial({ map: texture, blending: AdditiveBlending, depthWrite: false, transparent: true, opacity, fog: false })

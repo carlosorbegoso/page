@@ -17,7 +17,6 @@ function topCentre(rect: FaceRect): { x: number; y: number } {
   };
 }
 
-/** Push pins holding the note, the Alfa card and each post-it, in board-face metres. */
 export function pinSpots(): PinSpot[] {
   const { note, alfa, postits } = BOARD_LAYOUT;
   return [

@@ -48,7 +48,6 @@ const year = new Date().getFullYear();
 </section>
 
 <style>
-  /* Credits read as two short lines: how it was made, and who signs it. */
   .outro-credits > :not(:first-child)::before {
     content: '·';
     margin-right: 0.75rem;
@@ -63,7 +62,6 @@ const year = new Date().getFullYear();
     content: none;
   }
 
-  /* The closing credits roll on the monitor, like the opening titles: sizes are shares of the screen. */
   :global(.is-3d [data-plate-mode='surface-monitor']) .outro-screen {
     height: 100%;
     max-width: none;
@@ -98,7 +96,6 @@ const year = new Date().getFullYear();
     gap: 1.6cqh 2.4cqw;
   }
 
-  /* Upright phones: the credits dock under the dawn window instead of rolling on the monitor. */
   :global(.is-3d [data-plate-mode='anchored']) .outro-screen {
     gap: 0.75rem;
   }
@@ -125,7 +122,6 @@ const year = new Date().getFullYear();
     padding-block: 0.75rem;
   }
 
-  /* Without 3D the HTML footer already closes the page; the credits only make sense as the closing shot. */
   :global(html:not(.is-3d)) .outro {
     display: none;
   }

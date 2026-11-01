@@ -1,10 +1,3 @@
-/*
- * The external monitor reads as a Mac desktop: a translucent menu bar on every monitor screen and,
- * on the hero and the outro, the content sitting in a window with the three window buttons over a
- * soft wallpaper. The about screens keep their own editor window and only get the menu bar.
- * All of it is drawn with pseudo-elements so no section markup changes; the bar overlays the top of
- * the glass because the about screens bleed to it (styles/sections/about/monitor-landscape.css).
- */
 .is-3d .plate[data-plate-mode='surface-monitor'] {
   --chrome-bar: 3.4cqh;
   --chrome-window-top: calc(var(--chrome-bar) + 2.6cqh);
@@ -50,7 +43,6 @@
   position: absolute;
   inset: var(--chrome-window-top) 2.6cqw 2.6cqh;
   z-index: 0;
-  /* The plate's accent line (styles/motion/kinetic.css) uses the same pseudo-element at 1 px, hidden. */
   height: auto;
   opacity: 1;
   transition: none;

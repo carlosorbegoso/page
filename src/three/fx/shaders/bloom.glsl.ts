@@ -1,4 +1,3 @@
-/** 13-tap downsample (Jimenez 2014); the first level adds a soft threshold and Karis averaging against fireflies. */
 export const BLOOM_DOWN_FRAG = /* glsl */ `
 uniform sampler2D tInput;
 uniform vec2 uTexel;

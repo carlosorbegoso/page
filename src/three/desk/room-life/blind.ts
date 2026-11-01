@@ -2,20 +2,17 @@ import { BoxGeometry, Color, CylinderGeometry, DoubleSide, Group, Mesh, MeshStan
 import { GLASS_Z, WINDOW } from '../layout';
 import type { DeskFrame } from '../set/frame';
 
-/** In the window reveal, just room-side of the sash handle, so the raised roll hides under the lintel. */
 const BLIND_Z = GLASS_Z + 0.056;
 const ROLL_RADIUS = 0.016;
 const TOP = WINDOW.y + WINDOW.height / 2 - ROLL_RADIUS - 0.004;
 const DROP = WINDOW.height - 0.028;
 const WIDTH = WINDOW.width - 0.02;
 const LINEN = '#a99e8b';
-/** Light the fabric lets through (it glows like linen against the sky): faint city at night, bright by day. */
 const NIGHT_GLOW = new Color('#3a4258');
 const DAY_GLOW = new Color('#efe2cc');
 const SWAY_STIFFNESS = 90;
 const SWAY_DAMPING = 7;
 
-/** A linen roller blind in the window reveal: the visitor lowers or raises it, and it sways when touched. */
 export class RollerBlind {
   readonly group = new Group();
   private readonly cloth: Group;
@@ -48,7 +45,6 @@ export class RollerBlind {
     this.apply(0, 0);
   }
 
-  /** A touch sets the hem swinging (hover a little, a click more). */
   nudge(strength: number): void {
     this.swaySpeed += strength;
   }
@@ -68,7 +64,6 @@ export class RollerBlind {
     return moving;
   }
 
-  /** `blind` 0 raised … 1 lowered; `day` 0…1 for the light the cloth lets through. */
   apply(blind: number, day: number): void {
     const length = Math.max(blind * DROP, 0.0005);
     this.fabric.scale.y = length;

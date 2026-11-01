@@ -67,14 +67,8 @@ function stackedShot(ctx: ShotContext, focus: Vector3, heading: number, pitch: n
   return { eye: eyeFor(focus, heading, pitch, ctx.topHalf(span)), focus, sx: 0.5, sy, panel: { name, ...ctx.panelDocked } };
 }
 
-/**
- * Monitor chapters on a stacked phone are establishing shots, not screen reads: the hero holds the
- * whole night desk (laptop, monitor, lamp, window), about pushes onto the framed photo beside the
- * monitor and then turns to the laptop on the way to the shelf, and the outro pulls back up to the window.
- */
 export function stackedMonitorShots(ctx: ShotContext): { hero: Framing; about: Framing[]; outro: Framing } {
   const room = MONITOR.centre.clone().add(new Vector3(0.12, 0.06, -0.04));
-  /** The opening caption is short, so the desk can sit lower and meet it. */
   const hero = stackedShot(ctx, room, 4, -7, 1.45, 'hero', ctx.subjectY + 0.04);
   const bio = stackedShot(ctx, stackedAboutFocus(), 4, -8, 0.92, 'about-bio');
   const laptop = LAPTOP.centre.clone().add(new Vector3(0.02, 0.1, 0));

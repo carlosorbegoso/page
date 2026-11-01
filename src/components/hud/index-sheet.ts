@@ -1,6 +1,5 @@
 import type { HudElements, IndexOpener } from './elements';
 
-/** Chapter index dialog: closes on its button, a backdrop click or a link, and hands focus back to its opener. */
 export function initIndexSheet({ sheet, indexButton, clock, toggle }: HudElements, opener: IndexOpener): void {
   if (!sheet) return;
   sheet.addEventListener('close', () => {

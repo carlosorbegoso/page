@@ -1,4 +1,3 @@
-/** Motion preference: OS reduced-motion or the page's pause button (`html[data-motion]`). */
 export interface MotionState {
   reduced: boolean;
   paused: boolean;
@@ -17,7 +16,6 @@ export function motionAllowed(state: MotionState): boolean {
   return !state.reduced && !state.paused;
 }
 
-/** Calls `listener` whenever reduced-motion or the pause toggle changes. */
 export function watchMotion(listener: (state: MotionState) => void): () => void {
   const media = matchMedia('(prefers-reduced-motion: reduce)');
   const onMedia = () => listener(readMotion());

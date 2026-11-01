@@ -1,6 +1,5 @@
 import type { HudElements } from './elements';
 
-/** Story progress bar, shown with the tour controls only while story navigation is ready. */
 export function initProgress({ tourButton, quickTour }: HudElements): void {
   const progressBar = document.querySelector<HTMLElement>('[data-hud-progress]');
 

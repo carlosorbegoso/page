@@ -43,7 +43,6 @@ const BY_PREFIX: readonly (readonly [string, DeskSound | null])[] = [
   ['lamp', null]
 ];
 
-/** Maps an interaction id (`folder-acme`, `desk:skymek`, `chat`…) to its sound; unknown ids stay silent. */
 export function soundFor(id: unknown): DeskSound | null {
   if (typeof id !== 'string') return null;
   const key = id.toLowerCase().replace(/^desk:/, '');
@@ -58,10 +57,6 @@ interface Options {
   signal: AbortSignal;
 }
 
-/**
- * Per-object foley. Several events can describe the same click (`desk:interact`, `desk:action`,
- * `desk:clock`), so every sound goes through one gate with a minimum interval per sound.
- */
 export function listenDeskSounds({ context, output, noise, canPlay, signal }: Options): void {
   const lastPlayed = new Map<DeskSound, number>();
   let lastContactBuzz = -Infinity;

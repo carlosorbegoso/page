@@ -16,7 +16,6 @@ export interface CompositeFrame {
   time: number;
 }
 
-/** Fused final pass to the canvas: fringe, DoF mix, bloom, streak, grade, tone mapping, vignette, grain. */
 export class CompositePass {
   private readonly balance = new Vector3(1, 1, 1);
   readonly material = passMaterial(

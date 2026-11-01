@@ -19,7 +19,6 @@ function rrtOdt(v: number): number {
   return (v * (v + 0.0245786) - 0.000090537) / (v * (0.983729 * v + 0.432951) + 0.238081);
 }
 
-/** three's `ACESFilmicToneMapping` (tonemapping_pars_fragment), before sRGB encoding. */
 export function acesFilmic([r, g, b]: Rgb, exposure: number): Rgb {
   const k = exposure / 0.6;
   const x = r * k;
@@ -36,12 +35,9 @@ export function acesFilmic([r, g, b]: Rgb, exposure: number): Rgb {
   ];
 }
 
-/** Linear input whose ACES output equals `target` (linear display values up to 0.95). */
 export function inverseAcesFilmic(target: Rgb, exposure: number): Rgb {
   const goal = target.map(v => Math.min(Math.max(v, 0), 0.95)) as Rgb;
   const x: Rgb = [...goal];
-  // ACES is monotonic per channel and the colour matrices are diagonally dominant: a few rounds of
-  // per-channel bisection converge where Newton overshoots on the clamped toe.
   for (let round = 0; round < 4; round++) {
     for (let c = 0; c < 3; c++) {
       let low = 0;
@@ -72,11 +68,6 @@ function readPixels(texture: Texture): ImageData | null {
   }
 }
 
-/**
- * The direct render leaves the clear colour and sRGB background textures untouched by tone mapping,
- * but through the pipeline they pass ACES in the composite and the night sky collapses to black.
- * During the scene pass this swaps them for inverse-ACES equivalents so they land on their tokens.
- */
 export class ToneCompensation {
   private readonly savedClear = new Color();
   private readonly compensatedClear = new Color();

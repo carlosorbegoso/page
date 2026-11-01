@@ -1,10 +1,6 @@
 import { Vector2 } from 'three';
 import type { FluidStroke } from './field';
 
-/**
- * Pointer and finger-drag input for the fluid. The splat point eases towards the pointer
- * (`--fx-pointer-damping` per 60 Hz frame), which turns raw mouse jitter into a slow liquid wake.
- */
 export class FluidPointerInput {
   private readonly target = new Vector2();
   private readonly eased = new Vector2();
@@ -66,7 +62,6 @@ export class FluidPointerInput {
     this.rect = null;
   }
 
-  /** Returns this frame's stroke, or null when the pointer is idle. */
   consume(dt: number): FluidStroke | null {
     if (!this.hasTarget) return null;
     if (this.snap) {

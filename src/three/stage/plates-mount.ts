@@ -3,7 +3,6 @@ import { Plates } from '../plates';
 import type { Vector3 } from 'three';
 import type { PlateAnchor } from '../contracts';
 
-/** `data-plate-stacked` plates switch to this mode on stacked phones; `data-plate-wide` keeps the authored one. */
 const STACKED_MODE = 'anchored';
 const DISSOLVE_HALF_MS = 150;
 
@@ -15,7 +14,6 @@ export interface PlateHost {
   invalidate(): void;
 }
 
-/** Sets each switchable plate's `data-plate-mode` for the current layout, before the plates mount. */
 function applyPlateModes(stacked: boolean): void {
   for (const plate of document.querySelectorAll<HTMLElement>('[data-plate-stacked]')) {
     plate.dataset.plateWide ??= plate.dataset.plateMode ?? '';
@@ -23,7 +21,6 @@ function applyPlateModes(stacked: boolean): void {
   }
 }
 
-/** Moves the HTML plates into their CSS3D / panel layers; undefined when the page has none. */
 export function mountPlates(host: PlateHost, stacked: boolean, size: { width: number; height: number }): Plates | undefined {
   applyPlateModes(stacked);
   const plates = new Plates({
@@ -38,11 +35,6 @@ export function mountPlates(host: PlateHost, stacked: boolean, size: { width: nu
   return plates;
 }
 
-/**
- * Reduced motion / pause: 300 ms dip to black (WAAPI, so the global transition kill-switch does not
- * flatten it). Layers are darkened, not faded: the hero fallback picture sits behind the canvas
- * and the monitor's screen behind the plates, and fading would double-expose them over the new shot.
- */
 export function dissolve(layers: HTMLElement[], cut: () => void, invalidate: () => void): void {
   const fade = (direction: PlaybackDirection, fill: FillMode) =>
     layers.map(el => el.animate([{ filter: 'brightness(1)' }, { filter: 'brightness(0)' }], { duration: DISSOLVE_HALF_MS, fill, direction }));

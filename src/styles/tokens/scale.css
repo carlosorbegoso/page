@@ -19,7 +19,6 @@
   --text-5xl--line-height: 1.04;
   --text-6xl: clamp(3rem, 2.0833rem + 4.0741vw, 5.75rem);
   --text-6xl--line-height: 1;
-  /* Capped by the viewport height too: short laptop windows would otherwise stack a headline taller than the frame. */
   --text-display: clamp(2.5rem, min(1.5rem + 4.6875vw, 8.5vh), 6rem);
   --text-display--line-height: 1;
   --text-body: 1.0625rem;

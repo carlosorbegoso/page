@@ -11,14 +11,11 @@ interface Profile {
   scale: number;
 }
 
-/* No translateZ on purpose: a unit pushed off its layer's plane can sort behind the plate's dark pool on stations whose CSS3D matrix is mirrored. */
 const CHARS: Profile = { radius: 90, lift: 4, spread: 2, scale: 0.08 };
-/** Only short headlines react letter by letter; body text stays still so it can be read. */
 const MAX_HEADLINE_CHARS = 32;
 
 interface Unit {
   el: HTMLElement;
-  /** Centre inside its word box, in layout px (transforms excluded). */
   ux: number;
   uy: number;
   f: number;
@@ -89,7 +86,6 @@ function clear(unit: Unit): void {
   unit.written = false;
 }
 
-/** Projected (CSS3D-aware) centres of every unit, read in one batch before any write. */
 function centres(): Array<{ unit: Unit; x: number; y: number }> {
   const out: Array<{ unit: Unit; x: number; y: number }> = [];
   for (const word of words) {
@@ -166,7 +162,6 @@ function wave(heading: HTMLElement): void {
   });
 }
 
-/** Called when the set of live plates changes. */
 export function refreshProximity(): void {
   stale = true;
   if (words.length) wake();

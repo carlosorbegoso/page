@@ -9,7 +9,6 @@ export interface Mote {
   speed: number;
 }
 
-/** Light cone or dust stream: from `origin` along `direction`, `length` long and `spread` wide (CSS px). */
 export interface Ray {
   origin: Point;
   direction: Point;
@@ -21,7 +20,6 @@ export function createMotes(): Mote[] {
   return Array.from({ length: MOTES }, (_, i) => ({ u: Math.random(), v: Math.random() * 2 - 1, phase: i * 2.399, speed: 0.4 + Math.random() * 0.8 }));
 }
 
-/** Canvas 2D primitives of the loader, drawn in CSS px scaled by `scale`. */
 export class Painter {
   constructor(
     readonly ctx: CanvasRenderingContext2D,

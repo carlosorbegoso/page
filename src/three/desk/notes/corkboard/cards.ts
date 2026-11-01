@@ -7,7 +7,6 @@ const CARD_WHITE = '#f6f2e8';
 const RULE_BLUE = 'rgba(96, 128, 176, 0.32)';
 const RULE_RED = 'rgba(196, 70, 62, 0.75)';
 const KRAFT = '#c7a374';
-/** Text sizes in metres on the board: the company shot reads about 1600 px per metre, so 0.0098 m stays above 15 px. */
 const TEXT = { role: 0.0098, phrase: 0.0104, brand: 0.0118 } as const;
 const PAD = 0.008;
 
@@ -39,7 +38,6 @@ function writeLines(context: CanvasRenderingContext2D, lines: string[], x: numbe
   return firstBaseline + (lines.length - 1) * step;
 }
 
-/** The pinned index card: the role on top, a red rule, then the company's phrase on the ruled lines. */
 export function drawNote(board: BoardCanvas, company: CompanyPrint): void {
   const { context, scale, fonts } = board;
   inRect(board, BOARD_LAYOUT.note, (width, height) => {
@@ -75,7 +73,6 @@ function drawArrow(context: CanvasRenderingContext2D, from: number, to: number, 
   context.stroke();
 }
 
-/** The kraft card by the robot: an arrow pointing left, at Alfa, and the parent brand by hand. */
 export function drawAlfaCard(board: BoardCanvas, company: CompanyPrint): void {
   const { context, scale, fonts } = board;
   inRect(board, BOARD_LAYOUT.alfa, (width, height) => {

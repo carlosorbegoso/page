@@ -24,7 +24,6 @@ function debugRequested(params: URLSearchParams): boolean {
   }
 }
 
-/** Entry point of the 3D chunk, imported dynamically by StageCanvas. */
 export async function boot({ container, tier, params }: BootOptions): Promise<Stage> {
   const forced = params.get('chapter');
   const forcedSub = Number.parseInt(params.get('sub') ?? '0', 10);

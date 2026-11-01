@@ -11,7 +11,6 @@ const t = useTranslations(locale);
 const years = (await getExperience(locale)).map(entry => entry.start.slice(0, 4)).toSorted();
 const tonight = (time: string) => `${time} · ${t('story.tonight')}`;
 const night = (time: string) => `${time} · ${t('story.night')}`;
-/** What the HUD shows per chapter and sub-shot: the clock tonight, the year during the day years. */
 const storyBeats: Record<string, string[]> = {
   hero: [tonight('23:00')],
   about: [tonight('23:20'), tonight('23:30')],
@@ -23,7 +22,6 @@ const storyBeats: Record<string, string[]> = {
 };
 const today = (time: string) => `${time} · ${t('story.today')}`;
 const afterWork = (time: string) => `${time} · ${t('story.afterWork')}`;
-/** By day the same walk runs from a morning at the office to nightfall, when the lamp comes on. */
 const storyBeatsDay: Record<string, string[]> = {
   ...storyBeats,
   hero: [today('10:00')],
@@ -137,12 +135,10 @@ const storyBeatsDay: Record<string, string[]> = {
 </div>
 
 <style>
-  /* The story clock sits over bright windows at dawn: a halo keeps it legible on any frame. */
   .hud-beat {
     text-shadow: var(--plate-text-halo);
   }
 
-  /* A soft glass pill keeps the story clock legible over bright windows and warm close-ups. */
   .hud-clock {
     background: rgb(8 11 18 / 0.55);
     backdrop-filter: blur(10px) saturate(1.2);

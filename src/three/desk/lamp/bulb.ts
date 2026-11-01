@@ -2,14 +2,10 @@ import { AdditiveBlending, CanvasTexture, CircleGeometry, Color, Group, Mesh, Me
 import { tokenColor } from '../../tokens';
 import { LAMP } from '../layout';
 
-/** Mouth of the shade along the lamp's aim, matching `buildLamp` (shade 13 cm, diffuser 3.5 cm inside the rim). */
 const DIFFUSER_OFFSET = 0.13 - 0.035 + 0.0012;
 const DIFFUSER_RADIUS = 0.067;
-/** Level the story calls "on" (cd), used to normalise the lamp's level to 0…1. */
 const FULL_LAMP = 28;
-/** Emission of the frosted diffuser at full power: clears the bloom threshold so the bulb blooms softly. */
 const BULB_EMISSION = 4.2;
-/** Warm bounce from the bulb onto what sits around it (figures, clock, monitor glass), in cd per lamp cd. */
 const BULB_SPILL = 0.01;
 const SPILL_RANGE = 0.9;
 
@@ -26,11 +22,6 @@ function haloTexture(): CanvasTexture {
   return new CanvasTexture(canvas);
 }
 
-/**
- * The bulb behind the shade's diffuser. The merged room bakes the diffuser as always glowing, so a
- * frosted disc sits just in front of it: cold grey glass when the lamp is off, warm and blooming when
- * it is on, with a soft halo at the rim and a short-range point light for the warm spill nearby.
- */
 export class LampBulb {
   readonly group = new Group();
   private readonly glass: MeshStandardMaterial;
@@ -61,7 +52,6 @@ export class LampBulb {
     this.group.add(disc, this.halo, this.spill);
   }
 
-  /** `lamp` in cd (the light rig's level); `day` 0…1 dims the halo against a bright room. */
   apply(lamp: number, day: number): void {
     const power = Math.min(lamp / FULL_LAMP, 1.2);
     this.glass.emissiveIntensity = BULB_EMISSION * power;

@@ -5,10 +5,6 @@ import { seg } from '../geometry';
 import type { Palette, Quality } from '../palette';
 import { FRONT, sphereDirection, standing } from './frame';
 
-/**
- * Base ring, waist groove, chest bezel and arms. Everything stays below the neck (6.7 cm) and only the
- * chest light glows, because `life/classify` turns anything higher with the head and treats glow there as eyes.
- */
 function buildAlfaBodyDetails(
   b: PartBuilder,
   p: Palette,
@@ -36,7 +32,6 @@ function buildAlfaBodyDetails(
   }
 }
 
-/** Alfa, TUSOCIO's partner: a small porcelain robot with a smoked visor, two glowing eyes, an antenna light and a brass collar. */
 export function buildAlfa(b: PartBuilder, p: Palette, q: Quality): void {
   const id = OBJECT_ID.alfa;
   const at = standing(FIGURES.alfa, 0.12);

@@ -7,13 +7,6 @@ import type { LoaderStatus } from './status';
 const SKIP_AFTER_VISIBLE_MS = 20000;
 const POLL_MS = 250;
 
-/**
- * Pre-three loader: a canvas 2D overlay on the hero poster while the 3D chunk downloads. At night the
- * lamp filament warms up with the progress and dust drifts in its cone while the room dims towards the
- * dark first frame of the `intro` power-on; by day a morning haze and a sunbeam take its place. A thin
- * boot line runs along the bottom of the monitor. On `stage:reveal` the overlay fades with the canvas
- * fade-in and the filament glides onto the projected 3D lamp, fading as the real lamp ramps up.
- */
 export class StageLoader {
   private readonly root = document.documentElement;
   private readonly reducedQuery = matchMedia('(prefers-reduced-motion: reduce)');
@@ -31,7 +24,6 @@ export class StageLoader {
   private frame = 0;
   private finished = false;
   private veil = -1;
-  /* Kept from scroll events: reading scrollY in every tick, after the status text was written, forces a style recalc. */
   private atTop = scrollY < 4;
   private interval = 0;
   private readonly observer: MutationObserver;

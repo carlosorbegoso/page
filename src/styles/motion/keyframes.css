@@ -1,4 +1,3 @@
-/* Light that runs letter by letter across the settled headline. Flat page only: in 3D the plate's dark text halo would paint over clipped glyphs. */
 @supports (background-clip: text) or (-webkit-background-clip: text) {
   :root.k-armed:not(.is-3d) .kinetic[data-kinetic-shine][data-settled] .k-i {
     background-image: linear-gradient(

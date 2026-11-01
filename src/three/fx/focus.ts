@@ -1,16 +1,9 @@
 import { Vector3, type PerspectiveCamera } from 'three';
 
 export const RACK_SECONDS = 0.6;
-/** Longest camera transition (1.4 s) plus margin: releases the focus hold if `chapter:settled` never comes. */
 export const HOLD_TIMEOUT_SECONDS = 2;
 const AMOUNT_TAU = 0.15;
 
-/**
- * Rack focus: the focus distance is held while the camera travels (`chapter:enter`) and pulled to
- * the new subject in ≤ 600 ms over the last stretch of the move, landing as the camera settles
- * (`chapter:enter` carries the move's duration; without it the pull starts at `chapter:settled`). Without chapter events, a jump
- * larger than half the focus range triggers the same rack; small drifts are followed directly.
- */
 export class RackFocus {
   private readonly point = new Vector3();
   private hasPoint = false;
@@ -38,7 +31,6 @@ export class RackFocus {
     if (point) this.point.copy(point);
   }
 
-  /** Holds the current distance while the camera moves; `duration` is the move's length in seconds. */
   hold(duration: number | undefined): void {
     this.holding = true;
     this.holdElapsed = 0;

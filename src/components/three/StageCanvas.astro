@@ -25,7 +25,6 @@ const sources = (name: string) => [
 
 <script is:inline>
   (() => {
-    /* While the 3D stage boots, only the poster shows: the flat page under it is a different layout and would jump. */
     const params = new URLSearchParams(location.search);
     if (params.get('tier') === 'none' || params.has('capture') || navigator.connection?.saveData) return;
     let gl = null;
@@ -134,7 +133,6 @@ const sources = (name: string) => [
     background: linear-gradient(180deg, var(--color-sky-zenith), var(--color-sky-horizon));
   }
 
-  /* Matte bars frame the canvas like a film gate and close in slightly while the camera moves. */
   [data-stage][data-ready='true']::before,
   [data-stage][data-ready='true']::after {
     content: '';

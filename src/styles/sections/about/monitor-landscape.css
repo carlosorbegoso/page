@@ -1,4 +1,3 @@
-/* Landscape screen as a title card: the photo hangs framed on the wall beside the monitor, so the screen is all type — statement on top, three beats under it. */
 @container surface (orientation: landscape) {
   .is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-bio {
     display: grid;
@@ -91,7 +90,6 @@
     text-wrap: pretty;
   }
 
-  /* Spec sheet: education as a headline, the stack as ruled rows of plain text instead of bullets. */
   .is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-stack {
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 2fr);
     gap: 0 6cqw;

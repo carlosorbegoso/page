@@ -1,6 +1,5 @@
 import { COC_CHUNK } from './coc.glsl';
 
-/** Gather bokeh on a golden-angle disc; background samples are clamped to the centre CoC so they never bleed over sharp foreground. */
 export function dofFrag(taps: number): string {
   return /* glsl */ `
 ${COC_CHUNK}

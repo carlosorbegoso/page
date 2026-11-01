@@ -1,11 +1,8 @@
 import { BoxGeometry, BufferGeometry, Color, CylinderGeometry, Group, Mesh, MeshStandardMaterial, SphereGeometry } from 'three';
 
-/** Extra clockwork the Poly Haven model bakes into its single body mesh, sized in the model's metres. */
 export interface ClockParts {
-  /** Mounted on the case rim; spin it around its local Y. */
   crown: Group;
   crownSpin: Group;
-  /** Pivots at the bell bridge; swing it around its local Z. */
   hammer: Group;
   dispose(): void;
 }
@@ -70,7 +67,6 @@ export function createClockParts(): ClockParts {
     geometries.push(geometry);
     return geometry;
   };
-  /* The scene has no global environment map, so a fully metallic part would render black. */
   const metal = new MeshStandardMaterial({ color: new Color(0xd8d2c4), metalness: 0.45, roughness: 0.32, emissive: new Color(0xd8d2c4), emissiveIntensity: 0.1 });
   const dark = new MeshStandardMaterial({ color: new Color(0x3a3630), metalness: 0.3, roughness: 0.5, emissive: new Color(0x3a3630), emissiveIntensity: 0.08 });
   const kit: PartKit = { keep, metal, dark };

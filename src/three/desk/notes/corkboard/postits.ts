@@ -3,7 +3,6 @@ import { BOARD_LAYOUT, type ProductId } from '../layout';
 import { fitFont, inRect, MARKER, withShadow, type BoardCanvas } from './surface';
 
 const POSTIT_COLORS: Record<ProductId, string> = { skymek: '#f5a14a', parati: '#f28ba0', ventixs: '#5fcf96' };
-/** Sizes in metres on the board (about 1600 px per metre in the company shot: 0.02 m reads as 32 px). */
 const TITLE = { largest: 0.042, smallest: 0.026, rotation: -0.035 } as const;
 const NAME = { largest: 0.022, smallest: 0.016 } as const;
 const HINT = 0.0115;
@@ -64,7 +63,6 @@ function drawPostit(board: BoardCanvas, id: ProductId): void {
   });
 }
 
-/** "TUSOCIO IA" in marker across the top of the board, as large as its rect allows. */
 export function drawTitle(board: BoardCanvas, title: string): void {
   const { context } = board;
   const rect = { ...BOARD_LAYOUT.title, rotation: TITLE.rotation };
@@ -77,7 +75,6 @@ export function drawTitle(board: BoardCanvas, title: string): void {
   });
 }
 
-/** The three product post-its: SkyMek orange, Parati pink, Ventixs green, each with its name by hand. */
 export function drawPostits(board: BoardCanvas): void {
   for (const id of Object.keys(POSTIT_COLORS) as ProductId[]) drawPostit(board, id);
 }

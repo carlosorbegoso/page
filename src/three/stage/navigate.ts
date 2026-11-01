@@ -1,9 +1,7 @@
 import type { ChapterId, ChapterState, StationPick } from '../contracts';
 import { SECTION_CHAPTERS } from '../sections';
 
-/** How long a clicked figure reacts on its own before the camera travels (two-step click). */
 const FIGURE_REACTION_MS = 550;
-/** Same for objects that only answer with a press pulse (folders, phone). */
 const PRESS_REACTION_MS = 300;
 
 export interface NavigateHost {
@@ -16,11 +14,6 @@ function emit(type: string, detail?: unknown): void {
   window.dispatchEvent(new CustomEvent(type, { detail }));
 }
 
-/**
- * Two-step click: the object reacts first (`desk:action` play, or the press pulse DeskSet runs on
- * `desk:interact`), then — only if the click leads somewhere new — the camera travels once that
- * reaction has read. Toys (lamp, clock, mug) and the shot already on screen stay put.
- */
 export class PickNavigator {
   private travelTimer = 0;
 

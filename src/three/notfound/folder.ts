@@ -46,7 +46,6 @@ function createMissingSheetOutline(): Mesh {
   return ghost;
 }
 
-/** The open folder with the 404 sheet on one side and the outline of the missing sheet on the other. */
 export function buildFolder(material: MeshStandardMaterial, paperLabel: string): Object3D {
   const folder = new Object3D();
   folder.position.copy(TARGET).setY(0.006);

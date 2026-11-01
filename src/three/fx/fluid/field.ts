@@ -70,11 +70,9 @@ export interface FluidSettings {
 export interface FluidStroke {
   from: Vector2;
   to: Vector2;
-  /** UV units per second. */
   force: Vector2;
 }
 
-/** Stable-fluids velocity field (splat → curl/vorticity → projection → advection) on a small square grid. */
 export class FluidField {
   private readonly quad = new FullScreenQuad();
   private readonly velocity: PingPong;
@@ -135,7 +133,6 @@ export class FluidField {
     return this.velocity.read.texture;
   }
 
-  /** True while the field still carries visible motion. */
   get awake(): boolean {
     return this.energy > 0.01;
   }
@@ -146,7 +143,6 @@ export class FluidField {
     this.quad.render(renderer);
   }
 
-  /** Advances the field. `aspect` is the canvas width / height, so splats stay round on screen. */
   step(renderer: WebGLRenderer, dt: number, aspect: number, stroke: FluidStroke | null): void {
     const step = Math.min(Math.max(dt, 1 / 240), 1 / 30);
     if (stroke) this.splatStroke(renderer, aspect, stroke);
@@ -180,7 +176,6 @@ export class FluidField {
     this.velocity.swap();
   }
 
-  /** Pressure projection: divergence, Jacobi iterations on a decayed pressure, gradient subtraction. */
   private project(renderer: WebGLRenderer): void {
     this.divergenceMaterial.uniforms.tVelocity!.value = this.velocity.read.texture;
     this.draw(renderer, this.divergenceMaterial, this.divergence);
@@ -212,7 +207,6 @@ export class FluidField {
     this.energy *= dissipation;
   }
 
-  /** Zeroes the field (used when motion gets frozen). */
   clear(renderer: WebGLRenderer): void {
     this.energy = 0;
     if (!this.dirty) return;

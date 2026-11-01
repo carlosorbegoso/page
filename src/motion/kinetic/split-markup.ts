@@ -34,7 +34,6 @@ export function buildSplit(el: HTMLElement, mode: SplitMode): void {
   el.replaceChildren(label, visual);
 }
 
-/** SectionHeader is owned by the UI layer, so its title and eyebrow are split here with the same markup KineticText emits. */
 export function enhanceSectionHeaders(): void {
   for (const title of document.querySelectorAll<HTMLElement>('[data-plate] header > h2:not([data-kinetic])')) {
     if (title.children.length === 0) buildSplit(title, 'chars');
@@ -56,7 +55,6 @@ export function indexCascades(): void {
   }
 }
 
-/** Line index per word: staggers `lines` mode and gives each line its own depth in 3D. */
 export function measureLines(root: HTMLElement): void {
   const words = Array.from(root.querySelectorAll<HTMLElement>('.k-w'));
   const tops = words.map(word => word.offsetTop);

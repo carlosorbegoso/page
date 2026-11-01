@@ -17,7 +17,6 @@ export interface StationContextHost {
   precompile(object?: Object3D): Promise<void>;
 }
 
-/** What the desk set and legacy stations get from the stage when they load. */
 export function stationContext(host: StationContextHost): StationContext {
   return {
     tier: host.tier,

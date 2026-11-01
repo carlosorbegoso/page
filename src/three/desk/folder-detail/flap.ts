@@ -6,15 +6,12 @@ import { ease } from './ease';
 import type { TwinLook } from './mesh';
 
 export const FLAP_THICKNESS = 0.003;
-/** Opened almost flat beside the box, like the left page of a book, so it never stands between the camera and the sheet. */
 export const FLAP_OPEN = 2.8;
-/** Share of the take-out after which the box, already facing the camera, opens. */
 const FLAP_START = 0.62;
 
 const scratch = new Matrix4();
 const turn = new Matrix4();
 
-/** Front cover of a held box, hinged on its back edge (opposite the spine, like a lever-arch box file); hidden until the box is taken out. */
 export function createFlapMesh(id: ShelfFolder, look: TwinLook): Mesh {
   const centre = folderCentre(id);
   const builder = new PartBuilder();
@@ -31,7 +28,6 @@ export function createFlapMesh(id: ShelfFolder, look: TwinLook): Mesh {
   return flap;
 }
 
-/** World transform of the flap at `progress` of the take-out, given the box's held `pose`. */
 export function flapPose(id: ShelfFolder, progress: number, pose: Matrix4, out: Matrix4): Matrix4 {
   const centre = folderCentre(id);
   const hingeX = centre.x - FOLDER.depth / 2;
@@ -44,7 +40,6 @@ export function flapPose(id: ShelfFolder, progress: number, pose: Matrix4, out: 
     .multiply(scratch.makeTranslation(-hingeX, 0, -hingeZ));
 }
 
-/** Places the flap mesh; the atlas pull parks the shelf box, so the twin's flap undoes it. */
 export function placeFlap(flap: Mesh, pose: Matrix4): void {
   flap.matrix.copy(pose).multiply(scratch.makeTranslation(-FOLDER_PARK, 0, 0));
   flap.matrixWorldNeedsUpdate = true;

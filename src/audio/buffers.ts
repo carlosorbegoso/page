@@ -1,4 +1,3 @@
-/** Stereo exponentially decaying noise: a cheap, smooth reverb tail with no asset to download. */
 export function createImpulse(
   context: BaseAudioContext,
   seconds: number,
@@ -30,7 +29,6 @@ export function createNoise(context: BaseAudioContext, seconds: number): AudioBu
   return noise;
 }
 
-/** A raindrop on glass: a damped high ring plus a tiny noise transient. */
 export function createDrop(context: BaseAudioContext, ringHz: number): AudioBuffer {
   const length = Math.round(context.sampleRate * 0.03);
   const drop = context.createBuffer(1, length, context.sampleRate);

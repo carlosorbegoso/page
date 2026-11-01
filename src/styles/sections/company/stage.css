@@ -6,11 +6,6 @@ html:not(.is-3d) .company-postits {
   display: none;
 }
 
-/*
- * From 48rem the cork board carries the company, so the panel stays only for screen readers and
- * search engines. The engine still measures it (a 1 px box places and never clips), and the
- * post-it links stay in the tab order with no visible jump into the scene.
- */
 @media (width >= 48rem) {
   .is-3d .plate[data-plate-id='company'] {
     position: absolute;

@@ -3,7 +3,6 @@ import type { HudElements } from './elements';
 
 const STATION_SELECTOR = '[data-station]';
 
-/** Without the stage, the station crossing the middle of the viewport is the active chapter. */
 function observeStations(stations: HTMLElement[], activate: (id: string) => void): void {
   if (!('IntersectionObserver' in window) || stations.length === 0) return;
   const visible = new Set<HTMLElement>();
@@ -22,7 +21,6 @@ function observeStations(stations: HTMLElement[], activate: (id: string) => void
   for (const station of stations) observer.observe(station);
 }
 
-/** Tracks the active chapter from stage events or, without the stage, from the visible station; shows its beat and marks its index link. */
 export function initChapterBeat({ chapter, clock }: HudElements): void {
   const indexLinks = [...document.querySelectorAll<HTMLAnchorElement>('[data-index-link]')];
   const stations = [...document.querySelectorAll<HTMLElement>(STATION_SELECTOR)];

@@ -6,17 +6,12 @@ const PAPER = '#ece5d3';
 const INK = '#1c2230';
 const MUTED = '#5b6172';
 
-/** Each product's colour, for the card's top band, its status dot and its link. */
 export const PRODUCT_COLOR: Record<ProductId, string> = {
   skymek: '#f0a43c',
   parati: '#f28ba0',
   ventixs: '#3fcf8e'
 };
 
-/**
- * Type sizes in millimetres on the card. A product shot shows the card at about 2900 px per metre,
- * so 5 mm is the smallest body text that still reads (15 px) and the name stays above 11 mm.
- */
 const MM = {
   margin: 7,
   band: 3.5,
@@ -31,7 +26,6 @@ const LEADING = 1.32;
 interface Pen {
   context: CanvasRenderingContext2D;
   fonts: PrintFonts;
-  /** Canvas pixels per millimetre. */
   px: number;
   color: string;
   left: number;
@@ -54,7 +48,6 @@ function drawPill(pen: Pen, status: string, top: number): number {
   return top + height;
 }
 
-/** Largest description size whose wrapped lines fit in `room` pixels (the floor size if none does). */
 function fitDescription(pen: Pen, description: string, room: number): { size: number; lines: string[] } {
   let fit = { size: 0, lines: [] as string[] };
   for (const mm of MM.description) {
@@ -74,7 +67,6 @@ function drawDescription(pen: Pen, description: string, top: number, bottom: num
   for (const line of lines) pen.context.fillText(line, pen.left, (y += size * LEADING));
 }
 
-/** The rule, the role line and the underlined link at the foot; returns the rule's top. */
 function drawFooter(pen: Pen, product: ProductPrint, bottom: number): number {
   const { context, px } = pen;
   const visitSize = MM.visit * px;
@@ -100,10 +92,6 @@ function drawFooter(pen: Pen, product: ProductPrint, bottom: number): number {
   return rule;
 }
 
-/**
- * Prints a product's card on its face: a band in the product's colour, the status pill, the name,
- * the whole description (shrunk step by step down to the legibility floor), the role and the link.
- */
 export function drawProductCard(face: PrintedFace, product: ProductPrint): void {
   const { context, canvas } = face;
   const px = face.scale / 1000;

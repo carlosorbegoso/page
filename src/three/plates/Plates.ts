@@ -9,15 +9,6 @@ import { measureSafeArea, panelRoom } from './safe-area';
 import { tabInStoryOrder } from './tab-order';
 import type { Origin, PlateEntry, PlateHost, SafeInsets } from './types';
 
-/**
- * Text in 3D mode, in two layers (PLAN, final direction):
- * - `surface-*` plates: CSS3D on the monitor / phone surface, frontal, 1:1, never animated.
- * - `anchored` plates: HTML panels in a fixed 2D layer, translated (never rotated or scaled) to the
- *   screen projection of their anchor.
- * Plates of the current chapter get `data-active` once the camera settles. Neighbouring chapters
- * stay focusable but transparent (Tab into them scrolls there); the rest get `data-dormant`.
- * Section elements stay as scroll spacers (`data-station-spacer`).
- */
 export class Plates {
   readonly css3d = new CSS3DRenderer();
   readonly scene = new Scene();
@@ -34,7 +25,6 @@ export class Plates {
 
   constructor(private readonly host: PlateHost) {}
 
-  /** Moves every moded plate into its layer. Returns false when the page has none. */
   mount(): boolean {
     this.safe = measureSafeArea();
     styleLayers(this.css3d.domElement, this.panels);
@@ -72,7 +62,6 @@ export class Plates {
     for (const layer of [surfaceRoot, this.panels]) layer.addEventListener('keydown', this.onKeyDown);
   }
 
-  /** Puts every plate back where it was (degradation to the static page). */
   unmount(): void {
     this.sizes.disconnect();
     this.byPlate.clear();
@@ -84,7 +73,6 @@ export class Plates {
     document.documentElement.style.removeProperty('scroll-padding-top');
   }
 
-  /** Sub-shots implied by the plates of a chapter (explicit `data-plate-sub`, else one per plate). */
   subCount(chapter: ChapterId): number {
     const subs = this.entries.filter(e => e.chapter === chapter && e.sub !== null).map(e => e.sub!);
     return subs.length ? Math.max(...subs) + 1 : 1;
@@ -111,7 +99,6 @@ export class Plates {
     this.host.invalidate();
   }
 
-  /** Visibility, flags and placement for the current chapter state. */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Stage still passes the chapter progress; panels no longer scroll with it.
   update(camera: PerspectiveCamera, state: ChapterState, _progress?: number): void {
     const currentIndex = SECTION_CHAPTERS.indexOf(state.id);

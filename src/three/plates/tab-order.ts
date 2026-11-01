@@ -15,10 +15,6 @@ function focusWhenVisible(el: HTMLElement): void {
   requestAnimationFrame(waitAndFocus);
 }
 
-/**
- * The monitor and phone plates live in the CSS3D layer and the rest in the panel layer, so the
- * DOM alone would tab through every surface first. Tab follows the chapters instead (WCAG 2.4.3).
- */
 export function tabInStoryOrder(event: KeyboardEvent, entries: readonly PlateEntry[], scrollTo: ScrollTo): void {
   if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey) return;
   const focusables = entries.flatMap(entry => [...entry.el.querySelectorAll<HTMLElement>(FOCUSABLE)].map(el => ({ el, entry })));
@@ -31,7 +27,6 @@ export function tabInStoryOrder(event: KeyboardEvent, entries: readonly PlateEnt
     next.el.focus();
     return;
   }
-  /* Far chapters are dormant (visibility: hidden): travel there first, then focus once it shows. */
   scrollTo(next.entry.chapter, next.entry.sub ?? 0);
   focusWhenVisible(next.el);
 }

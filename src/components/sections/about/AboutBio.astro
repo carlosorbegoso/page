@@ -13,7 +13,6 @@ const { locale } = Astro.props;
 const t = useTranslations(locale);
 const profile = await getProfile(locale);
 
-/* The last two summary paragraphs are the CIBERTEC and Alura credentials, so AboutStack lists them under education. In 3D the photo hangs framed on the office wall, so the figure stays only for screen readers. */
 const body = profile.summary.slice(0, -2);
 const facts = (['now', 'before', 'night'] as const).map(key => ({
   label: t(`about.facts.${key}.label`),

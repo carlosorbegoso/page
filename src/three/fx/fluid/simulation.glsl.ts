@@ -63,7 +63,6 @@ void main() {
 }
 `;
 
-// Vorticity confinement: pushes velocity along the gradient of |curl| to keep small swirls alive.
 export const VORTICITY_FRAG = /* glsl */ `
 ${NEIGHBOURS}
 uniform sampler2D tVelocity;

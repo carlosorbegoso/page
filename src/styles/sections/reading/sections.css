@@ -1,4 +1,3 @@
-/* Reading page (CV): section grid, entries, bullets and skill lists. */
 .cv-section {
   display: grid;
   gap: 1rem;

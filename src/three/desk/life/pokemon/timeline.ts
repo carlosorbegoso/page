@@ -1,15 +1,12 @@
 import { CHARIZARD, PIKACHU } from '../../layout';
 import { bump } from '../motion';
 
-/** Length of the whole battle, from the first step to Pikachu back on its spot. */
 export const BATTLE_SECONDS = 7.6;
 
 export interface PikachuPose {
-  /** Offset of the base on the stand (room x, z). */
   x: number;
   z: number;
   hop: number;
-  /** Turn from the rest yaw. */
   yaw: number;
   roll: number;
   cheeks: number;
@@ -17,7 +14,6 @@ export interface PikachuPose {
 
 export interface CharizardPose {
   yaw: number;
-  /** Rearing back (radians about its own right axis). */
   lean: number;
   shake: number;
   wings: number;
@@ -42,7 +38,6 @@ const pulse = (t: number, from: number, to: number) => bump(span(t, from, to));
 
 const toCharizard = { x: CHARIZARD.base.x - PIKACHU.base.x, z: CHARIZARD.base.z - PIKACHU.base.z };
 const distance = Math.hypot(toCharizard.x, toCharizard.z);
-/** Pikachu stops a little over 10 cm from Charizard, inside the stand's base. */
 const WALK = distance - 0.105;
 const FACE_CHARIZARD = Math.atan2(toCharizard.x, toCharizard.z) - PIKACHU.yaw;
 const FACE_HOME = FACE_CHARIZARD + Math.PI;
@@ -54,7 +49,6 @@ export const RESTING: BattleFrame = {
   effects: { fire: 0, bolt: 0, impact: 0 }
 };
 
-/** Steps of a short waddle: a bob on every footfall and a side-to-side roll. */
 function gait(t: number, walking: number): { hop: number; roll: number } {
   const phase = t * Math.PI * 7;
   return { hop: walking * 0.0045 * Math.abs(Math.sin(phase)), roll: walking * 0.14 * Math.sin(phase) };
@@ -94,7 +88,6 @@ function charizardAt(t: number): CharizardPose {
   };
 }
 
-/** Pose of both figures and the strength of the effects `t` seconds into the battle. */
 export function battleAt(t: number): BattleFrame {
   if (t < 0 || t > BATTLE_SECONDS) return RESTING;
   return {

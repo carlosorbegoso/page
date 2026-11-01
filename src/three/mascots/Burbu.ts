@@ -22,7 +22,6 @@ function dot(): BufferGeometry {
   return new CapsuleGeometry(0.018, 0.04, 4, 8).rotateZ(Math.PI / 2);
 }
 
-/** Burbu, Ventixs' mascot: a flattened chat bubble with three "typing" signal slots. */
 export const burbuRecipe: MascotRecipe<{ body: BufferGeometry; dot: BufferGeometry }> = {
   id: 'burbu',
   height: LIFT + 0.2,

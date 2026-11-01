@@ -61,7 +61,3 @@ No hay copia en Markdown: el texto se edita en esos archivos, siempre en los dos
 
 - Adaptación natural (en-US), no traducción literal: más directo.
 - Contracciones moderadas ("doesn't", "I'm") en microcopy, nunca en logros.
-
-## Pendientes
-
-- `hero.fallbackAlt` existe en ES y EN pero nada lo usa, y describe "Alfa sobre una red de nodos", que ya no es la escena. Reescríbelo para el escritorio o bórralo.

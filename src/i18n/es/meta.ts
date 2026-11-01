@@ -6,7 +6,7 @@ export const meta = {
   'meta.ogDescription':
     'De día, backends para el BCP en TCS. De noche, SkyMek, Parati y Ventixs con TUSOCIO IA, la empresa que fundé con dos amigos.',
   'meta.ogImage': 'images/og-es.jpg',
-  'meta.ogImageAlt': 'Carlos Orbegoso, Backend Developer en Java y Quarkus',
+  'meta.ogImageAlt': 'Carlos Orbegoso, Backend Developer en Java y Quarkus, junto a su escritorio en 3D con monitor, laptop y el tablero de TUSOCIO IA',
   skipLink: 'Saltar al contenido',
   'lang.label': 'Idioma',
   'lang.switchTo': 'English',

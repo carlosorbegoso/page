@@ -4,7 +4,7 @@ import { Sparks } from './sparks';
 import { bump, progress, STILL, type FigureOffset } from './motion';
 
 const SECONDS = 2;
-const OPEN_ANGLE = 1.95;
+const OPEN_ANGLE = { wide: 1.95, tall: 1.15 } as const;
 const OPENING = 0.16;
 const CLOSING_AT = 0.78;
 const CLOSING = 0.14;
@@ -14,17 +14,17 @@ function easeOutBack(t: number): number {
   return 1 + 2.2 * x * x * x + 1.2 * x * x;
 }
 
-function lidAngle(t: number): number {
+function lidAngle(t: number, open: number): number {
   if (t < 0) return 0;
-  if (t < OPENING) return OPEN_ANGLE * easeOutBack(t / OPENING);
+  if (t < OPENING) return open * easeOutBack(t / OPENING);
   if (t < CLOSING_AT)
-    return OPEN_ANGLE + 0.05 * Math.sin((t - OPENING) * 14) * Math.max(0, 1 - (t - OPENING) * 4);
+    return open + 0.05 * Math.sin((t - OPENING) * 14) * Math.max(0, 1 - (t - OPENING) * 4);
   const close = Math.min((t - CLOSING_AT) / CLOSING, 1);
   const settle =
     t > CLOSING_AT + CLOSING
       ? 0.08 * bump((t - CLOSING_AT - CLOSING) / (1 - CLOSING_AT - CLOSING))
       : 0;
-  return OPEN_ANGLE * (1 - close * close) + settle;
+  return open * (1 - close * close) + settle;
 }
 
 function hingeOf(lid: RigPart): Vector3 {
@@ -38,6 +38,7 @@ export class GiftLife {
   private startedAt = -1;
   private gentle = false;
   private burst = false;
+  private open: number = OPEN_ANGLE.wide;
   private readonly hinge: Vector3;
   private readonly local = new Matrix4();
   private readonly turn = new Matrix4();
@@ -54,6 +55,7 @@ export class GiftLife {
     this.startedAt = time;
     this.gentle = !motion;
     this.burst = false;
+    this.open = innerWidth < innerHeight ? OPEN_ANGLE.tall : OPEN_ANGLE.wide;
   }
 
   offset(time: number): FigureOffset {
@@ -80,14 +82,14 @@ export class GiftLife {
   pose(time: number, frame: Matrix4): void {
     if (!this.lid) return;
     const t = progress(this.startedAt, time, SECONDS);
-    this.turn.makeRotationX(this.gentle ? 0 : -lidAngle(t));
+    this.turn.makeRotationX(this.gentle ? 0 : -lidAngle(t, this.open));
     aroundPivot(this.local, this.hinge, this.turn);
     poseInFrame(this.lid.mesh, frame, this.local);
   }
 
   poseKey(time: number): string {
     const t = progress(this.startedAt, time, SECONDS);
-    return t < 0 || this.gentle ? '0' : `${Math.round(lidAngle(t) * 200)}`;
+    return t < 0 || this.gentle ? '0' : `${Math.round(lidAngle(t, this.open) * 200)}`;
   }
 
   dispose(): void {

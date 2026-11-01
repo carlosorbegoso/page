@@ -48,7 +48,7 @@ async function grabCanvasPng(browser: Browser, base: string, station: string, vi
   page.on('console', message => {
     if (message.text().startsWith('[stage]')) console.log(`  ${viewport.width}: ${message.text()}`);
   });
-  const url = `${base}?capture=${station}&progress=1&w=${viewport.width}`;
+  const url = `${base}?capture=${station}`;
   await page.goto(url, { waitUntil: 'load' });
   await page.waitForFunction(() => window.__captureReady === true, null, { timeout: 30000 });
   const dataUrl = await page.evaluate(() =>

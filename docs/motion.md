@@ -5,7 +5,7 @@ Estados, atributos, eventos y timings de `src/motion/**` y `src/styles/motion/*.
 ## Límite de la capa
 
 - El motor 3D (`src/three/plates.ts`) mueve, inclina y hace flotar las placas; esta capa solo anima su contenido (spans, listas, cifras, señal del borde, botones). Nunca escribe el `transform` de `.plate`.
-- CSS: `src/styles/motion/kinetic.css` (tokens y base), `reveal.css` (estados ocultos y entradas), `keyframes.css` (brillo, keyframes, `forced-colors`), importados desde `src/styles/global.css`.
+- CSS: `src/styles/motion/kinetic.css` (tokens y base), `reveal.css` (estados ocultos y entradas), `keyframes.css` (keyframes, `forced-colors`), importados desde `src/styles/global.css`.
 
 ## Estados `k-armed`, `data-reveal`, `data-settled`, `data-motion-live`
 
@@ -44,7 +44,6 @@ Estados, atributos, eventos y timings de `src/motion/**` y `src/styles/motion/*.
 | `text` | `string` | — | Sin `text`, usa el slot si es texto plano; si trae HTML se anima como bloque (`data-kinetic="block"`) |
 | `split` | `'words' \| 'lines' \| 'chars'` | `words` | `lines` agrupa por `offsetTop` (medido una vez, al revelar); `chars` por grafemas (`Intl.Segmenter`) |
 | `delay` | ms | `0` | `--k-delay` |
-| `shine` | `boolean` | `false` | Brillo por letra tras asentarse, solo en plano. Hoy nadie lo usa |
 | `type` | `boolean` | `false` | Tecleo carácter a carácter con cursor `_` (implica `chars`); `kinetic/type-keys.ts` emite `desk:key` por carácter |
 | `counts` | `boolean` | `false` | No parte: cifras seguidas de `%` (`splitCounts()` en `src/motion/split.ts`) cuentan desde 0 |
 
@@ -94,7 +93,6 @@ Regla: una sola fuente de movimiento a la vez y el texto quieto para leer.
 | Bloque y cascada | 400 ms | `--duration-slow`, `--ease-out` |
 | Cursor | 1.6 s alterno, 0.65 ↔ 0.12 | `--ease-in-out` |
 | Señal del borde | 7 s alterno | `--ease-in-out` |
-| Brillo (`shine`) | ciclo 14 s, 35 ms entre letras, arranque 1.2 s | `linear` |
 
 `docs/design/spacing-motion.md` («Reglas de movimiento») pide «desplazamiento máximo 12–16 px»: las palabras suben su propia altura pero dentro de una máscara, así que se ve una emergencia, no un desplazamiento de bloque. Bloques (12 px) y cascadas (8 px) sí lo respetan.
 

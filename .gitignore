@@ -98,3 +98,7 @@ pnpm-lock.yaml
 
 # ===== BUN =====
 .bun/
+
+# ===== PLAYWRIGHT =====
+test-results/
+playwright-report/

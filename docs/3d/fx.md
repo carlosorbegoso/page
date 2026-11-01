@@ -33,7 +33,7 @@ fluido (si corre) → escena a RT HDR (HalfFloat, `DepthTexture`, MSAA según ti
 | Bloom | Umbral suave sobre luminancia HDR lineal + promedio Karis (contra fireflies) en el primer nivel; bajada de 13 taps (Jimenez 2014), subida en tienda | `--fx-bloom-strength` 0.32 (tope 0.6), radius 0.45, threshold 0.88, smoothing 0.1 |
 | Streak anamórfico | Dos pasadas horizontales sobre `down[0]` a 1/(2·bloomDivisor): taps contiguos con re-umbral duro `uKeep` = 10 (solo filamento, antena, LEDs), luego stride 2.5 | strength 0.14, tinte frío |
 | Rack focus (DoF) | Gather en disco áureo; las muestras de fondo se limitan al CoC del centro, así el fondo no sangra sobre el primer plano. Sin eventos de capítulo, un salto > medio rango dispara el mismo rack. z > 30 u (ciudad, estrellas) → CoC ≤ 0.3: son puntos de 1–2 px y un bokeh completo los vuelve manchas | radio = `--fx-dof-bokeh-scale` 2.5 × `grade.bokeh` × 3 × alto/1080 / dofDivisor |
-| Aberración | Franja radial solo en esquinas (texto y sujeto limpios); 0 en modo día | 0.005 fijo (`--fx-chromatic-offset` existe pero no se lee) |
+| Aberración | Franja radial solo en esquinas (texto y sujeto limpios); 0 en modo día | 0.005 fijo |
 | Grading | Exposición × balance (`balanceGains`, preserva luma) × split toning sobre luma Reinhard (las altas HDR no saturan el peso), en lineal antes de ACES | tabla abajo |
 | Tone mapping | `tonemapping_fragment` + `colorspace_fragment`: ACES y `toneMappingExposure` del renderer mandan; el grade multiplica encima | — |
 | Contraste | Curva S después del tone mapping, `grade.contrast`; suelo de negro azulado | — |

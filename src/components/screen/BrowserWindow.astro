@@ -1,0 +1,48 @@
+---
+import Monogram from '../ui/Monogram.astro';
+import { localeUrl, type Locale } from '../../i18n/utils';
+
+interface Props {
+  locale: Locale;
+  title: string;
+}
+
+const { locale, title } = Astro.props;
+const host = Astro.site?.host ?? 'carlosorbegoso.github.io';
+const path = localeUrl(locale).replace(/\/$/, '');
+---
+
+<div class="browser-window">
+  <div class="browser-bar" aria-hidden="true">
+    <span class="browser-bar__lights">
+      <i></i>
+      <i></i>
+      <i></i>
+    </span>
+    <span class="browser-bar__tab">
+      <Monogram size={14} class="browser-bar__favicon" />
+      <span class="browser-bar__title">{title}</span>
+    </span>
+    <span class="browser-bar__arrows">
+      <svg viewBox="0 0 16 16">
+        <path d="M10 3 5 8l5 5"></path>
+      </svg>
+      <svg viewBox="0 0 16 16">
+        <path d="m6 3 5 5-5 5"></path>
+      </svg>
+    </span>
+    <span class="browser-bar__address">
+      <Monogram size={12} class="browser-bar__favicon" />
+      <span class="browser-bar__url">
+        <span class="browser-bar__host">{host}</span>
+        {path}
+      </span>
+      <svg viewBox="0 0 16 16" class="browser-bar__reload">
+        <path d="M13 8a5 5 0 1 1-1.5-3.6M13 2.5v2.8h-2.8"></path>
+      </svg>
+    </span>
+  </div>
+  <div class="browser-window__page">
+    <slot />
+  </div>
+</div>

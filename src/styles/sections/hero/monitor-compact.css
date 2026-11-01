@@ -1,60 +1,77 @@
-@media (width < 48rem) and (orientation: portrait) {
-  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] {
-    padding-inline: 4cqw;
-    padding-bottom: 3.5cqw;
-  }
-}
-
 @container surface (width < 760px) {
-  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-screen h1 {
-    gap: 1cqw;
-  }
-
-  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-name {
-    font-size: 4.8cqw;
-    font-weight: 600;
-    color: var(--color-text);
-  }
-
-  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-role {
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-role,
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-metrics {
     display: none;
   }
 
   .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-headline {
     max-width: none;
-    margin-top: 2cqw;
-    font-size: 8cqw;
-    line-height: 1.04;
-  }
-
-  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-metrics {
-    display: none;
+    margin-top: 0;
+    font-size: 26px;
+    line-height: 1.05;
   }
 
   .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-ctas {
-    grid-template-columns: repeat(3, auto);
-    justify-content: start;
-    gap: 2cqw;
-    margin-top: 3.5cqw;
+    flex-wrap: nowrap;
+    gap: 8px;
+    margin-top: 12px;
   }
 
   .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-ctas > * {
-    min-height: 13.5cqw;
-    padding: 0 2cqw;
-    border: 1px solid rgb(255 255 255 / 0.25);
-    border-radius: 2cqw;
-    background: rgb(255 255 255 / 0.06);
-    font-size: 4.6cqw;
-    white-space: nowrap;
+    flex: none;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: 10px;
+    font-size: 15px;
   }
 
-  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-ctas > :first-child {
-    border-color: var(--color-accent);
-    background: var(--color-accent);
-    color: var(--color-bg);
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-ctas > :last-child {
+    border-color: rgb(255 255 255 / 0.22);
+    color: var(--color-text);
+  }
+
+  .is-3d
+    .plate[data-plate-mode='surface-monitor'][data-plate-id='hero']
+    .hero-ctas
+    > :last-child
+    > * {
+    gap: 5px;
+    font-size: 0;
+  }
+
+  .is-3d
+    .plate[data-plate-mode='surface-monitor'][data-plate-id='hero']
+    .hero-ctas
+    > :last-child
+    > *::after {
+    content: 'CV';
+    content: 'CV' / '';
+    font-size: 15px;
   }
 
   .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-ctas svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@container surface (width < 350px) {
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-ctas {
+    gap: 6px;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-ctas > * {
+    padding: 0 10px;
+  }
+}
+
+@container surface (width < 340px) {
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-ctas {
+    margin-top: 10px;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-ctas > :last-child {
     display: none;
   }
 }

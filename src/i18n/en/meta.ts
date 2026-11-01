@@ -6,7 +6,7 @@ export const meta = {
   'meta.ogDescription':
     'By day, backends for BCP at TCS. By night, SkyMek, Parati and Ventixs with TUSOCIO IA, the company I started with two friends.',
   'meta.ogImage': 'images/og-en.jpg',
-  'meta.ogImageAlt': 'Carlos Orbegoso, Java and Quarkus Backend Developer',
+  'meta.ogImageAlt': 'Carlos Orbegoso, Java and Quarkus Backend Developer, next to his 3D desk with a monitor, a laptop and the TUSOCIO IA board',
   skipLink: 'Skip to content',
   'lang.label': 'Language',
   'lang.switchTo': 'Español',

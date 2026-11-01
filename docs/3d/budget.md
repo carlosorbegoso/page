@@ -14,10 +14,10 @@ Cuánto pesa el 3D, qué se descarga antes del primer frame y qué llega despué
 |---|---|---|
 | `motion` (three.module + three.core; Rollup puede nombrarlo por otro módulo que lleve dentro, p. ej. `tokens`) | 148.8 | arranque |
 | `three` (Stage, director, placas, CSS3D) | 25.9 | arranque |
-| `desk` | 70.2 | arranque |
+| `desk` | 70.3 | arranque |
 | `fx` | 10.3 | arranque |
 | `BufferGeometryUtils` + `contracts` (la capa tardía ya va dentro de `fx`) | 1.8 | arranque |
-| **Antes del primer frame** | **256.9** | |
+| **Antes del primer frame** | **257.0** | |
 | `gsap` 26.5 + `ScrollTrigger` 17.0 + `ScrollToPlugin` 1.6 | 45.1 | después del primer frame (`Stage.start` dibuja antes de `startScroll`) |
 | `deferred` (carpeta para leer, escritorio de la laptop, persiana, impresos del teléfono vertical: corcho, tarjetas de producto con `product-shorts.json`, hoja de TCS, vida y batalla de Pikachu y Charizard) | 26.7 | evento `stage:reveal` |
 | `field` (simulación del fluido) | 1.9 | primer movimiento del puntero con el fluido activo |
@@ -48,7 +48,7 @@ GitHub Pages sirve todo con `max-age=600` y no deja cambiar cabeceras, así que 
 | Qué | Estrategia | Por qué |
 | --- | --- | --- |
 | `_astro/*` | cache-first (`immutable-v1`) | llevan hash en el nombre: nunca cambian |
-| `models/`, `audio/`, `fonts/`, `decoders/`, `images/`, `cv/`, favicon, manifest | stale-while-revalidate (`runtime-v1`) | nombres fijos: se sirven al instante y se actualizan en segundo plano |
+| `models/`, `audio/`, `fonts/`, `images/`, `cv/`, favicon, manifest | stale-while-revalidate (`runtime-v1`) | nombres fijos: se sirven al instante y se actualizan en segundo plano |
 | Navegación (HTML) | network-first, con la copia en caché si no hay red | el HTML siempre llega fresco tras un deploy; sin red, la página abre igual |
 
 - Se registra 4 s después de `load` (`src/scripts/offline/register.ts`), solo en producción y nunca con `?capture`: la primera visita y Lighthouse no lo notan. A partir de la segunda visita el 3D sale de la caché.

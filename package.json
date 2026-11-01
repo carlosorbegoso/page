@@ -14,7 +14,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "assets": "bun scripts/optimize-assets.ts",
-    "capture": "bun scripts/capture-fallbacks.ts"
+    "capture": "bun scripts/capture-fallbacks.ts",
+    "test:smoke": "playwright test"
   },
   "author": "Carlos Orbegoso",
   "license": "MIT",

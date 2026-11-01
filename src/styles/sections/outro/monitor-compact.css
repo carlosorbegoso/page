@@ -1,38 +1,68 @@
-@media (width < 48rem) and (orientation: portrait) {
-  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='outro'] {
-    padding-inline: 4cqw;
-    padding-bottom: 3.5cqw;
-  }
-}
-
 @container surface (width < 760px) {
-  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='outro'] .outro-label,
-  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='outro'] .outro-body {
+  .is-3d
+    .plate[data-plate-mode='surface-monitor'][data-plate-id='outro']
+    :is(.outro-label, .outro-body) {
     display: none;
   }
 
   .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='outro'] .outro-screen h2 {
     max-width: none;
     margin-top: 0;
-    font-size: 8cqw;
-    line-height: 1.05;
+    font-size: 26px;
+    line-height: 1.08;
   }
 
   .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='outro'] .outro-credits {
-    margin-top: 3cqw;
-    padding-top: 2cqw;
-    gap: 0 2cqw;
-    font-size: 4.6cqw;
-    line-height: 1.4;
+    display: grid;
+    justify-items: start;
+    gap: 6px;
+    margin-top: 12px;
+    padding-top: 0;
+    border-top: 0;
+    font-size: 15px;
+    line-height: 1.3;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='outro'] .outro-credits > * {
+    margin: 0;
+  }
+
+  .is-3d
+    .plate[data-plate-mode='surface-monitor'][data-plate-id='outro']
+    .outro-credits
+    > *::before {
+    content: none;
+  }
+
+  .is-3d
+    .plate[data-plate-mode='surface-monitor'][data-plate-id='outro']
+    .outro-credits
+    > :first-child {
+    display: none;
   }
 
   .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='outro'] .outro-credits a {
     display: inline-flex;
     align-items: center;
-    min-height: 13.5cqw;
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid rgb(255 255 255 / 0.22);
+    border-radius: 10px;
+    background: rgb(255 255 255 / 0.05);
+    color: var(--color-text);
+    text-decoration: none;
   }
 
   .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='outro'] .outro-credits__break {
-    font-size: 3.8cqw;
+    font-size: 13px;
+  }
+}
+
+@container surface (width < 760px) and (height >= 210px) {
+  .is-3d
+    .plate[data-plate-mode='surface-monitor'][data-plate-id='outro']
+    .outro-credits
+    > :first-child {
+    display: block;
   }
 }

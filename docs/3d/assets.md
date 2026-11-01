@@ -5,7 +5,7 @@ Cómo se cargan los modelos y texturas externas del 3D y qué hay que anotar al 
 ## Caché (`src/three/assets.ts`)
 
 - `acquire(key, create, dispose)` / `release(key)`: refcount por clave; al llegar a 0 espera 5 s (`GRACE_MS`) antes de liberar, para que un ir y volver de capítulo no recargue.
-- `acquireGltf(url)`: `GLTFLoader` + `KTX2Loader` + Meshopt se importan solo con el primer glTF. El transcoder Basis se busca en `decoders/basis/` bajo la base del sitio; `bun run assets` lo copia allí (hoy `public/decoders/` está vacío: ningún modelo usa KTX2).
+- `acquireGltf(url)`: `GLTFLoader` + `KTX2Loader` + Meshopt se importan solo con el primer glTF. El transcoder Basis lo resuelve `KTX2Loader` (ver «Transcoder KTX2»).
 - `bindRenderer()` lo llama el Stage al crear el renderer (lo necesita `KTX2Loader.detectSupport`).
 - `cacheSnapshot()` sale en el overlay de `?debug`.
 
@@ -19,8 +19,15 @@ El resto del escritorio (figuras, cuarto, laptop, Pokémon) es geometría proced
 
 ## Pipeline `bun run assets`
 
-- `scripts/optimize-assets.ts`: lee `assets-src/models/<id>.glb|gltf` con `<id>` ∈ `alfa`, `burbu`, `gift`, `tool` y escribe `public/models/<id>.high.<hash>.glb` (≤ 25 k tris, texturas ≤ 1024 px) y `<id>.mid.<hash>.glb` (≤ 8 k tris, ≤ 512 px), con Meshopt y KTX2 (ETC1S color/emisivo, UASTC normal/ORM) si está `ktx` (`brew install ktx`); sin `ktx`, las texturas quedan en su formato. Reescribe `src/three/models.generated.ts` y copia el transcoder.
-- Hoy no hay fuentes en `assets-src/models/` y lo único que consumía `models.generated.ts` era `src/three/mascots/`, que nada importa. Un GLB nuevo para el escritorio tendría que cargarse desde `src/three/desk/**` con `acquireGltf`.
+- `scripts/optimize-assets.ts`: lee cada `assets-src/models/<id>.glb|gltf` y escribe `public/models/<id>.high.<hash>.glb` (≤ 25 k tris, texturas ≤ 1024 px) y `<id>.mid.<hash>.glb` (≤ 8 k tris, ≤ 512 px), con Meshopt y KTX2 (ETC1S color/emisivo, UASTC normal/ORM) si está `ktx` (`brew install ktx`); sin `ktx`, las texturas quedan en su formato. Imprime cada nombre con hash y copia el transcoder.
+- Hoy no hay fuentes en `assets-src/models/`. Nada lee los nombres con hash por sí solo: el módulo de `src/three/desk/**` que use el GLB lo carga con `acquireGltf` y el nombre que imprimió el script.
+
+## Transcoder KTX2
+
+- `KTX2Loader` trae su propio transcoder Basis: sin `setTranscoderPath`, pide `basis_transcoder.js` y `.wasm` con `new URL(..., import.meta.url)`. En el build salen como `_astro/basis_transcoder.<hash>.{js,wasm}` (bajo `/page/`, caché `immutable` del service worker); en desarrollo, desde `node_modules/three/examples/jsm/libs/basis/`.
+- No hay nada que copiar ni commitear, y sigue solo a cada versión de `three`.
+- No llames a `setTranscoderPath`: con una ruta propia, `KTX2Loader` deja de usar esos archivos y habría que publicarlos a mano en esa ruta.
+- Pesan 15 KB + 245 KB gzip, fuera de los 260 KB: solo se piden con la primera textura KTX2.
 
 ## Checklist de intake (Tripo u otro)
 

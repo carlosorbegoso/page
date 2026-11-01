@@ -1,10 +1,21 @@
-import { BoxGeometry, CircleGeometry, CylinderGeometry, ExtrudeGeometry, Matrix4, Quaternion, Shape, SphereGeometry, TorusGeometry, Vector3, type BufferGeometry } from 'three';
+import { BoxGeometry, CatmullRomCurve3, Color, ExtrudeGeometry, Matrix4, Quaternion, Shape, TorusGeometry, TubeGeometry, Vector3, type BufferGeometry } from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { OBJECT_ID, PartBuilder, type Finish } from '../../builder';
 import { FIGURES } from '../../layout';
-import { between, seg, shade, UP } from '../geometry';
+import { seg, shade, UP } from '../geometry';
 import type { Palette, Quality } from '../palette';
 import { FRONT, standing } from './frame';
+
+/**
+ * `life/classify` lifts everything above 4.28 cm with the lid, so the base and its ribbon stay below
+ * that and every bow and lid piece above it.
+ */
+const BOX = { base: 0.056, baseH: 0.044, lid: 0.06, lidH: 0.013, band: 0.0095 } as const;
+const LID_Y = BOX.baseH - 0.001 + BOX.lidH / 2;
+const TOP = LID_Y + BOX.lidH / 2;
+
+type Put = (geometry: BufferGeometry, finish: Finish, matrix: Matrix4) => void;
+type At = (x: number, y: number, z: number, rotation?: Quaternion) => Matrix4;
 
 /** A flat ribbon end with a V cut, lying along +Z from the knot. */
 function ribbonTail(width: number, length: number): ExtrudeGeometry {
@@ -20,44 +31,97 @@ function ribbonTail(width: number, length: number): ExtrudeGeometry {
   return new ExtrudeGeometry(shape, { depth: thickness, bevelEnabled: false }).rotateX(Math.PI / 2).translate(0, thickness / 2, 0);
 }
 
-/** Parati: a pink lacquered gift box with a cream satin ribbon, a looped bow, a glowing seam under the lid and a card tag. */
+/** One bow loop: a thin satin band bent into a teardrop, wide across the loop's plane. */
+function bowLoop(size: number, q: Quality): TubeGeometry {
+  const path = [
+    [0, 0],
+    [0.35, 0.4],
+    [0.75, 0.7],
+    [1, 0.5],
+    [0.9, 0.12],
+    [0.45, -0.06]
+  ].map(([x, y]) => new Vector3(x! * size, y! * size, 0));
+  return new TubeGeometry(new CatmullRomCurve3(path, true), seg(28, q, 14), 0.0008, 6, true).scale(1, 1, 3.8);
+}
+
+function buildBoxAndBands(put: Put, at: At, p: Palette, q: Quality): void {
+  const { base, baseH, lid, lidH, band } = BOX;
+  const ribbon: Finish = { ...p.giftRibbon, roughness: 0.28, metalness: 0.12 };
+  const edge = shade(ribbon, 0.82);
+  put(new RoundedBoxGeometry(base, baseH, base, seg(3, q, 2), 0.003), p.giftBody, at(0, baseH / 2, 0));
+  put(new BoxGeometry(base + 0.0012, 0.0016, base + 0.0012), p.giftSeam, at(0, baseH - 0.0018, 0));
+  put(new RoundedBoxGeometry(lid, lidH, lid, seg(3, q, 2), 0.0035), shade(p.giftBody, 1.04), at(0, LID_Y, 0));
+  const bands: Array<[number, number, number, number]> = [
+    [baseH / 2, baseH - 0.004, base + 0.0012, 0],
+    [LID_Y, lidH + 0.0006, lid + 0.0012, 0]
+  ];
+  for (const [y, height, length] of bands) {
+    for (const turn of [0, Math.PI / 2]) {
+      const r = new Quaternion().setFromAxisAngle(UP, turn);
+      put(new RoundedBoxGeometry(band, height, length, 1, 0.0004), ribbon, at(0, y, 0, r));
+      for (const side of [-1, 1]) put(new BoxGeometry(0.0007, height + 0.0002, length + 0.0003), edge, at(side * (band / 2 - 0.0003), y, 0, r));
+    }
+  }
+}
+
+function buildBow(put: Put, at: At, p: Palette, q: Quality): void {
+  const ribbon: Finish = { ...p.giftRibbon, roughness: 0.28, metalness: 0.12 };
+  const lobes: Array<[number, number, number, number]> = [
+    [1, 0.016, 0.38, 0],
+    [-1, 0.016, 0.38, 0],
+    [1, 0.012, 0.6, 0.55],
+    [-1, 0.012, 0.6, -0.55]
+  ];
+  for (const [side, size, lift, yaw] of lobes) {
+    const rotation = new Quaternion().setFromAxisAngle(UP, yaw + (side < 0 ? Math.PI : 0)).multiply(new Quaternion().setFromAxisAngle(FRONT, lift));
+    put(bowLoop(size, q), size < 0.014 ? shade(ribbon, 0.93) : ribbon, at(0, TOP + 0.002, 0, rotation));
+  }
+  put(new RoundedBoxGeometry(0.0078, 0.0058, 0.007, 2, 0.0024), ribbon, at(0, TOP + 0.0032, 0));
+  for (const side of [-1, 1]) {
+    put(ribbonTail(0.0065, 0.026), ribbon, at(side * 0.002, TOP + 0.0007, 0.002, new Quaternion().setFromAxisAngle(UP, side * 0.55)));
+  }
+}
+
+/** A kraft luggage tag with a brass grommet and two ink lines, hung on twine from the bow. */
+function buildTag(put: Put, at: At, q: Quality): void {
+  const { base, baseH, lid } = BOX;
+  const kraft: Finish = { color: new Color('#c9a273'), roughness: 0.85, metalness: 0 };
+  const shape = new Shape();
+  const [w, h, clip] = [0.017, 0.011, 0.003];
+  shape.moveTo(-w / 2 + clip, h / 2);
+  shape.lineTo(w / 2, h / 2);
+  shape.lineTo(w / 2, -h / 2);
+  shape.lineTo(-w / 2 + clip, -h / 2);
+  shape.lineTo(-w / 2, -h / 2 + clip);
+  shape.lineTo(-w / 2, h / 2 - clip);
+  shape.closePath();
+  const centre = new Vector3(base * 0.3, baseH * 0.5, base / 2 + 0.0012);
+  const tilt = new Quaternion().setFromAxisAngle(FRONT, -0.22);
+  const onTag = (x: number, y: number, z: number) => at(centre.x, centre.y, centre.z, tilt).multiply(new Matrix4().makeTranslation(x, y, z));
+  put(new ExtrudeGeometry(shape, { depth: 0.0008, bevelEnabled: false }), kraft, onTag(0, 0, -0.0004));
+  const brass: Finish = { color: new Color('#b08a4a'), roughness: 0.35, metalness: 1 };
+  put(new TorusGeometry(0.0013, 0.00045, 6, seg(14, q, 8)), brass, onTag(-w / 2 + 0.0028, 0, 0.0005));
+  const ink: Finish = { color: new Color('#5a3b2a'), roughness: 0.9, metalness: 0 };
+  for (const [y, length] of [
+    [0.0018, 0.0085],
+    [-0.0012, 0.006]
+  ] as const) {
+    put(new BoxGeometry(length, 0.0006, 0.0002), ink, onTag(0.0018 + length / 2 - 0.004, y, 0.0005));
+  }
+  const hole = new Vector3(-w / 2 + 0.0028, 0, 0.0006).applyMatrix4(onTag(0, 0, 0));
+  const knot = new Vector3(0.0035, TOP - 0.001, lid / 2 + 0.0012).applyMatrix4(at(0, 0, 0));
+  const sag = hole.clone().lerp(knot, 0.5).add(new Vector3(0.0015, -0.002, 0.0012));
+  const twine: Finish = { color: new Color('#8a3a3a'), roughness: 0.8, metalness: 0 };
+  put(new TubeGeometry(new CatmullRomCurve3([hole, sag, knot]), 16, 0.00035, 4, false), twine, new Matrix4());
+}
+
+/** Parati: a pink lacquered gift box, satin ribbon with stitched edges, a four-loop bow, a glowing seam under the lid and a kraft tag. */
 export function buildGift(b: PartBuilder, p: Palette, q: Quality): void {
   const id = OBJECT_ID.parati;
-  const at = standing(FIGURES.parati, -0.2);
-  const place = (geometry: BufferGeometry, finish: Finish, x: number, y: number, z: number) =>
-    b.add(geometry, finish, at(new Matrix4().makeTranslation(x, y, z)), id);
-  const base = 0.056;
-  const baseH = 0.044;
-  const lid = 0.06;
-  const lidH = 0.013;
-  const lidY = baseH - 0.001 + lidH / 2;
-  const top = lidY + lidH / 2;
-  const band = 0.0095;
-
-  place(new RoundedBoxGeometry(base, baseH, base, seg(3, q, 2), 0.0025), p.giftBody, 0, baseH / 2, 0);
-  place(new BoxGeometry(base + 0.0012, 0.0016, base + 0.0012), p.giftSeam, 0, baseH - 0.0018, 0);
-  place(new RoundedBoxGeometry(lid, lidH, lid, seg(3, q, 2), 0.003), p.giftBody, 0, lidY, 0);
-  place(new BoxGeometry(band, baseH - 0.004, base + 0.0012), p.giftRibbon, 0, baseH / 2, 0);
-  place(new BoxGeometry(base + 0.0012, baseH - 0.004, band), p.giftRibbon, 0, baseH / 2, 0);
-  place(new BoxGeometry(band, lidH + 0.0006, lid + 0.0012), p.giftRibbon, 0, lidY, 0);
-  place(new BoxGeometry(lid + 0.0012, lidH + 0.0006, band), p.giftRibbon, 0, lidY, 0);
-
-  for (const side of [-1, 1]) {
-    const loop = new TorusGeometry(0.0085, 0.0024, seg(8, q, 5), seg(24, q, 12)).scale(1, 0.72, 1.6);
-    b.add(loop, p.giftRibbon, at(new Matrix4().compose(new Vector3(side * 0.0088, top + 0.0055, 0), new Quaternion().setFromAxisAngle(FRONT, side * 0.42), new Vector3(1, 1, 1))), id);
-    const inner = new TorusGeometry(0.0052, 0.0017, seg(8, q, 5), seg(20, q, 10)).scale(1, 0.72, 1.25);
-    b.add(inner, shade(p.giftRibbon, 0.92), at(new Matrix4().compose(new Vector3(side * 0.0058, top + 0.0046, 0.001), new Quaternion().setFromAxisAngle(FRONT, side * 0.75), new Vector3(1, 1, 1))), id);
-    b.add(ribbonTail(0.0065, 0.022), p.giftRibbon, at(new Matrix4().compose(new Vector3(side * 0.002, top + 0.0007, 0.002), new Quaternion().setFromAxisAngle(UP, side * 0.55), new Vector3(1, 1, 1))), id);
-  }
-  place(new SphereGeometry(0.0046, seg(14, q, 8), seg(10, q, 6)).scale(1, 0.8, 1), p.giftRibbon, 0, top + 0.0035, 0);
-
-  const tagX = base * 0.3;
-  const tagY = baseH * 0.5;
-  const tagZ = base / 2 + 0.0012;
-  const tag = at(new Matrix4().compose(new Vector3(tagX, tagY, tagZ), new Quaternion().setFromAxisAngle(FRONT, -0.22), new Vector3(1, 1, 1)));
-  b.add(new RoundedBoxGeometry(0.016, 0.011, 0.0012, 1, 0.0005), p.giftTag, tag, id);
-  b.add(new CircleGeometry(0.0018, seg(16, q, 8)), p.giftSeam, new Matrix4().multiplyMatrices(tag, new Matrix4().makeTranslation(-0.004, 0.0015, 0.00065)), id);
-  const hole = new Vector3(tagX - 0.006, tagY + 0.004, tagZ + 0.0003);
-  const knot = new Vector3(0.0035, top - 0.001, lid / 2 + 0.0012);
-  b.add(new CylinderGeometry(0.0004, 0.0004, hole.distanceTo(knot), 4), p.giftTag, at(between(hole, knot)), id);
+  const frame = standing(FIGURES.parati, -0.2);
+  const at: At = (x, y, z, rotation = new Quaternion()) => frame(new Matrix4().compose(new Vector3(x, y, z), rotation, new Vector3(1, 1, 1)));
+  const put: Put = (geometry, finish, matrix) => b.add(geometry, finish, matrix, id);
+  buildBoxAndBands(put, at, p, q);
+  buildBow(put, at, p, q);
+  buildTag(put, at, q);
 }

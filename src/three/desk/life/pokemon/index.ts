@@ -81,12 +81,13 @@ export class PokemonLife {
     if (this.startedAt < 0) this.startedAt = time;
   }
 
+  /** A battle, once started, plays to the end even if the stage's idle-motion window closes meanwhile. */
   update(time: number, motion: boolean): boolean {
-    this.motion = motion;
     if (this.startedAt >= 0 && time - this.startedAt > BATTLE_SECONDS) this.startedAt = -1;
     if (this.sparkAt >= 0 && time - this.sparkAt > 0.8) this.sparkAt = -1;
+    this.motion = motion || this.startedAt >= 0;
     this.frame = this.startedAt >= 0 ? battleAt(time - this.startedAt) : RESTING;
-    return motion || this.startedAt >= 0 || this.sparkAt >= 0;
+    return this.motion || this.sparkAt >= 0;
   }
 
   pose(time: number): void {

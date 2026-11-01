@@ -8,6 +8,7 @@ import KineticText from '../ui/KineticText.astro';
 import '../../styles/sections/products/stage.css';
 import '../../styles/sections/products/paper-card.css';
 import { useTranslations, withBase, type Locale } from '../../i18n/utils';
+import productShorts from '../../content/product-shorts.json';
 
 type Product = CollectionEntry<'products'>['data']['entries'][number];
 
@@ -20,6 +21,7 @@ interface Props {
 const { product, locale, order } = Astro.props;
 const t = useTranslations(locale);
 const featured = product.featured === true;
+const short = (productShorts[locale] as Partial<Record<Product['id'], string>>)[product.id];
 
 const dots: Record<Product['id'], string> = {
   skymek: 'bg-skymek',
@@ -90,7 +92,8 @@ const screenshot =
     }
 
     <p class:list={['product-description text-pretty text-text-muted', featured ? 'text-base' : 'text-sm']}>
-      {product.description}
+      <span class="product-description-full">{product.description}</span>
+      {short && <span class="product-description-short">{short}</span>}
     </p>
 
     {

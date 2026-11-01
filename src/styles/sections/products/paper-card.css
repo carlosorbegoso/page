@@ -33,6 +33,14 @@
     display: none;
   }
 
+  .is-3d .plate[data-product] .product-description:has(.product-description-short) .product-description-full {
+    display: none;
+  }
+
+  .is-3d .plate[data-product] .product-description-short {
+    display: inline;
+  }
+
   .is-3d .plate[data-product] .product-body {
     gap: 0.625rem;
   }
@@ -98,4 +106,8 @@
     outline: 2px solid #1c2230;
     outline-offset: 3px;
   }
+}
+
+.product-description-short {
+  display: none;
 }

@@ -65,7 +65,8 @@ export class CharizardRig {
     this.joint.makeTranslation(tip.x, tip.y, tip.z).multiply(spin.makeScale(s * (1 - 0.1 * n), s * (1 + 0.24 * n), s * (1 - 0.1 * n))).multiply(step.makeTranslation(-tip.x, -tip.y, -tip.z));
     this.place('charizardFlame', inRest(this.local, this.rest, this.restInverse, this.joint).premultiply(this.tail));
     this.at.set(tip.x, tip.y + 0.011 * flare, tip.z).applyMatrix4(this.rest).applyMatrix4(this.tail);
-    const glow = idle.alive || flare > 1.01 ? (0.32 + 0.14 * n) * Math.min(flare, 1.6) : 0;
+    const lit = idle.alive ? 1 : Math.min(1, Math.max(0, (flare - 1) * 4));
+    const glow = lit * (0.32 + 0.14 * n) * Math.min(flare, 1.6);
     setGlow(this.flameGlow, glow, this.at);
   }
 

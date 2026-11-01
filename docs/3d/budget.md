@@ -14,10 +14,10 @@ Cuánto pesa el 3D, qué se descarga antes del primer frame y qué llega despué
 |---|---|---|
 | `motion` (three.module + three.core; Rollup puede nombrarlo por otro módulo que lleve dentro, p. ej. `tokens`) | 149.3 | arranque |
 | `three` (Stage, director, placas, CSS3D) | 25.5 | arranque |
-| `desk` | 71.6 | arranque |
+| `desk` | 70.2 | arranque |
 | `fx` | 10.3 | arranque |
 | `late` (capa tardía y parche del fluido) + `BufferGeometryUtils` + `contracts` | 2.7 | arranque |
-| **Antes del primer frame** | **259.4** | |
+| **Antes del primer frame** | **257.9** | |
 | `gsap` 26.5 + `ScrollTrigger` 17.0 + `ScrollToPlugin` 1.6 | 45.1 | después del primer frame (`Stage.start` dibuja antes de `startScroll`) |
 | `deferred` (carpeta para leer, escritorio de la laptop, persiana, impresos del teléfono vertical: corcho, tarjetas de producto con `product-shorts.json`, hoja de TCS, vida y batalla de Pikachu y Charizard) | 26.7 | evento `stage:reveal` |
 | `field` (simulación del fluido) | 1.9 | primer movimiento del puntero con el fluido activo |

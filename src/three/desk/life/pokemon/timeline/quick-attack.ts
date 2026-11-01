@@ -2,7 +2,7 @@ import { QUICK_ATTACK } from './beats';
 import { arc, ease, easeOut, pulse, SIDE, span } from './curves';
 import type { BattleFrame } from './frame';
 
-const DODGE = 0.036;
+const DODGE = 0.028;
 const HOP = 0.022;
 const RETURN_HOP = 0.008;
 

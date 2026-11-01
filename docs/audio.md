@@ -67,7 +67,7 @@ Todo en Re mayor: cualquier crossfade es consonante. Dos osciladores por nota (t
 | Tecla mecánica (`voices.ts` `playKey`): click paso banda ~2.6 kHz + thock 210→120 Hz | `desk:key` (tecleo del titular del hero) | 1 / 28 ms |
 | Tock de madera (`playTock`): ~480 Hz con caída y dos parciales | `scene:hover` con etiqueta nueva (suave); `product:focus`/`experience:focus` con `source: 'scene'` (fuerte) | 1 / 250 ms |
 | Chime del teléfono (`playChime`): E6 → B6 | `chapter:settled` de `contact` | 1 / 4 s |
-| Objetos del escritorio (`desk-sounds.ts`, voces en `desk-voices.ts`): `clock`, `laptop`, `keyboard`, `folder`, `chat`, `gift`, `mug`, `wrench`, `toy`, `phone`, `blind` | `desk:interact` (`press`/`activate`), `desk:action` (`play`, `folder`, `folder-close`), `desk:clock`; `phone` también en `chapter:enter` de `contact` (1 / 6 s) | 350 ms por voz (`clock` 1.2 s, `phone`/`gift` 0.5 s, `blind` 0.6 s) |
+| Objetos del escritorio (`desk-sounds.ts`, voces en `desk-voices.ts`): `clock`, `laptop`, `keyboard`, `folder`, `chat`, `gift`, `mug`, `wrench`, `toy`, `phone`, `blind` | `desk:interact` (`press`/`activate`), `desk:action` (`play`, `folder`, `folder-close`), `desk:clock`; `phone` también en `chapter:enter` de `contact` (1 / 6 s) | 350 ms por voz (`clock` 1.2 s, `phone`/`gift` 0.5 s, `blind` 1.1 s) |
 
 El objeto se elige por prefijo del id (`soundFor`): `folder`/`paper` → `folder`, `skymek` → `wrench`, `ventixs` → `chat`, `parati` → `gift`, `alfa` → `toy`, `window` → `blind`, `macbook` → `laptop`; `lamp` no suena (la lámpara usa las muestras del interruptor).
 

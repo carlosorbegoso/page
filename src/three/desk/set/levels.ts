@@ -119,8 +119,8 @@ export class DeskLevels {
     if (motion && crossing) window.dispatchEvent(new CustomEvent('desk:switch', { detail: { on: goal > lamp } }));
   }
 
-  toggleBlind(time: number, animate: boolean): boolean {
-    return this.blind.toggle(time, animate);
+  toggleBlind(animate: boolean): boolean {
+    return this.blind.toggle(animate);
   }
 
   private goalFor(chapter: ChapterId, light: ChapterLight): number {

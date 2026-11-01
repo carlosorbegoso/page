@@ -57,9 +57,9 @@ export class RoomLife {
     if (toy === 'plant') this.plant.nudge(0.5, 0.1);
   }
 
-  action(action: string | undefined, time: number): boolean {
+  action(action: string | undefined): boolean {
     if (action === 'blind') {
-      this.levels.toggleBlind(time, motionAllowed(readMotion()) && !this.context.capture);
+      this.levels.toggleBlind(motionAllowed(readMotion()) && !this.context.capture);
       return true;
     }
     if (action === 'plant') {

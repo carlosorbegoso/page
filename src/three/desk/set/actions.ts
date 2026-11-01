@@ -53,7 +53,7 @@ export function createActionListener(host: DeskActionHost): (event: Event) => vo
       host.screens().toggleLaptop(host.clock());
       return;
     }
-    if (host.roomLife()?.action(detail?.action, host.clock())) {
+    if (host.roomLife()?.action(detail?.action)) {
       context?.invalidate();
       return;
     }

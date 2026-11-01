@@ -32,17 +32,24 @@ export class BlindTravel {
   value = this.down ? 1 : 0;
   private from = this.value;
   private startedAt = -1;
+  private pending = false;
 
-  toggle(time: number, animate: boolean): boolean {
+  /** The start is latched on the next frame: a click can arrive while the loop is asleep and the desk clock is stale. */
+  toggle(animate: boolean): boolean {
     this.from = this.value;
     this.down = !this.down;
     store(this.down);
-    this.startedAt = animate ? time : -1;
+    this.pending = animate;
+    this.startedAt = -1;
     return this.down;
   }
 
   update(time: number): boolean {
     const goal = this.down ? 1 : 0;
+    if (this.pending) {
+      this.pending = false;
+      this.startedAt = time;
+    }
     if (this.startedAt < 0) {
       this.value = goal;
       return false;

@@ -18,7 +18,7 @@ const LEVEL: Record<DeskSound, number> = {
 };
 
 const DEFAULT_GAP_MS = 350;
-const GAP_MS: Partial<Record<DeskSound, number>> = { clock: 1200, phone: 500, blind: 600, gift: 500 };
+const GAP_MS: Partial<Record<DeskSound, number>> = { clock: 1200, phone: 500, blind: 1100, gift: 500 };
 const CONTACT_BUZZ_GAP_MS = 6000;
 const PITCH_SPREAD = 0.05;
 

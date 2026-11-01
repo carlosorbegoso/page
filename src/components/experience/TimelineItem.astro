@@ -56,6 +56,7 @@ const stackId = `${headingId}-stack`;
   {
     compact ? (
       <article aria-labelledby={headingId} class="max-w-measure">
+        <span class="era-year" aria-hidden="true">{start.slice(0, 4)}</span>
         <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-text-muted">
           <span class="tabular-nums">
             <time datetime={start}>{formatTimelineMonth(start, locale)}</time>
@@ -72,6 +73,7 @@ const stackId = `${headingId}-stack`;
     ) : (
       <article aria-labelledby={headingId} class="flex max-w-measure flex-col gap-4">
         <header class="flex flex-col gap-1.5">
+          <span class="era-year" aria-hidden="true">{start.slice(0, 4)}</span>
           <p class="flex items-center gap-2 text-sm font-medium tabular-nums text-text-muted">
             <span
               class:list={[
@@ -101,11 +103,11 @@ const stackId = `${headingId}-stack`;
           )}
         </header>
 
-        <p class="wide-only text-text-muted">{summary}</p>
+        <p class="stage-hidden text-text-muted">{summary}</p>
 
         {highlights.length > 0 && (
           <div class="flex flex-col gap-2">
-            <p id={highlightsId} class="wide-only text-xs font-semibold tracking-caps text-text-muted uppercase">
+            <p id={highlightsId} class="stage-hidden text-xs font-semibold tracking-caps text-text-muted uppercase">
               {t('experience.highlights')}
             </p>
             <ul
@@ -137,7 +139,7 @@ const stackId = `${headingId}-stack`;
         )}
 
         <p id={stackId} class="sr-only">{t('experience.stack')}</p>
-        <ul aria-labelledby={stackId} class="wide-only flex flex-wrap gap-x-4 gap-y-2" role="list" data-kinetic-cascade>
+        <ul aria-labelledby={stackId} class="stage-hidden flex flex-wrap gap-x-4 gap-y-2" role="list" data-kinetic-cascade>
           {stack.map(tech => (
             <li>
               <Tag>{tech}</Tag>
@@ -150,10 +152,43 @@ const stackId = `${headingId}-stack`;
 </div>
 
 <style>
-  /* Phones in 3D: the panel shares the frame with the shelf, so it keeps dates, company, role and two highlights. */
+  .era-year {
+    display: none;
+  }
+
+  /* On the stage each job is a title card: the year, who and what, one result. The rest lives in reading mode. */
+  :global(.is-3d) .era-year {
+    display: block;
+    order: -1;
+    margin-bottom: 0.35rem;
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 6.5vw, 5.5rem);
+    font-weight: 600;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text);
+  }
+
+  :global(.is-3d) [data-experience] header > p::before {
+    display: none;
+  }
+
+  :global(.is-3d) .stage-hidden,
+  :global(.is-3d) [data-plate] li:nth-child(n + 2) {
+    display: none;
+  }
+
+  :global(.is-3d) [data-plate] ul.list-disc {
+    padding-left: 0;
+    list-style: none;
+    font-size: var(--text-base);
+    line-height: 1.45;
+    color: var(--color-text);
+  }
+
   @media (width < 48rem) {
-    :global(.is-3d) .wide-only,
-    :global(.is-3d) [data-plate] li:nth-child(n + 3) {
+    :global(.is-3d) .wide-only {
       display: none;
     }
   }

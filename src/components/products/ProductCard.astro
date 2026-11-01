@@ -140,19 +140,18 @@ const screenshot =
 </article>
 
 <style>
-  /* Phones in 3D: the panel shares the frame with the figure, so it keeps tagline, three features and the link. */
+  /* On the stage each product is a museum label: status, name, what it is and the link. Features live in reading mode. */
+  :global(.is-3d) .product-features {
+    display: none;
+  }
+
   @media (width < 48rem) {
-    :global(.is-3d) .wide-only,
-    :global(.is-3d) .product-features > li:nth-child(n + 4) {
+    :global(.is-3d) .wide-only {
       display: none;
     }
 
     :global(.is-3d) .product-body {
       gap: 0.75rem;
-    }
-
-    :global(.is-3d) .product-features {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 </style>

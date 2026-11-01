@@ -3,12 +3,14 @@ interface Props {
   id: string;
   title: string;
   eyebrow?: string;
+  /** Act title shown only on the 3D stage ("De día", "De noche"); decorative, the h2 keeps the section name. */
+  act?: string;
   subtitle?: string;
   align?: 'start' | 'center';
   class?: string;
 }
 
-const { id, title, eyebrow, subtitle, align = 'start', class: className } = Astro.props;
+const { id, title, eyebrow, act, subtitle, align = 'start', class: className } = Astro.props;
 const centered = align === 'center';
 ---
 
@@ -24,6 +26,7 @@ const centered = align === 'center';
       <p class="font-sans text-xs font-semibold tracking-caps text-accent uppercase">{eyebrow}</p>
     )
   }
+  {act && <span class="section-act" aria-hidden="true">{act}</span>}
   <h2
     id={id}
     class="font-display text-3xl font-semibold tracking-display text-balance text-text"
@@ -33,3 +36,30 @@ const centered = align === 'center';
   {subtitle && <p class="text-lg text-pretty text-text-muted">{subtitle}</p>}
   <slot />
 </header>
+
+<style>
+  .section-act {
+    display: none;
+  }
+
+  :global(.is-3d) .section-act {
+    display: block;
+    order: -1;
+    margin-bottom: 0.25rem;
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 7vw, 6rem);
+    font-weight: 600;
+    line-height: 0.95;
+    letter-spacing: -0.035em;
+    color: var(--color-text);
+  }
+
+  :global(.is-3d) .section-act + h2 {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: var(--tracking-caps, 0.14em);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+</style>

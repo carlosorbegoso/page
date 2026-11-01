@@ -33,11 +33,12 @@ const products = await getProducts(locale);
       <SectionHeader
         id="company-title"
         eyebrow={`${company.role} · ${company.legalName}`}
+        act={t('story.night')}
         title={t('company.title')}
         subtitle={t('company.subtitle')}
       />
 
-      <div class="wide-only flex flex-col gap-4 text-base text-pretty text-text-muted">
+      <div class="company-summary flex flex-col gap-4 text-base text-pretty text-text-muted">
         {company.summary.map(paragraph => <p>{paragraph}</p>)}
       </div>
 
@@ -81,5 +82,10 @@ const products = await getProducts(locale);
     :global(.is-3d) .wide-only {
       display: none;
     }
+  }
+
+  /* On the stage the panel is a caption: the story lives in the room, the full text in reading mode. */
+  :global(.is-3d) .company-summary {
+    display: none;
   }
 </style>

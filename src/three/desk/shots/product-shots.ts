@@ -2,7 +2,6 @@ import { Vector3 } from 'three';
 import { FIGURE_HEIGHT, FIGURES, PRODUCT_FIGURES, type FigureId } from '../layout';
 import { cardCorners } from '../notes/layout';
 import { TEXT_LEFT, type ShotContext, type SideLayout } from './context';
-import { clearOfText, placeBeside, type TextSide } from './beside-text';
 import { storyShot } from './portrait-fit';
 import { printedProductShot } from './printed-shots';
 import { centreOf, figurePoints, othersThan } from './protagonists';
@@ -14,7 +13,7 @@ interface ProductSetup {
   landscape: Setup;
   portrait: Setup;
   subjects: FigureId[];
-  text: TextSide;
+  text: 'left' | 'right';
   cardInPortrait?: boolean;
 }
 
@@ -26,13 +25,13 @@ const PRODUCT_SETUP: Record<ProductId, ProductSetup> = {
     text: 'left'
   },
   parati: {
-    landscape: { heading: -14, pitch: -36, distance: 0.45 },
+    landscape: { heading: 20, pitch: -34, distance: 0.45 },
     portrait: { heading: -4, pitch: -34, distance: 0.34 },
     subjects: ['parati'],
     text: 'right'
   },
   ventixs: {
-    landscape: { heading: -6, pitch: -26, distance: 0.4 },
+    landscape: { heading: 11, pitch: -30, distance: 0.4 },
     portrait: { heading: -2, pitch: -14, distance: 0.4 },
     subjects: ['ventixs', 'alfa'],
     text: 'right',
@@ -48,7 +47,8 @@ function figureCentre(id: FigureId): Vector3 {
 
 function framedPoints(ctx: ShotContext, id: ProductId, setup: ProductSetup): { points: Vector3[]; aim: Vector3 } {
   const card = ctx.portrait && !setup.cardInPortrait ? [] : cardCorners(id, 1);
-  const points = [...setup.subjects.flatMap(figurePoints), ...card];
+  const subjects = ctx.portrait ? setup.subjects : [id];
+  const points = [...subjects.flatMap(figurePoints), ...card];
   return { points, aim: centreOf(ctx.portrait ? [...figurePoints(id), ...card] : points) };
 }
 
@@ -56,9 +56,8 @@ function productShot(ctx: ShotContext, id: ProductId): Framing {
   if (ctx.stacked) return printedProductShot(ctx, id);
   const setup = PRODUCT_SETUP[id];
   const { points, aim } = framedPoints(ctx, id, setup);
-  const place = ctx.portrait ? { sx: 0.5, sy: ctx.subjectY } : placeBeside(ctx, setup.text, { sx: 0.5, sy: 0.5 });
-  const landscape = clearOfText(ctx, setup.text, aim, setup.landscape, points);
-  const frame = storyShot(ctx, aim, landscape, setup.portrait, place, points, othersThan(...setup.subjects));
+  const place = { sx: 0.5, sy: ctx.subjectY };
+  const frame = storyShot(ctx, aim, setup.landscape, setup.portrait, place, points, othersThan(...setup.subjects));
   const layout = ctx.layoutFor(setup.text === 'left' ? TEXT_LEFT : TEXT_RIGHT);
   return { ...frame, aim: frame.aim ?? aim, focus: figureCentre(id), panel: { name: `product-${id}`, ...layout.panel } };
 }

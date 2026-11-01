@@ -55,7 +55,7 @@ export const PRODUCT_CARD = {
 export const CARD_PLACES: Record<ProductId, { hinge: Vector3; yaw: number }> = {
   skymek: { hinge: new Vector3(0.07, DESK.top, 0.03), yaw: -0.244 },
   ventixs: { hinge: new Vector3(0.3, DESK.top, 0.03), yaw: -0.105 },
-  parati: { hinge: new Vector3(0.6, DESK.top, 0.03), yaw: 0.05 }
+  parati: { hinge: new Vector3(0.64, DESK.top, 0.03), yaw: -0.3 }
 };
 
 export function cardFaceMatrix(id: ProductId, raise: number): Matrix4 {

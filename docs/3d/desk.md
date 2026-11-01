@@ -16,15 +16,15 @@ Qué entrega el escritorio al director (planos, superficies, anclas, foco, picks
 | `company` | 1 (Alfa) |
 | `products` | 3: SkyMek, Parati, Ventixs (`PRODUCT_FIGURES`) |
 | `contact` | 1 (teléfono) |
-| `outro` | 1: detrás del `hero`, a `heroDistance + 0.08` m (máx. 1.75); apilado, el monitor al 95 % del ancho girado 8° hacia el teléfono (si no, contacto → cierre pasa de 1.4 m) |
+| `outro` | 1: en horizontal, la misma caja que el hero con 9 % de margen y rumbo −16° (hacia el teléfono, si no contacto → cierre pasa de 1.4 m); apilado, el monitor con marco al 91 % del ancho girado 8° hacia el teléfono |
 
 - Encuadres por viewport con caché (`framings`). El FOV es el del director (`context.fov()`).
-- Horizontal: texto a la izquierda (columna del 56 %, `TEXT_LEFT`), sujeto al 70 % del ancho. En escritorio, estante, TCS y productos se acercan hasta llenar la franja libre junto al panel (`beside-text.ts`); Parati y Ventixs llevan el texto a la derecha. El hero se aleja lo justo para que el cuadro y su lámpara entren enteros. Apilado: panel acoplado abajo, sujeto en la mitad superior bajo el HUD; hero, stack y cierre con el monitor casi a todo el ancho.
+- Horizontal (`box-fit.ts`): en ≥ 768 px los paneles HTML de productos, empresa y experiencia están ocultos (el texto va impreso en el cuarto), así que cada plano centra una caja de encuadre (protagonista + objeto con texto) con 7 % de margen y la parte de arriba bajo el HUD (72 px); la distancia sale del aspecto actual y se recalcula al redimensionar (`framings` cachea por viewport; en escritorio también un cambio solo de alto). Hero, about y cierre: cuadro y lámpara, monitor, corcho y la línea de la mesa en z = 0 (`roomShot`, `about-shots.ts`); productos: figura + su tarjeta (Ventixs sin Alfa, con el teléfono fuera de cuadro); estante: carpetas + portada; carpetas sueltas: no más cerca de 1.18 m. Vertical no apilado (tablet) sigue con `storyShot`/`heroDistance`. Apilado: panel acoplado abajo, sujeto en la mitad superior bajo el HUD; hero y stack con el monitor y su marco al 93 % del ancho.
 
 ## Límites entre planos (`checkShots`, `SHOT_LIMITS`)
 
 - Planos consecutivos en orden de historia: ≤ 28° entre direcciones de vista y ≤ 1.4 m entre posiciones. Así ninguna transición pasa de 1.4 s en el director.
-- Comprobar: `mountDeskPreview(container).checks()` (`src/three/desk/preview.ts`, la app no lo importa) en 1440 × 900, 390 × 844, 1024 × 1366 y 1920 × 1080.
+- Comprobar: `mountDeskPreview(container).checks()` (`src/three/desk/preview.ts`, la app no lo importa) en 1280 × 720, 1362 × 663, 1440 × 900, 1920 × 1080, 1024 × 768, 844 × 390, 390 × 844, 375 × 667 y 360 × 780.
 
 ## `getSurface('monitor' | 'phone')`
 

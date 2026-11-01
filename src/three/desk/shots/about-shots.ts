@@ -1,5 +1,8 @@
 import { Vector3 } from 'three';
+import { DESK } from '../layout';
+import { boardCorners } from '../notes/layout';
 import { BIO_CARD, PICTURE_LIGHT, PORTRAIT, PORTRAIT_GLASS_Z } from '../portrait/layout';
+import { boxRegion, boxShot, type Facing } from './box-fit';
 import type { ShotContext } from './context';
 import { DEG, eyeFor, lerp } from './math';
 import { fitDistance } from './projection';
@@ -31,6 +34,24 @@ function monitorCorners(ctx: ShotContext): Vector3[] {
   const right = new Vector3(1, 0, 0).applyQuaternion(quaternion).multiplyScalar(ctx.screenSpan / 2);
   const up = new Vector3(0, 1, 0).applyQuaternion(quaternion).multiplyScalar(ctx.screenRise / 2);
   return [-1, 1].flatMap(x => [-1, 1].map(y => centre.clone().addScaledVector(right, x).addScaledVector(up, y)));
+}
+
+const DESK_LINE = { x: 0.62, z: 0 } as const;
+const ROOM_FACING: Record<'hero' | 'about' | 'outro', Facing> = {
+  hero: { heading: 0, pitch: -8 },
+  about: { heading: 12, pitch: -6 },
+  outro: { heading: -16, pitch: -4 }
+};
+const OUTRO_MARGIN = 0.09;
+
+function roomPoints(ctx: ShotContext): Vector3[] {
+  const deskLine = [-1, 1].map(x => new Vector3(x * DESK_LINE.x, DESK.top, DESK_LINE.z));
+  return [...portraitCorners(), ...pictureLamp(), PICTURE_LIGHT.plate, ...monitorCorners(ctx), ...boardCorners(), ...deskLine];
+}
+
+export function roomShot(ctx: ShotContext, beat: keyof typeof ROOM_FACING): Framing {
+  const region = beat === 'outro' ? boxRegion(ctx, OUTRO_MARGIN) : boxRegion(ctx);
+  return { ...boxShot(ctx, ROOM_FACING[beat], roomPoints(ctx), undefined, region), focus: ctx.monitor.centre };
 }
 
 export const HERO_PLACE = { sx: 0.56, sy: 0.6 };

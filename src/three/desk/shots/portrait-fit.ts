@@ -1,4 +1,5 @@
 import type { Vector3 } from 'three';
+import { boxShot } from './box-fit';
 import type { ShotContext } from './context';
 import { eyeFor, lerp } from './math';
 import { fitDistance, inside, overlaps, projector, screenBox } from './projection';
@@ -90,13 +91,14 @@ export function storyShot(
   portraitSetup: Setup,
   place: Place,
   subjects: Vector3[],
-  neighbours: Vector3[][] = []
+  neighbours: Vector3[][] = [],
+  nearest?: number
 ): StoryFrame {
   const { t } = ctx;
   const heading = lerp(landscape.heading, portraitSetup.heading, t);
   const pitch = lerp(landscape.pitch, portraitSetup.pitch, t);
   const preferred = lerp(landscape.distance, portraitSetup.distance * ctx.lens, t);
-  if (!ctx.portrait) return { eye: eyeFor(focus, heading, pitch, preferred), sx: place.sx, sy: place.sy };
+  if (!ctx.portrait) return boxShot(ctx, { heading, pitch }, subjects, nearest);
   const sy = lerp(place.sy, ctx.stageY, t);
   return fitPortrait({ ctx, focus, heading, pitch, preferred, sx: place.sx, sy, neighbours }, subjects);
 }

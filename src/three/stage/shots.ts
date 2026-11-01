@@ -44,7 +44,8 @@ export class StageLayout {
     const rect = container.getBoundingClientRect();
     const width = Math.round(rect.width) || window.innerWidth;
     const height = Math.round(rect.height) || window.innerHeight;
-    if (!force && width === this.size.width && Math.abs(height - this.size.height) <= RESIZE_HEIGHT_THRESHOLD) return null;
+    const toolbarJitter = layoutKind(width) !== 'desktop' && Math.abs(height - this.size.height) <= RESIZE_HEIGHT_THRESHOLD;
+    if (!force && width === this.size.width && (height === this.size.height || toolbarJitter)) return null;
     this.size = { width, height };
     this.kind = layoutKind(width);
     const stacked = stackedLayout(this.size);

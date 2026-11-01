@@ -5,11 +5,11 @@ Qué archivo editar en el escritorio 3D: encuadres (shots), luz, props, figuras,
 | Para cambiar… | Edita |
 | --- | --- |
 | Encuadres por capítulo (ensamblado, caché por viewport) | `src/three/desk/shots/framings.ts` (`desk/shots.ts` solo reexporta) |
-| Cámara de hero, about, contacto y cierre; en teléfono vertical, el monitor a ~97 % del ancho (hero, stack, cierre) | `src/three/desk/shots/monitor-shots.ts` |
-| Cámara de about: el cuadro de la pared y el monitor juntos (en teléfono vertical, el cuadro y la tarjeta impresa); distancia del hero para que entre el cuadro | `src/three/desk/shots/about-shots.ts` |
+| Cámara de hero, about, contacto y cierre; en teléfono vertical, el monitor con marco al 93 % del ancho (hero, stack; cierre 91 %) | `src/three/desk/shots/monitor-shots.ts` |
+| Hero, about y cierre en horizontal (`roomShot`: cuadro, monitor, corcho y mesa); about en tablet vertical; en teléfono vertical, el cuadro y la tarjeta impresa | `src/three/desk/shots/about-shots.ts` |
 | Cámara de empresa | `src/three/desk/shots/figure-shots.ts` |
 | Cámara de productos (rumbo, inclinación, lado del texto) | `src/three/desk/shots/product-shots.ts` |
-| Encuadre de escritorio al lado del panel de texto (zona libre, distancia mínima) | `src/three/desk/shots/beside-text.ts` |
+| Encuadre horizontal: caja de encuadre centrada con 7 % de margen bajo el HUD, distancia según el aspecto | `src/three/desk/shots/box-fit.ts` |
 | Cámara del estante y las carpetas | `src/three/desk/shots/experience-shots.ts` |
 | Teléfono vertical: corcho, tarjeta de producto y hoja de TCS de frente al 90 % del ancho, bajo el HUD (texto impreso en vez de tarjeta HTML) | `src/three/desk/shots/printed-shots.ts` |
 | Encuadre vertical: protagonistas enteros, vecinos fuera, retoques | `src/three/desk/shots/portrait-fit.ts`, puntos en `protagonists.ts` |

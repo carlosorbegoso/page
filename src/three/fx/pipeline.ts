@@ -1,112 +1,35 @@
 import {
   BufferGeometry,
-  DepthTexture,
   Float32BufferAttribute,
-  HalfFloatType,
-  LinearFilter,
   Mesh,
-  NoBlending,
   OrthographicCamera,
-  RGBAFormat,
-  ShaderMaterial,
-  UnsignedIntType,
   Vector2,
-  Vector3,
-  WebGLRenderTarget,
-  type IUniform,
   type Object3D,
   type PerspectiveCamera,
   type Scene,
+  type Vector3,
   type WebGLRenderer
 } from 'three';
 import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
-import type { FxPipeline, PointerField } from '../contracts';
+import type { PointerField } from '../contracts';
 import { motionAllowed, readMotion, watchMotion, type MotionState } from '../motion';
 import type { Tier } from '../tier';
-import {
-  FLUID_IDLE_TEXTURE,
-  FLUID_MAX_PX,
-  fluidConsumerCount,
-  FluidField,
-  FluidPointerInput,
-  fluidUniforms
-} from './fluid';
-import { balanceGains, ChapterGrading } from './grading';
+import { effectsMs, FxBudget } from './adapt';
+import { FLUID_IDLE_TEXTURE, FLUID_MAX_PX, fluidConsumerCount, FluidField, FluidPointerInput, fluidUniforms } from './fluid';
+import { RackFocus } from './focus';
+import { ChapterGrading } from './grading';
 import { GpuTimer } from './gpuTimer';
+import { BloomPass } from './passes/bloom';
+import { CompositePass } from './passes/composite';
+import { DofPass } from './passes/dof';
+import { StreakPass } from './passes/streak';
 import { guessTier, readFxTokens, tierProfile, type FxTokens, type TierProfile } from './settings';
+import { createTargets, disposeTargets, type Targets } from './targets';
 import { ToneCompensation } from './toneCompensation';
-import { BLOOM_DOWN_FRAG, BLOOM_UP_FRAG, COMPOSITE_FRAG, dofFrag, FULLSCREEN_VERT, STREAK_FRAG } from './shaders';
+import type { CinematicFx, FxOptions, FxStats } from './types';
 
-export type FxFeature = 'fluid' | 'dof';
-
-/** Snapshot for the debug overlay and the docs (`window.__fx.stats()` with `?debug`). */
-export interface FxStats {
-  tier: Tier;
-  gpuTimer: boolean;
-  /** False on ANGLE Metal: timings are shown but the budget rule is off. */
-  gpuTimerTrusted: boolean;
-  /** Smoothed GPU ms per pass: fluid, scene, dof, bloom, composite. */
-  ms: Record<string, number>;
-  /** GPU ms of the effects alone (everything but `scene`). */
-  effectsMs: number;
-  disabled: FxFeature[];
-  fluidAwake: boolean;
-  dofAmount: number;
-  chapter: string;
-  buffer: { width: number; height: number };
-}
-
-/** The pipeline plus what the Stage can read back. */
-export interface CinematicFx extends FxPipeline {
-  /** True while the fluid, a rack focus or a grade transition still moves: OR it into the Stage's `settling`. */
-  readonly settling: boolean;
-  stats(): FxStats;
-}
-
-export interface FxOptions {
-  tier?: Tier;
-}
-
-const CUT_ORDER: readonly FxFeature[] = ['fluid', 'dof'];
-const RACK_SECONDS = 0.6;
-/** Longest camera transition (1.4 s) plus margin: releases the focus hold if `chapter:settled` never comes. */
-const HOLD_TIMEOUT_SECONDS = 2;
-const AMOUNT_TAU = 0.15;
-const EVALUATE_EVERY_MS = 1000;
-const MIN_SAMPLES = 20;
-
-function material(fragmentShader: string, uniforms: Record<string, IUniform>, toneMapped = false): ShaderMaterial {
-  return new ShaderMaterial({
-    vertexShader: FULLSCREEN_VERT,
-    fragmentShader,
-    uniforms,
-    blending: NoBlending,
-    depthTest: false,
-    depthWrite: false,
-    toneMapped
-  });
-}
-
-function colorTarget(width: number, height: number): WebGLRenderTarget {
-  return new WebGLRenderTarget(Math.max(1, width), Math.max(1, height), {
-    type: HalfFloatType,
-    format: RGBAFormat,
-    minFilter: LinearFilter,
-    magFilter: LinearFilter,
-    depthBuffer: false,
-    stencilBuffer: false
-  });
-}
-
-interface Targets {
-  width: number;
-  height: number;
-  scene: WebGLRenderTarget;
-  dof: WebGLRenderTarget | null;
-  down: WebGLRenderTarget[];
-  up: WebGLRenderTarget[];
-  streak: [WebGLRenderTarget, WebGLRenderTarget] | null;
-}
+export type { FxFeature } from './adapt';
+export type { CinematicFx, FxOptions, FxStats } from './types';
 
 class CinematicPipeline implements CinematicFx {
   private tier: Tier;
@@ -122,77 +45,19 @@ class CinematicPipeline implements CinematicFx {
   private readonly input: FluidPointerInput;
   private pointer: PointerField | null = null;
   private motion: MotionState = readMotion();
-  private readonly disabled = new Set<FxFeature>();
-  private readonly focusPoint = new Vector3();
-  private hasFocus = false;
-  private focusDistance = 5;
-  private dofAmount = 0;
-  private rackFrom = 5;
-  private rackTo = 5;
-  private rackElapsed = RACK_SECONDS;
-  private holdingFocus = false;
-  private holdElapsed = 0;
-  private holdFor = HOLD_TIMEOUT_SECONDS;
+  private readonly budget = new FxBudget();
+  private readonly focus = new RackFocus();
   private readonly capture = new URLSearchParams(location.search).has('capture');
   private chapterEvents = false;
   private chapter = '';
   private readonly grading = new ChapterGrading();
-  private readonly balance = new Vector3(1, 1, 1);
   private cssHeight = 0;
   private time = 0;
-  private lastEvaluation = 0;
-  private strikes = 0;
-  private readonly forward = new Vector3();
-  private readonly toPoint = new Vector3();
   private readonly cleanups: Array<() => void> = [];
-
-  private readonly down = material(BLOOM_DOWN_FRAG, {
-    tInput: { value: null },
-    uTexel: { value: new Vector2() },
-    uThreshold: { value: 1 },
-    uSmoothing: { value: 0.1 },
-    uPrefilter: { value: false }
-  });
-  private readonly up = material(BLOOM_UP_FRAG, {
-    tLow: { value: null },
-    tHigh: { value: null },
-    uTexel: { value: new Vector2() },
-    uRadius: { value: 0.45 }
-  });
-  private readonly streak = material(STREAK_FRAG, {
-    tInput: { value: null },
-    uTexel: { value: new Vector2() },
-    uStride: { value: 1 },
-    uKeep: { value: 0 }
-  });
-  private dof: ShaderMaterial | null = null;
-  private readonly composite = material(
-    COMPOSITE_FRAG,
-    {
-      tScene: { value: null },
-      tDepth: { value: null },
-      tDof: { value: null },
-      tBloom: { value: null },
-      tStreak: { value: null },
-      uNear: { value: 0.1 },
-      uFar: { value: 60 },
-      uFocus: { value: 5 },
-      uRange: { value: 2.5 },
-      uDofAmount: { value: 0 },
-      uBloomStrength: { value: 0.32 },
-      uStreakStrength: { value: 0 },
-      uAberration: { value: 0 },
-      uExposure: { value: 1 },
-      uBalance: { value: this.balance },
-      uSplit: { value: 0.2 },
-      uContrast: { value: 0 },
-      uVignetteDarkness: { value: 0.3 },
-      uVignetteOffset: { value: 0.32 },
-      uGrain: { value: 0.035 },
-      uSeed: { value: 0 }
-    },
-    true
-  );
+  private readonly bloom = new BloomPass();
+  private readonly streak = new StreakPass();
+  private readonly dof = new DofPass();
+  private readonly composite = new CompositePass();
 
   constructor(options: FxOptions) {
     this.tier = options.tier ?? guessTier();
@@ -216,24 +81,16 @@ class CinematicPipeline implements CinematicFx {
     listen('chapter:enter', (id, detail) => {
       this.chapterEvents = true;
       this.enterChapter(id);
-      this.holdingFocus = true;
-      this.holdElapsed = 0;
-      this.holdFor = typeof detail.duration === 'number' ? Math.max(detail.duration - RACK_SECONDS, 0) : HOLD_TIMEOUT_SECONDS;
+      this.focus.hold(detail.duration);
     });
     listen('chapter:settled', id => {
       this.chapterEvents = true;
       this.enterChapter(id);
-      if (this.holdingFocus) this.releaseHold();
+      this.focus.settle();
     });
     listen('station:enter', id => {
       if (!this.chapterEvents) this.enterChapter(id);
     });
-  }
-
-  private releaseHold(): void {
-    this.holdingFocus = false;
-    this.rackElapsed = 0;
-    this.rackFrom = this.focusDistance;
   }
 
   private enterChapter(id: string): void {
@@ -244,9 +101,8 @@ class CinematicPipeline implements CinematicFx {
   get settling(): boolean {
     if (!this.profile.enabled) return false;
     const fluid = this.fluidRunning && Boolean(this.fluid?.awake);
-    const focusTarget = this.hasFocus && this.dofEnabled ? 1 : 0;
-    const racking = this.rackElapsed < RACK_SECONDS;
-    return fluid || racking || this.grading.moving || Math.abs(this.dofAmount - focusTarget) > 0.01;
+    const focusTarget = this.focus.hasFocus && this.dofEnabled ? 1 : 0;
+    return fluid || this.focus.racking || this.grading.moving || Math.abs(this.focus.amount - focusTarget) > 0.01;
   }
 
   private get frozen(): boolean {
@@ -254,11 +110,11 @@ class CinematicPipeline implements CinematicFx {
   }
 
   private get fluidRunning(): boolean {
-    return this.profile.fluidSize > 0 && fluidConsumerCount() > 0 && !this.disabled.has('fluid') && !this.frozen;
+    return this.profile.fluidSize > 0 && fluidConsumerCount() > 0 && !this.budget.has('fluid') && !this.frozen;
   }
 
   private get dofEnabled(): boolean {
-    return this.profile.dof !== 'off' && !this.disabled.has('dof');
+    return this.profile.dof !== 'off' && !this.budget.has('dof');
   }
 
   attachPointer(pointer: PointerField): void {
@@ -266,8 +122,7 @@ class CinematicPipeline implements CinematicFx {
   }
 
   setFocus(point: Vector3 | null): void {
-    this.hasFocus = point !== null;
-    if (point) this.focusPoint.copy(point);
+    this.focus.set(point);
   }
 
   resize(width: number, height: number, pixelRatio: number): void {
@@ -281,14 +136,12 @@ class CinematicPipeline implements CinematicFx {
     if (tier === this.tier) return;
     this.tier = tier;
     this.profile = tierProfile(tier);
-    this.disabled.clear();
-    this.strikes = 0;
+    this.budget.reset();
     this.timer?.reset();
     this.releaseTargets();
     this.fluid?.dispose();
     this.fluid = null;
-    this.dof?.dispose();
-    this.dof = null;
+    this.dof.dispose();
     fluidUniforms.uFluidActive.value = 0;
     fluidUniforms.uFluidVelocity.value = FLUID_IDLE_TEXTURE;
   }
@@ -318,12 +171,12 @@ class CinematicPipeline implements CinematicFx {
       geometry.setAttribute('position', new Float32BufferAttribute([-1, 3, 0, -1, -1, 0, 3, -1, 0], 3));
       geometry.setAttribute('uv', new Float32BufferAttribute([0, 2, 0, 0, 2, 0], 2));
       const quadCamera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
-      const passes = [this.down, this.up, this.streak, ...(targets.dof ? [this.dofMaterial()] : [])];
+      const passes = [this.bloom.down, this.bloom.up, this.streak.material, ...(targets.dof ? [this.dof.material(this.profile.dofTaps)] : [])];
       const passTarget = targets.down[0] ?? targets.scene;
       renderer.setRenderTarget(passTarget);
       for (const pass of passes) pending.push(renderer.compileAsync(new Mesh(geometry, pass), quadCamera));
       renderer.setRenderTarget(null);
-      pending.push(renderer.compileAsync(new Mesh(geometry, this.composite), quadCamera));
+      pending.push(renderer.compileAsync(new Mesh(geometry, this.composite.material), quadCamera));
       void Promise.all(pending).finally(() => geometry.dispose());
     }
     renderer.setRenderTarget(previous);
@@ -351,44 +204,24 @@ class CinematicPipeline implements CinematicFx {
     this.tone.end(renderer, scene);
     this.timer.end();
 
-    this.updateFocus(camera, dt);
+    this.focus.update(camera, dt, this.dofEnabled, this.frozen, this.grading.value.focusRange);
     const grade = this.grading.update(this.frozen ? Number.POSITIVE_INFINITY : dt);
 
-    if (targets.dof && this.dofAmount > 0.001) this.renderDof(renderer, targets, camera);
-    this.renderBloom(renderer, targets);
-    this.renderStreak(renderer, targets);
+    if (targets.dof && this.focus.amount > 0.001) {
+      this.dof.render(renderer, this.quad, targets, camera, this.focus.distance, this.grading.value, this.tokens.bokeh, this.profile, this.timer);
+    }
+    this.bloom.render(renderer, this.quad, targets, this.tokens, this.profile, this.timer);
+    this.streak.render(renderer, this.quad, targets, this.tokens.streakThreshold, this.timer);
+    this.composite.render(
+      renderer,
+      this.quad,
+      targets,
+      this.tokens,
+      { camera, grade, focusDistance: this.focus.distance, dofAmount: this.focus.amount, frozen: this.frozen, time: this.time },
+      this.timer
+    );
 
-    const u = this.composite.uniforms;
-    const { tokens } = this;
-    u.tScene!.value = targets.scene.texture;
-    u.tDepth!.value = targets.scene.depthTexture;
-    u.tDof!.value = targets.dof?.texture ?? targets.scene.texture;
-    u.tBloom!.value = (targets.up[0] ?? targets.down[0])!.texture;
-    u.tStreak!.value = targets.streak ? targets.streak[1].texture : (targets.up[0] ?? targets.down[0])!.texture;
-    u.uStreakStrength!.value = targets.streak ? tokens.streakStrength : 0;
-    u.uAberration!.value = document.documentElement.dataset.time === 'day' ? 0 : tokens.aberration;
-    u.uContrast!.value = grade.contrast;
-    u.uNear!.value = camera.near;
-    u.uFar!.value = camera.far;
-    u.uFocus!.value = this.focusDistance;
-    u.uRange!.value = grade.focusRange;
-    u.uDofAmount!.value = targets.dof ? this.dofAmount : 0;
-    u.uBloomStrength!.value = tokens.bloomStrength;
-    u.uExposure!.value = grade.exposure;
-    balanceGains(grade.temperature, this.balance);
-    u.uSplit!.value = grade.split;
-    u.uVignetteDarkness!.value = grade.vignette * (tokens.vignetteDarkness / 0.5);
-    u.uVignetteOffset!.value = tokens.vignetteOffset;
-    u.uGrain!.value = tokens.grain;
-    u.uSeed!.value = this.frozen ? 0 : Math.floor(this.time * 24) % 997;
-
-    this.timer.begin('composite');
-    this.quad.material = this.composite;
-    renderer.setRenderTarget(null);
-    this.quad.render(renderer);
-    this.timer.end();
-
-    this.adapt();
+    if (this.budget.evaluate(this.timer, this.profile) === 'fluid') fluidUniforms.uFluidActive.value = 0;
   }
 
   private viewportHeight(renderer: WebGLRenderer): number {
@@ -422,134 +255,6 @@ class CinematicPipeline implements CinematicFx {
     fluidUniforms.uFluidViewport.value.set(this.bufferSize.x, this.bufferSize.y);
   }
 
-  /**
-   * Rack focus: the focus distance is held while the camera travels (`chapter:enter`) and pulled to
-   * the new subject in ≤ 600 ms over the last stretch of the move, landing as the camera settles
-   * (`chapter:enter` carries the move's duration; without it the pull starts at `chapter:settled`). Without chapter events, a jump
-   * larger than half the focus range triggers the same rack; small drifts are followed directly.
-   */
-  private updateFocus(camera: PerspectiveCamera, dt: number): void {
-    const target = this.hasFocus && this.dofEnabled ? 1 : 0;
-    const instant = this.frozen;
-    const range = this.grading.value.focusRange;
-    if (this.holdingFocus) {
-      this.holdElapsed += dt;
-      if (this.holdElapsed >= Math.min(this.holdFor, HOLD_TIMEOUT_SECONDS)) this.releaseHold();
-    }
-    if (this.hasFocus) {
-      camera.getWorldDirection(this.forward);
-      const desired = Math.max(this.toPoint.subVectors(this.focusPoint, camera.position).dot(this.forward), camera.near);
-      if (this.dofAmount < 0.001 || instant) {
-        this.focusDistance = desired;
-        this.rackElapsed = RACK_SECONDS;
-      } else if (!this.holdingFocus) {
-        if (this.rackElapsed < RACK_SECONDS) {
-          this.rackTo = desired;
-          this.rackElapsed = Math.min(this.rackElapsed + dt, RACK_SECONDS);
-          const t = this.rackElapsed / RACK_SECONDS;
-          const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-          this.focusDistance = this.rackFrom + (this.rackTo - this.rackFrom) * eased;
-        } else if (Math.abs(desired - this.focusDistance) > range * 0.5) {
-          this.rackFrom = this.focusDistance;
-          this.rackTo = desired;
-          this.rackElapsed = 0;
-        } else {
-          this.focusDistance = desired;
-        }
-      }
-    }
-    const k = instant ? 1 : 1 - Math.exp(-dt / AMOUNT_TAU);
-    this.dofAmount += (target - this.dofAmount) * k;
-    if (Math.abs(target - this.dofAmount) < 0.001) this.dofAmount = target;
-  }
-
-  private renderDof(renderer: WebGLRenderer, targets: Targets, camera: PerspectiveCamera): void {
-    const dofTarget = targets.dof!;
-    const dof = this.dofMaterial();
-    const u = dof.uniforms;
-    u.tColor!.value = targets.scene.texture;
-    u.tDepth!.value = targets.scene.depthTexture;
-    u.uNear!.value = camera.near;
-    u.uFar!.value = camera.far;
-    u.uFocus!.value = this.focusDistance;
-    u.uRange!.value = this.grading.value.focusRange;
-    (u.uTexel!.value as Vector2).set(1 / dofTarget.width, 1 / dofTarget.height);
-    const bokeh = this.tokens.bokeh;
-    u.uMaxRadius!.value = (bokeh * this.grading.value.bokeh * 3 * (targets.height / 1080)) / this.profile.dofDivisor;
-    this.timer?.begin('dof');
-    this.quad.material = dof;
-    renderer.setRenderTarget(dofTarget);
-    this.quad.render(renderer);
-    this.timer?.end();
-  }
-
-  private dofMaterial(): ShaderMaterial {
-    this.dof ??= material(dofFrag(this.profile.dofTaps), {
-      tColor: { value: null },
-      tDepth: { value: null },
-      uNear: { value: 0.1 },
-      uFar: { value: 60 },
-      uFocus: { value: 5 },
-      uRange: { value: 2.5 },
-      uTexel: { value: new Vector2() },
-      uMaxRadius: { value: 4 }
-    });
-    return this.dof;
-  }
-
-  private renderBloom(renderer: WebGLRenderer, targets: Targets): void {
-    const { down, up } = targets;
-    const d = this.down.uniforms;
-    d.uThreshold!.value = this.tokens.bloomThreshold;
-    d.uSmoothing!.value = this.tokens.bloomSmoothing;
-    this.timer?.begin('bloom');
-    this.quad.material = this.down;
-    for (let i = 0; i < down.length; i++) {
-      const source = i === 0 ? targets.scene : down[i - 1]!;
-      const spread = i === 0 ? this.profile.bloomDivisor / 2 : 1;
-      d.tInput!.value = source.texture;
-      d.uPrefilter!.value = i === 0;
-      (d.uTexel!.value as Vector2).set(spread / source.width, spread / source.height);
-      renderer.setRenderTarget(down[i]!);
-      this.quad.render(renderer);
-    }
-    const u = this.up.uniforms;
-    u.uRadius!.value = this.tokens.bloomRadius;
-    this.quad.material = this.up;
-    for (let i = up.length - 1; i >= 0; i--) {
-      const low = i === up.length - 1 ? down[i + 1]! : up[i + 1]!;
-      u.tLow!.value = low.texture;
-      u.tHigh!.value = down[i]!.texture;
-      (u.uTexel!.value as Vector2).set(1 / low.width, 1 / low.height);
-      renderer.setRenderTarget(up[i]!);
-      this.quad.render(renderer);
-    }
-    this.timer?.end();
-  }
-
-  /** Two horizontal passes over the bloom's bright pass: contiguous taps, then a stride inside their footprint. */
-  private renderStreak(renderer: WebGLRenderer, targets: Targets): void {
-    const pair = targets.streak;
-    const source = targets.down[0];
-    if (!pair || !source) return;
-    const u = this.streak.uniforms;
-    this.timer?.begin('streak');
-    this.quad.material = this.streak;
-    const passes: Array<[WebGLRenderTarget, WebGLRenderTarget, number, number]> = [
-      [source, pair[0], 1, this.tokens.streakThreshold],
-      [pair[0], pair[1], 2.5, 0]
-    ];
-    for (const [input, output, stride, keep] of passes) {
-      u.tInput!.value = input.texture;
-      (u.uTexel!.value as Vector2).set(1 / output.width, 1 / output.height);
-      u.uStride!.value = stride;
-      u.uKeep!.value = keep;
-      renderer.setRenderTarget(output);
-      this.quad.render(renderer);
-    }
-    this.timer?.end();
-  }
-
   private ensureTargets(renderer: WebGLRenderer): Targets {
     renderer.getDrawingBufferSize(this.bufferSize);
     const width = Math.max(1, Math.floor(this.bufferSize.x));
@@ -560,78 +265,14 @@ class CinematicPipeline implements CinematicFx {
       return current;
     }
     this.releaseTargets();
-    const depthTexture = new DepthTexture(width, height, UnsignedIntType);
-    const scene = new WebGLRenderTarget(width, height, {
-      type: HalfFloatType,
-      format: RGBAFormat,
-      minFilter: LinearFilter,
-      magFilter: LinearFilter,
-      depthBuffer: true,
-      stencilBuffer: false,
-      samples: this.profile.msaa,
-      depthTexture
-    });
-    const divisor = this.profile.dofDivisor;
-    const dof = wantsDof ? colorTarget(Math.ceil(width / divisor), Math.ceil(height / divisor)) : null;
-    const down: WebGLRenderTarget[] = [];
-    let w = Math.ceil(width / this.profile.bloomDivisor);
-    let h = Math.ceil(height / this.profile.bloomDivisor);
-    for (let i = 0; i < this.profile.bloomLevels; i++) {
-      down.push(colorTarget(w, h));
-      w = Math.max(1, Math.ceil(w / 2));
-      h = Math.max(1, Math.ceil(h / 2));
-    }
-    const up = down.slice(0, -1).map(t => colorTarget(t.width, t.height));
-    const streakWidth = Math.ceil(width / (this.profile.bloomDivisor * 2));
-    const streakHeight = Math.ceil(height / (this.profile.bloomDivisor * 2));
-    const streak: Targets['streak'] = this.profile.streak && down.length > 0 ? [colorTarget(streakWidth, streakHeight), colorTarget(streakWidth, streakHeight)] : null;
-    this.targets = { width, height, scene, dof, down, up, streak };
+    this.targets = createTargets(width, height, this.profile, wantsDof);
     return this.targets;
   }
 
   private releaseTargets(): void {
-    const t = this.targets;
-    if (!t) return;
-    t.scene.depthTexture?.dispose();
-    t.scene.dispose();
-    t.dof?.dispose();
-    for (const target of [...t.down, ...t.up, ...(t.streak ?? [])]) target.dispose();
+    if (!this.targets) return;
+    disposeTargets(this.targets);
     this.targets = null;
-  }
-
-  /** Budget rule of docs/design/desk.md §7: cut fluid → DoF; bloom stays. */
-  private adapt(): void {
-    const timer = this.timer;
-    if (!timer?.trusted || timer.sampleCount < MIN_SAMPLES) return;
-    const now = performance.now();
-    if (now - this.lastEvaluation < EVALUATE_EVERY_MS) return;
-    this.lastEvaluation = now;
-    const { budgetMs, dofCeilingMs } = this.profile;
-    if (dofCeilingMs > 0 && (timer.ms.get('dof') ?? 0) > dofCeilingMs && !this.disabled.has('dof')) {
-      this.cut('dof');
-      return;
-    }
-    if (budgetMs <= 0) return;
-    if (this.effectsMs() <= budgetMs) {
-      this.strikes = 0;
-      return;
-    }
-    if (++this.strikes < 2) return;
-    const next = CUT_ORDER.find(feature => !this.disabled.has(feature));
-    if (next) this.cut(next);
-  }
-
-  private cut(feature: FxFeature): void {
-    this.disabled.add(feature);
-    this.strikes = 0;
-    this.timer?.reset();
-    if (feature === 'fluid') fluidUniforms.uFluidActive.value = 0;
-  }
-
-  private effectsMs(): number {
-    let total = 0;
-    for (const [label, ms] of this.timer?.ms ?? []) if (label !== 'scene') total += ms;
-    return total;
   }
 
   stats(): FxStats {
@@ -640,10 +281,10 @@ class CinematicPipeline implements CinematicFx {
       gpuTimer: Boolean(this.timer?.supported),
       gpuTimerTrusted: Boolean(this.timer?.trusted),
       ms: Object.fromEntries(this.timer?.ms ?? []),
-      effectsMs: this.effectsMs(),
-      disabled: [...this.disabled],
+      effectsMs: effectsMs(this.timer),
+      disabled: this.budget.list(),
       fluidAwake: Boolean(this.fluid?.awake),
-      dofAmount: this.dofAmount,
+      dofAmount: this.focus.amount,
       chapter: this.chapter,
       buffer: { width: this.bufferSize.x, height: this.bufferSize.y }
     };
@@ -657,10 +298,9 @@ class CinematicPipeline implements CinematicFx {
     this.fluid = null;
     this.timer?.dispose();
     this.timer = null;
-    this.down.dispose();
-    this.up.dispose();
+    this.bloom.dispose();
     this.streak.dispose();
-    this.dof?.dispose();
+    this.dof.dispose();
     this.composite.dispose();
     this.quad.dispose();
     this.tone.dispose();

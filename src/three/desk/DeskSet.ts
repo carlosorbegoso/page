@@ -22,6 +22,7 @@ import { tokenColor, tokenNumber } from '../tokens';
 import { createBackdrop, createRainGlass, createSteam, type Backdrop, type RainGlass, type Steam } from './atmosphere';
 import { createLampBeam, type LampBeam } from './beam';
 import { createSpineLabels } from './spines';
+import { StoryClock, storyMinutes } from './clock';
 import { OBJECT_ID, PartBuilder } from './builder';
 import { DESK, FIGURE_HEIGHT, FIGURES, FOLDER, FOLDERS, GLASS_Z, LAMP, MONITOR, PHONE, PRODUCT_FIGURES, ROOM, WINDOW, folderCentre, type FigureId, type FolderId } from './layout';
 import {
@@ -234,6 +235,8 @@ export class DeskSet implements ShotProvider {
   private lampOff = false;
   private lampToggledAt = -1;
   private storySwitched = false;
+  private clockModel: StoryClock | null = null;
+  private clockMinutes = 60;
   private clock = 0;
   private readonly onAction = (event: Event) => {
     if ((event as CustomEvent<{ action?: string }>).detail?.action !== 'lamp') return;
@@ -313,6 +316,12 @@ export class DeskSet implements ShotProvider {
     this.room.add(...spines.meshes.values());
     this.disposables.push(spines);
     window.addEventListener('desk:action', this.onAction);
+    this.clockModel = new StoryClock(() => {
+      this.clockModel?.show(this.clockMinutes);
+      if (this.context) this.context.renderer.shadowMap.needsUpdate = true;
+      this.context?.invalidate();
+    });
+    this.room.add(this.clockModel.group);
     if (high) {
       this.steam = createSteam();
       this.room.add(this.steam.mesh);
@@ -590,6 +599,13 @@ export class DeskSet implements ShotProvider {
       level.monitor = damp(level.monitor, light.monitor, 5, step);
     }
     level.late = damp(level.late, LATENESS[this.chapter], 1.2, step);
+    const minutesGoal = storyMinutes(this.chapter, this.subIndex);
+    const minutes = damp(this.clockMinutes, minutesGoal, 1.6, step);
+    if (Math.abs(minutes - this.clockMinutes) > 0.01 || Math.abs(minutes - minutesGoal) < 0.01) {
+      this.clockMinutes = Math.abs(minutes - minutesGoal) < 0.05 ? minutesGoal : minutes;
+      this.clockModel?.show(this.clockMinutes);
+    }
+    settling ||= this.clockMinutes !== minutesGoal;
     settling ||= Math.abs(level.late - LATENESS[this.chapter]) > 0.002;
     level.moon = damp(level.moon, light.moon, 1.6, step);
     level.shelf = damp(level.shelf, light.shelf, 3, step);
@@ -742,6 +758,7 @@ export class DeskSet implements ShotProvider {
 
   dispose(): void {
     window.removeEventListener('desk:action', this.onAction);
+    this.clockModel?.dispose();
     this.screen?.geometry.dispose();
     for (const item of this.disposables) item.dispose();
     this.disposables.length = 0;

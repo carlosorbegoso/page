@@ -1,4 +1,4 @@
-import { ACESFilmicToneMapping, PerspectiveCamera, SRGBColorSpace, Vector3, WebGLRenderer } from 'three';
+import { ACESFilmicToneMapping, PerspectiveCamera, SRGBColorSpace, Vector3, WebGLRenderer, type Object3D } from 'three';
 import { bindRenderer } from './assets';
 import {
   onRegistryChange,
@@ -20,7 +20,7 @@ import { setupInteraction } from './interaction';
 import { motionAllowed, readMotion, watchMotion, type MotionState } from './motion';
 import { Plates } from './plates';
 import { StagePointer } from './pointer';
-import { layoutKind, type LayoutKind } from './scenes/common';
+import { layoutKind, stackedLayout, type LayoutKind } from './scenes/common';
 import { setupChapterScroll, type ChapterScroll } from './scroll';
 import { chapterElement, SECTION_CHAPTERS } from './sections';
 import { calibrateRefreshInterval, dprPolicy, DprController, FrameSampler, type Tier, type TierResult } from './tier';
@@ -57,6 +57,10 @@ const DEFAULT_SUBS: Partial<Record<ChapterId, number>> = { products: 3 };
  * (monitor, phone) stay still, because their 1:1 text would shimmer or slide on the glass.
  */
 const BREATHING_CHAPTERS: ReadonlySet<ChapterId> = new Set(['company', 'products', 'experience', 'outro']);
+/** Stacked phones read the monitor chapters from 2D panels too, so those shots breathe as well. */
+const BREATHING_STACKED: ReadonlySet<ChapterId> = new Set([...BREATHING_CHAPTERS, 'hero', 'about']);
+/** `data-plate-stacked` plates switch to this mode on stacked phones; `data-plate-wide` keeps the authored one. */
+const STACKED_MODE = 'anchored';
 
 /** Boot milestones for the pre-three loader in StageCanvas (0…1). */
 function progress(value: number): void {
@@ -96,6 +100,7 @@ export class Stage {
   private readonly finePointer = matchMedia('(pointer: fine)').matches;
   private size = { width: 0, height: 0 };
   private layout: LayoutKind = 'desktop';
+  private stacked = false;
   private refreshMs = 1000 / 60;
   private readonly sampler = new FrameSampler(60);
   private readonly workSampler = new FrameSampler(60);
@@ -178,11 +183,13 @@ export class Stage {
     this.cleanups.push(onRegistryChange(() => void this.syncRegistry()));
     await yieldToMain();
 
+    /* Read before the plates move into their layers: afterwards scrollY would force that whole re-layout synchronously. */
+    const atTop = scrollY < 4;
     if (!capture) this.mountPlates();
-    const first = this.firstChapter();
+    const first = this.firstChapter(atTop);
     this.director.request({ id: first.id, subIndex: first.sub, shot: this.shotFor(first.id, first.sub) }, 'instant');
     this.director.update(this.camera, 0, this.fov(), { x: 0, y: 0 }, true);
-    await this.renderer.compileAsync(this.world.scene, this.camera);
+    await this.precompile();
     progress(0.96);
     await yieldToMain();
     // The idle window starts when the scene is first seen: a long boot would otherwise skip the power-on.
@@ -206,10 +213,10 @@ export class Stage {
   }
 
   /** Capture / forced chapter, else `intro` when the page starts at the top, else the hero. */
-  private firstChapter(): { id: ChapterId; sub: number } {
+  private firstChapter(atTop: boolean): { id: ChapterId; sub: number } {
     const fixed = this.options.capture ?? (this.options.forcedChapter ? { chapter: this.options.forcedChapter, sub: this.options.forcedSub ?? 0 } : null);
     if (fixed) return { id: fixed.chapter, sub: fixed.sub };
-    if (scrollY < 4 && this.movesAllowed) {
+    if (atTop && this.movesAllowed) {
       this.introUntil = Number.POSITIVE_INFINITY;
       return { id: 'intro', sub: 0 };
     }
@@ -217,18 +224,20 @@ export class Stage {
   }
 
   /**
-   * Chapter shot for the current layout. Below 768 px the hero (and intro) push in 10 % towards
+   * Chapter shot for the current layout. Landscape phones push the hero (and intro) in 10 % towards
    * the target so the screen text is not tiny (a straight dolly: roll and FOV are unchanged).
    */
   private shotFor(id: ChapterId, sub: number): Shot {
     const shot = this.world.shot(id, sub);
-    const push = (this.layout === 'phone' && (id === 'hero' || id === 'intro') ? PHONE_MONITOR_PUSH : 0) - (id === 'intro' ? INTRO_PULLBACK : 0);
+    const readsMonitor = this.layout === 'phone' && !this.stacked && (id === 'hero' || id === 'intro');
+    const push = (readsMonitor ? PHONE_MONITOR_PUSH : 0) - (id === 'intro' ? INTRO_PULLBACK : 0);
     if (!push) return shot;
     const position = shot.position.clone().lerp(shot.target, push);
     return { ...shot, position };
   }
 
   private fov(): number {
+    if (this.stacked) return CAMERA_LIMITS.fovStacked;
     return this.layout === 'desktop' ? CAMERA_LIMITS.fovDesktop : CAMERA_LIMITS.fovTouch;
   }
 
@@ -247,26 +256,50 @@ export class Stage {
     this.bump();
   }
 
-  /** Reduced motion / pause: 300 ms dissolve (WAAPI, so the global transition kill-switch does not flatten it). */
+  /**
+   * Reduced motion / pause: 300 ms dip to black (WAAPI, so the global transition kill-switch does not
+   * flatten it). Layers are darkened, not faded: the hero fallback picture sits behind the canvas
+   * and the monitor's screen behind the plates, and fading would double-expose them over the new shot.
+   */
   private dissolve(cut: () => void): void {
     const layers = [this.canvas, this.plates?.css3d.domElement, this.plates?.panels].filter(Boolean) as HTMLElement[];
-    const out = layers.map(el => el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: DISSOLVE_HALF_MS, fill: 'forwards' }));
+    const fade = (direction: PlaybackDirection, fill: FillMode) =>
+      layers.map(el => el.animate([{ filter: 'brightness(1)' }, { filter: 'brightness(0)' }], { duration: DISSOLVE_HALF_MS, fill, direction }));
+    const out = fade('normal', 'forwards');
     void Promise.all(out.map(a => a.finished)).then(() => {
       cut();
       this.invalidate();
       requestAnimationFrame(() => {
-        for (const el of layers) el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: DISSOLVE_HALF_MS, fill: 'none' });
+        fade('reverse', 'none');
         for (const a of out) a.cancel();
       });
     });
   }
 
+  /** Sets each switchable plate's `data-plate-mode` for the current layout, before the plates mount. */
+  private applyPlateModes(): void {
+    for (const plate of document.querySelectorAll<HTMLElement>('[data-plate-stacked]')) {
+      plate.dataset.plateWide ??= plate.dataset.plateMode ?? '';
+      plate.dataset.plateMode = this.stacked ? STACKED_MODE : plate.dataset.plateWide;
+    }
+  }
+
+  /** Plates choose their layer at mount, so crossing the stacked breakpoint remounts them. */
+  private remountPlates(): void {
+    if (!this.plates) return;
+    this.plates.unmount();
+    this.plates = undefined;
+    this.mountPlates();
+  }
+
   private mountPlates(): void {
+    this.applyPlateModes();
     const plates = new Plates({
       surface: name => this.world.surface(name),
       anchor: name => this.world.anchor(name),
       scrollTo: (chapter, sub) => this.scrollToChapter(chapter, sub),
-      reduced: () => !this.movesAllowed
+      reduced: () => !this.movesAllowed,
+      invalidate: () => this.invalidate()
     });
     if (!plates.mount()) return;
     this.plates = plates;
@@ -323,8 +356,19 @@ export class Stage {
       motion: () => this.idleMotion(),
       fov: () => this.fov(),
       readingPose: id => this.world.shot(id, 0),
-      invalidate: () => this.invalidate()
+      invalidate: () => this.invalidate(),
+      precompile: object => this.precompile(object)
     };
+  }
+
+  private async precompile(object?: Object3D): Promise<void> {
+    /* A model can finish loading while the desk set is still loading, before the pipeline is attached. */
+    if (!this.fx) this.attachFx();
+    if (this.fx?.precompile) {
+      await this.fx.precompile(this.renderer, this.world.scene, this.camera, object);
+      return;
+    }
+    await (object ? this.renderer.compileAsync(object, this.camera, this.world.scene) : this.renderer.compileAsync(this.world.scene, this.camera));
   }
 
   /** Loads the registered desk set (or legacy hero module) and the FX pipeline. */
@@ -459,7 +503,7 @@ export class Stage {
     const state = this.director.state();
     if (this.world.update(dt, (now - this.clockStart) / 1000, state, this.idleMotion(), this.camera.position, this.renderer.getPixelRatio())) settling = true;
     this.plates?.update(this.camera, state, this.progress.get(state.id) ?? 0);
-    const steady = this.director.breathe(this.camera, dt, this.idleMotion() && BREATHING_CHAPTERS.has(state.id));
+    const steady = this.director.breathe(this.camera, dt, this.idleMotion() && (this.stacked ? BREATHING_STACKED : BREATHING_CHAPTERS).has(state.id));
     settling ||= this.director.breathing;
     if (this.fx) {
       this.fx.render(this.renderer, this.world.scene, this.camera, dt);
@@ -550,9 +594,13 @@ export class Stage {
     if (!changed) return;
     this.size = { width, height };
     this.layout = layoutKind(width);
+    const stacked = stackedLayout(this.size);
+    const restack = stacked !== this.stacked;
+    this.stacked = stacked;
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height, false);
+    if (restack) this.remountPlates();
     this.plates?.setSize(width, height);
     this.fx?.resize(width, height, this.renderer.getPixelRatio());
     if (this.ready) {

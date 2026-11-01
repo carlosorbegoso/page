@@ -61,7 +61,6 @@ import {
   SUB_SHOTS,
   framings,
   monitorFrame,
-  portraitMonitor,
   panelAnchor,
   phoneFrame,
   toShot,
@@ -79,11 +78,6 @@ import {
 const LIGHT_CALIBRATION = { lamp: 0.4, monitor: 0.16, moon: 3, fill: 2.5, shelf: 9 } as const;
 /** HDR gain of the screen pictures so they stay luminous through ACES / the FX composer. */
 const SCREEN_HDR = 1.8;
-/**
- * On phones the portrait monitor shows its content at 0.82 of 1:1: 17 px body text reads at
- * ~14 px and the screen gains ~22 % more CSS room, so the about slides fit without overflow.
- */
-const PORTRAIT_SCREEN_PROJECTION = 0.82;
 
 interface ChapterLight {
   lamp: number;
@@ -226,8 +220,6 @@ export class DeskSet implements ShotProvider {
   private readonly lightRig = new Group();
   private uniforms!: AtlasUniforms;
   private screen!: Mesh<PlaneGeometry, MeshBasicMaterial>;
-  private monitorHead!: Mesh;
-  private portrait: boolean | null = null;
   private screenTexture!: CanvasTexture;
   private phoneScreen!: Mesh<PlaneGeometry, MeshBasicMaterial>;
   private phoneTexture!: CanvasTexture;
@@ -243,6 +235,13 @@ export class DeskSet implements ShotProvider {
   private monitorLight!: PointLight;
   private moon!: DirectionalLight;
   private fill!: HemisphereLight;
+  private ambientIntensity = 0.08;
+  /** Canvas CSS size, read once per resize instead of forcing a layout from every frame. */
+  private viewportSize: { width: number; height: number } | null = null;
+  private viewportObserver: ResizeObserver | null = null;
+  private readonly onViewportChange = () => {
+    this.viewportSize = null;
+  };
   private shelfLight!: SpotLight;
   private moonNight!: Color;
   private moonDawn!: Color;
@@ -268,6 +267,7 @@ export class DeskSet implements ShotProvider {
   private shadowPose = '';
   private hoverId = -1;
   private spineLabels = new Map<FolderId, Mesh>();
+  private archiveCover: Mesh | null = null;
   private readonly folderPull = new Map<FolderId, number>(FOLDERS.map(id => [id, 0]));
   /** The visitor switched the lamp off by clicking it; the story switches it back on at the next chapter. */
   private lampOff = false;
@@ -325,14 +325,13 @@ export class DeskSet implements ShotProvider {
     const head = new PartBuilder();
     buildMonitorHead(head, palette, q);
     const headGeometry = head.build();
-    this.monitorHead = new Mesh(headGeometry, material);
-    this.monitorHead.name = 'desk-monitor';
-    this.monitorHead.castShadow = high;
-    this.monitorHead.receiveShadow = high;
-    const pivot = monitorFrame();
-    this.monitorHead.position.copy(MONITOR.centre);
-    this.monitorHead.quaternion.copy(pivot.quaternion);
-    this.room.add(this.monitorHead);
+    const monitorHead = new Mesh(headGeometry, material);
+    monitorHead.name = 'desk-monitor';
+    monitorHead.castShadow = high;
+    monitorHead.receiveShadow = high;
+    monitorHead.position.copy(MONITOR.centre);
+    monitorHead.quaternion.copy(monitorFrame().quaternion);
+    this.room.add(monitorHead);
     this.disposables.push(headGeometry);
     buildLamp(statics, palette, q);
     buildPlant(statics, palette, q);
@@ -363,17 +362,21 @@ export class DeskSet implements ShotProvider {
     this.disposables.push(this.backdrop, this.glass);
     const spines = createSpineLabels();
     this.spineLabels = spines.meshes;
-    this.room.add(...spines.meshes.values());
+    this.room.add(...spines.meshes.values(), spines.cover);
+    this.archiveCover = spines.cover;
     this.disposables.push(spines);
     window.addEventListener('desk:action', this.onAction);
-    this.clockModel = new StoryClock(() => {
-      this.clockModel?.show(this.clockMinutes);
-      if (this.context) this.context.renderer.shadowMap.needsUpdate = true;
-      this.context?.invalidate();
-    });
+    this.clockModel = new StoryClock(
+      () => {
+        this.clockModel?.show(this.clockMinutes);
+        if (this.context) this.context.renderer.shadowMap.needsUpdate = true;
+        this.context?.invalidate();
+      },
+      model => this.context?.precompile?.(model) ?? Promise.resolve()
+    );
     this.room.add(this.clockModel.group);
-    if (high) {
-      this.steam = createSteam();
+    if (high || context.tier === 'mid') {
+      this.steam = createSteam(high ? { wisps: 3, octaves: 3 } : { wisps: 2, octaves: 2 });
       this.room.add(this.steam.mesh);
       this.disposables.push(this.steam);
     }
@@ -520,7 +523,8 @@ export class DeskSet implements ShotProvider {
     this.moonAt = this.moon.position.clone();
     this.sunAt.set(WINDOW.x - 1.6, WINDOW.y + 3.4, ROOM.back - 3);
     this.moon.target.position.set(0, 0.6, 0.8);
-    this.fill = new HemisphereLight(0x1b2436, 0x0a0806, tokenNumber('--desk-ambient-intensity', 0.08) * LIGHT_CALIBRATION.fill);
+    this.ambientIntensity = tokenNumber('--desk-ambient-intensity', 0.08);
+    this.fill = new HemisphereLight(0x1b2436, 0x0a0806, this.ambientIntensity * LIGHT_CALIBRATION.fill);
     this.shelfLight = new SpotLight(this.moonNight.clone(), 0, 0, 0.42, 0.85, 2);
     this.shelfLight.position.set(WINDOW.x - 0.3, WINDOW.y + 0.35, GLASS_Z + 0.08);
     this.shelfLight.target.position.copy(folderCentre('intercorp')).add(new Vector3(FOLDER.depth / 2, 0, 0));
@@ -529,9 +533,23 @@ export class DeskSet implements ShotProvider {
 
   private viewport(): Viewport {
     const canvas = this.context.renderer.domElement;
-    const width = canvas.clientWidth || innerWidth;
-    const height = canvas.clientHeight || innerHeight;
+    if (!this.viewportObserver) {
+      /* Layout is clean inside a ResizeObserver callback, so reading the size there costs nothing. */
+      this.viewportObserver = new ResizeObserver(() => {
+        this.viewportSize = this.readViewport(canvas);
+      });
+      this.viewportObserver.observe(canvas);
+      /* Capture so the cache is cleared before the Stage's own resize listener asks for a new shot. */
+      window.addEventListener('resize', this.onViewportChange, { capture: true, passive: true });
+      window.addEventListener('orientationchange', this.onViewportChange, { capture: true, passive: true });
+    }
+    this.viewportSize ??= this.readViewport(canvas);
+    const { width, height } = this.viewportSize;
     return { width, height, fov: this.context.fov?.() ?? (width < 1024 ? 40 : 30) };
+  }
+
+  private readViewport(canvas: HTMLCanvasElement): { width: number; height: number } {
+    return { width: canvas.clientWidth || innerWidth, height: canvas.clientHeight || innerHeight };
   }
 
   private framing(chapter: ChapterId, subIndex = 0): Framing | null {
@@ -556,14 +574,13 @@ export class DeskSet implements ShotProvider {
    */
   getSurface(name: SurfaceName): PlateAnchor | null {
     if (!this.context) return null;
-    const frame = name === 'monitor' ? monitorFrame(portraitMonitor(this.viewport())) : this.phoneSurface();
+    const frame = name === 'monitor' ? monitorFrame() : this.phoneSurface();
     const reader: ChapterId = name === 'phone' ? 'contact' : this.chapter === 'about' ? 'about' : 'hero';
     const shot = this.getShot(reader, 0);
     const view = this.viewport();
     if (!shot || view.height <= 0) return null;
     const distance = shot.position.distanceTo(frame.centre);
-    const projection = name === 'monitor' && portraitMonitor(view) ? PORTRAIT_SCREEN_PROJECTION : 1;
-    const scale = (2 * distance * Math.tan((view.fov * Math.PI) / 360)) / view.height * projection;
+    const scale = (2 * distance * Math.tan((view.fov * Math.PI) / 360)) / view.height;
     return {
       position: frame.centre.clone().addScaledVector(frame.normal, 0.0015),
       quaternion: frame.quaternion.clone(),
@@ -638,7 +655,6 @@ export class DeskSet implements ShotProvider {
     this.clock = time;
     if (state.settled && this.settledAt < 0) this.settledAt = time;
     let settling = false;
-    this.syncOrientation();
     const day = document.documentElement.dataset.time === 'day';
     const light = (day ? CHAPTER_LIGHT_DAY : CHAPTER_LIGHT)[this.chapter];
     const level = this.level;
@@ -783,22 +799,6 @@ export class DeskSet implements ShotProvider {
     return parts.join(',');
   }
 
-  /** Pivots the monitor head (and its screen picture) to portrait on narrow viewports; re-bakes the shadow. */
-  private syncOrientation(): void {
-    const portrait = portraitMonitor(this.viewport());
-    if (portrait === this.portrait) return;
-    this.portrait = portrait;
-    this.monitorHead.rotation.z = 0;
-    this.monitorHead.quaternion.copy(monitorFrame().quaternion);
-    if (portrait) this.monitorHead.rotateZ(Math.PI / 2);
-    const frame = monitorFrame(portrait);
-    this.screen.geometry.dispose();
-    this.screen.geometry = new PlaneGeometry(frame.width, frame.height);
-    drawScreen(this.screenTexture, frame.width / frame.height, tokenColor('--color-monitor-glow', '#7fb8ff'));
-    if (this.context.tier === 'high') this.context.renderer.shadowMap.needsUpdate = true;
-    this.context.invalidate();
-  }
-
   private applyLevels(): void {
     const level = this.level;
     this.lamp.intensity = level.lamp * LIGHT_CALIBRATION.lamp;
@@ -809,7 +809,7 @@ export class DeskSet implements ShotProvider {
     this.moon.position.copy(this.moonAt).lerp(this.sunAt, level.day);
     this.fill.color.copy(this.nightSky).lerp(this.daySky, level.day);
     this.fill.groundColor.copy(this.nightGround).lerp(this.dayGround, level.day);
-    this.fill.intensity = tokenNumber('--desk-ambient-intensity', 0.08) * LIGHT_CALIBRATION.fill * (1 + level.dawn * 1.5 + level.day * DAY_FILL_GAIN);
+    this.fill.intensity = this.ambientIntensity * LIGHT_CALIBRATION.fill * (1 + level.dawn * 1.5 + level.day * DAY_FILL_GAIN);
     this.screen.material.color.setScalar(SCREEN_HDR * Math.min(level.monitor / 5, 1.2));
     this.phoneScreen.material.color.setScalar(0.06 + level.phone * SCREEN_HDR * 0.9);
     this.laptopScreen?.material.color.setScalar(SCREEN_HDR * 0.55 * Math.min(level.monitor / 5, 1));
@@ -820,7 +820,7 @@ export class DeskSet implements ShotProvider {
     this.glass.setLampReflection(Math.min(level.lamp / 28, 1));
     this.beam.setLevel(Math.min(level.lamp / 28, 1.2));
     this.beam.setPixelScale(this.context.renderer.domElement.height, this.viewport().fov);
-    this.steam?.setStrength((this.chapter === 'hero' || this.chapter === 'about' || this.chapter === 'intro' ? 0.22 : 0.1) * (1 - this.level.day));
+    this.steam?.setStrength(this.chapter === 'contact' ? 0.9 : this.chapter === 'hero' || this.chapter === 'about' || this.chapter === 'intro' ? 0.7 : 0.45, this.level.day);
     const uniforms = this.uniforms;
     FIGURE_ORDER.forEach((id, index) => {
       const play = this.playOffset(id);
@@ -839,6 +839,7 @@ export class DeskSet implements ShotProvider {
       uniforms.uPull.value[OBJECT_ID[id]] = pull;
       const label = this.spineLabels.get(id);
       if (label) label.position.x = pull;
+      if (id === FOLDERS[0] && this.archiveCover) this.archiveCover.position.x = (this.archiveCover.userData.restX as number) + pull;
     }
     uniforms.uGlow.value[OBJECT_ID.openFolder] = (this.folderGlow.get('tcs') ?? 0) * 0.25;
     uniforms.uHoverMix.value = this.hoverMix;
@@ -860,6 +861,11 @@ export class DeskSet implements ShotProvider {
 
   dispose(): void {
     window.removeEventListener('desk:action', this.onAction);
+    this.viewportObserver?.disconnect();
+    this.viewportObserver = null;
+    this.viewportSize = null;
+    window.removeEventListener('resize', this.onViewportChange, { capture: true });
+    window.removeEventListener('orientationchange', this.onViewportChange, { capture: true });
     this.clockModel?.dispose();
     this.screen?.geometry.dispose();
     for (const item of this.disposables) item.dispose();

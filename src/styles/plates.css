@@ -125,6 +125,23 @@
 }
 
 /*
+ * Upright phones dock every panel at the bottom (stackedLayout): the pool becomes a full-bleed
+ * gradient from the panel down, like a subtitle band, so the room above stays clean.
+ */
+@media (width < 48rem) and (orientation: portrait) {
+  .is-3d .plate:not([data-plate-mode^='surface-'])::before {
+    inset: -6rem calc((100% - 100vw) / 2) -100vh;
+    background: linear-gradient(
+      180deg,
+      transparent 0,
+      var(--color-plate-pool-fade, rgb(4 6 11 / 0.32)) 2.5rem,
+      var(--color-plate-pool-edge) 5rem,
+      var(--color-plate-pool) 8rem
+    );
+  }
+}
+
+/*
  * Screens have a fixed size set by the engine (--surface-width/height) and must never clip, so
  * each section sizes its screen content in container units (cqh/cqw) of the plate.
  */

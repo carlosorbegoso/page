@@ -56,6 +56,8 @@ export type SurfaceName = 'monitor' | 'phone';
  * - `data-plate-mode="anchored"` + `data-plate-anchor="<anchor name>"` — HTML panel in a fixed 2D
  *   layer, translated to the screen projection of `getAnchor(name)`; it never rotates or scales.
  * Optional `data-plate-side="left|right"` places an anchored panel beside its anchor point.
+ * `data-plate-stacked` makes a surface plate an anchored panel on upright phones (`stackedLayout`),
+ * docked under the room; it then needs a `data-plate-anchor` too.
  * Plates without a mode stay in the normal page flow.
  */
 export type PlateMode = 'surface-monitor' | 'surface-phone' | 'anchored';
@@ -122,6 +124,11 @@ export interface StationContext {
   /** @deprecated Legacy station framing; returns the chapter shot. */
   readingPose(id: ChapterId): StationCameraPose;
   invalidate(): void;
+  /**
+   * Compiles the shaders of an object that is not in the scene yet, with the scene's lights and the
+   * render state the next frame will use, so adding it does not stall that frame.
+   */
+  precompile?(object: Object3D): Promise<void>;
 }
 
 /**
@@ -152,6 +159,11 @@ export interface ShotProvider {
 /** Post-processing pipeline. When none is registered the Stage renders directly. */
 export interface FxPipeline {
   render(renderer: WebGLRenderer, scene: Scene, camera: PerspectiveCamera, dt: number): void;
+  /**
+   * Compiles every program `render` will use (scene into the pipeline's own target, and its passes).
+   * `object` compiles only that object, lit by `scene`, for meshes that are added later.
+   */
+  precompile?(renderer: WebGLRenderer, scene: Scene, camera: PerspectiveCamera, object?: Object3D): Promise<void>;
   /** World point to keep in focus (rack focus ≤ 600 ms), or null. */
   setFocus(point: Vector3 | null): void;
   resize(width: number, height: number, pixelRatio: number): void;
@@ -172,6 +184,16 @@ export interface StageEventMap {
   'chapter:progress': CustomEvent<{ id: ChapterId; progress: number }>;
   /** Label of the scene object under the pointer, or null. */
   'scene:hover': CustomEvent<{ label: string | null }>;
+  /** Overall story progress (0 at the first sub-shot, 1 at the last) and the active sub-shot index. */
+  'story:progress': CustomEvent<{ value: number; index: number; total: number }>;
+  /** Shot navigation is live (3D mode): keyboard, settle and tour are available. */
+  'story:ready': CustomEvent<{ total: number }>;
+  'story:disposed': CustomEvent<undefined>;
+  /** Request: go to a sub-shot, one step forward / back, or an edge of the story. */
+  'story:goto': CustomEvent<{ chapter: ChapterId; sub?: number } | { step: 1 | -1 } | { edge: 'start' | 'end' }>;
+  /** Request: start, stop or toggle the auto tour. */
+  'story:tour': CustomEvent<{ action?: 'toggle' | 'start' | 'stop' }>;
+  'story:tour-state': CustomEvent<{ state: 'playing' | 'paused' | 'finished' }>;
 }
 
 /** @deprecated Legacy camera pose (desk before the migration). */

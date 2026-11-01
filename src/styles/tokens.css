@@ -110,6 +110,11 @@
   --color-rain: #9db8e8;
   --color-dawn-low: #e9a47a;
   --color-dawn-high: #6f86ae;
+  --color-sea-haze: #1b2532;
+  --color-day-sky-high: #a9b1b9;
+  --color-day-sky-low: #c9cbc8;
+  --color-day-haze: #bcbfbe;
+  --color-day-city: #7f858c;
   --color-screen-bg: #0b0f16;
   --color-telescope: #c9ced6;
   --color-telescope-brass: #b08a4a;
@@ -276,7 +281,10 @@
 }
 
 /* Day mode on the stage: the walls stay dim, so loose panels keep light ink on their dark pool; only the HUD scrim turns lighter. */
+/* Muted and subtle ink lift with it: over the lighter day backdrop the 0.78 pool alone left them at 3.2–4.5:1. */
 :root[data-time='day'].is-3d {
+  --color-text-muted: #b4bfcf;
+  --color-text-subtle: #aab6c8;
   --color-plate-pool: rgb(4 6 11 / 0.78);
   --color-plate-pool-edge: rgb(4 6 11 / 0.6);
 }
@@ -363,4 +371,10 @@
   animation-iteration-count: 1 !important;
   transition-duration: 0.01ms !important;
   scroll-behavior: auto !important;
+}
+
+/* Copy that depends on the time shown on the stage. */
+:root:not([data-time='day']) .when-day,
+:root[data-time='day'] .when-night {
+  display: none !important;
 }

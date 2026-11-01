@@ -21,6 +21,10 @@ interface PlateEntry {
   object?: CSS3DObject;
   anchorName?: string;
   side?: 'left' | 'right';
+  /** Border-box size of an anchored wrapper, kept by a ResizeObserver so placement never reads layout. */
+  size?: { width: number; height: number };
+  /** Last values written, so a settled frame touches no style. */
+  written: { opacity?: string; pointer?: string; transform?: string; surface?: string };
 }
 
 export interface PlateHost {
@@ -29,6 +33,8 @@ export interface PlateHost {
   /** Scrolls the page to a chapter / sub-shot (used when keyboard focus enters a plate). */
   scrollTo(chapter: ChapterId, sub: number): void;
   reduced(): boolean;
+  /** Requests a frame (a panel changed size while the loop was idle). */
+  invalidate(): void;
 }
 
 const MODES: readonly PlateMode[] = ['surface-monitor', 'surface-phone', 'anchored'];
@@ -67,6 +73,8 @@ export class Plates {
   private width = 1;
   private height = 1;
   private safeBottom = 0;
+  private readonly sizes = new ResizeObserver(records => this.resized(records));
+  private readonly byWrapper = new Map<Element, PlateEntry>();
   private readonly onFocusIn = (event: FocusEvent) => this.focusIn(event);
   private readonly onKeyDown = (event: KeyboardEvent) => this.tabInStoryOrder(event);
 
@@ -74,6 +82,7 @@ export class Plates {
 
   /** Moves every moded plate into its layer. Returns false when the page has none. */
   mount(): boolean {
+    this.safeBottom = this.measureSafeBottom();
     const surfaceRoot = this.css3d.domElement;
     surfaceRoot.classList.add('stage-surfaces');
     surfaceRoot.dataset.stageSurfaces = '';
@@ -102,7 +111,7 @@ export class Plates {
         wrapper.dataset.plateWrapper = el.dataset.plateId ?? '';
         wrapper.dataset.plateChapter = chapter;
         wrapper.append(el);
-        const entry: PlateEntry = { el, chapter, mode, sub, wrapper };
+        const entry: PlateEntry = { el, chapter, mode, sub, wrapper, written: {} };
         if (mode === 'anchored') {
           wrapper.className = 'stage-panels__panel';
           wrapper.style.cssText = 'position:absolute;left:0;top:0;width:var(--plate-width);will-change:transform';
@@ -110,6 +119,8 @@ export class Plates {
           const side = el.dataset.plateSide;
           entry.side = side === 'left' || side === 'right' ? side : undefined;
           this.panels.append(wrapper);
+          this.byWrapper.set(wrapper, entry);
+          this.sizes.observe(wrapper);
         } else {
           wrapper.className = 'stage-surfaces__plate';
           entry.object = new CSS3DObject(wrapper);
@@ -136,6 +147,8 @@ export class Plates {
 
   /** Puts every plate back where it was (degradation to the static page). */
   unmount(): void {
+    this.sizes.disconnect();
+    this.byWrapper.clear();
     for (const { plate, parent, next } of [...this.origins].reverse()) {
       plate.removeAttribute('data-active');
       plate.removeAttribute('data-dormant');
@@ -162,22 +175,43 @@ export class Plates {
   }
 
   setSize(width: number, height: number): void {
+    if (width === this.width && height === this.height) return;
+    const first = this.width === 1 && this.height === 1;
     this.width = width;
     this.height = height;
-    this.safeBottom = this.measureSafeBottom();
+    if (!first) this.safeBottom = this.measureSafeBottom();
     this.css3d.setSize(width, height);
+  }
+
+  private resized(records: ResizeObserverEntry[]): void {
+    for (const record of records) {
+      const entry = this.byWrapper.get(record.target);
+      if (!entry) continue;
+      const box = record.borderBoxSize?.[0];
+      entry.size = box
+        ? { width: Math.round(box.inlineSize), height: Math.round(box.blockSize) }
+        : { width: entry.wrapper.offsetWidth, height: entry.wrapper.offsetHeight };
+    }
+    this.host.invalidate();
   }
 
   /** Visibility, flags and placement for the current chapter state. */
   update(camera: PerspectiveCamera, state: ChapterState, progress: number): void {
     const currentIndex = SECTION_CHAPTERS.indexOf(state.id);
     for (const entry of this.entries) {
+      if (entry.mode === 'anchored' && !entry.size) entry.size = { width: entry.wrapper.offsetWidth, height: entry.wrapper.offsetHeight };
+    }
+    for (const entry of this.entries) {
       const current = entry.chapter === state.id && (entry.sub === null || entry.sub === state.subIndex);
       const gap = Math.abs(SECTION_CHAPTERS.indexOf(entry.chapter) - currentIndex);
-      entry.el.toggleAttribute('data-active', current && state.settled);
+      const { written } = entry;
+      const active = current && state.settled;
+      entry.el.toggleAttribute('data-active', active);
       entry.el.toggleAttribute('data-dormant', !current && gap > 1);
-      entry.wrapper.style.opacity = current ? '' : '0';
-      entry.wrapper.style.pointerEvents = current && state.settled ? 'auto' : 'none';
+      const opacity = current ? '' : '0';
+      if (written.opacity !== opacity) entry.wrapper.style.opacity = written.opacity = opacity;
+      const pointer = active ? 'auto' : 'none';
+      if (written.pointer !== pointer) entry.wrapper.style.pointerEvents = written.pointer = pointer;
       if (entry.mode === 'anchored') this.placePanel(entry, camera, current, progress);
       else this.placeSurface(entry, camera);
     }
@@ -198,16 +232,22 @@ export class Plates {
     const scale = anchor.scale ?? (2 * distance * Math.tan((camera.fov * Math.PI) / 360)) / this.height;
     object.scale.setScalar(scale);
     if (anchor.size) {
-      entry.el.style.setProperty('--surface-width', `${Math.round(anchor.size.width / scale)}px`);
-      entry.el.style.setProperty('--surface-height', `${Math.round(anchor.size.height / scale)}px`);
+      const width = `${Math.round(anchor.size.width / scale)}px`;
+      const height = `${Math.round(anchor.size.height / scale)}px`;
+      const surface = `${width} ${height}`;
+      if (entry.written.surface !== surface) {
+        entry.written.surface = surface;
+        entry.el.style.setProperty('--surface-width', width);
+        entry.el.style.setProperty('--surface-height', height);
+      }
     }
   }
 
   private placePanel(entry: PlateEntry, camera: PerspectiveCamera, current: boolean, progress: number): void {
     if (!current) return;
     const world = entry.anchorName ? this.host.anchor(entry.anchorName) : null;
-    const width = entry.wrapper.offsetWidth || 480;
-    const height = entry.wrapper.offsetHeight || 300;
+    const width = entry.size?.width || 480;
+    const height = entry.size?.height || 300;
     let x: number;
     let y: number;
     const projected = world ? world.clone().project(camera) : null;
@@ -231,15 +271,16 @@ export class Plates {
       const overflow = Math.max(top + height - bottom, 0);
       y = top - overflow * progress;
     }
-    entry.wrapper.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`;
+    const transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`;
+    if (entry.written.transform !== transform) entry.wrapper.style.transform = entry.written.transform = transform;
   }
 
-  /** `env(safe-area-inset-bottom)` in px (home indicator on iOS). */
+  /** `env(safe-area-inset-bottom)` in px (home indicator on iOS), resolved by style alone: no layout pass. */
   private measureSafeBottom(): number {
     const probe = document.createElement('div');
-    probe.style.cssText = 'position:fixed;bottom:0;height:env(safe-area-inset-bottom, 0px);visibility:hidden;pointer-events:none';
+    probe.style.cssText = 'position:fixed;bottom:0;padding-bottom:env(safe-area-inset-bottom, 0px);visibility:hidden;pointer-events:none';
     document.body.append(probe);
-    const value = probe.getBoundingClientRect().height;
+    const value = Number.parseFloat(getComputedStyle(probe).paddingBottom) || 0;
     probe.remove();
     return value;
   }

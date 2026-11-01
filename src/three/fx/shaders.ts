@@ -79,8 +79,10 @@ void main() {
 `;
 
 /**
- * Anamorphic streak: a wide horizontal blur of the bloom's bright pass, run twice (short then long
- * stride) at low resolution. `uKeep` re-thresholds the first pass so only the brightest points streak.
+ * Anamorphic streak: a short horizontal blur of the bloom's bright pass, run twice at low resolution.
+ * `uKeep` is a hard re-threshold so only emitters (filament, antenna, LEDs) streak, not lit surfaces.
+ * The second stride must stay within the first pass's footprint: a longer one samples gaps and
+ * stamps discrete copies of the source along the line.
  */
 export const STREAK_FRAG = /* glsl */ `
 uniform sampler2D tInput;
@@ -91,7 +93,7 @@ varying vec2 vUv;
 float luma(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
 vec3 bright(vec2 uv) {
   vec3 c = texture2D(tInput, uv).rgb;
-  return uKeep > 0.0 ? c * smoothstep(uKeep, uKeep * 1.6, luma(c)) : c;
+  return uKeep > 0.0 ? c * smoothstep(uKeep, uKeep * 1.15, luma(c)) : c;
 }
 void main() {
   vec3 sum = bright(vUv);

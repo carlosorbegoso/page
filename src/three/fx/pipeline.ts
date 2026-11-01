@@ -1,8 +1,12 @@
 import {
+  BufferGeometry,
   DepthTexture,
+  Float32BufferAttribute,
   HalfFloatType,
   LinearFilter,
+  Mesh,
   NoBlending,
+  OrthographicCamera,
   RGBAFormat,
   ShaderMaterial,
   UnsignedIntType,
@@ -10,6 +14,7 @@ import {
   Vector3,
   WebGLRenderTarget,
   type IUniform,
+  type Object3D,
   type PerspectiveCamera,
   type Scene,
   type WebGLRenderer
@@ -288,6 +293,43 @@ class CinematicPipeline implements CinematicFx {
     fluidUniforms.uFluidVelocity.value = FLUID_IDLE_TEXTURE;
   }
 
+  /**
+   * Program cache keys depend on the bound render target (tone mapping, output colour space), so the
+   * scene is compiled into `targets.scene` and each pass under the target it draws into; compiling
+   * against the canvas would leave every program to be linked again in the first frame.
+   */
+  async precompile(renderer: WebGLRenderer, scene: Scene, camera: PerspectiveCamera, object?: Object3D): Promise<void> {
+    const previous = renderer.getRenderTarget();
+    if (!this.profile.enabled) {
+      renderer.setRenderTarget(null);
+      const ready = object ? renderer.compileAsync(object, camera, scene) : renderer.compileAsync(scene, camera);
+      renderer.setRenderTarget(previous);
+      await ready;
+      return;
+    }
+    const targets = this.ensureTargets(renderer);
+    renderer.setRenderTarget(targets.scene);
+    this.tone.begin(renderer, scene);
+    const pending = [object ? renderer.compileAsync(object, camera, scene) : renderer.compileAsync(scene, camera)];
+    this.tone.end(renderer, scene);
+    if (!object) {
+      /* Same attributes as FullScreenQuad's triangle (position + uv, no normal): attributes are part of the program key. */
+      const geometry = new BufferGeometry();
+      geometry.setAttribute('position', new Float32BufferAttribute([-1, 3, 0, -1, -1, 0, 3, -1, 0], 3));
+      geometry.setAttribute('uv', new Float32BufferAttribute([0, 2, 0, 0, 2, 0], 2));
+      const quadCamera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
+      const passes = [this.down, this.up, this.streak, ...(targets.dof ? [this.dofMaterial()] : [])];
+      const passTarget = targets.down[0] ?? targets.scene;
+      renderer.setRenderTarget(passTarget);
+      for (const pass of passes) pending.push(renderer.compileAsync(new Mesh(geometry, pass), quadCamera));
+      renderer.setRenderTarget(null);
+      pending.push(renderer.compileAsync(new Mesh(geometry, this.composite), quadCamera));
+      void Promise.all(pending).finally(() => geometry.dispose());
+    }
+    renderer.setRenderTarget(previous);
+    await Promise.all(pending);
+  }
+
   render(renderer: WebGLRenderer, scene: Scene, camera: PerspectiveCamera, dt: number): void {
     if (!this.profile.enabled) {
       renderer.setRenderTarget(null);
@@ -324,7 +366,7 @@ class CinematicPipeline implements CinematicFx {
     u.tBloom!.value = (targets.up[0] ?? targets.down[0])!.texture;
     u.tStreak!.value = targets.streak ? targets.streak[1].texture : (targets.up[0] ?? targets.down[0])!.texture;
     u.uStreakStrength!.value = targets.streak ? tokens.streakStrength : 0;
-    u.uAberration!.value = tokens.aberration;
+    u.uAberration!.value = document.documentElement.dataset.time === 'day' ? 0 : tokens.aberration;
     u.uContrast!.value = grade.contrast;
     u.uNear!.value = camera.near;
     u.uFar!.value = camera.far;
@@ -423,17 +465,8 @@ class CinematicPipeline implements CinematicFx {
 
   private renderDof(renderer: WebGLRenderer, targets: Targets, camera: PerspectiveCamera): void {
     const dofTarget = targets.dof!;
-    this.dof ??= material(dofFrag(this.profile.dofTaps), {
-      tColor: { value: null },
-      tDepth: { value: null },
-      uNear: { value: 0.1 },
-      uFar: { value: 60 },
-      uFocus: { value: 5 },
-      uRange: { value: 2.5 },
-      uTexel: { value: new Vector2() },
-      uMaxRadius: { value: 4 }
-    });
-    const u = this.dof.uniforms;
+    const dof = this.dofMaterial();
+    const u = dof.uniforms;
     u.tColor!.value = targets.scene.texture;
     u.tDepth!.value = targets.scene.depthTexture;
     u.uNear!.value = camera.near;
@@ -444,10 +477,24 @@ class CinematicPipeline implements CinematicFx {
     const bokeh = this.tokens.bokeh;
     u.uMaxRadius!.value = (bokeh * this.grading.value.bokeh * 3 * (targets.height / 1080)) / this.profile.dofDivisor;
     this.timer?.begin('dof');
-    this.quad.material = this.dof;
+    this.quad.material = dof;
     renderer.setRenderTarget(dofTarget);
     this.quad.render(renderer);
     this.timer?.end();
+  }
+
+  private dofMaterial(): ShaderMaterial {
+    this.dof ??= material(dofFrag(this.profile.dofTaps), {
+      tColor: { value: null },
+      tDepth: { value: null },
+      uNear: { value: 0.1 },
+      uFar: { value: 60 },
+      uFocus: { value: 5 },
+      uRange: { value: 2.5 },
+      uTexel: { value: new Vector2() },
+      uMaxRadius: { value: 4 }
+    });
+    return this.dof;
   }
 
   private renderBloom(renderer: WebGLRenderer, targets: Targets): void {
@@ -480,7 +527,7 @@ class CinematicPipeline implements CinematicFx {
     this.timer?.end();
   }
 
-  /** Two horizontal passes over the bloom's bright pass: short stride, then long stride. */
+  /** Two horizontal passes over the bloom's bright pass: contiguous taps, then a stride inside their footprint. */
   private renderStreak(renderer: WebGLRenderer, targets: Targets): void {
     const pair = targets.streak;
     const source = targets.down[0];
@@ -489,8 +536,8 @@ class CinematicPipeline implements CinematicFx {
     this.timer?.begin('streak');
     this.quad.material = this.streak;
     const passes: Array<[WebGLRenderTarget, WebGLRenderTarget, number, number]> = [
-      [source, pair[0], 1.5, this.tokens.streakThreshold],
-      [pair[0], pair[1], 9, 0]
+      [source, pair[0], 1, this.tokens.streakThreshold],
+      [pair[0], pair[1], 2.5, 0]
     ];
     for (const [input, output, stride, keep] of passes) {
       u.tInput!.value = input.texture;

@@ -1,20 +1,19 @@
 import {
   BoxGeometry,
-  CapsuleGeometry,
   CircleGeometry,
   Color,
-  ConeGeometry,
   CylinderGeometry,
   ExtrudeGeometry,
   LatheGeometry,
   Matrix4,
-  OctahedronGeometry,
   Path,
   PlaneGeometry,
   Quaternion,
+  RingGeometry,
   Shape,
   ShapeGeometry,
   SphereGeometry,
+  SplineCurve,
   TorusGeometry,
   Vector2,
   Vector3,
@@ -23,7 +22,7 @@ import {
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { tokenColor, tokenNumber } from '../tokens';
-import { doubleSided, OBJECT_ID, PartBuilder, type Finish } from './builder';
+import { doubleSided, OBJECT_ID, PartBuilder, type Finish, type Placement } from './builder';
 import {
   CHAIR,
   DESK,
@@ -60,6 +59,7 @@ export interface Palette {
   fabric: Finish;
   ceramic: Finish;
   coffee: Finish;
+  crema: Finish;
   plant: Finish;
   pot: Finish;
   soil: Finish;
@@ -77,13 +77,17 @@ export interface Palette {
   telescopeBrass: Finish;
   lens: Finish;
   alfaBody: Finish;
+  alfaVisor: Finish;
   alfaRing: Finish;
   alfaSignal: Finish;
   burbuBody: Finish;
+  burbuDots: Finish;
+  burbuBase: Finish;
   burbuSignal: Finish;
   giftBody: Finish;
   giftRibbon: Finish;
   giftSeam: Finish;
+  giftTag: Finish;
   toolBody: Finish;
   toolBand: Finish;
   toolSignal: Finish;
@@ -120,7 +124,8 @@ export function readPalette(): Palette {
     metal: { color: c('--color-desk-metal', '#2b313c'), roughness: 0.35, metalness: 0.8 },
     fabric: { color: c('--color-desk-fabric', '#232a3a'), roughness: 0.9, metalness: 0 },
     ceramic: { color: c('--color-desk-ceramic', '#e6e0d4'), roughness: 0.7, metalness: 0 },
-    coffee: { color: c('--color-desk-coffee', '#2a1a10'), roughness: 0.15, metalness: 0 },
+    coffee: { color: new Color('#3a2214'), roughness: 0.62, metalness: 0 },
+    crema: { color: new Color('#a8703d'), roughness: 0.7, metalness: 0 },
     plant: { color: c('--color-desk-plant', '#2f5a44'), roughness: 0.45, metalness: 0 },
     pot: { color: c('--color-desk-pot', '#8c5a44'), roughness: 0.8, metalness: 0 },
     soil: { color: c('--color-desk-coffee', '#2a1a10').multiplyScalar(0.6), roughness: 1, metalness: 0 },
@@ -137,14 +142,18 @@ export function readPalette(): Palette {
     telescope: { color: c('--color-telescope', '#c9ced6'), roughness: 0.3, metalness: 0.1 },
     telescopeBrass: { color: c('--color-telescope-brass', '#b08a4a'), roughness: 0.35, metalness: 1 },
     lens: { color: new Color(0.01, 0.015, 0.03), roughness: 0.05, metalness: 0.4 },
-    alfaBody: { color: c('--color-alfa-body', '#10131a'), roughness: COLLECTIBLE.satin, metalness: 0 },
+    alfaBody: { color: c('--color-desk-ceramic', '#e6e0d4').lerp(new Color('#f4f7fb'), 0.6), roughness: 0.24, metalness: 0 },
+    alfaVisor: { color: c('--color-alfa-body', '#10131a'), roughness: 0.1, metalness: 0.35 },
     alfaRing: brass,
-    alfaSignal: { color: c('--color-alfa-signal', '#5aa9ff'), roughness: 0.4, metalness: 0, emissive: tokenNumber('--alfa-signal-intensity', 1) },
-    burbuBody: { color: ceramic(c('--color-burbu-body', '#1f6e52'), 0.72, 1.35), roughness: COLLECTIBLE.matte, metalness: 0 },
-    burbuSignal: { color: ceramic(c('--color-burbu-signal', '#3fcf8e'), 0.35, 1), roughness: 0.4, metalness: 0, emissive: 0.55 },
-    giftBody: { color: ceramic(c('--color-gift-body', '#2a3142'), 0.3, 1.25), roughness: COLLECTIBLE.matte, metalness: 0 },
-    giftRibbon: { color: ceramic(c('--color-gift-ribbon', '#f28ba0'), 0.55, 0.85), roughness: COLLECTIBLE.satin, metalness: 0 },
-    giftSeam: brass,
+    alfaSignal: { color: c('--color-alfa-signal', '#5aa9ff'), roughness: 0.3, metalness: 0, emissive: 1.4 * tokenNumber('--alfa-signal-intensity', 1) },
+    burbuBody: { color: ceramic(c('--color-burbu-signal', '#3fcf8e'), 0.12, 0.92), roughness: 0.3, metalness: 0, emissive: 0.08 },
+    burbuDots: { color: c('--color-desk-paper', '#d8d2c4').lerp(new Color('#ffffff'), 0.6), roughness: 0.3, metalness: 0, emissive: 0.18 },
+    burbuBase: { color: c('--color-alfa-body', '#10131a').multiplyScalar(1.8), roughness: COLLECTIBLE.satin, metalness: 0.2 },
+    burbuSignal: { color: c('--color-burbu-signal', '#3fcf8e'), roughness: 0.4, metalness: 0, emissive: 0.9 * tokenNumber('--burbu-signal-intensity', 0.8) },
+    giftBody: { color: ceramic(c('--color-gift-ribbon', '#f28ba0'), 0.08, 0.95), roughness: 0.3, metalness: 0 },
+    giftRibbon: { color: c('--color-desk-paper', '#d8d2c4').lerp(new Color('#fff8f2'), 0.55), roughness: 0.32, metalness: 0.05 },
+    giftSeam: { color: c('--color-gift-ribbon', '#f28ba0'), roughness: 0.4, metalness: 0, emissive: 0.9 },
+    giftTag: { color: c('--color-desk-paper', '#d8d2c4'), roughness: 0.85, metalness: 0 },
     toolBody: { color: new Color('#c9ccd1'), roughness: 0.24, metalness: 1 },
     toolBand: brass,
     toolStand: { color: c('--color-alfa-body', '#10131a').multiplyScalar(1.6), roughness: COLLECTIBLE.satin, metalness: 0 },
@@ -161,6 +170,8 @@ export function readPalette(): Palette {
 }
 
 const UP = new Vector3(0, 1, 0);
+/** Coffee surface height inside the mug: high enough that the wide shot sees the dark disc and its crema. */
+const COFFEE_LEVEL = 0.085;
 
 function seg(base: number, q: Quality, min = 3): number {
   return Math.max(min, Math.round(base * q));
@@ -304,7 +315,11 @@ export function buildWorkstation(b: PartBuilder, p: Palette, q: Quality): void {
     [0.0, 0.012]
   ].map(([x, y]) => new Vector2(x!, y!));
   b.add(new LatheGeometry(profile, seg(32, q, 12)), p.ceramic, { position: MUG.toArray() });
-  b.add(new CircleGeometry(0.0376, seg(28, q, 10)), p.coffee, { position: [MUG.x, MUG.y + 0.076, MUG.z], rotation: [-Math.PI / 2, 0, 0] });
+  const surface = (): Placement => ({ position: [MUG.x, MUG.y + COFFEE_LEVEL, MUG.z], rotation: [-Math.PI / 2, 0, 0] });
+  const rim = seg(28, q, 10);
+  b.add(new CircleGeometry(0.028, rim), p.coffee, surface());
+  b.add(new RingGeometry(0.028, 0.0315, rim), shade(p.crema, 0.6), surface());
+  b.add(new RingGeometry(0.0315, 0.0376, rim), p.crema, surface());
   b.add(new TorusGeometry(0.025, 0.006, seg(8, q, 4), seg(16, q, 8), Math.PI), p.ceramic, {
     position: [MUG.x + 0.04, MUG.y + 0.048, MUG.z],
     rotation: [0, 0, -Math.PI / 2]
@@ -579,64 +594,159 @@ function wrenchShapes(): Shape[] {
   return [shape];
 }
 
+const FRONT = new Vector3(0, 0, 1);
+
+function standing(base: Vector3, yaw: number): (m: Matrix4) => Matrix4 {
+  const frame = new Matrix4().compose(base, new Quaternion().setFromAxisAngle(UP, yaw), new Vector3(1, 1, 1));
+  return m => new Matrix4().multiplyMatrices(frame, m);
+}
+
+function sphereDirection(phi: number, theta: number): Vector3 {
+  return new Vector3(-Math.cos(phi) * Math.sin(theta), Math.cos(theta), Math.sin(phi) * Math.sin(theta));
+}
+
+/** Alfa, TUSOCIO's partner: a small porcelain robot with a smoked visor, two glowing eyes, an antenna light and a brass collar. */
+function buildAlfa(b: PartBuilder, p: Palette, q: Quality): void {
+  const id = OBJECT_ID.alfa;
+  const at = standing(FIGURES.alfa, 0.12);
+  const place = (x: number, y: number, z: number) => at(new Matrix4().makeTranslation(x, y, z));
+
+  const profile = new SplineCurve(
+    [
+      [0.019, 0],
+      [0.024, 0.006],
+      [0.029, 0.024],
+      [0.0275, 0.042],
+      [0.021, 0.056],
+      [0.012, 0.064]
+    ].map(([r, y]) => new Vector2(r!, y!))
+  ).getPoints(seg(24, q, 14));
+  const body = new LatheGeometry([new Vector2(0, 0), ...profile, new Vector2(0, 0.064)], seg(32, q, 20)).scale(1, 1, 0.9);
+  body.deleteAttribute('uv');
+  b.add(body, p.alfaBody, at(new Matrix4()), id);
+
+  const chestY = 0.032;
+  const chestR = profile.reduce((best, point) => (Math.abs(point.y - chestY) < Math.abs(best.y - chestY) ? point : best)).x * 0.9;
+  b.add(new SphereGeometry(0.0042, seg(14, q, 8), seg(10, q, 6)).scale(1, 1, 0.35), p.alfaSignal, place(0, chestY, chestR), id);
+
+  const collar = new TorusGeometry(0.0168, 0.0032, seg(10, q, 6), seg(40, q, 20)).scale(1, 0.9, 1);
+  b.add(collar, p.alfaRing, at(new Matrix4().compose(new Vector3(0, 0.0635, 0), new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2), new Vector3(1, 1, 1))), id);
+
+  const R = 0.027;
+  const headY = 0.0885;
+  const head = at(new Matrix4().compose(new Vector3(0, headY, 0), new Quaternion(), new Vector3(1, 0.93, 0.96)));
+  b.add(new SphereGeometry(R, seg(32, q, 18), seg(24, q, 12)), p.alfaBody, head, id);
+  const visorTheta = 1.5;
+  const visor = new SphereGeometry(R * 1.03, seg(28, q, 14), seg(10, q, 5), Math.PI / 2 - 1.05, 2.1, visorTheta - 0.43, 0.86);
+  b.add(visor, p.alfaVisor, head, id);
+  for (const side of [-1, 1]) {
+    const direction = sphereDirection(Math.PI / 2 + side * 0.36, visorTheta - 0.04);
+    const eye = new Matrix4().compose(direction.clone().multiplyScalar(R * 1.035), new Quaternion().setFromUnitVectors(FRONT, direction), new Vector3(1, 1, 1));
+    b.add(new SphereGeometry(0.0036, seg(14, q, 8), seg(10, q, 6)).scale(1, 1.4, 0.4), p.alfaSignal, new Matrix4().multiplyMatrices(head, eye), id);
+    b.add(new CylinderGeometry(0.0062, 0.0068, 0.004, seg(20, q, 10)).rotateZ(Math.PI / 2), p.alfaRing, place(side * R * 0.98, headY, 0), id);
+  }
+  const crown = headY + R * 0.93;
+  b.add(new CylinderGeometry(0.0034, 0.0042, 0.003, seg(16, q, 8)), p.alfaRing, place(0, crown, 0), id);
+  b.add(new CylinderGeometry(0.0011, 0.0011, 0.013, seg(8, q, 5)), p.alfaRing, place(0, crown + 0.0075, 0), id);
+  b.add(new SphereGeometry(0.0042, seg(14, q, 8), seg(10, q, 6)), p.alfaSignal, place(0, crown + 0.0155, 0), id);
+}
+
+/** Ventixs: a round chat bubble with its tail at the lower left and three typing dots, standing on a puck with a green light line. */
+function buildBurbu(b: PartBuilder, p: Palette, q: Quality): void {
+  const id = OBJECT_ID.ventixs;
+  const at = standing(FIGURES.ventixs, -0.26);
+  const baseH = 0.007;
+  b.add(new RoundedBoxGeometry(0.058, baseH, 0.026, seg(3, q, 2), 0.0028), p.burbuBase, at(new Matrix4().makeTranslation(0, baseH / 2, 0)), id);
+  b.add(new BoxGeometry(0.05, 0.0012, 0.0006), p.burbuSignal, at(new Matrix4().makeTranslation(0, baseH * 0.5, 0.0131)), id);
+
+  const r = 0.027;
+  const bevel = 0.0026;
+  const tip = new Vector2(-0.029, -0.031);
+  const tailStart = (250 * Math.PI) / 180;
+  const tailEnd = (196 * Math.PI) / 180;
+  const shape = new Shape();
+  shape.moveTo(Math.cos(tailStart) * r, Math.sin(tailStart) * r);
+  shape.absarc(0, 0, r, tailStart, tailEnd + Math.PI * 2, false);
+  shape.quadraticCurveTo(-r * 0.98, -r * 0.62, tip.x, tip.y);
+  shape.quadraticCurveTo(-r * 0.62, -r * 0.98, Math.cos(tailStart) * r, Math.sin(tailStart) * r);
+  const depth = 0.011;
+  const bubble = new ExtrudeGeometry(shape, {
+    depth,
+    bevelEnabled: true,
+    bevelSize: bevel,
+    bevelThickness: 0.003,
+    bevelSegments: seg(4, q, 2),
+    curveSegments: seg(40, q, 18)
+  }).translate(0, 0, -depth / 2);
+  bubble.deleteAttribute('uv');
+
+  /** Turns the bubble so the tail tip and the bottom of the round both rest on the puck, then centres that footprint. */
+  const reach = Math.hypot(tip.x, tip.y) + bevel;
+  const rest = Math.PI + Math.asin((r + bevel) / reach);
+  const turn = rest - Math.atan2(tip.y, tip.x);
+  const lean = new Matrix4().compose(
+    new Vector3(-(Math.cos(rest) * reach) / 2, baseH - 0.0008 + r + bevel, 0),
+    new Quaternion().setFromAxisAngle(FRONT, turn),
+    new Vector3(1, 1, 1)
+  );
+  b.add(bubble, p.burbuBody, at(lean), id);
+  const face = depth / 2 + 0.003;
+  for (let i = 0; i < 3; i++) {
+    const dot = new SphereGeometry(0.0039, seg(14, q, 8), seg(10, q, 6)).scale(1, 1, 0.5).translate((i - 1) * 0.0125, 0, face);
+    b.add(dot, p.burbuDots, at(lean), id);
+  }
+}
+
+/** Parati: a pink lacquered gift box with a cream satin ribbon, a looped bow, a glowing seam under the lid and a card tag. */
+function buildGift(b: PartBuilder, p: Palette, q: Quality): void {
+  const id = OBJECT_ID.parati;
+  const at = standing(FIGURES.parati, -0.2);
+  const place = (geometry: BufferGeometry, finish: Finish, x: number, y: number, z: number) =>
+    b.add(geometry, finish, at(new Matrix4().makeTranslation(x, y, z)), id);
+  const base = 0.056;
+  const baseH = 0.044;
+  const lid = 0.06;
+  const lidH = 0.013;
+  const lidY = baseH - 0.001 + lidH / 2;
+  const top = lidY + lidH / 2;
+  const band = 0.0095;
+
+  place(new RoundedBoxGeometry(base, baseH, base, seg(3, q, 2), 0.0025), p.giftBody, 0, baseH / 2, 0);
+  place(new BoxGeometry(base + 0.0012, 0.0016, base + 0.0012), p.giftSeam, 0, baseH - 0.0018, 0);
+  place(new RoundedBoxGeometry(lid, lidH, lid, seg(3, q, 2), 0.003), p.giftBody, 0, lidY, 0);
+  place(new BoxGeometry(band, baseH - 0.004, base + 0.0012), p.giftRibbon, 0, baseH / 2, 0);
+  place(new BoxGeometry(base + 0.0012, baseH - 0.004, band), p.giftRibbon, 0, baseH / 2, 0);
+  place(new BoxGeometry(band, lidH + 0.0006, lid + 0.0012), p.giftRibbon, 0, lidY, 0);
+  place(new BoxGeometry(lid + 0.0012, lidH + 0.0006, band), p.giftRibbon, 0, lidY, 0);
+
+  for (const side of [-1, 1]) {
+    const loop = new TorusGeometry(0.0085, 0.0024, seg(8, q, 5), seg(24, q, 12)).scale(1, 0.72, 1.6);
+    b.add(loop, p.giftRibbon, at(new Matrix4().compose(new Vector3(side * 0.0088, top + 0.0055, 0), new Quaternion().setFromAxisAngle(FRONT, side * 0.42), new Vector3(1, 1, 1))), id);
+    const tail = new BoxGeometry(0.0065, 0.0011, 0.019).translate(0, 0, 0.0095);
+    b.add(tail, p.giftRibbon, at(new Matrix4().compose(new Vector3(side * 0.002, top + 0.0007, 0.002), new Quaternion().setFromAxisAngle(UP, side * 0.55), new Vector3(1, 1, 1))), id);
+  }
+  place(new SphereGeometry(0.0046, seg(14, q, 8), seg(10, q, 6)).scale(1, 0.8, 1), p.giftRibbon, 0, top + 0.0035, 0);
+
+  const tagX = base * 0.3;
+  const tagY = baseH * 0.5;
+  const tagZ = base / 2 + 0.0012;
+  const tag = at(new Matrix4().compose(new Vector3(tagX, tagY, tagZ), new Quaternion().setFromAxisAngle(FRONT, -0.22), new Vector3(1, 1, 1)));
+  b.add(new RoundedBoxGeometry(0.016, 0.011, 0.0012, 1, 0.0005), p.giftTag, tag, id);
+  b.add(new CircleGeometry(0.0018, seg(16, q, 8)), p.giftSeam, new Matrix4().multiplyMatrices(tag, new Matrix4().makeTranslation(-0.004, 0.0015, 0.00065)), id);
+  const hole = new Vector3(tagX - 0.006, tagY + 0.004, tagZ + 0.0003);
+  const knot = new Vector3(0.0035, top - 0.001, lid / 2 + 0.0012);
+  b.add(new CylinderGeometry(0.0004, 0.0004, hole.distanceTo(knot), 4), p.giftTag, at(between(hole, knot)), id);
+}
+
 /** The walnut plinth and the four executive desk pieces (mascots.md §2–3). */
 export function buildFigures(b: PartBuilder, p: Palette, q: Quality): void {
   const { centre, width, depth, height } = PLINTH;
   b.add(new RoundedBoxGeometry(width, height, depth, 2, 0.003), p.wood, { position: [centre.x, centre.y + height / 2, centre.z] });
   b.add(new BoxGeometry(width - 0.02, 0.004, 0.002), p.brass, { position: [centre.x, centre.y + height * 0.55, centre.z + depth / 2 + 0.0006] });
 
-  const alfa = FIGURES.alfa;
-  const silhouette = [
-    [0, 0],
-    [0.014, 0.004],
-    [0.026, 0.03],
-    [0.033, 0.062],
-    [0.031, 0.08],
-    [0.022, 0.104],
-    [0.009, 0.119],
-    [0, 0.122]
-  ].map(([r, y]) => new Vector2(r!, y!));
-  const body = new LatheGeometry(silhouette, seg(32, q, 18)).scale(1, 1, 0.82);
-  body.deleteAttribute('uv');
-  b.add(body, p.alfaBody, { position: alfa.toArray(), rotation: [0, 0.2, 0] }, OBJECT_ID.alfa);
-  const ringY = alfa.y + 0.066;
-  const ring = new TorusGeometry(0.0335, 0.0013, 8, seg(72, q, 32)).scale(1, 0.82, 1);
-  b.add(ring, p.alfaRing, { position: [alfa.x, ringY, alfa.z], rotation: [Math.PI / 2, 0, 0] }, OBJECT_ID.alfa);
-  const signal = new TorusGeometry(0.0322, 0.0005, 4, seg(72, q, 32)).scale(1, 0.82, 1);
-  b.add(signal, p.alfaSignal, { position: [alfa.x, ringY, alfa.z], rotation: [Math.PI / 2, 0, 0] }, OBJECT_ID.alfa);
-
-  const burbu = FIGURES.ventixs;
-  const bubble = new Matrix4().compose(
-    new Vector3(burbu.x, burbu.y + 0.025, burbu.z),
-    new Quaternion().setFromAxisAngle(UP, -0.26),
-    new Vector3(1, 1, 1)
-  );
-  const capsule = new CapsuleGeometry(0.025, 0.03, seg(8, q, 4), seg(16, q, 8)).rotateZ(Math.PI / 2).scale(1, 1, 0.6);
-  const tail = new ConeGeometry(0.008, 0.016, seg(12, q, 6)).scale(1, 1, 0.6).rotateZ(2.4).translate(-0.026, -0.021, 0);
-  b.add(mergeGeometries([capsule, tail])!, p.burbuBody, bubble, OBJECT_ID.ventixs);
-  capsule.dispose();
-  tail.dispose();
-  for (let i = 0; i < 3; i++) {
-    b.add(new SphereGeometry(0.003, 8, 6).translate((i - 1) * 0.011, 0, 0.0145), p.burbuSignal, bubble, OBJECT_ID.ventixs);
-  }
-
-  const gift = FIGURES.parati;
-  const box = new Matrix4().compose(gift, new Quaternion().setFromAxisAngle(UP, -0.2), new Vector3(1, 1, 1));
-  const part = (geometry: BufferGeometry, finish: Finish, y: number) =>
-    b.add(geometry, finish, new Matrix4().multiplyMatrices(box, new Matrix4().makeTranslation(0, y, 0)), OBJECT_ID.parati);
-  part(new RoundedBoxGeometry(0.06, 0.048, 0.06, 2, 0.004), p.giftBody, 0.024);
-  part(new BoxGeometry(0.0605, 0.001, 0.0605), p.giftSeam, 0.0485);
-  part(new RoundedBoxGeometry(0.063, 0.012, 0.063, 2, 0.003), p.giftBody, 0.055);
-  part(new BoxGeometry(0.008, 0.0612, 0.0645), p.giftRibbon, 0.0306);
-  part(new BoxGeometry(0.0645, 0.0612, 0.008), p.giftRibbon, 0.0306);
-  for (const side of [-1, 1]) {
-    b.add(
-      new OctahedronGeometry(0.006, 0).scale(1.5, 0.5, 0.9).rotateZ(side * -0.35).translate(side * 0.0065, 0.0635, 0),
-      p.giftRibbon,
-      box,
-      OBJECT_ID.parati
-    );
-  }
+  buildAlfa(b, p, q);
+  buildBurbu(b, p, q);
+  buildGift(b, p, q);
 
   const tool = FIGURES.skymek;
   const base = new Matrix4().compose(tool, new Quaternion().setFromAxisAngle(UP, -0.35), new Vector3(1, 1, 1));
@@ -664,6 +774,7 @@ export function buildFigures(b: PartBuilder, p: Palette, q: Quality): void {
 /** Rectangles (centre x/z and size) that receive a soft contact shadow, in room space. */
 export function contactShadowSpots(): Array<{ x: number; y: number; z: number; w: number; d: number; yaw?: number }> {
   const top = DESK.top + 0.0012;
+  const plinthTop = PLINTH.centre.y + PLINTH.height + 0.0012;
   const { centre, yaw } = MONITOR;
   return [
     { x: centre.x, y: top, z: centre.z - 0.03, w: 0.36, d: 0.26, yaw },
@@ -674,6 +785,10 @@ export function contactShadowSpots(): Array<{ x: number; y: number; z: number; w
     { x: PHONE.base.x, y: top, z: PHONE.base.z, w: 0.14, d: 0.12, yaw: PHONE.yaw },
     { x: LAMP.base.x, y: top, z: LAMP.base.z, w: 0.2, d: 0.2 },
     { x: PLINTH.centre.x, y: top, z: PLINTH.centre.z, w: PLINTH.width + 0.07, d: PLINTH.depth + 0.06 },
+    { x: FIGURES.alfa.x, y: plinthTop, z: FIGURES.alfa.z, w: 0.065, d: 0.06 },
+    { x: FIGURES.skymek.x, y: plinthTop, z: FIGURES.skymek.z, w: 0.12, d: 0.042, yaw: -0.35 },
+    { x: FIGURES.parati.x, y: plinthTop, z: FIGURES.parati.z, w: 0.082, d: 0.082, yaw: -0.2 },
+    { x: FIGURES.ventixs.x, y: plinthTop, z: FIGURES.ventixs.z, w: 0.074, d: 0.04, yaw: -0.26 },
     { x: TELESCOPE.foot.x, y: 0.0012, z: TELESCOPE.foot.z, w: 0.8, d: 0.8 },
     { x: CHAIR.x, y: 0.0012, z: CHAIR.z, w: 0.75, d: 0.75 },
     { x: -(DESK.width / 2 - 0.07), y: 0.0012, z: 0, w: 0.12, d: 0.8 },

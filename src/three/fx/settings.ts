@@ -29,8 +29,8 @@ export function readFxTokens(): FxTokens {
     vignetteOffset: tokenNumber('--fx-vignette-offset', 0.32),
     bokeh: tokenNumber('--fx-dof-bokeh-scale', 2.5),
     pointerDamping: tokenNumber('--fx-pointer-damping', 0.06),
-    streakStrength: 0.3,
-    streakThreshold: 1.8,
+    streakStrength: 0.14,
+    streakThreshold: 10,
     aberration: 0.005
   };
 }

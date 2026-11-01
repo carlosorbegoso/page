@@ -68,7 +68,7 @@ export const FIGURES = {
 } as const;
 
 /** Approximate heights for framing (m). */
-export const FIGURE_HEIGHT = { alfa: 0.122, skymek: 0.06, parati: 0.066, ventixs: 0.07 } as const;
+export const FIGURE_HEIGHT = { alfa: 0.133, skymek: 0.06, parati: 0.07, ventixs: 0.066 } as const;
 
 export type FigureId = keyof typeof FIGURES;
 export const PRODUCT_FIGURES = ['skymek', 'parati', 'ventixs'] as const;

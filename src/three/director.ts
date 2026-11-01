@@ -12,6 +12,8 @@ export const CAMERA_LIMITS = {
   parallaxPitchDeg: 0.8,
   fovDesktop: 30,
   fovTouch: 40,
+  /** Upright phones: a taller lens so the room fits the top half of the frame above the panels. */
+  fovStacked: 52,
   breathMetres: 0.006,
   breathDegrees: 0.12,
   breathPeriodSeconds: 11
@@ -58,6 +60,7 @@ export class CameraDirector {
   private from: Shot | null = null;
   private to: Shot | null = null;
   private current: DirectorRequest | null = null;
+  private pendingCut: DirectorRequest | null = null;
   private previous: ChapterId | null = null;
   private elapsed = 0;
   private duration = 0;
@@ -112,9 +115,17 @@ export class CameraDirector {
    * `cut` (reduced motion / pause) dissolves and jumps.
    */
   request(next: DirectorRequest, mode: 'move' | 'cut' | 'instant'): void {
+    if (this.pendingCut) {
+      this.pendingCut = next;
+      return;
+    }
     if (this.current && this.current.id === next.id && this.current.subIndex === next.subIndex) {
       this.current = next;
       if (this.settled) this.to = next.shot;
+      return;
+    }
+    if (mode === 'cut' && this.to) {
+      this.cut(next);
       return;
     }
     this.previous = this.current?.id ?? null;
@@ -126,15 +137,6 @@ export class CameraDirector {
       this.settle();
       return;
     }
-    if (mode === 'cut') {
-      this.events.onEnter(next.id, next.subIndex, 0);
-      this.settled = false;
-      this.events.dissolve(() => {
-        this.jump(next.shot);
-        this.settle();
-      });
-      return;
-    }
     const distance = start.position.distanceTo(next.shot.position);
     const angle = viewAngleDeg(start, next.shot);
     this.lastRequiredSeconds = Math.max(distance / CAMERA_LIMITS.maxMetresPerSecond, angle / CAMERA_LIMITS.maxDegPerSecond);
@@ -144,6 +146,25 @@ export class CameraDirector {
     this.elapsed = 0;
     this.settled = false;
     this.events.onEnter(next.id, next.subIndex, this.duration);
+  }
+
+  /**
+   * The chapter only changes at the cut, behind the dissolve: switching it before would show the
+   * new chapter's plates and props from the old camera while the frame fades out.
+   */
+  private cut(next: DirectorRequest): void {
+    this.pendingCut = next;
+    this.settled = false;
+    this.from = null;
+    this.events.dissolve(() => {
+      const target = this.pendingCut ?? next;
+      this.pendingCut = null;
+      this.previous = this.current?.id ?? null;
+      this.current = target;
+      this.events.onEnter(target.id, target.subIndex, 0);
+      this.jump(target.shot);
+      this.settle();
+    });
   }
 
   /** Refreshes the target shot of the current chapter (resize, provider changes) without moving events. */

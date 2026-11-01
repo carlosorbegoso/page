@@ -4,6 +4,7 @@ export { wrap } from '../folder-detail/wrap';
 
 export const PRINT_DENSITY = 4200;
 export const PAPER_LEVEL = 0.8;
+const PAPER_SELF_LIGHT = 0.25;
 
 export interface PrintedFace {
   mesh: Mesh<PlaneGeometry, MeshStandardMaterial>;
@@ -45,6 +46,9 @@ export function printedFace(name: string, width: number, height: number, density
   const material = new MeshStandardMaterial({
     map: texture,
     color: new Color(PAPER_LEVEL, PAPER_LEVEL, PAPER_LEVEL),
+    emissive: new Color(1, 1, 1),
+    emissiveMap: texture,
+    emissiveIntensity: PAPER_SELF_LIGHT,
     roughness: 0.95,
     metalness: 0,
     polygonOffset: true,

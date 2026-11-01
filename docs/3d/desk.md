@@ -67,7 +67,7 @@ Qué entrega el escritorio al director (planos, superficies, anclas, foco, picks
 - **Alfa**: todo lo que está por encima de `ALFA_NECK_Y` (6.7 cm sobre la base) gira con la cabeza, y lo emisivo a la altura de `ALFA_HEAD_Y` se trata como ojos. Base, cintura, pecho y brazos de `props/figures/alfa.ts` tienen que quedar debajo de 6.7 cm, y solo debe brillar la luz del pecho.
 - **Regalo (Parati)**: todo lo que está por encima de `GIFT_SEAM_BAND` (4.28 cm) sube con la tapa. En `props/figures/gift.ts`, la caja y su cinta van debajo y cada pieza del moño y de la tapa va encima.
 - **Pikachu y Charizard** comparten el negro y el blanco: `life/pokemon/parts.ts` los distingue por la distancia a cada base (`REACH`, `HEIGHT`), no por el color.
-- **Papel impreso**: la lámpara lava el papel iluminado, así que las caras impresas se oscurecen con `PAPER_LEVEL` (`notes/paper.ts`) para que la tinta conserve el contraste.
+- **Papel impreso**: la lámpara lava el papel iluminado, así que las caras impresas se oscurecen con `PAPER_LEVEL` (`notes/paper.ts`) para que la tinta conserve el contraste. Además cada cara tiene una luz propia baja (`PAPER_SELF_LIGHT`, el mapa impreso como emisivo): una tarjeta a contraluz de la lámpara, como la de Parati de noche, no se vuelve negra y la tinta sigue oscura.
 
 ## Ids de objeto (`OBJECT_ID`, `src/three/desk/builder.ts`)
 

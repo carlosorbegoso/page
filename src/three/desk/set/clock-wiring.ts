@@ -1,6 +1,7 @@
 import type { Group, Object3D } from 'three';
 import type { StationContext } from '../../contracts';
-import { StoryClock, storyMinutes } from '../clock';
+import { storyMinutes } from '../../../lib/story-time';
+import { StoryClock } from '../clock';
 import { damp } from '../math';
 import type { DeskFrame } from './frame';
 

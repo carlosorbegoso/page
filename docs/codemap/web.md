@@ -33,6 +33,7 @@ Qué archivo editar en la web: `<head>`, tokens, HUD, secciones, modo lectura, t
 | --- | --- |
 | Cabecera: compone barra, menú e índice | `src/components/Header.astro` |
 | Barra del HUD: logo, reloj de la historia, progreso, recorrido rápido | `src/components/hud/HudBar.astro` (frases por capítulo en su frontmatter) |
+| Hora de la historia por plano y día/noche (única fuente: HUD, teléfono, laptop, monitor, reloj despertador) | `src/lib/story-time.ts`; el HUD la publica en `--story-clock` y `story:clock` con `src/scripts/story-clock.ts`; el teléfono la lee en `src/scripts/phone/clock.ts`, el monitor en el `::before` de `plates/monitor-chrome.css` |
 | Menú del HUD: idioma, sonido, movimiento, hora, enlaces | `src/components/hud/HudMenu.astro` |
 | Hoja de índice de secciones | `src/components/hud/IndexSheet.astro` |
 | Abrir y cerrar el menú (hover, clic, Escape) | `src/components/hud/menu.ts` |

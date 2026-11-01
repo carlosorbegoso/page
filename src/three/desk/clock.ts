@@ -1,6 +1,5 @@
 import { Group, Quaternion, Vector3, type Mesh, type MeshStandardMaterial, type Object3D } from 'three';
 import { acquireGltf, release } from '../assets';
-import type { ChapterId } from '../contracts';
 import { createClockParts, type ClockParts } from './clock/parts';
 import { DESK, HERO_EYE } from './layout';
 
@@ -12,33 +11,6 @@ export const CLOCK_RING_EVENT = 'desk:clock';
 const RING_SECONDS = 1.2;
 const CROWN_SPEED = 0.21;
 const SECOND_STEP = Math.PI / 30;
-
-const STORY_MINUTES: Record<ChapterId, number[]> = {
-  intro: [60],
-  hero: [60],
-  about: [80, 90],
-  experience: [100, 105, 110, 115, 120],
-  company: [150],
-  products: [210, 240, 270],
-  contact: [330],
-  outro: [478]
-};
-
-const STORY_MINUTES_DAY: Record<ChapterId, number[]> = {
-  intro: [0],
-  hero: [0],
-  about: [20, 40],
-  experience: [60, 65, 70, 75, 80],
-  company: [490],
-  products: [500, 510, 520],
-  contact: [530],
-  outro: [545]
-};
-
-export function storyMinutes(chapter: ChapterId, subIndex: number, day = false): number {
-  const list = (day ? STORY_MINUTES_DAY : STORY_MINUTES)[chapter];
-  return list[Math.min(Math.max(subIndex, 0), list.length - 1)]!;
-}
 
 interface Hand {
   node: Object3D;

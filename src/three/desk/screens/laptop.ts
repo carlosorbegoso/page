@@ -1,5 +1,5 @@
 import { Frustum, Matrix4, Mesh, MeshBasicMaterial, PlaneGeometry, type Camera, type Group, type Material } from 'three';
-import { storyMinutes } from '../clock';
+import { clockText, storyMinutes } from '../../../lib/story-time';
 import { LAPTOP } from '../layout';
 import { LAPTOP_LID } from '../props';
 import type { DeskFrame } from '../set/frame';
@@ -19,11 +19,6 @@ export interface LaptopOptions {
   shadows: boolean;
   high: boolean;
   invalidate: () => void;
-}
-
-function clockText(minutes: number, day: boolean): string {
-  const total = ((day ? 600 : 1320) + Math.round(minutes)) % 1440;
-  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
 }
 
 export class DeskLaptop {

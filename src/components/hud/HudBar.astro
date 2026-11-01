@@ -1,6 +1,8 @@
 ---
 import { useTranslations, type Locale } from '../../i18n/utils';
 import { getExperience } from '../../lib/content';
+import { storyClock, storyClocks } from '../../lib/story-time';
+import type { ChapterId } from '../../three/contracts';
 
 interface Props {
   locale: Locale;
@@ -9,28 +11,27 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 const years = (await getExperience(locale)).map(entry => entry.start.slice(0, 4)).toSorted();
-const tonight = (time: string) => `${time} · ${t('story.tonight')}`;
-const night = (time: string) => `${time} · ${t('story.night')}`;
+const label = (id: ChapterId, count: number, day: boolean, word: string) =>
+  Array.from({ length: count }, (_, sub) => `${storyClock(id, sub, day)} · ${word}`);
 const storyBeats: Record<string, string[]> = {
-  hero: [tonight('23:00')],
-  about: [tonight('23:20'), tonight('23:30')],
+  hero: label('hero', 1, false, t('story.tonight')),
+  about: label('about', 2, false, t('story.tonight')),
   experience: [`${t('story.day')} · ${years[0]} →`, ...years.map(year => `${t('story.day')} · ${year}`)],
-  company: [night('00:30')],
-  products: [night('01:30'), night('02:00'), night('02:30')],
-  contact: [night('03:30')],
-  outro: [`05:58 · ${t('story.dawn')}`]
+  company: label('company', 1, false, t('story.night')),
+  products: label('products', 3, false, t('story.night')),
+  contact: label('contact', 1, false, t('story.night')),
+  outro: label('outro', 1, false, t('story.dawn'))
 };
-const today = (time: string) => `${time} · ${t('story.today')}`;
-const afterWork = (time: string) => `${time} · ${t('story.afterWork')}`;
 const storyBeatsDay: Record<string, string[]> = {
   ...storyBeats,
-  hero: [today('10:00')],
-  about: [today('10:20'), today('10:40')],
-  company: [afterWork('18:10')],
-  products: [afterWork('18:20'), afterWork('18:30'), afterWork('18:40')],
-  contact: [`18:50 · ${t('story.dusk')}`],
-  outro: [`19:05 · ${t('story.nightfall')}`]
+  hero: label('hero', 1, true, t('story.today')),
+  about: label('about', 2, true, t('story.today')),
+  company: label('company', 1, true, t('story.afterWork')),
+  products: label('products', 3, true, t('story.afterWork')),
+  contact: label('contact', 1, true, t('story.dusk')),
+  outro: label('outro', 1, true, t('story.nightfall'))
 };
+const clocks = { night: storyClocks(false), day: storyClocks(true) };
 ---
 
 <div class="flex items-center gap-1">
@@ -78,6 +79,7 @@ const storyBeatsDay: Record<string, string[]> = {
         data-hud-chapter
         data-story-beats={JSON.stringify(storyBeats)}
         data-story-beats-day={JSON.stringify(storyBeatsDay)}
+        data-story-clocks={JSON.stringify(clocks)}
         class="hud-beat font-mono text-xs tracking-caps text-text-muted tabular-nums opacity-0 transition-[opacity,color] duration-(--duration-base) ease-standard group-hover/clock:text-text data-[ready=true]:opacity-100"
       ></span>
       <span class="sr-only">· {t('story.openIndex')}</span>

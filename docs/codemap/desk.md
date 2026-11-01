@@ -37,7 +37,7 @@ Qué archivo editar en el escritorio 3D: encuadres (shots), luz, props, figuras,
 | Teclas de la laptop que se hunden al escribir con el teclado real | `src/three/desk/screens/keycaps.ts`, `typing.ts`, distribución en `props/laptopKeys.ts` |
 | Vidrio del monitor (reflejo del entorno, respiración del brillo) | `src/three/desk/screens/monitorGlass.ts` |
 | Zonas de clic, etiquetas y hover | `src/three/desk/set/picks.ts` |
-| Reloj (hora de la historia, timbre) | `src/three/desk/set/clock-wiring.ts` |
+| Reloj (hora de la historia, timbre) | `src/three/desk/set/clock-wiring.ts`; minutos por plano en `src/lib/story-time.ts` |
 | Qué hace cada `desk:action` (juguetes, carpeta, laptop, lámpara) | `src/three/desk/set/actions.ts` |
 | Figuras animadas, carpeta en mano y lomos al cargar | `src/three/desk/set/extras.ts` |
 | Ciudad, lluvia, vapor y haz de la lámpara cada frame | `src/three/desk/set/weather.ts` |

@@ -6,11 +6,18 @@
 }
 
 .is-3d .plate[data-plate-mode='surface-monitor']::before {
-  content: '';
+  content: var(--story-clock, '');
   position: absolute;
   inset: 0 0 auto;
   z-index: 3;
+  box-sizing: border-box;
   height: var(--chrome-bar);
+  padding-right: calc(var(--chrome-bar) * 6);
+  color: #e8edf5;
+  font: 500 calc(var(--chrome-bar) * 0.55) / var(--chrome-bar) -apple-system, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
   pointer-events: none;
   background:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 330 20'%3E%3Crect x='12' y='5' width='10' height='10' rx='3' fill='%23e8edf5'/%3E%3Cg font-family='-apple-system,system-ui,sans-serif' font-size='11' fill='%23e8edf5'%3E%3Ctext x='34' y='14' font-weight='700'%3EPortafolio%3C/text%3E%3Ctext x='104' y='14'%3EArchivo%3C/text%3E%3Ctext x='154' y='14'%3EEditar%3C/text%3E%3Ctext x='198' y='14'%3EVer%3C/text%3E%3Ctext x='228' y='14'%3EVentana%3C/text%3E%3Ctext x='282' y='14'%3EAyuda%3C/text%3E%3C/g%3E%3C/svg%3E")

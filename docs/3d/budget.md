@@ -48,7 +48,7 @@ GitHub Pages sirve todo con `max-age=600` y no deja cambiar cabeceras, así que 
 | Qué | Estrategia | Por qué |
 | --- | --- | --- |
 | `_astro/*` | cache-first (`immutable-v1`) | llevan hash en el nombre: nunca cambian |
-| `models/`, `audio/`, `fonts/`, `decoders/`, `images/`, `cv/`, favicon, manifest | stale-while-revalidate (`runtime-v1`) | nombres fijos: se sirven al instante y se actualizan en segundo plano |
+| `models/`, `audio/`, `fonts/`, `images/`, `cv/`, favicon, manifest | stale-while-revalidate (`runtime-v1`) | nombres fijos: se sirven al instante y se actualizan en segundo plano |
 | Navegación (HTML) | network-first, con la copia en caché si no hay red | el HTML siempre llega fresco tras un deploy; sin red, la página abre igual |
 
 - Se registra 4 s después de `load` (`src/scripts/offline/register.ts`), solo en producción y nunca con `?capture`: la primera visita y Lighthouse no lo notan. A partir de la segunda visita el 3D sale de la caché.

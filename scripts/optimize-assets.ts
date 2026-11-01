@@ -8,8 +8,7 @@
  * Geometry is meshopt-compressed; textures go to KTX2 (ETC1S for colour/emissive, UASTC for
  * normal / metallic-roughness / occlusion) when KTX-Software (`ktx`) is installed, otherwise they
  * keep their source format and a warning is printed. It prints each hashed name for the module
- * that loads it with `acquireGltf`. It always copies the Basis transcoder into
- * `public/decoders/basis/`, where `src/three/assets.ts` looks for it, even with no sources.
+ * that loads it with `acquireGltf`. With no sources it exits cleanly.
  */
 import { createHash } from 'node:crypto';
 import { copyFile, mkdir, mkdtemp, readdir, readFile, rm, stat } from 'node:fs/promises';
@@ -23,7 +22,6 @@ import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SRC_DIR = join(ROOT, 'assets-src', 'models');
 const OUT_DIR = join(ROOT, 'public', 'models');
-const DECODER_DIR = join(ROOT, 'public', 'decoders', 'basis');
 const CLI = join(ROOT, 'node_modules', '.bin', 'gltf-transform');
 
 const VARIANTS = {
@@ -88,14 +86,7 @@ async function buildVariant(source: string, id: string, variant: Variant, work: 
   return name;
 }
 
-async function copyDecoders(): Promise<void> {
-  await mkdir(DECODER_DIR, { recursive: true });
-  const from = join(ROOT, 'node_modules', 'three', 'examples', 'jsm', 'libs', 'basis');
-  for (const file of ['basis_transcoder.js', 'basis_transcoder.wasm']) await copyFile(join(from, file), join(DECODER_DIR, file));
-}
-
 async function main(): Promise<void> {
-  await copyDecoders();
   await mkdir(SRC_DIR, { recursive: true });
   const sources = (await readdir(SRC_DIR)).filter(file => ['.glb', '.gltf'].includes(extname(file)));
   if (!sources.length) {

@@ -5,7 +5,7 @@ Cómo se cargan los modelos y texturas externas del 3D y qué hay que anotar al 
 ## Caché (`src/three/assets.ts`)
 
 - `acquire(key, create, dispose)` / `release(key)`: refcount por clave; al llegar a 0 espera 5 s (`GRACE_MS`) antes de liberar, para que un ir y volver de capítulo no recargue.
-- `acquireGltf(url)`: `GLTFLoader` + `KTX2Loader` + Meshopt se importan solo con el primer glTF. El transcoder Basis se busca en `decoders/basis/` bajo la base del sitio (ver «Transcoder KTX2»).
+- `acquireGltf(url)`: `GLTFLoader` + `KTX2Loader` + Meshopt se importan solo con el primer glTF. El transcoder Basis lo resuelve `KTX2Loader` (ver «Transcoder KTX2»).
 - `bindRenderer()` lo llama el Stage al crear el renderer (lo necesita `KTX2Loader.detectSupport`).
 - `cacheSnapshot()` sale en el overlay de `?debug`.
 
@@ -24,9 +24,10 @@ El resto del escritorio (figuras, cuarto, laptop, Pokémon) es geometría proced
 
 ## Transcoder KTX2
 
-- `KTX2Loader` pide `basis_transcoder.js` y `basis_transcoder.wasm` a `decoders/basis/` (`setTranscoderPath` en `src/three/assets.ts`), con esos nombres fijos: por eso no pasan por Vite con hash.
-- Viven en `public/decoders/basis/` y van en git (57 KB + 527 KB sin comprimir). No cuentan para los 260 KB: solo se piden con la primera textura KTX2.
-- `bun run assets` los copia desde `node_modules/three/examples/jsm/libs/basis/` cada vez que corre, aunque no haya modelos. Al subir la versión de `three`, corre `bun run assets` y commitea los dos archivos para que el transcoder siga a `KTX2Loader`.
+- `KTX2Loader` trae su propio transcoder Basis: sin `setTranscoderPath`, pide `basis_transcoder.js` y `.wasm` con `new URL(..., import.meta.url)`. En el build salen como `_astro/basis_transcoder.<hash>.{js,wasm}` (bajo `/page/`, caché `immutable` del service worker); en desarrollo, desde `node_modules/three/examples/jsm/libs/basis/`.
+- No hay nada que copiar ni commitear, y sigue solo a cada versión de `three`.
+- No llames a `setTranscoderPath`: con una ruta propia, `KTX2Loader` deja de usar esos archivos y habría que publicarlos a mano en esa ruta.
+- Pesan 15 KB + 245 KB gzip, fuera de los 260 KB: solo se piden con la primera textura KTX2.
 
 ## Checklist de intake (Tripo u otro)
 

@@ -58,7 +58,7 @@ function gltfLoader(): Promise<(url: string) => Promise<GLTF>> {
     ]);
     const loader = new GLTFLoader();
     loader.setMeshoptDecoder(MeshoptDecoder);
-    const ktx2 = new KTX2Loader().setTranscoderPath(`${import.meta.env.BASE_URL.replace(/\/?$/, '/')}decoders/basis/`);
+    const ktx2 = new KTX2Loader();
     if (rendererForLoaders) ktx2.detectSupport(rendererForLoaders);
     loader.setKTX2Loader(ktx2);
     return (url: string) => loader.loadAsync(url);

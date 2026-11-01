@@ -3,7 +3,7 @@ const IMMUTABLE_CACHE = `immutable-${VERSION}`;
 const RUNTIME_CACHE = `runtime-${VERSION}`;
 const IMMUTABLE_PATHS = ['_astro/'];
 const IMMUTABLE_MAX_ENTRIES = 160;
-const REVALIDATE_PATHS = ['models/', 'audio/', 'fonts/', 'decoders/', 'images/', 'cv/', 'favicon.svg', 'manifest.json'];
+const REVALIDATE_PATHS = ['models/', 'audio/', 'fonts/', 'images/', 'cv/', 'favicon.svg', 'manifest.json'];
 
 const base = new URL(self.registration.scope).pathname;
 

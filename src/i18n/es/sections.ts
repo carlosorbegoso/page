@@ -2,7 +2,6 @@ export const sections = {
   'hero.headline': 'De día, backends para la banca. De noche, mis propios productos.',
   'hero.ctaProducts': 'Ver productos',
   'hero.ctaContact': 'Escríbeme',
-  'hero.fallbackAlt': 'Alfa, la mascota de TUSOCIO IA, sobre una red de nodos conectados',
   'hero.metrics.label': 'En cifras',
   'hero.metrics.performance.value': '+30–40 %',
   'hero.metrics.performance.label': 'de rendimiento en Intercorp Retail',

@@ -48,6 +48,6 @@ Tokens en código: `src/styles/tokens/` (`fonts.css`, `colors.css`, `scale.css`,
 
 ## OG (`public/images/og-es.jpg`, `public/images/og-en.jpg`)
 
-- 1200 × 630, ~51 KB cada una, JPEG mozjpeg q86. Las elige `meta.ogImage` en `src/i18n/<es|en>/meta.ts`.
-- Plantilla `docs/design/og/og.html` (Geist, barra de señal a la izquierda). Se regeneran ejecutando `docs/design/og/render.mjs` con node y `CHROMIUM_PATH` apuntando a un chrome-headless-shell (Playwright + sharp del `node_modules` del repo).
-- Pendiente: el arte de la derecha aún es la red de nodos de la dirección anterior, no el escritorio.
+- 1200 × 630, ~58 KB cada una, JPEG mozjpeg q80. Las elige `meta.ogImage` en `src/i18n/<es|en>/meta.ts`; `meta.ogImageAlt` describe la tarjeta.
+- Plantilla `docs/design/og/og.html` (Geist, barra de señal a la izquierda, nombre y rol sobre un degradado) con el plano del hero a la derecha.
+- Se regeneran con `node docs/design/og/render.mjs` y el servidor de desarrollo levantado (`BASE_URL`, por defecto `http://localhost:4321/page/`): captura `[data-stage-canvas]` con `?capture=hero` a 1200 × 630 ×2 con la GPU real, lo pone en la plantilla y escribe las dos JPEG. `CHROMIUM_PATH` es opcional.

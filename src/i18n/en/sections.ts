@@ -2,7 +2,6 @@ export const sections = {
   'hero.headline': 'By day, backends for banking. By night, products of my own.',
   'hero.ctaProducts': 'See products',
   'hero.ctaContact': 'Get in touch',
-  'hero.fallbackAlt': 'Alfa, the TUSOCIO IA mascot, over a network of connected nodes',
   'hero.metrics.label': 'By the numbers',
   'hero.metrics.performance.value': '+30–40%',
   'hero.metrics.performance.label': 'performance gain at Intercorp Retail',

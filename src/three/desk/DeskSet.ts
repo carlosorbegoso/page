@@ -375,8 +375,8 @@ export class DeskSet implements ShotProvider {
       model => this.context?.precompile?.(model) ?? Promise.resolve()
     );
     this.room.add(this.clockModel.group);
-    if (high) {
-      this.steam = createSteam();
+    if (high || context.tier === 'mid') {
+      this.steam = createSteam(high ? { wisps: 3, octaves: 3 } : { wisps: 2, octaves: 2 });
       this.room.add(this.steam.mesh);
       this.disposables.push(this.steam);
     }
@@ -820,7 +820,7 @@ export class DeskSet implements ShotProvider {
     this.glass.setLampReflection(Math.min(level.lamp / 28, 1));
     this.beam.setLevel(Math.min(level.lamp / 28, 1.2));
     this.beam.setPixelScale(this.context.renderer.domElement.height, this.viewport().fov);
-    this.steam?.setStrength((this.chapter === 'hero' || this.chapter === 'about' || this.chapter === 'intro' ? 0.22 : 0.1) * (1 - this.level.day));
+    this.steam?.setStrength(this.chapter === 'contact' ? 0.55 : this.chapter === 'hero' || this.chapter === 'about' || this.chapter === 'intro' ? 0.45 : 0.3, this.level.day);
     const uniforms = this.uniforms;
     FIGURE_ORDER.forEach((id, index) => {
       const play = this.playOffset(id);

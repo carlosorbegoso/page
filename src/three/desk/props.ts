@@ -9,6 +9,7 @@ import {
   Path,
   PlaneGeometry,
   Quaternion,
+  RingGeometry,
   Shape,
   ShapeGeometry,
   SphereGeometry,
@@ -21,7 +22,7 @@ import {
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { tokenColor, tokenNumber } from '../tokens';
-import { doubleSided, OBJECT_ID, PartBuilder, type Finish } from './builder';
+import { doubleSided, OBJECT_ID, PartBuilder, type Finish, type Placement } from './builder';
 import {
   CHAIR,
   DESK,
@@ -58,6 +59,7 @@ export interface Palette {
   fabric: Finish;
   ceramic: Finish;
   coffee: Finish;
+  crema: Finish;
   plant: Finish;
   pot: Finish;
   soil: Finish;
@@ -122,7 +124,8 @@ export function readPalette(): Palette {
     metal: { color: c('--color-desk-metal', '#2b313c'), roughness: 0.35, metalness: 0.8 },
     fabric: { color: c('--color-desk-fabric', '#232a3a'), roughness: 0.9, metalness: 0 },
     ceramic: { color: c('--color-desk-ceramic', '#e6e0d4'), roughness: 0.7, metalness: 0 },
-    coffee: { color: c('--color-desk-coffee', '#2a1a10'), roughness: 0.15, metalness: 0 },
+    coffee: { color: c('--color-desk-coffee', '#2a1a10').multiplyScalar(0.55), roughness: 0.06, metalness: 0 },
+    crema: { color: c('--color-desk-coffee', '#2a1a10').lerp(new Color('#b07a45'), 0.6), roughness: 0.3, metalness: 0 },
     plant: { color: c('--color-desk-plant', '#2f5a44'), roughness: 0.45, metalness: 0 },
     pot: { color: c('--color-desk-pot', '#8c5a44'), roughness: 0.8, metalness: 0 },
     soil: { color: c('--color-desk-coffee', '#2a1a10').multiplyScalar(0.6), roughness: 1, metalness: 0 },
@@ -167,6 +170,8 @@ export function readPalette(): Palette {
 }
 
 const UP = new Vector3(0, 1, 0);
+/** Coffee surface height inside the mug: high enough that the wide shot sees the dark disc and its crema. */
+const COFFEE_LEVEL = 0.085;
 
 function seg(base: number, q: Quality, min = 3): number {
   return Math.max(min, Math.round(base * q));
@@ -310,7 +315,11 @@ export function buildWorkstation(b: PartBuilder, p: Palette, q: Quality): void {
     [0.0, 0.012]
   ].map(([x, y]) => new Vector2(x!, y!));
   b.add(new LatheGeometry(profile, seg(32, q, 12)), p.ceramic, { position: MUG.toArray() });
-  b.add(new CircleGeometry(0.0376, seg(28, q, 10)), p.coffee, { position: [MUG.x, MUG.y + 0.076, MUG.z], rotation: [-Math.PI / 2, 0, 0] });
+  const surface = (): Placement => ({ position: [MUG.x, MUG.y + COFFEE_LEVEL, MUG.z], rotation: [-Math.PI / 2, 0, 0] });
+  const rim = seg(28, q, 10);
+  b.add(new CircleGeometry(0.028, rim), p.coffee, surface());
+  b.add(new RingGeometry(0.028, 0.0315, rim), shade(p.crema, 0.6), surface());
+  b.add(new RingGeometry(0.0315, 0.0376, rim), p.crema, surface());
   b.add(new TorusGeometry(0.025, 0.006, seg(8, q, 4), seg(16, q, 8), Math.PI), p.ceramic, {
     position: [MUG.x + 0.04, MUG.y + 0.048, MUG.z],
     rotation: [0, 0, -Math.PI / 2]

@@ -1,14 +1,19 @@
 import {
-  AdditiveBlending,
+  AddEquation,
   BufferAttribute,
   BufferGeometry,
   CanvasTexture,
   Color,
+  CustomBlending,
   DoubleSide,
   Mesh,
   NoColorSpace,
+  OneFactor,
+  OneMinusSrcAlphaFactor,
   PlaneGeometry,
   ShaderMaterial,
+  Sphere,
+  Vector2,
   Vector3
 } from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
@@ -477,17 +482,29 @@ export function createRainGlass(): RainGlass {
 }
 
 const STEAM_VERTEX = /* glsl */ `
+attribute vec2 corner;
+attribute float seed;
+uniform vec2 uSize;
 varying vec2 vUv;
+varying float vSeed;
 void main() {
-  vUv = uv;
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  vUv = corner * vec2(0.5, 1.0) + vec2(0.5, 0.0);
+  vSeed = seed;
+  vec3 anchor = (modelMatrix * vec4(position, 1.0)).xyz;
+  vec3 right = vec3(viewMatrix[0][0], 0.0, viewMatrix[2][0]);
+  right = length(right) > 1e-4 ? normalize(right) : vec3(1.0, 0.0, 0.0);
+  vec3 world = anchor + right * corner.x * uSize.x * 0.5 + vec3(0.0, corner.y * uSize.y, 0.0);
+  gl_Position = projectionMatrix * viewMatrix * vec4(world, 1.0);
 }
 `;
 
 const STEAM_FRAGMENT = /* glsl */ `
 uniform float uTime;
 uniform float uStrength;
+uniform float uOcclusion;
+uniform vec3 uColor;
 varying vec2 vUv;
+varying float vSeed;
 float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 float noise(vec2 p) {
   vec2 i = floor(p);
@@ -495,51 +512,129 @@ float noise(vec2 p) {
   vec2 u = f * f * (3.0 - 2.0 * f);
   return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
 }
+float fbm(vec2 p) {
+  float sum = 0.0;
+  float amp = 0.5;
+  for (int i = 0; i < STEAM_OCTAVES; i++) {
+    sum += amp * noise(p);
+    p = p * 2.03 + vec2(1.7, 9.2);
+    amp *= 0.5;
+  }
+  return sum;
+}
 void main() {
-  vec2 p = vec2(vUv.x * 2.0, vUv.y * 3.0 - uTime * 0.25);
-  float n = noise(p * 2.0 + vec2(sin(vUv.y * 4.0 + uTime * 0.3) * 0.6, 0.0)) * noise(p * 4.3);
-  float width = 0.32 - 0.12 * vUv.y;
-  float column = smoothstep(width, 0.0, abs(vUv.x - 0.5 - 0.08 * sin(vUv.y * 5.0 + uTime * 0.4)));
-  float fade = smoothstep(0.0, 0.15, vUv.y) * (1.0 - smoothstep(0.45, 1.0, vUv.y));
-  gl_FragColor = vec4(vec3(0.85, 0.82, 0.78), n * column * fade * uStrength);
+  float y = vUv.y;
+  float t = uTime * (0.8 + 0.25 * vSeed);
+  float phase = vSeed * 6.2831;
+  vec2 flow = vec2(vSeed * 11.0, y * 2.4 - t * 0.32);
+  float advect = (fbm(flow) - 0.5) * 0.55 * y;
+  float curl = sin(y * 8.0 - t * 1.3 + phase) * 0.07 * y + sin(y * 3.1 - t * 0.55 + phase * 1.7) * 0.1 * y * y;
+  float drift = 0.12 * y * y;
+  float centre = 0.5 + advect + curl + drift;
+  float width = mix(0.05, 0.2, y);
+  float d = (vUv.x - centre) / width;
+  float ribbon = exp(-d * d * 1.6);
+  float puffs = fbm(vec2(vUv.x * 5.0 + vSeed * 13.0 + advect * 3.0, y * 4.2 - t * 0.55));
+  float density = ribbon * smoothstep(0.28, 0.72, puffs + 0.2 * (1.0 - y));
+  float fade = smoothstep(0.0, 0.1, y) * pow(1.0 - y, 1.8);
+  float edges = smoothstep(0.0, 0.1, vUv.x) * (1.0 - smoothstep(0.9, 1.0, vUv.x));
+  float breath = 0.65 + 0.35 * sin(t * 0.45 + phase * 2.3);
+  float a = density * fade * edges * breath * uStrength;
+  gl_FragColor = vec4(uColor * a, a * uOcclusion);
 }
 `;
+
+export interface SteamOptions {
+  /** Billboard wisps rising from the cup (3 on `high`, 2 on `mid`). */
+  wisps: number;
+  /** Noise octaves per sample; fewer on `mid`. */
+  octaves: number;
+}
 
 export interface Steam {
   mesh: Mesh<BufferGeometry, ShaderMaterial>;
   setTime(time: number): void;
-  setStrength(level: number): void;
+  /** `level` 0..1 is the chapter's presence; `day` 0..1 switches to a paler grey veil that reads against the bright window. */
+  setStrength(level: number, day?: number): void;
   dispose(): void;
 }
 
-/** Two crossed soft sheets rising from the mug; sways with the FX fluid field. */
-export function createSteam(): Steam {
-  const sheet = (rotation: number) => new PlaneGeometry(0.07, 0.17).translate(0, 0.085, 0).rotateY(rotation);
-  const parts = [sheet(0.4), sheet(0.4 + Math.PI / 2)];
-  const geometry = mergeGeometries(parts, false)!;
-  for (const part of parts) part.dispose();
+const STEAM_SIZE = { width: 0.1, height: 0.24 } as const;
+const STEAM_NIGHT = new Color(0.62, 0.58, 0.54);
+const STEAM_DAY = new Color(0.95, 0.95, 0.96);
+
+/**
+ * Hot-coffee steam: camera-facing wisps that curl through advected noise, widen and fade with
+ * height and drift slightly. Premultiplied blending: additive at night (`uOcclusion` ≈ 0), a
+ * light veil by day. Linear HDR output, tone-mapped by the post chain; peaks stay below bloom.
+ */
+export function createSteam(options: SteamOptions = { wisps: 3, octaves: 3 }): Steam {
+  const count = Math.max(1, options.wisps);
+  const positions = new Float32Array(count * 4 * 3);
+  const corners = new Float32Array(count * 4 * 2);
+  const seeds = new Float32Array(count * 4);
+  const index: number[] = [];
+  for (let w = 0; w < count; w++) {
+    const angle = (w / count) * Math.PI * 2 + 0.7;
+    const radius = count > 1 ? 0.011 : 0;
+    const seed = (w + 0.37) / count;
+    const quad = [
+      [-1, 0],
+      [1, 0],
+      [1, 1],
+      [-1, 1]
+    ];
+    quad.forEach(([cx, cy], k) => {
+      const v = w * 4 + k;
+      positions.set([Math.cos(angle) * radius, 0, Math.sin(angle) * radius], v * 3);
+      corners.set([cx!, cy!], v * 2);
+      seeds[v] = seed;
+    });
+    const o = w * 4;
+    index.push(o, o + 1, o + 2, o, o + 2, o + 3);
+  }
+  const geometry = new BufferGeometry();
+  geometry.setAttribute('position', new BufferAttribute(positions, 3));
+  geometry.setAttribute('corner', new BufferAttribute(corners, 2));
+  geometry.setAttribute('seed', new BufferAttribute(seeds, 1));
+  geometry.setIndex(index);
+  geometry.boundingSphere = new Sphere(new Vector3(0, STEAM_SIZE.height / 2, 0), STEAM_SIZE.height);
+  const color = STEAM_NIGHT.clone();
   const material = withFluidDisplacement(
     new ShaderMaterial({
       vertexShader: STEAM_VERTEX,
       fragmentShader: STEAM_FRAGMENT,
-      uniforms: { uTime: { value: 0 }, uStrength: { value: 0.22 } },
+      defines: { STEAM_OCTAVES: Math.max(1, Math.round(options.octaves)) },
+      uniforms: {
+        uTime: { value: 0 },
+        uStrength: { value: 0.5 },
+        uOcclusion: { value: 0 },
+        uColor: { value: color },
+        uSize: { value: new Vector2(STEAM_SIZE.width, STEAM_SIZE.height) }
+      },
       transparent: true,
       depthWrite: false,
-      blending: AdditiveBlending,
+      blending: CustomBlending,
+      blendEquation: AddEquation,
+      blendSrc: OneFactor,
+      blendDst: OneMinusSrcAlphaFactor,
       side: DoubleSide
     })
   );
   const mesh = new Mesh(geometry, material);
   mesh.name = 'desk-steam';
-  mesh.position.set(MUG.x, MUG.y + 0.088, MUG.z);
+  mesh.position.set(MUG.x, MUG.y + 0.09, MUG.z);
+  mesh.renderOrder = 2;
   mesh.raycast = () => undefined;
   return {
     mesh,
     setTime: time => {
       material.uniforms.uTime!.value = time;
     },
-    setStrength: level => {
-      material.uniforms.uStrength!.value = level;
+    setStrength: (level, day = 0) => {
+      color.copy(STEAM_NIGHT).lerp(STEAM_DAY, day);
+      material.uniforms.uStrength!.value = level * (1 - 0.45 * day);
+      material.uniforms.uOcclusion!.value = 0.55 * day;
     },
     dispose: () => {
       geometry.dispose();

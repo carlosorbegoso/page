@@ -332,14 +332,26 @@ const menuItem =
       if (!open && restoreFocus) toggle!.focus();
     }
 
-    toggle.addEventListener('click', () => setOpen(!isOpen()));
+    let openedByHover = false;
+
+    /* Hover already opened the menu on desktop: the click that follows must not close it again. */
+    toggle.addEventListener('click', () => {
+      if (openedByHover && isOpen()) {
+        openedByHover = false;
+        return;
+      }
+      setOpen(!isOpen());
+    });
 
     hud.addEventListener('pointerenter', event => {
-      if (event.pointerType === 'mouse' && finePointer.matches) setOpen(true);
+      if (event.pointerType !== 'mouse' || !finePointer.matches || isOpen()) return;
+      openedByHover = true;
+      setOpen(true);
     });
     hud.addEventListener('pointerleave', event => {
       if (event.pointerType !== 'mouse' || !finePointer.matches) return;
-      if (hud.contains(document.activeElement)) return;
+      openedByHover = false;
+      if (hud.contains(document.activeElement)) (document.activeElement as HTMLElement).blur();
       closeTimer = window.setTimeout(() => setOpen(false), HOVER_CLOSE_DELAY_MS);
     });
 

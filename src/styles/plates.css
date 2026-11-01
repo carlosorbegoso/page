@@ -258,3 +258,10 @@
 .plate :is(p:has(+ h1, + h2, + h3), [data-signal])::before {
   display: none;
 }
+
+/* Links on the stage are bare text; keyboard users still need to see where they are. */
+.is-3d .plate :is(a, button):focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 4px;
+  border-radius: 4px;
+}

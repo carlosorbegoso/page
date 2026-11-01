@@ -251,14 +251,25 @@ export class Plates {
   private tabInStoryOrder(event: KeyboardEvent): void {
     if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey) return;
     const focusables = this.entries.flatMap(entry =>
-      [...entry.el.querySelectorAll<HTMLElement>(FOCUSABLE)].filter(el => el.checkVisibility({ visibilityProperty: true }))
+      [...entry.el.querySelectorAll<HTMLElement>(FOCUSABLE)].map(el => ({ el, entry }))
     );
-    const index = focusables.indexOf(document.activeElement as HTMLElement);
+    const index = focusables.findIndex(item => item.el === document.activeElement);
     if (index < 0) return;
     const next = focusables[index + (event.shiftKey ? -1 : 1)];
     if (!next) return;
     event.preventDefault();
-    next.focus();
+    if (next.el.checkVisibility({ visibilityProperty: true })) {
+      next.el.focus();
+      return;
+    }
+    /* Far chapters are dormant (visibility: hidden): travel there first, then focus once it shows. */
+    this.host.scrollTo(next.entry.chapter, next.entry.sub ?? 0);
+    const started = performance.now();
+    const waitAndFocus = () => {
+      if (next.el.checkVisibility({ visibilityProperty: true })) next.el.focus({ preventScroll: true });
+      else if (performance.now() - started < 2500) requestAnimationFrame(waitAndFocus);
+    };
+    requestAnimationFrame(waitAndFocus);
   }
 
   private focusIn(event: FocusEvent): void {

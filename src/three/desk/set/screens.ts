@@ -1,34 +1,43 @@
-import { Mesh, MeshBasicMaterial, PlaneGeometry, type CanvasTexture, type Group } from 'three';
+import { Mesh, MeshBasicMaterial, PlaneGeometry, type CanvasTexture, type Group, type Material, type MeshStandardMaterial } from 'three';
+import type { StationContext } from '../../contracts';
 import { tokenColor } from '../../tokens';
-import { LAPTOP, MONITOR } from '../layout';
+import { MONITOR } from '../layout';
 import { createPhoneTexture, createScreenTexture, drawPhone, drawScreen } from '../materials';
-import { laptopScreenFrame } from '../props';
-import { monitorFrame, type SurfaceFrame } from '../shots';
+import { DeskLaptop } from '../screens/laptop';
+import { MonitorGlass } from '../screens/monitorGlass';
+import type { SurfaceFrame } from '../shots';
+import type { DeskFrame } from './frame';
 import type { LightLevels } from './levels';
 
-/** HDR gain of the screen pictures so they stay luminous through ACES / the FX composer. */
 const SCREEN_HDR = 1.8;
 /** The MacBook never goes fully dark: at dawn it keeps a dim standby glow so it reads as a screen, not a black slab. */
 const LAPTOP_STANDBY = 0.32;
+const LAPTOP_HOVER_GAIN = 0.12;
 
-/** The monitor, phone and laptop glass: canvas pictures whose brightness follows the chapter light. */
+export interface ScreensOptions {
+  room: Group;
+  phone: SurfaceFrame;
+  material: MeshStandardMaterial;
+  depthMaterial: Material | undefined;
+  disposables: Array<{ dispose(): void }>;
+}
+
+/** The monitor, phone and laptop glass: pictures whose brightness follows the chapter light. */
 export class DeskScreens {
-  readonly screen: Mesh<PlaneGeometry, MeshBasicMaterial>;
+  readonly screen: Mesh;
+  private readonly monitor: MonitorGlass;
   private readonly phoneScreen: Mesh<PlaneGeometry, MeshBasicMaterial>;
   private readonly phoneTexture: CanvasTexture;
-  private readonly laptopScreen: Mesh<PlaneGeometry, MeshBasicMaterial>;
+  private readonly laptop: DeskLaptop;
   private phoneNotified = false;
+  private laptopHover = 0;
 
-  constructor(room: Group, phone: SurfaceFrame, disposables: Array<{ dispose(): void }>) {
-    const monitor = monitorFrame();
+  constructor(context: StationContext, options: ScreensOptions) {
+    const { room, phone, disposables } = options;
     const screenTexture = createScreenTexture();
     drawScreen(screenTexture, MONITOR.screen.width / MONITOR.screen.height, tokenColor('--color-monitor-glow', '#7fb8ff'));
-    const screenMaterial = new MeshBasicMaterial({ map: screenTexture });
-    this.screen = new Mesh(new PlaneGeometry(MONITOR.screen.width, MONITOR.screen.height), screenMaterial);
-    this.screen.name = 'desk-screen';
-    this.screen.position.copy(monitor.centre);
-    this.screen.quaternion.copy(monitor.quaternion);
-    room.add(this.screen);
+    this.monitor = new MonitorGlass(room, screenTexture, options.material.envMap);
+    this.screen = this.monitor.mesh;
 
     this.phoneTexture = createPhoneTexture();
     drawPhone(this.phoneTexture, false, tokenColor('--color-accent', '#5aa9ff'));
@@ -38,33 +47,44 @@ export class DeskScreens {
     this.phoneScreen.position.copy(phone.centre);
     this.phoneScreen.quaternion.copy(phone.quaternion);
     room.add(this.phoneScreen);
-    disposables.push(screenMaterial, screenTexture, this.screen.geometry, phoneMaterial, this.phoneTexture, this.phoneScreen.geometry);
 
-    const laptopTexture = createScreenTexture();
-    drawScreen(laptopTexture, LAPTOP.screen.width / LAPTOP.screen.height, tokenColor('--color-monitor-glow', '#7fb8ff'));
-    const laptopMaterial = new MeshBasicMaterial({ map: laptopTexture });
-    const laptopGlass = new Mesh(new PlaneGeometry(LAPTOP.screen.width, LAPTOP.screen.height), laptopMaterial);
-    const glassFrame = laptopScreenFrame();
-    laptopGlass.name = 'desk-laptop-screen';
-    laptopGlass.position.copy(glassFrame.centre);
-    laptopGlass.quaternion.copy(glassFrame.quaternion);
-    laptopGlass.raycast = () => undefined;
-    this.laptopScreen = laptopGlass;
-    room.add(laptopGlass);
-    disposables.push(laptopTexture, laptopMaterial, laptopGlass.geometry);
+    const high = context.tier === 'high';
+    this.laptop = new DeskLaptop({
+      room,
+      material: options.material,
+      depthMaterial: options.depthMaterial,
+      camera: context.camera,
+      shadows: high,
+      high: high && !matchMedia('(pointer: coarse)').matches,
+      invalidate: () => context.invalidate()
+    });
+    disposables.push(screenTexture, this.monitor, phoneMaterial, this.phoneTexture, this.phoneScreen.geometry, this.laptop);
   }
 
-  /** Redraws the phone lock screen when the notification card appears or leaves. */
-  update(level: LightLevels): void {
+  toggleLaptop(time: number): void {
+    this.laptop.toggleLid(time);
+  }
+
+  setHover(id: string | null): void {
+    this.laptop.setHover(id === 'laptop');
+    this.laptopHover = id === 'laptop' ? 1 : 0;
+  }
+
+  /** Redraws the phone lock screen on change and runs the laptop; returns true while one moves. */
+  update(frame: DeskFrame, level: LightLevels): boolean {
     const notify = level.phone > 0.5;
-    if (notify === this.phoneNotified) return;
-    this.phoneNotified = notify;
-    drawPhone(this.phoneTexture, notify, tokenColor('--color-accent', '#5aa9ff'));
+    if (notify !== this.phoneNotified) {
+      this.phoneNotified = notify;
+      drawPhone(this.phoneTexture, notify, tokenColor('--color-accent', '#5aa9ff'));
+    }
+    this.monitor.update(frame.time, frame.motion);
+    return this.laptop.update(frame, frame.chapter === 'outro');
   }
 
   apply(level: LightLevels): void {
-    this.screen.material.color.setScalar(SCREEN_HDR * Math.min(level.monitor / 5, 1.2));
+    this.monitor.apply(level.monitor);
     this.phoneScreen.material.color.setScalar(0.06 + level.phone * SCREEN_HDR * 0.9);
-    this.laptopScreen.material.color.setScalar(SCREEN_HDR * 0.55 * Math.max(Math.min(level.monitor / 5, 1), LAPTOP_STANDBY));
+    const laptopLevel = Math.max(Math.min(level.monitor / 5, 1), LAPTOP_STANDBY);
+    this.laptop.apply(SCREEN_HDR * 0.55 * laptopLevel * (1 + LAPTOP_HOVER_GAIN * this.laptopHover));
   }
 }

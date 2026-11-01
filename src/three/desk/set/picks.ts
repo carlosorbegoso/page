@@ -4,7 +4,7 @@ import { tokenColor } from '../../tokens';
 import { OBJECT_ID } from '../builder';
 import { CLOCK_POSITION } from '../clock';
 import { LAMP_SWITCH } from '../lamp';
-import { FIGURE_HEIGHT, FIGURES, FOLDERS, GLASS_Z, LAMP, MUG, OPEN_FOLDER, PLANT, PRODUCT_FIGURES, WINDOW, folderCentre, type FigureId } from '../layout';
+import { FIGURE_HEIGHT, FIGURES, FOLDERS, GLASS_Z, LAMP, LAPTOP, MUG, OPEN_FOLDER, PLANT, PRODUCT_FIGURES, WINDOW, folderCentre, type FigureId } from '../layout';
 import { createPickMaterial, type AtlasUniforms } from '../materials';
 import { damp } from '../math';
 import { EXPERIENCE_ORDER, type SurfaceFrame } from '../shots';
@@ -24,6 +24,7 @@ const LABELS: Record<string, { es: string; en: string }> = {
   window: { es: 'Ventana', en: 'Window' },
   plant: { es: 'Planta', en: 'Plant' },
   mug: { es: 'Taza de café', en: 'Coffee mug' },
+  laptop: { es: 'Laptop', en: 'Laptop' },
   clock: { es: 'Reloj · clic para que suene', en: 'Clock · click to ring it' }
 };
 
@@ -86,6 +87,7 @@ export class DeskPicks {
     this.picks.push({ object3D: proxy('lampSwitch', [0.045, 0.03, 0.045], LAMP_SWITCH), key: 'desk:lamp', label: LABELS.lamp!, target: '#company', action: 'lamp' });
     this.addRoomToys(proxy);
     this.picks.push({ object3D: proxy('phone', [0.08, 0.16, 0.03], phone.centre, phone.quaternion), key: 'desk:phone', label: LABELS.phone!, target: '#contact' });
+    this.addLaptop(proxy);
     this.picks.push({ object3D: proxy('mug', [0.1, 0.1, 0.09], MUG.clone().add(new Vector3(0.01, 0.05, 0))), key: 'desk:mug', label: LABELS.mug!, target: '#contact' });
     this.picks.push({ object3D: proxy('clock', [0.12, 0.14, 0.08], CLOCK_POSITION.clone().add(new Vector3(0, 0.07, 0))), key: 'desk:clock', label: LABELS.clock!, target: '#hero' });
   }
@@ -102,6 +104,13 @@ export class DeskPicks {
     for (const object3D of [pane, lintel]) this.picks.push({ object3D, key: 'desk:window', label: LABELS.window!, target: '#hero', action: 'blind' });
     const plant = proxy('plant', [0.24, 0.3, 0.2], PLANT.clone().add(new Vector3(0, 0.2, 0)));
     this.picks.push({ object3D: plant, key: 'desk:plant', label: LABELS.plant!, target: '#hero', action: 'plant' });
+  }
+
+  /** The MacBook: a click shuts or opens its lid; it never moves the camera. */
+  private addLaptop(proxy: (key: string, size: [number, number, number], position: Vector3, quaternion?: Quaternion) => Mesh): void {
+    const turn = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), LAPTOP.yaw);
+    const centre = LAPTOP.centre.clone().add(new Vector3(0, 0.07, -0.02).applyQuaternion(turn));
+    this.picks.push({ object3D: proxy('laptop', [LAPTOP.width, 0.15, LAPTOP.depth + 0.04], centre, turn), key: 'desk:laptop', label: LABELS.laptop!, target: '#hero', action: 'laptop' });
   }
 
   /** Finds the pick an object belongs to (walking up the parents). */

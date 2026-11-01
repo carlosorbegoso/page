@@ -69,6 +69,10 @@ export class DeskSet implements ShotProvider {
       this.onFolderAction(detail.action, detail.id);
       return;
     }
+    if (detail?.action === 'laptop') {
+      this.screens.toggleLaptop(this.clock);
+      return;
+    }
     if (this.roomLife?.action(detail?.action)) {
       this.context?.invalidate();
       return;
@@ -109,7 +113,7 @@ export class DeskSet implements ShotProvider {
     this.roomLife.build(this.room, { material: meshes.material, depthMaterial: meshes.depthMaterial, palette });
     this.disposables.push(this.roomLife);
     this.addFolderDetail(meshes, palette, high);
-    this.screens = new DeskScreens(this.room, this.phoneSurface(), this.disposables);
+    this.screens = new DeskScreens(context, { room: this.room, phone: this.phoneSurface(), material: meshes.material, depthMaterial: meshes.depthMaterial, disposables: this.disposables });
     this.weather.addWindow(this.room, this.disposables);
     this.addSpines();
     window.addEventListener('desk:action', this.onAction);
@@ -198,6 +202,7 @@ export class DeskSet implements ShotProvider {
   setHover(object: Object3D | null): void {
     const { name, changed } = this.pickSet.hover(object, this.uniforms);
     this.life?.setHover(name ?? null);
+    this.screens?.setHover(name ?? null);
     this.roomLife?.setHover(object ? (this.resolvePick(object)?.key.slice(5) ?? null) : null);
     if (changed) this.context?.invalidate();
   }
@@ -226,7 +231,8 @@ export class DeskSet implements ShotProvider {
     settling ||= lifting;
     const posing = this.updateShadows(frame);
     settling ||= posing;
-    this.screens.update(this.levels.level);
+    const screening = this.screens.update(frame, this.levels.level);
+    settling ||= screening;
     const hovering = this.pickSet.update(frame.step);
     settling ||= hovering;
     const toys = this.roomLife?.update(frame) ?? false;

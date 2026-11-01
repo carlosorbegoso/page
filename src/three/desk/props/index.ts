@@ -5,5 +5,6 @@ export { buildOpenFolder } from './openFolder';
 export { buildPikachu } from './pikachu';
 export { readPalette, type Palette, type Quality } from './palette';
 export { buildContactShadows, contactShadowSpots } from './shadows';
-export { buildLaptop, laptopScreenFrame } from './laptop';
+export { buildLaptop, buildLaptopLid, laptopHingeMatrix, laptopKeyboardMatrix, LAPTOP_LID } from './laptop';
+export { laptopKeys, LAPTOP_KEYBOARD, type LaptopKey } from './laptopKeys';
 export { buildLamp, buildMonitorHead, buildPhone, buildWorkstation } from './workstation';

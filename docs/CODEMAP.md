@@ -94,6 +94,10 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Presencia, neón, elevación y giro de las figuras | `src/three/desk/set/figures.ts` |
 | Carpetas del estante, carpeta abierta (bisagra), carpeta en mano | `src/three/desk/set/folders.ts` |
 | Pantallas de monitor, teléfono y laptop | `src/three/desk/set/screens.ts` |
+| Laptop viva: tapa con bisagra, imagen (IntelliJ + terminal, Grafana, bloqueo), fps y frustum | `src/three/desk/screens/laptop.ts`, `laptopLid.ts`, `laptopDisplay.ts` |
+| Contenido de la laptop (código Java, log de Quarkus, git log) | `src/three/desk/screens/laptopScript.ts`, `editor.ts`, `terminal.ts`, `dashboard.ts`, `lockScreen.ts` |
+| Teclas de la laptop que se hunden al escribir con el teclado real | `src/three/desk/screens/keycaps.ts`, `typing.ts`, distribución en `props/laptopKeys.ts` |
+| Vidrio del monitor (reflejo del entorno, respiración del brillo) | `src/three/desk/screens/monitorGlass.ts` |
 | Zonas de clic, etiquetas y hover | `src/three/desk/set/picks.ts` |
 | Reloj (hora de la historia, timbre) | `src/three/desk/set/clock-wiring.ts` |
 | Ciudad, lluvia, vapor y haz de la lámpara cada frame | `src/three/desk/set/weather.ts` |

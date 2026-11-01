@@ -21,10 +21,17 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Modo día, tema claro, movimiento reducido o pausado | `src/styles/tokens/modes.css` |
 | Cómo lee three los tokens (`tokenColor`, `tokenNumber`) | `src/three/tokens.ts` |
 
-## HUD y cabecera *(pendiente: `src/components/hud/`)*
+## HUD y cabecera
 | Para cambiar… | Edita |
 | --- | --- |
 | Marcado y estilos de la cabecera, menú, índice | `src/components/Header.astro` |
+| Abrir y cerrar el menú (hover, clic, Escape) | `src/components/hud/menu.ts` |
+| Hoja de índice (cerrar, devolver el foco) | `src/components/hud/index-sheet.ts` |
+| Barra de progreso de la historia | `src/components/hud/progress.ts` |
+| Botones de recorrido y su insignia | `src/components/hud/tour-badge.ts` |
+| Aviso de sonido disponible | `src/components/hud/audio-hint.ts` |
+| Frase del capítulo y enlace activo del índice | `src/components/hud/chapter-beat.ts`, `hud/beats.ts` |
+| Orden de arranque del HUD | `src/components/hud/main.ts` (sin three ni GSAP) |
 
 ## Secciones
 | Para cambiar… | Edita |

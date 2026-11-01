@@ -31,9 +31,8 @@ const year = new Date().getFullYear();
         {t('outro.title')}
       </h2>
       <p class="outro-body text-base text-pretty text-text-muted">{t('outro.body')}</p>
-      <p class="flex flex-wrap items-baseline gap-x-3 gap-y-1 pt-2 text-xs text-text-subtle">
+      <p class="mt-2 flex flex-col items-start gap-1.5 border-t border-text/10 pt-4 text-xs text-text-subtle">
         <span>{t('outro.tech')}</span>
-        <span aria-hidden="true">·</span>
         <ExternalLink
           href={SITE.social.github}
           locale={locale}
@@ -41,8 +40,8 @@ const year = new Date().getFullYear();
         >
           {t('outro.source')}
         </ExternalLink>
-        <span aria-hidden="true">·</span>
-        <span>© {year} {SITE.name} · TUSOCIO IA S.A.C.</span>
+        <span>© {year} {SITE.name}</span>
+        <span>TUSOCIO IA S.A.C.</span>
       </p>
     </div>
   </div>

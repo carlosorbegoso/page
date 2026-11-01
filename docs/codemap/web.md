@@ -10,7 +10,7 @@ Qué archivo editar en la web: `<head>`, tokens, HUD, secciones, modo lectura, t
 | Páginas (home ES/EN, modo lectura ES/EN, 404) | `src/pages/index.astro`, `pages/en/index.astro`, `pages/lectura/index.astro`, `pages/en/reading/index.astro`, `pages/404.astro` |
 | Datos fijos: correo, redes, ruta del CV, ids de sección | `src/config/site.ts` |
 | Componentes base (botón, enlace externo, CV, etiqueta, cabecera de sección, texto cinético, monograma «C») | `src/components/ui/` |
-| Botones de sonido, movimiento y hora; idioma; skip link; tooltip de la escena; barra del modo lectura; pie | `src/components/{AudioToggle,MotionToggle,TimeToggle,LangSwitch,SkipLink,SceneTooltip,ReadingBar,Footer}.astro` |
+| Botones de sonido, movimiento y hora (la hora arranca de día y se recuerda solo en la sesión: `sessionStorage`); idioma; skip link; tooltip de la escena; barra del modo lectura; pie | `src/components/{AudioToggle,MotionToggle,TimeToggle,LangSwitch,SkipLink,SceneTooltip,ReadingBar,Footer}.astro` |
 | Estilos globales, reset | `src/styles/global.css` |
 | Animaciones CSS, `prefers-reduced-motion` | `src/styles/motion/{keyframes,reveal,kinetic}.css` |
 | Estilos de las placas (base, ancladas, sueltas, superficies, desbordes, acabado) | `src/styles/plates/` |
@@ -33,7 +33,7 @@ Qué archivo editar en la web: `<head>`, tokens, HUD, secciones, modo lectura, t
 | --- | --- |
 | Cabecera: compone barra, menú e índice | `src/components/Header.astro` |
 | Barra del HUD: logo, reloj de la historia, progreso, recorrido rápido | `src/components/hud/HudBar.astro` (frases por capítulo en su frontmatter) |
-| Hora de la historia por plano y día/noche (única fuente: HUD, teléfono, laptop, monitor, reloj despertador) | `src/lib/story-time.ts`; el HUD la publica en `--story-clock` y `story:clock` con `src/scripts/story-clock.ts`; el teléfono la lee en `src/scripts/phone/clock.ts`, el monitor en el `::before` de `plates/monitor-chrome.css` |
+| Hora de la historia por plano y día/noche (única fuente: HUD, teléfono, laptop, monitor, reloj despertador) | `src/lib/story-time.ts`; el HUD la publica en `--story-clock` y `story:clock` con `src/scripts/story-clock.ts`; el teléfono la lee en `src/scripts/phone/clock.ts`, el monitor en el `::before` de `plates/monitor-chrome.css`. Las etiquetas del HUD por plano (también los años de Experiencia, con su hora) están en `src/components/hud/HudBar.astro` para día y noche |
 | Menú del HUD: idioma, sonido, movimiento, hora, enlaces | `src/components/hud/HudMenu.astro` |
 | Hoja de índice de secciones | `src/components/hud/IndexSheet.astro` |
 | Abrir y cerrar el menú (hover, clic, Escape) | `src/components/hud/menu.ts` |

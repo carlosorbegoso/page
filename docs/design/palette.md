@@ -16,7 +16,7 @@ Valores: `src/styles/tokens/colors.css` (oscuro y escena) y `src/styles/tokens/m
 |---|---|---|
 | Oscuro | `:root` | Por defecto. La experiencia 3D es siempre oscura |
 | Claro | `:root[data-theme='light']:not(.is-3d)` | Solo fuera del 3D. El modo lectura lo activa con `prefers-color-scheme: light` (`src/components/sections/reading/ReadingPage.astro`) |
-| Día | `:root[data-time='day'].is-3d` | Botón de día/noche (`src/components/TimeToggle.astro`) |
+| Día | `:root[data-time='day'].is-3d` | Por defecto en cada visita. El botón de día/noche (`src/components/TimeToggle.astro`) guarda la noche en `sessionStorage['time']` y el script inline de `src/layouts/Base.astro` la restaura solo en esa sesión |
 
 Por qué el 3D no tiene modo claro: la imagen de fallback del hero (LCP) se captura sobre fondo oscuro y el presupuesto no admite un segundo juego; una página clara mostraría una placa oscura.
 

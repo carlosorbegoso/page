@@ -23,6 +23,8 @@ import {
   buildWorkstation,
   type Palette
 } from '../props';
+import { buildCorkboard } from '../notes/corkboard/geometry';
+import { createCorkboardPrint } from '../notes/corkboard/print';
 import { monitorFrame } from '../shots';
 
 export interface RoomMeshes {
@@ -72,6 +74,10 @@ export function buildRoomMeshes(room: Group, context: StationContext, palette: P
   buildPikachu(workstation, q);
   buildCharizard(workstation, q);
   buildSucculent(statics, palette, q);
+  buildCorkboard(statics, palette, q);
+  const corkboardPrint = createCorkboardPrint();
+  room.add(corkboardPrint.object3D);
+  disposables.push(corkboardPrint);
   const phoneMatrix = buildPhone(statics, palette);
   const figures = new PartBuilder();
   buildFigures(figures, palette, q);

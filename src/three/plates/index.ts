@@ -1,1 +1,2 @@
-export { Plates, type PlateHost } from './Plates';
+export { Plates } from './Plates';
+export type { PlateHost } from './types';

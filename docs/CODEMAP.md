@@ -9,7 +9,12 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Orden de las secciones de la home | `src/components/HomePage.astro` |
 | Estilos globales, reset | `src/styles/global.css` |
 | Animaciones CSS, `prefers-reduced-motion` | `src/styles/motion.css` |
-| Placas HTML sobre la escena 3D | `src/styles/plates.css`, `src/three/plates.ts` |
+| Placas HTML sobre la escena 3D (montaje, visibilidad por capítulo) | `src/styles/plates.css`, `src/three/plates/Plates.ts` (`three/plates.ts` solo reexporta) |
+| Placas: envolver y devolver las placas, capas CSS3D y 2D | `src/three/plates/mount.ts` |
+| Placas: dónde va un panel junto a su ancla, placas sobre monitor y teléfono | `src/three/plates/anchoring.ts` |
+| Placas: márgenes del HUD y `safe-area-inset` | `src/three/plates/safe-area.ts` |
+| Placas: panel más alto que la pantalla (recorte y scroll interno) | `src/three/plates/overflow.ts` |
+| Placas: orden de Tab por capítulos | `src/three/plates/tab-order.ts` |
 
 ## Tokens de diseño
 | Para cambiar… | Edita |
@@ -70,7 +75,10 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Tier de calidad por dispositivo | `src/three/tier.ts` |
 | Posición de cámara por capítulo | `src/three/desk/shots.ts` |
 | Montaje del escritorio y orden de `update` (ensamblador) | `src/three/desk/DeskSet.ts` |
-| Luz por capítulo, día y noche, encendido de la intro, clic en la lámpara | `src/three/desk/set/levels.ts` |
+| Luz por capítulo, día y noche, encendido de la intro, clic en la lámpara, persiana bajada | `src/three/desk/set/levels.ts` |
+| Bombilla de la lámpara (difusor, halo, luz cálida cercana) e interruptor de la base | `src/three/desk/lamp/bulb.ts`, `src/three/desk/lamp/switch.ts` |
+| Persiana enrollable de la ventana, planta que se mece | `src/three/desk/room-life/blind.ts`, `src/three/desk/room-life/plant.ts` |
+| Hover y clic de lámpara, ventana y planta | `src/three/desk/room-life/room-life.ts` |
 | Luces (lámpara, monitor, luna/sol, relleno, estante) | `src/three/desk/set/lighting.ts` |
 | Presencia, neón, elevación y giro de las figuras | `src/three/desk/set/figures.ts` |
 | Carpetas del estante, carpeta abierta (bisagra), carpeta en mano | `src/three/desk/set/folders.ts` |
@@ -87,7 +95,7 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Monitor, teclado, taza, teléfono, lámpara | `src/three/desk/props/workstation.ts` |
 | Laptop (carcasa, teclas, tapa, cable USB-C) | `src/three/desk/props/laptop.ts` |
 | Carpeta abierta de TCS (tapas, bolsillo, hojas, clip, ligas) | `src/three/desk/props/openFolder.ts` |
-| Planta y telescopio | `src/three/desk/props/decor.ts` |
+| Planta (maceta y hojas) y telescopio | `src/three/desk/props/decor.ts` |
 | Peana y coleccionables: Alfa, Burbu (Ventixs), regalo (Parati), llave (SkyMek), un archivo cada uno | `src/three/desk/props/figures/` |
 | Sombras de contacto | `src/three/desk/props/shadows.ts` |
 | Ayudas de geometría (`seg`, `shade`, `rod`) | `src/three/desk/props/geometry.ts` |

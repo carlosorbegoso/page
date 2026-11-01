@@ -86,3 +86,6 @@ Qué archivo editar en el escritorio 3D: encuadres (shots), luz, props, figuras,
 | Papel impreso: densidad, nivel de tinta frente a la lámpara (`PAPER_LEVEL`), fuentes | `src/three/desk/notes/paper.ts`; textos en `notes/content.ts`, posiciones en `notes/layout.ts` |
 | Vista aislada del escritorio para depurar (la app no la importa) | `src/three/desk/preview.ts` |
 | Ficha impresa bajo el cuadro (solo teléfono vertical; titular y Hoy/Antes/De noche leídos del HTML de about-bio), llega después del primer frame | `src/three/desk/portrait/bio-card.ts`, dibujo en `bio-print.ts`, posición `BIO_CARD` en `portrait/layout.ts` |
+| Acción al hacer clic en las figuras (tapa con bisagra, giros de la llave, «escribiendo…»), bloqueo del doble clic, elevación al pasar el cursor | `src/three/desk/life/{gift,wrench,bubble,index}.ts` |
+| Lo que aparece al hacer clic (invitación y aviso de Yape, ticket de OT, burbujas de chat, globo de Alfa): planos impresos en la capa tardía, guiones y textos ES/EN con variaciones, carga diferida | `src/three/desk/life/beats/` (`scripts.ts` guiones, `copy.ts` textos, `draw.ts` dibujo, `paths.ts` trayectorias, `beats.ts` ciclo de vida) |
+| Cuánto espera la cámara a que termine la acción antes de viajar | `ACTION_MS` en `src/three/stage/navigate.ts` |

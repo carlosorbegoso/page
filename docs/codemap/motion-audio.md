@@ -39,3 +39,4 @@ Qué archivo editar en la navegación por planos (story-nav), el texto cinético
 | Sonidos de objetos del escritorio (`desk:*`) | `src/audio/desk-sounds.ts`, voces en `desk-voices.ts` |
 | Tecla, tock y campanilla | `src/audio/voices.ts`; envolventes y síntesis en `synth.ts`, ruido e impulsos en `buffers.ts` |
 | Sonidos de la UI (botones, menú) | `src/audio/ui-sounds.ts` |
+| Sonidos de lo que aparece (invitación, Yape, ticket, mensaje) | `src/audio/beat-voices.ts`, evento `desk:beat` en `src/audio/desk-sounds.ts` |

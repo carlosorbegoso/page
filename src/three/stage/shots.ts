@@ -5,7 +5,7 @@ import type { World } from '../world';
 import type { StageOptions } from './types';
 
 const PHONE_MONITOR_PUSH = 0.1;
-const INTRO_PULLBACK = 0.04;
+const INTRO_PULLBACK = 0.14;
 export const DEFAULT_SUBS: Partial<Record<ChapterId, number>> = { products: 3 };
 const BREATHING_CHAPTERS: ReadonlySet<ChapterId> = new Set(['company', 'products', 'experience', 'outro']);
 const BREATHING_STACKED: ReadonlySet<ChapterId> = new Set([...BREATHING_CHAPTERS, 'hero', 'about']);

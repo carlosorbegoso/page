@@ -1,6 +1,6 @@
 import { PerspectiveCamera, type WebGLRenderer } from 'three';
 import { bindRenderer } from './assets';
-import { onRegistryChange, type ChapterId } from './contracts';
+import { isChapterId, onRegistryChange, type ChapterId } from './contracts';
 import { DebugOverlay } from './debug';
 import { CAMERA_LIMITS, CameraDirector } from './director';
 import { yieldToMain } from './idle';
@@ -11,7 +11,8 @@ import { loadExtensions } from './stage/extensions';
 import { StageLoop } from './stage/frame-loop';
 import { listenStage } from './stage/listen';
 import { StageModules } from './stage/modules';
-import { announceReveal, screenPoint } from './stage/reveal';
+import { holdIntroForBoot } from './stage/intro-gate';
+import { announceReveal, screenPoint, surfaceFoot } from './stage/reveal';
 import { applyStageTokens, createStageRenderer } from './stage/renderer';
 import { breathes, fixedChapter, StageLayout } from './stage/shots';
 import { stationContext } from './stage/station-context';
@@ -152,10 +153,10 @@ export class Stage {
   }
 
   private async enterFirstShot(): Promise<void> {
-    const atTop = scrollY < 4;
+    const opening = scrollY < 4 || isChapterId(location.hash.slice(1));
     if (!this.options.capture) this.chapters.mountPlates();
     let first = fixedChapter(this.options);
-    if (!first && atTop && this.movesAllowed) this.loop.introUntil = Number.POSITIVE_INFINITY;
+    if (!first && opening && this.movesAllowed) this.loop.introUntil = Number.POSITIVE_INFINITY;
     first ??= this.loop.introUntil ? { id: 'intro', sub: 0 } : { id: 'hero', sub: 0 };
     this.director.request({ id: first.id, subIndex: first.sub, shot: this.layout.shot(this.world, first.id, first.sub) }, 'instant');
     this.director.update(this.camera, 0, this.layout.fov(), { x: 0, y: 0 }, true);
@@ -221,8 +222,11 @@ export class Stage {
 
   private reveal(): void {
     const intro = this.loop.introUntil === Number.POSITIVE_INFINITY;
-    if (intro) this.loop.introUntil = performance.now() + INTRO_SECONDS * 1000;
-    announceReveal(this.options.container, intro, screenPoint(this.world.anchor('lamp'), this.camera, this.layout.size), Boolean(this.options.capture));
+    if (intro && document.documentElement.classList.contains('booting')) this.cleanups.push(holdIntroForBoot(this.loop));
+    else if (intro) this.loop.introUntil = performance.now() + INTRO_SECONDS * 1000;
+    const { size } = this.layout;
+    const points = { lamp: screenPoint(this.world.anchor('lamp'), this.camera, size), monitor: screenPoint(surfaceFoot(this.world.surface('monitor')), this.camera, size) };
+    announceReveal(this.options.container, intro, points, Boolean(this.options.capture));
   }
 
   degrade(reason: 'low' | 'context-lost'): void {

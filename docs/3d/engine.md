@@ -4,10 +4,10 @@ Qué hace el Stage desde que carga la página hasta el primer frame, cómo degra
 
 ## Arranque (`StageCanvas.astro`)
 
-- `[data-stage]` es fijo, `aria-hidden`, con un `<picture data-stage-fallback="hero">` (AVIF/WebP a 375, 768 y 1440, `fetchpriority="high"`): es el LCP y lo que queda si no hay 3D.
-- Script inline: si hay WebGL2 y no hay `?tier=none`, `?capture` ni `saveData`, pone `html.stage-pending` (se quita a los 12 s o al degradar).
-- Script del módulo: espera `load` y luego la primera interacción (`pointerdown`, `keydown`, `wheel`, `touchstart`, `scroll`) o 3 s; después `onIdle` → `detectTier()` → import dinámico de `src/three/index.ts` → `boot()`. Con `?capture` no espera y fuerza `high`.
-- Mientras tanto corre el cargador 2D (`src/components/three/stage-loader/`), que emite y escucha `stage:progress {value}`.
+- `[data-stage]` es fijo y `aria-hidden`; encima va la pantalla de arranque (`docs/3d/boot.md`). Ya no hay póster: si el 3D degrada queda el degradado del cielo de `[data-stage]`.
+- Script inline: pone `html.booting` (ver `docs/3d/boot.md`) y, si hay WebGL2, `html.stage-pending` (se quita a los 12 s, al degradar o al terminar el arranque).
+- Script del módulo: espera `load` y luego la primera interacción (`pointerdown`, `keydown`, `wheel`, `touchstart`, `scroll`) o 3 s (salvo en una visita en caliente, `stage:warm`); después `onIdle` → `detectTier()` → import dinámico de `src/three/index.ts` → `boot()`. Con `?capture` no espera y fuerza `high`.
+- Mientras tanto la pantalla de arranque escucha `stage:progress {value}` y `stage:assets {loaded, total}`.
 - `chapter:enter` pone `[data-stage][data-moving]`; `chapter:settled` lo quita.
 
 ## Tiers (`detectTier`)
@@ -30,7 +30,7 @@ Qué hace el Stage desde que carga la página hasta el primer frame, cómo degra
 2. `bootScene`: `loadExtensions()` importa `src/three/desk/index.ts` y `src/three/fx/index.ts` por `import.meta.glob` (si fallan, se registra el error y sigue); `World` con cielo mínimo y luces de reserva que se apagan cuando hay escritorio.
 3. `enterFirstShot`: lee `scrollY` **antes** de mover las placas (después forzaría un re-layout síncrono). Si la página está arriba y hay movimiento, empieza en `intro`; si no, en `hero`. Precompila shaders.
 4. Primer frame **sin esperar a GSAP**; luego `chapters.startScroll()` (no corre con `?capture` ni `?chapter`).
-- `stage:reveal {intro, lamp}` sale en el primer frame dibujado y pone `[data-ready="true"]`. La intro dura 2.4 s desde ese momento, no desde el boot: un arranque lento se comería el encendido.
+- `stage:reveal {intro, lamp, monitor}` sale en el primer frame dibujado y pone `[data-ready="true"]`. Con la pantalla de arranque, la intro se retiene hasta `stage:boot-open`; sin ella dura 2.4 s desde el primer frame, no desde el boot: un arranque lento se comería el encendido.
 
 ## Bucle (`StageLoop`)
 
@@ -67,13 +67,10 @@ Qué hace el Stage desde que carga la página hasta el primer frame, cómo degra
 
 `window.__stage` expone el Stage en consola.
 
-## Fallbacks (`bun run capture`)
+## Capturas (`bun run capture`)
 
-- `scripts/capture-fallbacks.ts`, con el servidor de desarrollo levantado (`--base`, por defecto `http://localhost:4321/page/`; `--station hero`).
-- Playwright + `chrome-headless-shell` con la GPU real (ANGLE/Metal); `--swiftshader` de reserva. `CHROME_PATH` cambia el binario.
-- Lee `[data-stage-canvas]` y escribe con `sharp` AVIF q50 / WebP q72 a 375×667, 768×1024 y 1440×900 con DPR 2 en `public/fallback/`. Tamaños y presupuesto: `docs/3d/budget.md`.
-- Pide `&progress=1&w=<ancho>`, pero `boot()` ya no lee esos dos parámetros: no hacen nada.
-- La pantalla del monitor sale vacía en el fallback: el texto es DOM, no WebGL.
+- `scripts/capture-fallbacks.ts`, con el servidor de desarrollo levantado (`--base`, por defecto `http://localhost:4321/page/`): Playwright + `chrome-headless-shell` con la GPU real, lee `[data-stage-canvas]` y escribe AVIF/WebP en public/fallback/.
+- La página ya no usa esas imágenes (el póster se quitó): sirve solo para sacar capturas.
 
 ## Medir FPS
 

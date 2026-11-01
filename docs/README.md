@@ -8,7 +8,8 @@
 | Reglas de código, trampas (`settling ||=`, imports del HUD, orden de tokens), verificación | [`conventions.md`](conventions.md) |
 | Decisiones de Carlos, presupuestos (Lighthouse, KB, FPS, draw calls), tiers, i18n, SEO, a11y, anti-mareo | [`requirements.md`](requirements.md) |
 | Lo que falta, preguntas abiertas, código muerto | [`pending.md`](pending.md) |
-| Arranque del 3D, `Stage.start`, tiers y DPR, render a demanda, `?debug` `?tier` `?chapter` `?capture`, fallbacks | [`3d/engine.md`](3d/engine.md) |
+| Pantalla de carga: diagrama `GET /carlos`, `200 OK`, monograma, 503, intro y salto | [`3d/boot.md`](3d/boot.md) |
+| Arranque del 3D, `Stage.start`, tiers y DPR, render a demanda, `?debug` `?tier` `?chapter` `?capture`, capturas | [`3d/engine.md`](3d/engine.md) |
 | Capítulos, eventos `chapter:*` `story:*` `desk:*`, `ShotProvider`, `CameraDirector`, scroll, placas `data-plate-*` | [`3d/director.md`](3d/director.md) |
 | Escritorio: sub-planos, superficies, anclas, foco, picks, acciones, ids de objeto (`oid`) | [`3d/desk.md`](3d/desk.md) |
 | Peso de los chunks, qué va antes del primer frame (260 KB), `deferred` | [`3d/budget.md`](3d/budget.md) |

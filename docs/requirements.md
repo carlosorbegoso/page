@@ -43,17 +43,17 @@ Decisiones de Carlos, presupuestos de rendimiento, tiers, i18n/SEO y accesibilid
 | Draw calls | < 50 por plano (`renderer.info.render.calls`) |
 | Modelos | Hero < 2 MB, todos ≤ 4 MB (`high`); `high` ≤ 25 k tris y 1024 px, `mid` ≤ 8 k tris y 512 px; KTX2 potencia de 2, un material y atlas por pieza |
 | Decoders | Meshopt ≤ 40 KB; transcoder KTX2 diferido hasta la primera textura |
-| Fallback del hero (LCP) | AVIF ≤ 60 KB a 375 px, ≤ 150 KB a 1440 px; `public/fallback/` ≤ 600 KB |
+| Pantalla de arranque | HTML/CSS visible en el primer frame, JS ≤ 5 KB gzip, sin three |
 | Memoria GPU | `renderer.info.memory` vuelve a la base al liberar una escena |
 
 ## Niveles de dispositivo (`src/three/tier.ts`)
-- `none`: sin WebGL2, render por software, `saveData`, `forced-colors` o contexto perdido. Fallback estático; nunca se descarga three.
+- `none`: sin WebGL2, render por software, `saveData`, `forced-colors` o contexto perdido. Sin pantalla de arranque ni 3D (página normal); sin WebGL2 o con render por software, la pantalla muestra `503 · Modo lectura` y lleva al modo lectura. Nunca se descarga three.
 - `mid`: `pointer: coarse` o < 1024 px. `high`: el resto. `low`: degradación posterior si el p75 no cumple ni a DPR mínimo.
 - No se usan `deviceMemory` ni `hardwareConcurrency`: solo existen en Chromium y están mal calibrados (un Galaxy A5x tiene 8 núcleos).
 - Los FPS se miden tras calibrar 500 ms el intervalo de rAF (detecta 30/60/120 Hz y el bajo consumo de iOS), después de compilar shaders y subir texturas, como p75 relativo a ese intervalo.
 
 ## Rendimiento del arranque
-- El LCP es la imagen de fallback del hero: preload, `fetchpriority="high"`, nunca `loading="lazy"`.
+- La pantalla de arranque es HTML/CSS puro y se pinta en el primer frame, sin esperar a three ni a imágenes.
 - Diferir el 3D tras `load` no basta: Lighthouse sigue midiendo hasta que la CPU queda quieta. El 3D espera la primera interacción o unos segundos y se trocea en tareas < 50 ms.
 - CSS inline (`inlineStylesheets: 'always'`), sin CSS de terceros.
 
@@ -67,6 +67,6 @@ Decisiones de Carlos, presupuestos de rendimiento, tiers, i18n/SEO y accesibilid
 ## Accesibilidad
 - Canvas `aria-hidden`; skip link, landmarks, un solo `h1`.
 - Contraste AA (4,5:1 texto, 3:1 UI). El texto nunca pisa el 3D sin un panel o scrim sólido (≥ 60 %), y el contraste se valida contra ese scrim.
-- `forced-colors: active` oculta el canvas y muestra el fallback.
+- `forced-colors: active` oculta el canvas y la pantalla de arranque: queda la página normal.
 - Foco visible, teclado completo, objetivos táctiles ≥ 44 × 44 px, orden de Tab igual al de los capítulos.
 - `prefers-reduced-motion` y el botón de pausa (WCAG 2.2.2) detienen el movimiento automático.

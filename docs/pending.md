@@ -22,6 +22,9 @@ Lo que falta hacer y las preguntas abiertas para Carlos; cuando algo se termina,
 - Tokens que nadie lee: `--lamp-intensity`, `--monitor-intensity`, `--moonlight-intensity`, `--fx-chromatic-offset`, `--color-{burbu,gift,tool}-body` y los `--*-roughness` / `--*-metalness` de las figuras.
 - Prop `shine` de `KineticText`: no la usa nadie.
 
+## Marca
+- El CV en PDF (`public/cv/Carlos-Orbegoso-CV.pdf`) no lleva el monograma «C»: no hay fuente editable en el repo.
+
 ## Medición
 - FPS en el Android y el iPhone de Carlos con `?debug` (métricas en `localStorage['stage:metrics']`).
 

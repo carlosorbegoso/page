@@ -40,6 +40,12 @@
   font-size: var(--text-sm);
 }
 
+.cv-mark {
+  display: block;
+  margin-bottom: 0.75rem;
+  color: var(--color-text);
+}
+
 .cv-name {
   font-size: var(--text-5xl);
   font-weight: var(--font-weight-semibold);

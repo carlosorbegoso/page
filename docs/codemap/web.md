@@ -9,7 +9,7 @@ Qué archivo editar en la web: `<head>`, tokens, HUD, secciones, modo lectura, t
 | Orden de las secciones de la home | `src/components/HomePage.astro` |
 | Páginas (home ES/EN, modo lectura ES/EN, 404) | `src/pages/index.astro`, `pages/en/index.astro`, `pages/lectura/index.astro`, `pages/en/reading/index.astro`, `pages/404.astro` |
 | Datos fijos: correo, redes, ruta del CV, ids de sección | `src/config/site.ts` |
-| Componentes base (botón, enlace externo, CV, etiqueta, cabecera de sección, texto cinético) | `src/components/ui/` |
+| Componentes base (botón, enlace externo, CV, etiqueta, cabecera de sección, texto cinético, monograma «C») | `src/components/ui/` |
 | Botones de sonido, movimiento y hora; idioma; skip link; tooltip de la escena; barra del modo lectura; pie | `src/components/{AudioToggle,MotionToggle,TimeToggle,LangSwitch,SkipLink,SceneTooltip,ReadingBar,Footer}.astro` |
 | Estilos globales, reset | `src/styles/global.css` |
 | Animaciones CSS, `prefers-reduced-motion` | `src/styles/motion/{keyframes,reveal,kinetic}.css` |

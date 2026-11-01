@@ -1,5 +1,6 @@
 import { isChapterId } from './contracts';
 import { Stage, type CaptureOptions } from './Stage';
+import { watchAssetLoads } from './stage/types';
 import type { TierResult } from './tier';
 
 export interface BootOptions {
@@ -36,6 +37,7 @@ export async function boot({ container, tier, params }: BootOptions): Promise<St
     debug: debugRequested(params)
   });
   window.__stage = stage;
+  watchAssetLoads();
   await stage.start();
   return stage;
 }

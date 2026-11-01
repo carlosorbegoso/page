@@ -1,4 +1,4 @@
-# Presupuesto del 3D: chunks antes del primer frame y fallbacks
+# Presupuesto del 3D: chunks antes del primer frame
 
 Cuánto pesa el 3D, qué se descarga antes del primer frame y qué llega después; léelo antes de añadir algo al escritorio, a FX o al chunk de arranque.
 
@@ -32,16 +32,9 @@ Cuánto pesa el 3D, qué se descarga antes del primer frame y qué llega despué
 - Lo que más pesa en `desk` y se ve en el hero (no se puede diferir sin cambiar el primer frame): props (figuras, Pikachu, Charizard, cuarto) ≈ 66 KB sin comprimir, `life/**` ≈ 49 (incluye `life/pokemon` ≈ 15), `notes/**` ≈ 24 (corcho y tarjetas), `portrait/**` ≈ 15.
 - `RectAreaLight` pesaba unos 100 KB: por eso el monitor ilumina con una `PointLight`.
 
-## Fallbacks (`public/fallback/`)
+## Pantalla de arranque
 
-Presupuesto de `scripts/capture-fallbacks.ts`: AVIF ≤ 60 / 100 / 150 KB a 375 / 768 / 1440 y ≤ 600 KB en total.
-
-| Ancho | AVIF KB | WebP KB |
-|---|---|---|
-| 375 | 12.6 | 14.5 |
-| 768 | 24.0 | 29.8 |
-| 1440 | 48.6 | 60.7 |
-| **Total** | | **≈ 190** |
+JS inicial de `src/components/three/boot/` ≈ 3.3 KB gzip (secuencia 2.2 + scripts de los componentes 1.1); CSS inline. No importa three ni GSAP.
 
 ## Draw calls
 

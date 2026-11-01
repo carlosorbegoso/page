@@ -20,7 +20,7 @@ Sitio estático bilingüe (ES en `/page/`, EN en `/page/en/`) con un escritorio 
 | `bun run lint` | ESLint |
 | `bun run format` | Prettier (`format:check` solo verifica) |
 | `bun run assets` | Optimiza los GLB de `assets-src/` |
-| `bun run capture` | Regenera las imágenes de fallback (con el dev server levantado) |
+| `bun run capture` | Saca capturas del 3D a public/fallback/ (con el dev server levantado; la página no las usa) |
 
 ## Estructura
 ```

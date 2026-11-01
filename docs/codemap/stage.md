@@ -4,9 +4,8 @@ Qué archivo editar en el motor 3D: arranque, Stage, director, scroll, placas, i
 
 | Para cambiar… | Edita |
 | --- | --- |
-| Cargador previo a three (progreso, filamento, haz de sol, línea de arranque) | `src/components/three/stage-loader/loader.ts` (`stage-loader.ts` solo reexporta) |
-| Cargador: dibujo de día, de noche y línea del monitor | `src/components/three/stage-loader/scene.ts`, primitivas en `paint.ts` |
-| Cargador: marcas del póster, ritmo del progreso, texto de estado | `src/components/three/stage-loader/frame.ts`, `progress.ts`, `status.ts` |
+| Pantalla de arranque: diagrama, paquete, `200 OK`, monograma, 503 y salto (`docs/3d/boot.md`) | `src/components/three/boot/` (`BootScreen.astro`, `sequence.ts`, `timeline.ts`, `progress.ts`), estilos en `src/styles/boot/boot.css` |
+| La intro del 3D espera a la pantalla de arranque | `src/three/stage/intro-gate.ts` |
 | Arranque del Stage y cableado de piezas (ensamblador) | `src/three/Stage.ts` |
 | Bucle de render a demanda, ventana de inactividad, DPR adaptativo | `src/three/stage/frame-loop.ts` |
 | Placas, scroll ↔ capítulo, intro que retiene el capítulo; `data-plate-stacked="printed"` deja la placa solo para lectores de pantalla en teléfono vertical (`data-plate-printed`) | `src/three/stage/chapters.ts`, `stage/plates-mount.ts` |
@@ -20,10 +19,10 @@ Qué archivo editar en el motor 3D: arranque, Stage, director, scroll, placas, i
 | Hover y clic sobre objetos 3D (raycast, cursor, `desk:interact`) | `src/three/interaction/index.ts`, `interaction/picker.ts`, `interaction/events.ts` |
 | Enter sobre el panel de experiencia saca la carpeta | `src/three/interaction/folder-keys.ts` |
 | Tier de calidad por dispositivo | `src/three/tier.ts` |
-| Arranque sin three: contenedor del canvas, `<picture>` de fallback, cuándo se importa el 3D | `src/components/three/StageCanvas.astro`, preload del fallback en `HeroFallbackPreload.astro` |
+| Arranque sin three: contenedor del canvas, clases iniciales, scroll arriba, puerta de interacción, cuándo se importa el 3D | `src/components/three/StageCanvas.astro` |
 | Punto de entrada del chunk 3D (`boot`) | `src/three/index.ts` |
-| Opciones del Stage y de `?capture` | `src/three/stage/types.ts` |
-| Revelado del canvas al primer frame (`stage:reveal`) | `src/three/stage/reveal.ts` |
+| Opciones del Stage y de `?capture`, eventos `stage:progress` y `stage:assets` | `src/three/stage/types.ts` |
+| Revelado del canvas al primer frame (`stage:reveal` con los puntos de la lámpara y el monitor) | `src/three/stage/reveal.ts` |
 | Desvío de cámara (acercarse a un objeto y volver) | `src/three/stage/detour.ts` |
 | Director de cámara: límites, duración y easing de cada transición, parallax | `src/three/director.ts` |
 | Scroll ↔ capítulo (ScrollTrigger) | `src/three/scroll.ts`; capítulo de cada sección en `src/three/sections.ts` |

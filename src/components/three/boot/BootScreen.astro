@@ -1,0 +1,62 @@
+---
+import { localeUrl, useTranslations, type Locale } from '../../../i18n/utils';
+import '../../../styles/boot/boot.css';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const reading = localeUrl(locale, locale === 'es' ? 'lectura' : 'reading');
+const NODES = ['gateway', 'quarkus-api', 'kafka', 'db'];
+---
+
+<div
+  class="boot"
+  data-boot
+  data-phase="load"
+  data-reading={reading}
+  data-loaded={t('stage.loaded')}
+  data-failed={t('stage.failed')}
+  data-unavailable={t('stage.unavailable')}
+>
+  <div class="boot__grain" aria-hidden="true"></div>
+  <div class="boot__stage" aria-hidden="true">
+    <div class="boot__route" data-boot-route>
+      <span class="boot__wire"></span>
+      <span class="boot__wire boot__wire--lit"></span>
+      <ol class="boot__nodes" role="list">
+        {NODES.map(node => (
+          <li class="boot__node" data-boot-node>
+            <span class="boot__dot" />
+            <span class="boot__label">{node}</span>
+          </li>
+        ))}
+      </ol>
+      <span class="boot__packet">
+        <span class="boot__tag" data-boot-tag>
+          GET /carlos
+        </span>
+      </span>
+    </div>
+    <p class="boot__response" data-boot-response></p>
+  </div>
+  <svg class="boot__mark" viewBox="0 0 64 64" aria-hidden="true">
+    <path class="boot__arc" pathLength="1" d="M43.5 22.4A15 15 0 1 0 43.5 41.6"></path>
+    <circle class="boot__led" cx="47" cy="32" r="4.5"></circle>
+  </svg>
+  <p class="boot__signature" aria-hidden="true">
+    Carlos Orbegoso · Backend Developer
+  </p>
+  <p class="sr-only" role="status" aria-live="polite" data-boot-status>
+    {t('stage.loading')}
+  </p>
+</div>
+
+<script>
+  import { startBoot } from './index';
+
+  const root = document.querySelector<HTMLElement>('[data-boot]');
+  if (root && document.documentElement.classList.contains('booting')) startBoot(root);
+</script>

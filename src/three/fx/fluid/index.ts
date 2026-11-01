@@ -1,5 +1,5 @@
 export { FLUID_FRAGMENT_OFFSET, FLUID_PARS, FLUID_VERTEX_DISPLACE, FLUID_VERTEX_PARS } from './displace.glsl';
-export { FluidField, type FluidSettings, type FluidStroke } from './field';
+export type { FluidSettings, FluidStroke } from './field';
 export { withFluidDisplacement, withFluidFragment } from './patch';
 export { FluidPointerInput } from './pointer';
 export {

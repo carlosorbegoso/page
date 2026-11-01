@@ -3,6 +3,7 @@ import { storyMinutes } from '../clock';
 import { LAPTOP } from '../layout';
 import { LAPTOP_LID } from '../props';
 import type { DeskFrame } from '../set/frame';
+import type { LaptopDesktop } from './desktop';
 import { LaptopDisplay, type LaptopPicture } from './laptopDisplay';
 import { LaptopKeycaps } from './keycaps';
 import { LaptopLid } from './laptopLid';
@@ -74,6 +75,13 @@ export class DeskLaptop {
 
   setHover(hovered: boolean): void {
     this.lid.setHover(hovered);
+  }
+
+  /** The working desktop arrives after the first frame; until then 'live' shows the lock screen. */
+  attachDesktop(desktop: LaptopDesktop): void {
+    this.display.attachDesktop(desktop);
+    this.dirty = true;
+    this.options.invalidate();
   }
 
   private onType(typed: TypedKey): boolean {

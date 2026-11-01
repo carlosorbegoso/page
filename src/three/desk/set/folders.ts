@@ -1,7 +1,9 @@
 import { Matrix4, Vector3, type Mesh } from 'three';
 import type { ChapterId } from '../../contracts';
 import { OBJECT_ID } from '../builder';
-import { FOLDER_PARK, FolderDetail, follow } from '../folderDetail';
+import { FOLDER_PARK } from '../folder-detail/constants';
+import { follow } from '../folder-detail/follow';
+import type { FolderDetail } from '../folderDetail';
 import { FLAP_THICKNESS } from '../folder-detail/flap';
 import { OpenFolderPrint } from '../folders/open-folder-print';
 import { FOLDERS, OPEN_FOLDER, type FolderId } from '../layout';

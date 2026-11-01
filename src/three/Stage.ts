@@ -126,6 +126,8 @@ export class Stage {
     await this.enterFirstShot();
     this.listen();
     if (this.options.debug) this.debug = new DebugOverlay(this.renderer, this);
+    /* The first frame must not wait for GSAP: scroll only matters once the scene is on screen. */
+    this.invalidate();
     if (!this.options.capture && !this.options.forcedChapter) await this.chapters.startScroll();
     this.invalidate();
   }

@@ -130,7 +130,9 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Presencia, neón, elevación y giro de las figuras | `src/three/desk/set/figures.ts` |
 | Carpetas del estante, carpeta abierta (bisagra), carpeta en mano | `src/three/desk/set/folders.ts` |
 | Pantallas de monitor, teléfono y laptop | `src/three/desk/set/screens.ts` |
-| Laptop viva: tapa con bisagra, imagen (IntelliJ + terminal, Grafana, bloqueo), fps y frustum | `src/three/desk/screens/laptop.ts`, `laptopLid.ts`, `laptopDisplay.ts` |
+| Laptop viva: tapa con bisagra, imagen (bloqueo o escritorio), fps y frustum | `src/three/desk/screens/laptop.ts`, `laptopLid.ts`, `laptopDisplay.ts` |
+| Escritorio de la laptop (IntelliJ + terminal, Grafana, barra de menús; llega después del primer frame) | `src/three/desk/screens/desktop.ts` |
+| Lo que se carga después del primer frame (carpeta para leer, escritorio de la laptop): cuándo y cómo se monta | `src/three/desk/set/deferred.ts`; el chunk en `src/three/desk/deferred/index.ts` |
 | Contenido de la laptop (código Java, log de Quarkus, git log) | `src/three/desk/screens/laptopScript.ts`, `editor.ts`, `terminal.ts`, `dashboard.ts`, `lockScreen.ts` |
 | Teclas de la laptop que se hunden al escribir con el teclado real | `src/three/desk/screens/keycaps.ts`, `typing.ts`, distribución en `props/laptopKeys.ts` |
 | Vidrio del monitor (reflejo del entorno, respiración del brillo) | `src/three/desk/screens/monitorGlass.ts` |
@@ -198,7 +200,7 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Render targets y tamaños | `src/three/fx/targets.ts` |
 | Cómo se dibuja cada pasada (uniforms) | `src/three/fx/passes/{bloom,streak,dof,composite}.ts` |
 | GLSL de cada pasada | `src/three/fx/shaders/*.glsl.ts` (`coc.glsl.ts` lo comparten DoF y composite) |
-| Simulación de fluido | `src/three/fx/fluid/field.ts`, GLSL en `fluid/simulation.glsl.ts` |
+| Simulación de fluido (chunk propio, se pide al primer movimiento del puntero) | `src/three/fx/fluid/field.ts`, GLSL en `fluid/simulation.glsl.ts` |
 | Entrada de puntero del fluido | `src/three/fx/fluid/pointer.ts` |
 | Paso del fluido por frame y uniforms compartidos | `src/three/fx/fluid/driver.ts` |
 | Desplazar un material con el fluido | `src/three/fx/fluid/patch.ts` (`withFluidDisplacement`, `withFluidFragment`), GLSL en `fluid/displace.glsl.ts` |

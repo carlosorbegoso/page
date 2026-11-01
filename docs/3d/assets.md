@@ -122,3 +122,23 @@ FPS: p75 16.7 ms (60 fps) en desktop `high` y 30 fps en reposo / 60 en scroll co
 - La exposición pasa de 1.1 (cuarto) al valor del token entre `s` 0.5 y 0.85; arrastre táctil horizontal ±4° en el escritorio (`s < 0.25`).
 - Productos: una placa al frente por segmento (0.8 viewport cada uno); las demás descansan junto a su luna. `product:focus` (`source: 'scene'`) sigue a la placa del frente.
 - Fallback del hero regenerado con el escritorio: 375 3.2 KB · 768 16.3 KB · 1440 30 KB (AVIF); total `public/fallback/` 116 KB. La pantalla sale vacía (la placa es DOM).
+
+## 7. Presupuesto del 3D tras dividir el escritorio (2026-11-01)
+
+`bun run build`, gzip -9 de `dist/_astro/*.js`. El presupuesto de 260 KB cubre lo que se descarga **antes del primer frame del 3D**; lo demás llega después y no lo retrasa.
+
+| Chunk | Antes | Después | Cuándo se pide |
+|---|---|---|---|
+| `motion` (three.module + three.core) | 149.3 | 149.3 | arranque |
+| `three` (Stage, escenas, placas, CSS3D) | 25.1 | 25.5 | arranque |
+| `desk` | 76.7 | 71.6 | arranque |
+| `fx` | 11.6 | 10.3 | arranque |
+| `late` (capa tardía y parche del fluido) + `BufferGeometryUtils` + `contracts` | 2.7 | 2.7 | arranque |
+| **Antes del primer frame** | **310.5** (esperaba a GSAP) | **259.4** | |
+| `gsap` 26.5 + `ScrollTrigger` 17.0 + `ScrollToPlugin` 1.6 | en el camino del primer frame | 45.1, después del primer frame | `Stage.start` dibuja antes de `startScroll` |
+| `deferred` (carpeta para leer, escritorio de la laptop) | — | 7.5 | evento `stage:reveal` |
+| `field` (simulación del fluido) | — | 1.9 | primer movimiento del puntero con fluido activo |
+
+- Hasta que llega `deferred` la laptop muestra la pantalla de bloqueo, y las carpetas no se pueden sacar todavía (un clic queda en cola 5 s, y la apertura automática de experiencia funciona igual cuando llega). En `?capture` todo se carga antes del primer frame.
+- `gsap/gsap-core` sin CSSPlugin no sirve: ScrollTrigger llama a `gsap.utils.checkPrefix`, que viene de CSSPlugin.
+- Lo que más pesa en `desk` y se ve en el hero (no se puede diferir sin cambiar el primer frame): props (figuras, Pikachu, Charizard, cuarto) ≈ 66 KB sin comprimir, `life/**` ≈ 49 (incluye `life/pokemon` ≈ 15), `notes/**` ≈ 24 (tablero de corcho y tarjetas), `portrait/**` ≈ 15. Margen restante: ~0.6 KB; lo próximo que se añada al escritorio debe llegar después del primer frame (patrón de `desk/set/deferred.ts`).

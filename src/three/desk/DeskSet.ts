@@ -7,11 +7,12 @@ import { readPalette } from './props';
 import { SUB_SHOTS, phoneFrame, type SurfaceFrame } from './shots';
 import { createActionListener } from './set/actions';
 import { ClockWiring } from './set/clock-wiring';
-import { addDeskLife, addFolderDetail, addSpines } from './set/extras';
+import { addDeskLife, addSpines } from './set/extras';
 import { DeskFigures } from './set/figures';
 import { DeskFolders } from './set/folders';
 import type { DeskFrame } from './set/frame';
 import { DeskFraming } from './set/framing';
+import { mountLateDesk } from './set/deferred';
 import { DeskLevels } from './set/levels';
 import { LightRig } from './set/lighting';
 import { DeskPicks } from './set/picks';
@@ -103,9 +104,9 @@ export class DeskSet implements ShotProvider {
     this.portrait = new WallPortrait(context.camera, meshes.material.envMap, () => context.invalidate());
     this.room.add(this.portrait.group);
     this.disposables.push(this.portrait);
-    this.folders.detail = addFolderDetail(this.room, context, meshes, palette, this.disposables);
     window.addEventListener('keydown', this.onFolderKey);
     this.screens = new DeskScreens(context, { room: this.room, phone: this.phoneSurface(), material: meshes.material, depthMaterial: meshes.depthMaterial, disposables: this.disposables });
+    const late = mountLateDesk({ context, room: this.room, meshes, palette, folders: this.folders, screens: this.screens, disposables: this.disposables });
     this.weather.addWindow(this.room, this.disposables);
     addSpines(this.room, this.folders, this.disposables);
     window.addEventListener('desk:action', this.onAction);
@@ -119,6 +120,7 @@ export class DeskSet implements ShotProvider {
     this.weather.addBeam(this.room, this.lights.lamp.position, high, this.disposables);
     if (high) this.enableShadows();
     this.applyLevels();
+    if (context.capture) await late;
     context.invalidate();
   }
 

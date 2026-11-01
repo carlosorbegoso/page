@@ -3,6 +3,7 @@ import type { StationContext } from '../../contracts';
 import { tokenColor } from '../../tokens';
 import { MONITOR } from '../layout';
 import { createPhoneTexture, createScreenTexture, drawPhone, drawScreen } from '../materials';
+import type { LaptopDesktop } from '../screens/desktop';
 import { DeskLaptop } from '../screens/laptop';
 import { MonitorGlass } from '../screens/monitorGlass';
 import type { SurfaceFrame } from '../shots';
@@ -65,6 +66,10 @@ export class DeskScreens {
 
   toggleLaptop(time: number): void {
     this.laptop.toggleLid(time);
+  }
+
+  attachDesktop(desktop: LaptopDesktop): void {
+    this.laptop.attachDesktop(desktop);
   }
 
   setHover(id: string | null): void {

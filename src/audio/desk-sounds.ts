@@ -18,7 +18,8 @@ const LEVEL: Record<DeskSound, number> = {
 };
 
 const DEFAULT_GAP_MS = 350;
-const GAP_MS: Partial<Record<DeskSound, number>> = { clock: 1200, phone: 6000, blind: 600, gift: 500 };
+const GAP_MS: Partial<Record<DeskSound, number>> = { clock: 1200, phone: 500, blind: 600, gift: 500 };
+const CONTACT_BUZZ_GAP_MS = 6000;
 const PITCH_SPREAD = 0.05;
 
 const BY_PREFIX: readonly (readonly [string, DeskSound | null])[] = [
@@ -63,6 +64,7 @@ interface Options {
  */
 export function listenDeskSounds({ context, output, noise, canPlay, signal }: Options): void {
   const lastPlayed = new Map<DeskSound, number>();
+  let lastContactBuzz = -Infinity;
   const on = <T>(type: string, handler: (detail: T | undefined) => void) =>
     window.addEventListener(type, event => handler((event as CustomEvent<T>).detail), { signal });
 
@@ -83,6 +85,8 @@ export function listenDeskSounds({ context, output, noise, canPlay, signal }: Op
   });
   on<unknown>('desk:clock', () => play('clock'));
   on<{ id?: string }>('chapter:enter', detail => {
-    if (detail?.id === 'contact') play('phone');
+    if (detail?.id !== 'contact' || performance.now() - lastContactBuzz < CONTACT_BUZZ_GAP_MS) return;
+    lastContactBuzz = performance.now();
+    play('phone');
   });
 }

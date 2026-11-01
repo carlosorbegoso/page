@@ -62,6 +62,13 @@ Qué entrega el escritorio al director (planos, superficies, anclas, foco, picks
 4. **Calibración de luces y albedo**: `LIGHT_CALIBRATION` en `src/three/desk/set/lighting.ts` y `PERCEIVED_TO_ALBEDO` en `src/three/desk/props/palette.ts`. El monitor ilumina con una `PointLight`: `RectAreaLight` pesaba unos 100 KB.
 5. **Lo nuevo va después del primer frame**: el margen del presupuesto es ~0.6 KB (`docs/3d/budget.md`).
 
+## Trampas de las figuras animadas (`src/three/desk/life/classify.ts`)
+
+- **Alfa**: todo lo que está por encima de `ALFA_NECK_Y` (6.7 cm sobre la base) gira con la cabeza, y lo emisivo a la altura de `ALFA_HEAD_Y` se trata como ojos. Base, cintura, pecho y brazos de `props/figures/alfa.ts` tienen que quedar debajo de 6.7 cm, y solo debe brillar la luz del pecho.
+- **Regalo (Parati)**: todo lo que está por encima de `GIFT_SEAM_BAND` (4.28 cm) sube con la tapa. En `props/figures/gift.ts`, la caja y su cinta van debajo y cada pieza del moño y de la tapa va encima.
+- **Pikachu y Charizard** comparten el negro y el blanco: `life/pokemon/parts.ts` los distingue por la distancia a cada base (`REACH`, `HEIGHT`), no por el color.
+- **Papel impreso**: la lámpara lava el papel iluminado, así que las caras impresas se oscurecen con `PAPER_LEVEL` (`notes/paper.ts`) para que la tinta conserve el contraste.
+
 ## Ids de objeto (`OBJECT_ID`, `src/three/desk/builder.ts`)
 
 1 Alfa, 2 Ventixs, 3 Parati, 4 SkyMek, 5–8 carpetas SYSARP/Baufest/Intercorp/TCS, 9 carpeta abierta, 10 teléfono, 11 tapa de la carpeta abierta. El shader del atlas usa el id por vértice para el brillo, la elevación y el giro de las figuras: un GLB que reemplace una pieza tiene que llevar ese id o animar el nodo directamente.

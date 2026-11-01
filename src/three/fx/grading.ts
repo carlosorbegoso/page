@@ -26,7 +26,7 @@ const GRADES: Record<string, Grade & { seconds?: number; delay?: number }> = {
   hero: { exposure: 1, temperature: 0, split: 0.38, contrast: 0.22, vignette: 0.55, focusRange: 0.6, bokeh: 1, seconds: 0.8 },
   about: { exposure: 1, temperature: -0.08, split: 0.25, contrast: 0.15, vignette: 0.45, focusRange: 0.6, bokeh: 1 },
   company: { exposure: 1.04, temperature: 0.18, split: 0.5, contrast: 0.3, vignette: 0.6, focusRange: 0.3, bokeh: 1.2, seconds: 1.4, delay: 1.6 },
-  products: { exposure: 1, temperature: 0.14, split: 0.48, contrast: 0.3, vignette: 0.6, focusRange: 0.035, bokeh: 2.6 },
+  products: { exposure: 1, temperature: 0.14, split: 0.48, contrast: 0.3, vignette: 0.6, focusRange: 0.3, bokeh: 1.2 },
   experience: { exposure: 0.96, temperature: -0.22, split: 0.2, contrast: 0.2, vignette: 0.6, focusRange: 0.25, bokeh: 1.4 },
   contact: { exposure: 1, temperature: -0.06, split: 0.32, contrast: 0.2, vignette: 0.55, focusRange: 0.2, bokeh: 1.2 },
   outro: { exposure: 1.3, temperature: 0.35, split: 0.2, contrast: 0.15, vignette: 0.35, focusRange: 0.8, bokeh: 1, seconds: 2.5 }

@@ -34,17 +34,18 @@ export const CORKBOARD = {
 } as const;
 
 /**
- * Where each piece is pinned on the board face (x right, y up). Alfa and Burbu stand in front of the
- * lower middle and lower right, so the bottom of those columns stays free.
+ * Where each piece is pinned on the board face (x right, y up). From the company shot Alfa covers the
+ * lower middle, Burbu the lower right and the wrench the lower left corner, so the post-its run down
+ * the left, the title and the note take the top right, and the Alfa card sits low right, by the robot.
  */
 export const BOARD_LAYOUT = {
-  title: { x: 0.025, y: 0.232, width: 0.2, height: 0.05 },
-  note: { x: 0.024, y: 0.122, width: 0.19, height: 0.1, rotation: -0.03 },
-  alfa: { x: 0.03, y: 0.052, width: 0.115, height: 0.056, rotation: 0.04 },
+  title: { x: 0.118, y: 0.236, width: 0.205, height: 0.05 },
+  note: { x: 0.122, y: 0.142, width: 0.2, height: 0.086, rotation: -0.025 },
+  alfa: { x: 0.246, y: 0.062, width: 0.082, height: 0.07, rotation: -0.04 },
   postits: {
-    skymek: { x: 0.243, y: 0.213, width: 0.08, height: 0.07, rotation: 0.05 },
-    parati: { x: 0.243, y: 0.138, width: 0.08, height: 0.07, rotation: -0.04 },
-    ventixs: { x: 0.243, y: 0.063, width: 0.08, height: 0.07, rotation: 0.03 }
+    skymek: { x: 0.02, y: 0.212, width: 0.085, height: 0.07, rotation: 0.05 },
+    parati: { x: 0.02, y: 0.137, width: 0.085, height: 0.07, rotation: -0.04 },
+    ventixs: { x: 0.02, y: 0.062, width: 0.085, height: 0.07, rotation: 0.03 }
   }
 } as const satisfies { title: FaceRect; note: FaceRect; alfa: FaceRect; postits: Record<ProductId, FaceRect> };
 
@@ -76,11 +77,11 @@ export const PRODUCT_CARD = {
 
 /**
  * Front edge centre of each card on the desk, and its yaw: the card faces its shot's heading
- * (skymek 14°, parati −12°, ventixs 6°), screen-left of its figure where the old text panel sat.
+ * (skymek 14°, parati −12°, ventixs 6°), screen-left of its figure and clear of it in every frontal view.
  */
 export const CARD_PLACES: Record<ProductId, { hinge: Vector3; yaw: number }> = {
-  skymek: { hinge: new Vector3(0.162, DESK.top, 0.03), yaw: -0.244 },
-  ventixs: { hinge: new Vector3(0.356, DESK.top, 0.03), yaw: -0.105 },
+  skymek: { hinge: new Vector3(0.07, DESK.top, 0.03), yaw: -0.244 },
+  ventixs: { hinge: new Vector3(0.33, DESK.top, 0.03), yaw: -0.105 },
   parati: { hinge: new Vector3(0.512, DESK.top, 0.03), yaw: 0.209 }
 };
 

@@ -75,7 +75,7 @@ function drawArrow(context: CanvasRenderingContext2D, from: number, to: number, 
   context.stroke();
 }
 
-/** The kraft card by the robot: the parent brand by hand and an arrow pointing right, at Alfa. */
+/** The kraft card by the robot: an arrow pointing left, at Alfa, and the parent brand by hand. */
 export function drawAlfaCard(board: BoardCanvas, company: CompanyPrint): void {
   const { context, scale, fonts } = board;
   inRect(board, BOARD_LAYOUT.alfa, (width, height) => {
@@ -84,7 +84,7 @@ export function drawAlfaCard(board: BoardCanvas, company: CompanyPrint): void {
       context.fillRect(-width / 2, -height / 2, width, height);
     });
     const arrowSpan = 0.024 * scale;
-    const left = -width / 2 + 0.007 * scale;
+    const left = -width / 2 + arrowSpan + 0.009 * scale;
     context.fillStyle = MARKER;
     context.textAlign = 'left';
     context.textBaseline = 'middle';
@@ -96,6 +96,7 @@ export function drawAlfaCard(board: BoardCanvas, company: CompanyPrint): void {
     context.lineWidth = scale * 0.0011;
     context.lineCap = 'round';
     context.lineJoin = 'round';
+    context.scale(-1, 1);
     drawArrow(context, width / 2 - arrowSpan, width / 2 - 0.005 * scale, 0, 0.012 * scale);
   });
 }

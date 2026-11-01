@@ -27,7 +27,8 @@ export interface PaneRect {
 export class LaptopEditor {
   private readonly user: string[] = [];
   private typedAt = -100;
-  private origin = 0;
+  /** Starts most of the way through the snippet, so the first look already finds code on screen. */
+  private origin = -CYCLE * 0.6;
 
   type(key: string, time: number): void {
     if (this.user.length === 0) this.user.push('    ');

@@ -57,7 +57,7 @@ const stackId = `${headingId}-stack`;
     compact ? (
       <article aria-labelledby={headingId} class="max-w-measure">
         <span class="era-year" aria-hidden="true">{start.slice(0, 4)}</span>
-        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-text-muted">
+        <div class="compact-line flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-text-muted">
           <span class="tabular-nums">
             <time datetime={start}>{formatTimelineMonth(start, locale)}</time>
             {' – '}
@@ -190,6 +190,21 @@ const stackId = `${headingId}-stack`;
   @media (width < 48rem) {
     :global(.is-3d) .wide-only {
       display: none;
+    }
+
+    /* On phones the one-line entry stacks like the others: dates, company, role. */
+    :global(.is-3d) .compact-line {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
+    }
+
+    :global(.is-3d) .compact-line > span:first-child {
+      order: 0;
+    }
+
+    :global(.is-3d) .compact-line h3 {
+      font-size: var(--text-2xl);
     }
   }
 </style>

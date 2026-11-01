@@ -79,7 +79,7 @@ const menuItem =
       data-hud-chapter
       data-story-beats={JSON.stringify(storyBeats)}
       aria-hidden="true"
-      class="font-mono text-xs tracking-caps text-text-muted tabular-nums opacity-0 transition-opacity duration-(--duration-base) ease-standard data-[ready=true]:opacity-100"
+      class="hud-beat font-mono text-xs tracking-caps text-text-muted tabular-nums opacity-0 transition-opacity duration-(--duration-base) ease-standard data-[ready=true]:opacity-100"
     ></span>
   </div>
 
@@ -232,6 +232,11 @@ const menuItem =
 </dialog>
 
 <style>
+  /* The story clock sits over bright windows at dawn: a halo keeps it legible on any frame. */
+  .hud-beat {
+    text-shadow: var(--plate-text-halo);
+  }
+
   .hud-menu {
     transform-origin: top left;
     transition:

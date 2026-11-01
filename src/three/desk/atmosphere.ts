@@ -535,7 +535,7 @@ void main() {
   float d = (vUv.x - centre) / width;
   float ribbon = exp(-d * d * 1.6);
   float puffs = fbm(vec2(vUv.x * 5.0 + vSeed * 13.0 + advect * 3.0, y * 4.2 - t * 0.55));
-  float density = ribbon * smoothstep(0.28, 0.72, puffs + 0.2 * (1.0 - y));
+  float density = ribbon * smoothstep(0.18, 0.62, puffs + 0.25 * (1.0 - y));
   float fade = smoothstep(0.0, 0.1, y) * pow(1.0 - y, 1.8);
   float edges = smoothstep(0.0, 0.1, vUv.x) * (1.0 - smoothstep(0.9, 1.0, vUv.x));
   float breath = 0.65 + 0.35 * sin(t * 0.45 + phase * 2.3);
@@ -560,7 +560,7 @@ export interface Steam {
 }
 
 const STEAM_SIZE = { width: 0.1, height: 0.24 } as const;
-const STEAM_NIGHT = new Color(0.62, 0.58, 0.54);
+const STEAM_NIGHT = new Color(1.1, 1.0, 0.92);
 const STEAM_DAY = new Color(0.95, 0.95, 0.96);
 
 /**
@@ -623,7 +623,7 @@ export function createSteam(options: SteamOptions = { wisps: 3, octaves: 3 }): S
   );
   const mesh = new Mesh(geometry, material);
   mesh.name = 'desk-steam';
-  mesh.position.set(MUG.x, MUG.y + 0.09, MUG.z);
+  mesh.position.set(MUG.x, MUG.y + 0.088, MUG.z);
   mesh.renderOrder = 2;
   mesh.raycast = () => undefined;
   return {

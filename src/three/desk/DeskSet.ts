@@ -820,7 +820,7 @@ export class DeskSet implements ShotProvider {
     this.glass.setLampReflection(Math.min(level.lamp / 28, 1));
     this.beam.setLevel(Math.min(level.lamp / 28, 1.2));
     this.beam.setPixelScale(this.context.renderer.domElement.height, this.viewport().fov);
-    this.steam?.setStrength(this.chapter === 'contact' ? 0.55 : this.chapter === 'hero' || this.chapter === 'about' || this.chapter === 'intro' ? 0.45 : 0.3, this.level.day);
+    this.steam?.setStrength(this.chapter === 'contact' ? 0.9 : this.chapter === 'hero' || this.chapter === 'about' || this.chapter === 'intro' ? 0.7 : 0.45, this.level.day);
     const uniforms = this.uniforms;
     FIGURE_ORDER.forEach((id, index) => {
       const play = this.playOffset(id);

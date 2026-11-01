@@ -364,3 +364,9 @@
   transition-duration: 0.01ms !important;
   scroll-behavior: auto !important;
 }
+
+/* Copy that depends on the time shown on the stage. */
+:root:not([data-time='day']) .when-day,
+:root[data-time='day'] .when-night {
+  display: none !important;
+}

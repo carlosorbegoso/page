@@ -70,6 +70,8 @@ export const es = {
   'story.afterWork': 'Al salir',
   'story.dusk': 'Atardece',
   'story.nightfall': 'Cae la noche',
+  'story.dayNightAct': 'Al salir',
+  'outro.titleDay': 'Se enciende la ciudad. Esta noche, más código.',
   'about.education': 'Formación',
   'about.stack': 'Stack principal',
   'company.title': 'TUSOCIO IA',

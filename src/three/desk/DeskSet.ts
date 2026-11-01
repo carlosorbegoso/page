@@ -268,6 +268,7 @@ export class DeskSet implements ShotProvider {
   private shadowPose = '';
   private hoverId = -1;
   private spineLabels = new Map<FolderId, Mesh>();
+  private archiveCover: Mesh | null = null;
   private readonly folderPull = new Map<FolderId, number>(FOLDERS.map(id => [id, 0]));
   /** The visitor switched the lamp off by clicking it; the story switches it back on at the next chapter. */
   private lampOff = false;
@@ -363,7 +364,8 @@ export class DeskSet implements ShotProvider {
     this.disposables.push(this.backdrop, this.glass);
     const spines = createSpineLabels();
     this.spineLabels = spines.meshes;
-    this.room.add(...spines.meshes.values());
+    this.room.add(...spines.meshes.values(), spines.cover);
+    this.archiveCover = spines.cover;
     this.disposables.push(spines);
     window.addEventListener('desk:action', this.onAction);
     this.clockModel = new StoryClock(() => {
@@ -839,6 +841,7 @@ export class DeskSet implements ShotProvider {
       uniforms.uPull.value[OBJECT_ID[id]] = pull;
       const label = this.spineLabels.get(id);
       if (label) label.position.x = pull;
+      if (id === FOLDERS[0] && this.archiveCover) this.archiveCover.position.x = (this.archiveCover.userData.restX as number) + pull;
     }
     uniforms.uGlow.value[OBJECT_ID.openFolder] = (this.folderGlow.get('tcs') ?? 0) * 0.25;
     uniforms.uHoverMix.value = this.hoverMix;

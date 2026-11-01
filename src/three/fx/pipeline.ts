@@ -324,7 +324,7 @@ class CinematicPipeline implements CinematicFx {
     u.tBloom!.value = (targets.up[0] ?? targets.down[0])!.texture;
     u.tStreak!.value = targets.streak ? targets.streak[1].texture : (targets.up[0] ?? targets.down[0])!.texture;
     u.uStreakStrength!.value = targets.streak ? tokens.streakStrength : 0;
-    u.uAberration!.value = tokens.aberration;
+    u.uAberration!.value = document.documentElement.dataset.time === 'day' ? 0 : tokens.aberration;
     u.uContrast!.value = grade.contrast;
     u.uNear!.value = camera.near;
     u.uFar!.value = camera.far;

@@ -71,6 +71,8 @@ export const en = {
   'story.afterWork': 'After work',
   'story.dusk': 'Sunset',
   'story.nightfall': 'Nightfall',
+  'story.dayNightAct': 'After work',
+  'outro.titleDay': 'The city lights up. More code tonight.',
   'about.education': 'Education',
   'about.stack': 'Main stack',
   'company.title': 'TUSOCIO IA',

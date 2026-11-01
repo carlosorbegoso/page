@@ -27,7 +27,7 @@ const year = new Date().getFullYear();
     <div class="outro-screen flex max-w-measure flex-col gap-4">
       <p class="outro-label text-sm font-medium text-text-muted">{t('outro.label')}</p>
       <h2 id="outro-title" class="font-display text-3xl font-semibold tracking-display text-balance text-text">
-        {t('outro.title')}
+        <span class="when-night">{t('outro.title')}</span><span class="when-day">{t('outro.titleDay')}</span>
       </h2>
       <p class="outro-body text-base text-pretty text-text-muted">{t('outro.body')}</p>
       <p class="outro-credits mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1.5 border-t border-text/10 pt-4 text-sm text-text-subtle">

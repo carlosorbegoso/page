@@ -79,7 +79,15 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Vapor del café | `src/three/desk/atmosphere/steam.ts`, GLSL en `steam.glsl.ts` |
 | Reloj despertador | `src/three/desk/clock.ts`, `src/three/desk/clock/` |
 | Figuras animadas | `src/three/desk/life/` |
-| Página 404 | `src/three/notfound/scene.ts` |
+| Página 404: montaje, orden de arranque, disposer | `src/three/notfound/scene.ts` |
+| 404: hoja impresa (texto, sello, renglones) | `src/three/notfound/paper-texture.ts` |
+| 404: escritorio, pared, ventana con lluvia, taza | `src/three/notfound/room.ts`, GLSL en `rain.glsl.ts` |
+| 404: carpeta y hoja curvada | `src/three/notfound/folder.ts` |
+| 404: lámpara, haz visible, foco y luna | `src/three/notfound/lamp.ts` (GLSL en `beam.glsl.ts`), `lights.ts` |
+| 404: polvo en el haz | `src/three/notfound/dust.ts`, GLSL en `dust.glsl.ts` |
+| 404: encuadre, desplazamiento por el texto HTML, balanceo | `src/three/notfound/camera-rig.ts` |
+| 404: bucle de frames, frame quieto | `src/three/notfound/loop.ts` |
+| 404: puntero, inclinación, resize, visibilidad, pérdida de contexto | `src/three/notfound/input.ts` |
 
 ## Postproceso (fx)
 | Para cambiar… | Edita |

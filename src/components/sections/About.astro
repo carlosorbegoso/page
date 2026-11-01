@@ -386,87 +386,150 @@ const { degree, institution, status } = profile.education;
     }
   }
 
-  /* Phones turn the monitor upright: everything stacks in one column with body text near 14 px. */
+  /* Upright monitor: photo as a cover band, then the statement and story; the stack reads as a ruled spec sheet. */
   @container surface (orientation: portrait) {
-    :global(.is-3d) :is(.about-bio, .about-stack) {
-      gap: 2.5cqh;
-    }
-
-    :global(.is-3d) .about-bio :global(header) {
-      gap: 0.8cqh;
-    }
-
-    :global(.is-3d) .about-bio :global(header > p:first-child) {
-      font-size: 1.9cqh;
-    }
-
-    :global(.is-3d) .about-bio :global(h2) {
-      font-size: 6.5cqh;
-    }
-
-    :global(.is-3d) .about-bio :global(header > p:last-child) {
-      font-size: 2.6cqh;
+    :global(.is-3d) .about-bio {
+      display: flex;
+      justify-content: flex-start;
+      gap: 0;
     }
 
     :global(.is-3d) .about-bio__row {
-      flex-direction: column;
-      gap: 2.5cqh;
+      display: contents;
+    }
+
+    :global(.is-3d) .about-bio :global(picture) {
+      order: -1;
+      margin: calc(var(--plate-padding) * -1) calc(var(--plate-padding) * -1) 0;
     }
 
     :global(.is-3d) .about-bio__photo {
-      width: 16cqh;
+      width: 100%;
+      height: 30cqh;
+      border: 0;
+      border-radius: 0;
+      object-position: 50% 18%;
+      mask-image: linear-gradient(180deg, #000 55%, transparent);
+    }
+
+    :global(.is-3d) .about-bio :global(header) {
+      margin-top: -3cqh;
+      gap: 1cqh;
+    }
+
+    :global(.is-3d) .about-bio :global(header > p:first-child) {
+      font-size: 1.7cqh;
+    }
+
+    :global(.is-3d) .about-bio :global(h2) {
+      font-size: 2.2cqh;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--color-text-muted);
+    }
+
+    :global(.is-3d) .about-bio :global(header > p:last-of-type) {
+      font-family: var(--font-display);
+      font-size: 4.4cqh;
+      font-weight: 600;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      color: var(--color-text);
+      text-wrap: balance;
     }
 
     :global(.is-3d) .about-bio__text {
-      gap: 1.6cqh;
-      font-size: 2.45cqh;
+      margin-top: 2.6cqh;
+      padding-top: 2.4cqh;
+      border-top: 1px solid rgb(255 255 255 / 0.1);
+      gap: 1.8cqh;
+      font-size: 2.4cqh;
+      line-height: 1.45;
     }
 
     :global(.is-3d) .about-stack {
       grid-template-columns: minmax(0, 1fr);
+      align-content: center;
       gap: 3cqh;
     }
 
     :global(.is-3d) .about-stack h3 {
-      font-size: 3.4cqh;
+      font-family: var(--font-sans);
+      font-size: 1.9cqh;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
     }
 
     :global(.is-3d) .about-stack ul,
     :global(.is-3d) .about-stack dl {
-      margin-top: 1.5cqh;
+      margin-top: 1.6cqh;
     }
 
     :global(.is-3d) .about-stack > section:first-child ul {
-      gap: 1.4cqh;
-      font-size: 2.1cqh;
+      gap: 1.6cqh;
+      font-size: 2.2cqh;
+      line-height: 1.4;
     }
 
     :global(.is-3d) .about-stack > section:first-child li > span:first-child {
-      width: 1cqh;
-      height: 1cqh;
-      margin-top: 1cqh;
+      display: none;
+    }
+
+    :global(.is-3d) .about-stack > section:first-child li:first-child > span:last-child > span:first-child {
+      margin-bottom: 0.6cqh;
+      font-family: var(--font-display);
+      font-size: 4cqh;
+      font-weight: 600;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+    }
+
+    :global(.is-3d) .about-stack > section:first-child li + li {
+      padding-top: 1.6cqh;
+      border-top: 1px solid rgb(255 255 255 / 0.1);
     }
 
     :global(.is-3d) .about-stack dl {
-      gap: 1.8cqh 5cqw;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    :global(.is-3d) .about-stack dl > div {
+      padding-block: 1.2cqh;
+      border-top: 1px solid rgb(255 255 255 / 0.08);
+    }
+
+    :global(.is-3d) .about-stack dl > div:last-child {
+      border-bottom: 1px solid rgb(255 255 255 / 0.08);
     }
 
     :global(.is-3d) .about-stack dt {
-      font-size: 1.8cqh;
+      font-size: 1.65cqh;
+      letter-spacing: 0.12em;
     }
 
     :global(.is-3d) .about-stack dd {
-      margin-top: 0.6cqh;
+      margin-top: 0.5cqh;
     }
 
     :global(.is-3d) .about-stack dd ul {
-      gap: 0.4cqh 3cqw;
-      font-size: 2.1cqh;
+      margin-top: 0;
+      gap: 0.2cqh 0;
+      font-size: 2.35cqh;
+      color: var(--color-text);
+    }
+
+    :global(.is-3d) .about-stack dd li:not(:last-child)::after {
+      content: '/';
+      margin-inline: 2cqw;
+      color: var(--color-text-subtle);
     }
 
     :global(.is-3d) .about-stack :global([data-tone] > span[aria-hidden]) {
-      width: 0.8cqh;
-      height: 0.8cqh;
+      display: none;
     }
   }
 </style>

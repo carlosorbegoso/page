@@ -107,6 +107,11 @@ function widthFit(size: number, fraction: number, view: Viewport): number {
   return size / fraction / (2 * tan * (view.width / view.height));
 }
 
+/** Distance at which an object of `size` metres spans `fraction` of the frame height. */
+function heightFit(size: number, fraction: number, view: Viewport): number {
+  return size / fraction / (2 * Math.tan((view.fov * DEG) / 2));
+}
+
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
@@ -121,6 +126,7 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
   const monitor = monitorFrame(portraitMonitor(view));
   const screen = monitor.centre;
   const screenSpan = monitor.width + MONITOR.bezel * 2;
+  const screenRise = monitor.height + MONITOR.bezel * 2;
   /**
    * The director lays an anchored panel on the side of its anchor away from the frame centre:
    * an anchor right of centre gets the panel on its left. Subjects sit on the opposite side.
@@ -139,7 +145,8 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
     sx: portrait ? 0.5 : 0.42,
     sy: portrait ? 0.42 : 0.47
   };
-  const aboutDistance = portrait ? clamp(widthFit(screenSpan, 0.86, view), 0.7, heroDistance - 0.2) : clamp(widthFit(screenSpan, 0.7, view), 0.7, heroDistance - 0.25);
+  const aboutDistance = portrait
+    ? clamp(Math.max(widthFit(screenSpan, 0.86, view), heightFit(screenRise, 0.86, view)), 0.7, heroDistance - 0.2) : clamp(widthFit(screenSpan, 0.7, view), 0.7, heroDistance - 0.25);
   const about: Framing = {
     eye: screen.clone().addScaledVector(monitor.normal, aboutDistance),
     focus: screen,

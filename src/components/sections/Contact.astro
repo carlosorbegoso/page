@@ -90,45 +90,53 @@ const glyph =
   :global(.is-3d) .contact-screen {
     height: 100%;
     justify-content: center;
-    gap: 3.5cqh;
+    gap: 3.2cqh;
   }
 
   :global(.is-3d) .contact-screen header {
-    gap: 1.5cqh;
+    gap: 1.2cqh;
   }
 
   :global(.is-3d) .contact-screen h2 {
-    font-size: 7cqh;
-    line-height: 1.1;
+    font-size: 6cqh;
+    line-height: 1.05;
   }
 
   :global(.is-3d) .contact-screen header p {
-    font-size: 3.4cqh;
+    font-size: 2.9cqh;
     line-height: 1.35;
   }
 
   :global(.is-3d) .contact-screen .contact-group {
-    gap: 1.5cqh;
+    gap: 1.2cqh;
   }
 
   :global(.is-3d) .contact-email {
     min-height: 0;
-    height: 11cqh;
+    height: 9.5cqh;
     gap: 3cqw;
     padding-inline: 4cqw;
+    border-radius: 2.2cqh;
   }
 
   :global(.is-3d) .contact-email .contact-glyph {
-    width: 7cqh;
-    height: 7cqh;
+    width: 5.6cqh;
+    height: 5.6cqh;
+    border-radius: 1.6cqh;
+  }
+
+  :global(.is-3d) .contact-email .contact-glyph :global(svg) {
+    width: 2.8cqh;
+    height: 2.8cqh;
   }
 
   :global(.is-3d) .contact-email-label {
-    font-size: 2.6cqh;
+    font-size: 2.2cqh;
   }
 
   :global(.is-3d) .contact-email-value {
-    font-size: 3.3cqh;
+    font-size: 2.6cqh;
+    letter-spacing: -0.01em;
   }
 
   :global(.is-3d) .contact-screen :global([data-copy-email]) {
@@ -137,8 +145,17 @@ const glyph =
 
   :global(.is-3d) .contact-screen :global([data-copy-trigger]) {
     min-height: 0;
-    height: 8cqh;
-    font-size: 3.2cqh;
+    height: 6cqh;
+    border: 0;
+    background: none;
+    font-size: 2.5cqh;
+    white-space: nowrap;
+    color: var(--color-text-muted);
+  }
+
+  :global(.is-3d) .contact-screen :global([data-copy-trigger] svg) {
+    width: 2.4cqh;
+    height: 2.4cqh;
   }
 
   :global(.is-3d) .contact-screen :global([data-copy-status]:empty) {
@@ -147,47 +164,62 @@ const glyph =
 
   :global(.is-3d) .contact-screen :global([data-copy-status]) {
     min-height: 0;
-    margin-top: 1cqh;
-    font-size: 2.8cqh;
+    margin-top: 0.6cqh;
+    font-size: 2.4cqh;
   }
 
   :global(.is-3d) .contact-social-label {
-    font-size: 2.6cqh;
+    font-size: 2cqh;
   }
 
+  /* Socials read as a settings-style list: one ruled row per network with its handle. */
   :global(.is-3d) .contact-socials {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 2.5cqw;
+    gap: 0;
+    border-radius: 2.2cqh;
+    background: rgb(255 255 255 / 0.04);
+    overflow: hidden;
+  }
+
+  :global(.is-3d) .contact-socials li + li {
+    border-top: 1px solid rgb(255 255 255 / 0.07);
   }
 
   :global(.is-3d) .contact-socials :global(a) {
     min-height: 0;
-    height: 13cqh;
-    flex-direction: column;
-    justify-content: center;
-    gap: 1cqh;
-    padding-inline: 1cqw;
-    text-align: center;
+    height: 8cqh;
+    gap: 3cqw;
+    padding-inline: 4cqw;
+    border: 0;
+    border-radius: 0;
+    background: none;
   }
 
   :global(.is-3d) .contact-socials .contact-glyph {
-    width: 6cqh;
-    height: 6cqh;
-    font-size: 2.4cqh;
+    width: 4.8cqh;
+    height: 4.8cqh;
+    border-radius: 1.4cqh;
+    font-size: 1.9cqh;
   }
 
   :global(.is-3d) .contact-social-name {
-    font-size: 2.8cqh;
+    font-size: 2.6cqh;
+    line-height: 1.2;
   }
 
   :global(.is-3d) .contact-social-detail {
-    display: none;
+    font-size: 2cqh;
   }
 
   :global(.is-3d) .contact-screen :global(.contact-cv) {
     min-height: 0;
-    height: 9cqh;
-    font-size: 3.4cqh;
+    height: 8cqh;
+    border-radius: 999px;
+    font-size: 2.7cqh;
+    white-space: nowrap;
+  }
+
+  :global(.is-3d) .contact-screen :global(.contact-cv svg) {
+    width: 2.6cqh;
+    height: 2.6cqh;
   }
 </style>

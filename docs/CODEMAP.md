@@ -53,7 +53,10 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Montaje del escritorio, luces por capítulo | `src/three/desk/DeskSet.ts` |
 | Mobiliario y objetos | `src/three/desk/props.ts` |
 | Materiales y atlas | `src/three/desk/materials.ts` |
-| Ventana, ciudad, lluvia en el vidrio, vapor *(pendiente: `atmosphere/`)* | `src/three/desk/atmosphere.ts` |
+| Cielo, acantilados y ciudad tras la ventana | `src/three/desk/atmosphere/backdrop.ts`, GLSL en `backdrop.glsl.ts` |
+| Siluetas y ventanas de la ciudad (atlas), luces de aviación | `src/three/desk/atmosphere/city-atlas.ts` |
+| Lluvia en el vidrio de la ventana | `src/three/desk/atmosphere/glass.ts`, GLSL en `glass.glsl.ts` |
+| Vapor del café | `src/three/desk/atmosphere/steam.ts`, GLSL en `steam.glsl.ts` |
 | Reloj despertador | `src/three/desk/clock.ts`, `src/three/desk/clock/` |
 | Figuras animadas | `src/three/desk/life/` |
 | Página 404 | `src/three/notfound/scene.ts` |

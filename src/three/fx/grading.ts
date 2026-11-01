@@ -20,13 +20,14 @@ export interface Grade {
 /** Seconds to reach a chapter's grade; the dawn of `outro` takes 2.5 s (docs/PLAN.md). */
 const DEFAULT_SECONDS = 1.2;
 
-const GRADES: Record<string, Grade & { seconds?: number }> = {
+/** `delay` holds the old grade while the camera travels, so the warmth lands with the lamp switch. */
+const GRADES: Record<string, Grade & { seconds?: number; delay?: number }> = {
   intro: { exposure: 0.55, temperature: -0.3, split: 0.15, contrast: 0.2, vignette: 0.6, focusRange: 0.6, bokeh: 1, seconds: 0 },
   hero: { exposure: 1, temperature: 0, split: 0.38, contrast: 0.22, vignette: 0.55, focusRange: 0.6, bokeh: 1, seconds: 0.8 },
   about: { exposure: 1, temperature: -0.08, split: 0.25, contrast: 0.15, vignette: 0.45, focusRange: 0.6, bokeh: 1 },
-  company: { exposure: 1, temperature: 0.12, split: 0.48, contrast: 0.3, vignette: 0.6, focusRange: 0.045, bokeh: 2 },
+  company: { exposure: 1.04, temperature: 0.18, split: 0.5, contrast: 0.3, vignette: 0.6, focusRange: 0.045, bokeh: 2, seconds: 1.4, delay: 1.6 },
   products: { exposure: 1, temperature: 0.14, split: 0.48, contrast: 0.3, vignette: 0.6, focusRange: 0.035, bokeh: 2.6 },
-  experience: { exposure: 1.02, temperature: 0.04, split: 0.42, contrast: 0.26, vignette: 0.55, focusRange: 0.25, bokeh: 1.4 },
+  experience: { exposure: 0.96, temperature: -0.22, split: 0.2, contrast: 0.2, vignette: 0.6, focusRange: 0.25, bokeh: 1.4 },
   contact: { exposure: 1, temperature: -0.06, split: 0.32, contrast: 0.2, vignette: 0.55, focusRange: 0.2, bokeh: 1.2 },
   outro: { exposure: 1.3, temperature: 0.35, split: 0.2, contrast: 0.15, vignette: 0.35, focusRange: 0.8, bokeh: 1, seconds: 2.5 }
 };
@@ -74,14 +75,14 @@ export class ChapterGrading {
       bokeh: target.bokeh
     };
     this.duration = instant ? 0 : (target.seconds ?? DEFAULT_SECONDS);
-    this.elapsed = 0;
+    this.elapsed = instant ? 0 : -(target.delay ?? 0);
     if (this.duration === 0) this.current = { ...this.to };
   }
 
   update(dt: number): Grade {
     if (this.elapsed < this.duration) {
       this.elapsed = Math.min(this.elapsed + dt, this.duration);
-      this.current = mix(this.from, this.to, easeInOut(this.elapsed / this.duration));
+      if (this.elapsed > 0) this.current = mix(this.from, this.to, easeInOut(this.elapsed / this.duration));
     }
     return this.current;
   }

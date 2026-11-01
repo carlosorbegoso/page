@@ -103,6 +103,7 @@ uniform vec3 uDawnLow;
 uniform vec3 uSilhouette;
 uniform vec3 uBeacon;
 uniform float uDawn;
+uniform float uLate;
 uniform float uTime;
 varying vec2 vUv;
 varying float vLayer;
@@ -126,7 +127,7 @@ void main() {
     vec3 hazeColor = mix(uHorizon * 2.2, mix(uDawnLow, uDawnHigh, 0.5) * 0.7, uDawn);
     vec3 body = mix(uSilhouette * (1.0 + uDawn * 1.8), hazeColor, haze);
     vec2 cell = floor(uv * vec2(256.0, 192.0));
-    float off = step(hash(cell), uDawn * 1.15);
+    float off = step(hash(cell), max(uDawn * 1.15, uLate));
     vec3 lights = city.rgb * 2.2 * (1.0 - off) * (1.0 - haze * 0.6);
     float beacon = vLayer > 1.5 && vLayer < 2.5 ? step(0.92, fract(uTime / 3.0)) * exp(-pow(length((vUv - vec2(0.62, 0.86)) * vec2(60.0, 30.0)), 2.0)) : 0.0;
     gl_FragColor = vec4(body + lights + uBeacon * beacon * 3.0, 1.0);
@@ -138,6 +139,8 @@ void main() {
 export interface Backdrop {
   mesh: Mesh<BufferGeometry, ShaderMaterial>;
   setDawn(value: number): void;
+  /** 0 early night … 1 every city window dark (the story clock). */
+  setLateness(value: number): void;
   setTime(time: number): void;
   dispose(): void;
 }
@@ -163,6 +166,7 @@ export function createBackdrop(): Backdrop {
       uSilhouette: { value: tokenColor('--color-city-silhouette', '#0d121b') },
       uBeacon: { value: new Color(1, 0.12, 0.08) },
       uDawn: { value: 0 },
+      uLate: { value: 0 },
       uTime: { value: 0 }
     },
     depthWrite: false
@@ -176,6 +180,9 @@ export function createBackdrop(): Backdrop {
     mesh,
     setDawn: value => {
       material.uniforms.uDawn!.value = value;
+    },
+    setLateness: value => {
+      material.uniforms.uLate!.value = value;
     },
     setTime: time => {
       material.uniforms.uTime!.value = time;

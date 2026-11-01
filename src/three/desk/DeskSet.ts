@@ -94,12 +94,21 @@ const CHAPTER_LIGHT: Record<ChapterId, ChapterLight> = {
   intro: { lamp: 28, monitor: 5, moon: 0.7, shelf: 0 },
   hero: { lamp: 28, monitor: 5, moon: 0.7, shelf: 0 },
   about: { lamp: 18, monitor: 6, moon: 0.6, shelf: 0 },
-  company: { lamp: 16, monitor: 2, moon: 0.8, shelf: 0 },
-  products: { lamp: 15, monitor: 2, moon: 0.8, shelf: 0 },
-  experience: { lamp: 22, monitor: 5, moon: 0.9, shelf: 1 },
-  contact: { lamp: 20, monitor: 1, moon: 0.7, shelf: 0 },
+  company: { lamp: 30, monitor: 1.5, moon: 0.6, shelf: 0 },
+  products: { lamp: 26, monitor: 1.5, moon: 0.55, shelf: 0 },
+  experience: { lamp: 5, monitor: 6, moon: 1.1, shelf: 1.25 },
+  contact: { lamp: 20, monitor: 1, moon: 0.5, shelf: 0 },
   outro: { lamp: 0, monitor: 0.6, moon: 1.2, shelf: 0 }
 };
+
+/**
+ * The day years are a memory lit by the monitor and the window; the night starts with the lamp
+ * clicking on once the camera has landed on TUSOCIO IA, and ends with it clicking off at dawn.
+ * Light never changes while the camera moves towards these chapters (one motion at a time).
+ */
+const LAMP_SWITCH: Partial<Record<ChapterId, number>> = { company: 0.3, outro: 0.4 };
+/** How late the night is per chapter: city windows go dark as the story advances. */
+const LATENESS: Record<ChapterId, number> = { intro: 0, hero: 0, about: 0.05, experience: 0.1, company: 0.25, products: 0.35, contact: 0.5, outro: 0.6 };
 
 const FIGURE_ORDER: readonly FigureId[] = ['alfa', 'ventixs', 'parati', 'skymek'];
 const ALFA_TURN = 20 * (Math.PI / 180);
@@ -124,6 +133,12 @@ const EXPERIENCE_IDS: Record<string, string> = { tcs: 'tcs', intercorp: 'interco
 
 function damp(current: number, goal: number, rate: number, dt: number): number {
   return current + (goal - current) * (1 - Math.exp(-rate * dt));
+}
+
+/** A tungsten lamp switching: a short flicker, then the filament settles fast (no smooth fade). */
+function filamentSwitch(current: number, goal: number, since: number, dt: number): number {
+  if (goal > current && since < 0.14) return goal * (since < 0.06 ? 0.55 : 0.12);
+  return damp(current, goal, 16, dt);
 }
 
 function towards(current: number, goal: number, maxStep: number): number {
@@ -177,7 +192,8 @@ export class DeskSet implements ShotProvider {
   private chapter: ChapterId = 'intro';
   private subIndex = 0;
   private introStart = -1;
-  private readonly level = { lamp: 0, monitor: 0, moon: 0.45, shelf: 0, dawn: 0, phone: 0, alfaSignal: 1, alfaYaw: 0 };
+  private readonly level = { lamp: 0, monitor: 0, moon: 0.45, shelf: 0, dawn: 0, phone: 0, alfaSignal: 1, alfaYaw: 0, late: 0 };
+  private settledAt = -1;
   private readonly figureLift = new Map<FigureId, number>(FIGURE_ORDER.map(id => [id, 0]));
   private readonly figureYaw = new Map<FigureId, number>(FIGURE_ORDER.map(id => [id, 0]));
   private readonly folderGlow = new Map<string, number>(FOLDERS.map(id => [id, 0]));
@@ -490,7 +506,9 @@ export class DeskSet implements ShotProvider {
       if (state.id === 'intro' && this.chapter !== 'intro') this.introStart = -1;
       this.chapter = state.id;
       this.subIndex = state.subIndex;
+      this.settledAt = -1;
     }
+    if (state.settled && this.settledAt < 0) this.settledAt = time;
     let settling = false;
     this.syncOrientation();
     const light = CHAPTER_LIGHT[this.chapter];
@@ -502,9 +520,17 @@ export class DeskSet implements ShotProvider {
       level.monitor = intro.monitor * light.monitor;
       settling = time - this.introStart < 1.4;
     } else {
-      level.lamp = damp(level.lamp, light.lamp, this.chapter === 'outro' ? 2.5 : 4, step);
+      const switchDelay = LAMP_SWITCH[this.chapter];
+      if (switchDelay === undefined || !motion) {
+        level.lamp = damp(level.lamp, light.lamp, 4, step);
+      } else if (this.settledAt >= 0 && time - this.settledAt >= switchDelay) {
+        level.lamp = filamentSwitch(level.lamp, light.lamp, time - this.settledAt - switchDelay, step);
+      }
+      settling ||= switchDelay !== undefined && Math.abs(level.lamp - light.lamp) > 0.05;
       level.monitor = damp(level.monitor, light.monitor, 5, step);
     }
+    level.late = damp(level.late, LATENESS[this.chapter], 1.2, step);
+    settling ||= Math.abs(level.late - LATENESS[this.chapter]) > 0.002;
     level.moon = damp(level.moon, light.moon, 1.6, step);
     level.shelf = damp(level.shelf, light.shelf, 3, step);
     settling ||= Math.abs(level.shelf - light.shelf) > 0.005;
@@ -595,6 +621,7 @@ export class DeskSet implements ShotProvider {
     this.screen.material.color.setScalar(SCREEN_HDR * Math.min(level.monitor / 5, 1.2));
     this.phoneScreen.material.color.setScalar(0.06 + level.phone * SCREEN_HDR * 0.9);
     this.backdrop.setDawn(level.dawn);
+    this.backdrop.setLateness(level.late);
     this.glass.setLampReflection(Math.min(level.lamp / 28, 1));
     this.beam.setLevel(Math.min(level.lamp / 28, 1.2));
     this.beam.setPixelScale(this.context.renderer.domElement.height, this.viewport().fov);

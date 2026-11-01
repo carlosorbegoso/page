@@ -17,8 +17,9 @@ const DISMISS = 0.25;
 const FOLLOW_TIMEOUT = 5;
 const UP = new Vector3(0, 1, 0);
 const AXIS_X = new Vector3(1, 0, 0);
-const MIN_WIDTH_SHARE = { wide: 0.2, tall: 0.5 } as const;
-const MAX_GROWTH = { camera: 3.2, yaw: 1.8 } as const;
+const MIN_WIDTH_SHARE = { wide: 0.2, tall: 0.62 } as const;
+const MAX_GROWTH = { camera: 4, yaw: 1.8 } as const;
+const EDGE = { side: 0.05, top: 0.16, bottom: 0.06 } as const;
 
 interface LiveBeat {
   toy: BeatToy;
@@ -107,13 +108,37 @@ export class StoryBeats {
     return Math.min(Math.max(wanted, 1), MAX_GROWTH[spec.face]);
   }
 
+  private keepOnScreen(spec: BeatSpec, scale: number, camera: PerspectiveCamera): void {
+    const view = this.world.applyMatrix4(camera.matrixWorldInverse);
+    const halfHeight = -view.z * Math.tan((camera.fov * Math.PI) / 360);
+    const halfWidth = halfHeight * camera.aspect;
+    const clamp = (value: number, low: number, high: number) =>
+      low > high ? (low + high) / 2 : Math.min(Math.max(value, low), high);
+    const w = (spec.size.width * scale) / 2;
+    const h = (spec.size.height * scale) / 2;
+    view.x = clamp(
+      view.x,
+      -halfWidth * (1 - EDGE.side * 2) + w,
+      halfWidth * (1 - EDGE.side * 2) - w
+    );
+    view.y = clamp(
+      view.y,
+      -halfHeight * (1 - EDGE.bottom * 2) + h,
+      halfHeight * (1 - EDGE.top * 2) - h
+    );
+    this.world.applyMatrix4(camera.matrixWorld);
+  }
+
   private compose(beat: LiveBeat, camera: Camera, renderer: WebGLRenderer): void {
     const { pose, plane } = beat;
     this.world.copy(beat.anchor);
     const grow = this.growth(beat.spec, camera, renderer);
     this.world.addScaledVector(pose.offset, beat.spec.face === 'camera' ? grow : 1);
-    if (beat.spec.face === 'camera') camera.getWorldQuaternion(this.facing);
-    else {
+    if (beat.spec.face === 'camera') {
+      camera.getWorldQuaternion(this.facing);
+      if (camera instanceof PerspectiveCamera)
+        this.keepOnScreen(beat.spec, pose.scale * grow, camera);
+    } else {
       camera.getWorldPosition(this.towards).sub(this.world);
       this.facing.setFromAxisAngle(UP, Math.atan2(this.towards.x, this.towards.z));
     }

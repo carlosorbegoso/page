@@ -1,6 +1,6 @@
-import { Euler, Matrix4, Quaternion, Vector3 } from 'three';
-import { FOLDER, folderCentre, type FolderId } from '../layout';
-import { CLEAR_X, FACE_TURN, HOLD_LEAN, LIFT, MAX_FORWARD, NEARER, SLIDE_END, TURN_START } from './constants';
+import { Matrix4, Quaternion, Vector3, type PerspectiveCamera } from 'three';
+import { FOLDER, FOLDERS, ROOM, folderCentre, type FolderId } from '../layout';
+import { CLEAR_X, SLIDE_END, TURN_START } from './constants';
 import { ease } from './ease';
 
 const scratch = new Matrix4();
@@ -8,21 +8,55 @@ const scratchQuaternion = new Quaternion();
 const scratchPosition = new Vector3();
 const IDENTITY = new Quaternion();
 const ONE = new Vector3(1, 1, 1);
+const UP = new Vector3(0, 1, 0);
+const scratchEye = new Vector3();
+const scratchForward = new Vector3();
+const scratchRay = new Vector3();
+/** Width of the box plus its cover opened past square, in box widths. */
+const COVER_SPREAD = 1.45;
+/** Slight turn that keeps the spine label in view while the cover opens on the other edge. */
+const HOLD_YAW = 0.12;
+/** Nearer than this share of the focus distance the depth of field blurs the sheet. */
+const FOCUS_SHARE = 0.8;
+const SPOT_MAX_X = 0.8;
+const SPOT_STEP = 0.04;
 
-/** Where the visitor holds a shelf box: in front of the shelf, brought towards `eye` and turned to face it. */
-export function aimShelfFolder(id: FolderId, eye: Vector3, targetAt: Vector3, targetTurn: Quaternion): void {
-  const centre = folderCentre(id);
-  const forward = scratchPosition.copy(folderCentre(id)).setX(centre.x + FOLDER.depth / 2).sub(eye).setY(0);
-  const distance = forward.length();
-  forward.normalize();
-  const x = Math.max(CLEAR_X, centre.x);
-  const nearer = distance * NEARER;
-  const z = Math.abs(forward.z) > 0.3 ? eye.z + (nearer - (x - eye.x) * forward.x) / forward.z : centre.z;
-  targetAt.set(x, centre.y + LIFT, centre.z + Math.min(Math.max(z - centre.z, 0), MAX_FORWARD));
-  const toEye = eye.clone().sub(targetAt);
-  const yaw = Math.atan2(toEye.x, toEye.z) * FACE_TURN;
-  const elevation = Math.asin(Math.min(Math.max(toEye.y / toEye.length(), -1), 1));
-  targetTurn.setFromEuler(new Euler(-elevation * FACE_TURN - HOLD_LEAN, yaw, 0, 'YXZ'));
+/** Beyond the near end of the stack a held box only has to clear the wall. */
+const STACK_FRONT_Z = folderCentre(FOLDERS[0]).z + FOLDER.spine / 2 + FOLDER.depth / 2 + 0.02;
+const WALL_X = ROOM.left + FOLDER.depth / 2 + 0.03;
+
+function clearOfShelf(at: Vector3): boolean {
+  return at.x >= CLEAR_X || (at.z >= STACK_FRONT_Z && at.x >= WALL_X);
+}
+
+/** First screen spot (NDC) tried for the held box's centre: right of the panel on wide screens, above it on tall ones. */
+function holdSpot(aspect: number): { x: number; y: number; height: number; width: number } {
+  return aspect >= 1 ? { x: 0.34, y: 0.04, height: 0.62, width: 0.5 } : { x: -0.2, y: 0.4, height: 0.42, width: 0.86 };
+}
+
+/**
+ * Where the visitor holds a shelf box: near the shot's focus distance (the shelf), so depth of field
+ * keeps the sheet sharp, pushed back only when the box and its opened cover would not fit. It sits on
+ * the ray through `holdSpot`, moved right across the screen until it clears the stack and the wall.
+ */
+export function aimShelfFolder(id: FolderId, camera: PerspectiveCamera, targetAt: Vector3, targetTurn: Quaternion): void {
+  camera.updateMatrixWorld();
+  const eye = camera.getWorldPosition(scratchEye);
+  const forward = camera.getWorldDirection(scratchForward);
+  const spot = holdSpot(camera.aspect);
+  const tan = Math.tan((camera.fov * Math.PI) / 360);
+  const focus = scratchPosition.copy(folderCentre(id)).sub(eye).dot(forward) * FOCUS_SHARE;
+  const fitHeight = FOLDER.height / (spot.height * 2 * tan);
+  const fitWidth = (FOLDER.depth * COVER_SPREAD) / (spot.width * 2 * tan * camera.aspect);
+  const depth = Math.max(focus, fitHeight, fitWidth);
+  for (let x = spot.x; x <= SPOT_MAX_X; x += SPOT_STEP) {
+    const ray = scratchRay.set(x, spot.y, 0.5).unproject(camera).sub(eye).normalize();
+    targetAt.copy(eye).addScaledVector(ray, depth / ray.dot(forward));
+    if (clearOfShelf(targetAt)) break;
+  }
+  if (!clearOfShelf(targetAt)) targetAt.x = Math.max(targetAt.x, CLEAR_X);
+  scratch.lookAt(eye, targetAt, UP);
+  targetTurn.setFromRotationMatrix(scratch).multiply(scratchQuaternion.setFromAxisAngle(UP, -HOLD_YAW));
 }
 
 /** Rest-to-held world transform at `progress`: slide out first, then turn and come forward. */

@@ -1,4 +1,4 @@
-import { CanvasTexture, Group, Matrix4, Mesh, MeshStandardMaterial, PlaneGeometry, Quaternion, SRGBColorSpace, Vector3 } from 'three';
+import { CanvasTexture, Color, Group, Matrix4, Mesh, MeshStandardMaterial, PlaneGeometry, Quaternion, SRGBColorSpace, Vector3 } from 'three';
 import { drawSheet, drawSummarySheet } from '../folder-detail/sheet-canvas';
 import { readExperience, type SheetContent } from '../folder-detail/sheet-content';
 import { OPEN_FOLDER } from '../layout';
@@ -12,6 +12,8 @@ const LEFT_SHEET = { width: BOARD_WIDTH - 0.036, depth: OPEN_FOLDER.depth - 0.05
 /** The pocket covers the tucked sheet from this depth (board frame) towards the visitor. */
 const POCKET_TOP = 0.004;
 const CANVAS_WIDTH = 1024;
+/** The lamp washes the lit paper out, so the printed sheet is darkened to keep its ink readable. */
+const PAPER_LEVEL = 0.74;
 const UP = new Vector3(0, 1, 0);
 const ONE = new Vector3(1, 1, 1);
 
@@ -35,7 +37,7 @@ function printedSheet(name: string, width: number, depth: number, draw: PrintedS
   const texture = new CanvasTexture(canvas);
   texture.colorSpace = SRGBColorSpace;
   texture.anisotropy = 8;
-  const material = new MeshStandardMaterial({ map: texture, roughness: 0.9, metalness: 0, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  const material = new MeshStandardMaterial({ map: texture, color: new Color(PAPER_LEVEL, PAPER_LEVEL, PAPER_LEVEL), roughness: 1, metalness: 0, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
   const geometry = new PlaneGeometry(width, depth).rotateX(-Math.PI / 2);
   const mesh = new Mesh(geometry, material);
   mesh.name = name;

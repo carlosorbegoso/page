@@ -6,6 +6,7 @@ import {
   type CanvasTexture,
   type Mesh,
   type Material,
+  type PerspectiveCamera,
   type WebGLRenderer
 } from 'three';
 import { FOLDER, FOLDERS, OPEN_FOLDER, folderCentre, type FolderId } from '../layout';
@@ -33,6 +34,8 @@ export interface FolderDetailOptions {
   shadows: boolean;
   palette: Palette;
   renderer: WebGLRenderer;
+  /** The live camera: a shelf box is held at a fixed spot of the screen. */
+  camera: PerspectiveCamera;
   onRedraw: () => void;
 }
 
@@ -109,7 +112,7 @@ export class FolderDetail {
     return this.shown;
   }
 
-  /** Takes the folder out, or puts it back when it is already out. `eye` is the shot's camera position. */
+  /** Takes the folder out, or puts it back when it is already out. `eye` (the shot's camera position) aims the TCS sheet. */
   toggle(id: FolderId, eye: Vector3): void {
     this.toggledAt = performance.now();
     if (this.shown === id) {
@@ -124,7 +127,7 @@ export class FolderDetail {
     this.texture.needsUpdate = true;
     this.options.renderer.initTexture(this.texture);
     if (id === 'tcs') this.aimOpenSheet(eye);
-    else aimShelfFolder(id, eye, this.targetAt, this.targetTurn);
+    else aimShelfFolder(id, this.options.camera, this.targetAt, this.targetTurn);
   }
 
   close(): void {

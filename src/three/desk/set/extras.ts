@@ -26,6 +26,7 @@ export function addFolderDetail(room: Group, context: StationContext, meshes: Ro
     shadows: context.tier === 'high',
     palette,
     renderer: context.renderer,
+    camera: context.camera,
     onRedraw: () => context.invalidate()
   });
   void context.precompile?.(detail.object3D);

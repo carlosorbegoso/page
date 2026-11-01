@@ -12,7 +12,7 @@ export const sections = {
   'hero.metrics.team.label': 'de eficiencia en Baufest, donde lideré un equipo de 3',
   'about.title': 'Sobre mí',
   'about.subtitle':
-    'Desarrollador backend en Lima, con más de 5 años construyendo sistemas en Java.',
+    'Desarrollador backend en Lima, con casi 7 años construyendo sistemas en Java.',
   'about.portrait': 'Foto de Carlos Orbegoso',
   'about.facts.label': 'En resumen',
   'about.facts.now.label': 'Hoy',
@@ -39,7 +39,7 @@ export const sections = {
   'products.role': 'Mi rol',
   'products.visit': 'Visitar sitio',
   'experience.title': 'Experiencia',
-  'experience.subtitle': 'Más de 5 años entre banca, retail y consultoría.',
+  'experience.subtitle': 'Casi 7 años entre banca, retail y consultoría.',
   'experience.present': 'Actualidad',
   'experience.client': 'Cliente',
   'experience.highlights': 'Logros',
@@ -48,7 +48,7 @@ export const sections = {
   'reading.exit': 'Volver a la experiencia 3D',
   'reading.metaTitle': 'CV de Carlos Orbegoso · Backend Developer Java y Quarkus',
   'reading.description':
-    'CV de Carlos Orbegoso: más de 5 años como Backend Developer en Java y Quarkus, hoy en TCS para el BCP. Experiencia, productos, formación y contacto.',
+    'CV de Carlos Orbegoso: casi 7 años como Backend Developer en Java y Quarkus, hoy en TCS para el BCP. Experiencia, productos, formación y contacto.',
   'reading.intro': 'Mi CV en una sola página: sin 3D, sin animaciones y lista para imprimir.',
   'reading.profile': 'Perfil',
   'reading.print': 'Imprimir o guardar en PDF',

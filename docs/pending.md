@@ -37,5 +37,4 @@ Sin respuesta; no se publica ninguna frase que dependa de ellas.
 5. ¿Por qué SkyMek y talleres mecánicos?
 6. ¿En qué años estudiaste en la UPC, cuándo egresaste y ya tienes el título?
 7. ¿Qué buscas hoy: un puesto, socios o clientes? Eso decide el botón principal del hero.
-8. ¿«Más de 5 años» o «casi 7»? En total son casi 7; en backend, unos 4,5.
-9. Cifras del hero: ¿cambiamos «Monolito → CQRS» por «3 productos en producción»?
+8. Cifras del hero: ¿cambiamos «Monolito → CQRS» por «3 productos en producción»?

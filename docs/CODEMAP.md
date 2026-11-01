@@ -108,6 +108,8 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Vidrio del monitor (reflejo del entorno, respiración del brillo) | `src/three/desk/screens/monitorGlass.ts` |
 | Zonas de clic, etiquetas y hover | `src/three/desk/set/picks.ts` |
 | Reloj (hora de la historia, timbre) | `src/three/desk/set/clock-wiring.ts` |
+| Qué hace cada `desk:action` (juguetes, carpeta, laptop, lámpara) | `src/three/desk/set/actions.ts` |
+| Figuras animadas, carpeta en mano y lomos al cargar | `src/three/desk/set/extras.ts` |
 | Ciudad, lluvia, vapor y haz de la lámpara cada frame | `src/three/desk/set/weather.ts` |
 | Malla estática de la habitación y sombras de contacto | `src/three/desk/set/room.ts` |
 | Planos de cámara, superficies CSS3D, anclas de paneles | `src/three/desk/set/framing.ts` |

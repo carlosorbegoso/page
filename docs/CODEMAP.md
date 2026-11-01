@@ -51,8 +51,16 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Tier de calidad por dispositivo | `src/three/tier.ts` |
 | Posición de cámara por capítulo | `src/three/desk/shots.ts` |
 | Montaje del escritorio, luces por capítulo | `src/three/desk/DeskSet.ts` |
-| Mobiliario y objetos | `src/three/desk/props.ts` |
-| Materiales y atlas | `src/three/desk/materials.ts` |
+| Colores y acabados de la habitación (`readPalette`) | `src/three/desk/props/palette.ts` |
+| Paredes, suelo, ventana, escritorio, estantes, silla | `src/three/desk/props/room.ts` |
+| Monitor, teclado, taza, laptop, carpeta abierta, teléfono, lámpara | `src/three/desk/props/workstation.ts` |
+| Planta y telescopio | `src/three/desk/props/decor.ts` |
+| Coleccionables (Alfa, Burbu, regalo, llave) | `src/three/desk/props/figures.ts` |
+| Sombras de contacto | `src/three/desk/props/shadows.ts` |
+| Ayudas de geometría (`seg`, `shade`, `rod`) | `src/three/desk/props/geometry.ts` |
+| Material atlas de la habitación | `src/three/desk/materials/atlas.ts`, GLSL en `atlas.glsl.ts`, ranuras en `slots.ts` |
+| Texturas de canvas (pantallas, teléfono, sombra) | `src/three/desk/materials/canvas.ts` |
+| Mapa de entorno nocturno | `src/three/desk/materials/environment.ts` |
 | Cielo, acantilados y ciudad tras la ventana | `src/three/desk/atmosphere/backdrop.ts`, GLSL en `backdrop.glsl.ts` |
 | Siluetas y ventanas de la ciudad (atlas), luces de aviación | `src/three/desk/atmosphere/city-atlas.ts` |
 | Lluvia en el vidrio de la ventana | `src/three/desk/atmosphere/glass.ts`, GLSL en `glass.glsl.ts` |

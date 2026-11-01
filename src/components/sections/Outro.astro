@@ -22,11 +22,10 @@ const year = new Date().getFullYear();
     class="plate p-(--plate-padding)"
     data-plate
     data-plate-id="outro"
-    data-plate-mode="anchored"
-    data-plate-anchor="outro"
+    data-plate-mode="surface-monitor"
   >
-    <div class="flex max-w-measure flex-col gap-4">
-      <p class="text-xs font-semibold tracking-caps text-accent uppercase">{t('outro.label')}</p>
+    <div class="outro-screen flex max-w-measure flex-col gap-4">
+      <p class="outro-label text-xs font-semibold tracking-caps text-accent uppercase">{t('outro.label')}</p>
       <h2 id="outro-title" class="font-display text-3xl font-semibold tracking-display text-balance text-text">
         {t('outro.title')}
       </h2>
@@ -62,14 +61,59 @@ const year = new Date().getFullYear();
     content: none;
   }
 
+  /* The closing credits roll on the monitor, like the opening titles: sizes are shares of the screen. */
+  :global(.is-3d) .outro-screen {
+    height: 100%;
+    max-width: none;
+    justify-content: center;
+    gap: 0;
+  }
+
+  :global(.is-3d) .outro-label {
+    font-size: 3cqh;
+    letter-spacing: var(--tracking-caps);
+    color: var(--color-text-muted);
+  }
+
   :global(.is-3d) .outro h2 {
-    max-width: 12ch;
+    max-width: 80%;
+    margin-top: 3cqh;
+    font-size: 11cqh;
+    line-height: 1.02;
     text-wrap: balance;
   }
 
-  @media (width < 48rem) {
+  :global(.is-3d) .outro-body {
+    max-width: 70%;
+    margin-top: 4cqh;
+    font-size: 3.9cqh;
+    line-height: 1.45;
+  }
+
+  :global(.is-3d) .outro-credits {
+    margin-top: 6cqh;
+    padding-top: 4cqh;
+    font-size: 3.4cqh;
+    gap: 1.6cqh 2.4cqw;
+  }
+
+  @container surface (orientation: portrait) {
+    :global(.is-3d) .outro h2 {
+      max-width: none;
+      font-size: 6.2cqh;
+    }
+
+    :global(.is-3d) .outro-label {
+      font-size: 2.1cqh;
+    }
+
     :global(.is-3d) .outro-body {
-      display: none;
+      max-width: none;
+      font-size: 2.6cqh;
+    }
+
+    :global(.is-3d) .outro-credits {
+      font-size: 2.3cqh;
     }
   }
 

@@ -239,7 +239,7 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
 
   const back = hero.eye.clone().sub(screen).normalize();
   const outro: Framing = {
-    eye: screen.clone().addScaledVector(back, Math.min(heroDistance + 0.2, 1.75)),
+    eye: screen.clone().addScaledVector(back, Math.min(heroDistance + 0.08, 1.75)),
     focus: screen,
     sx: hero.sx,
     sy: hero.sy,

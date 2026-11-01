@@ -21,6 +21,10 @@ export type StoryGotoDetail =
 export type StoryTourState = 'playing' | 'paused' | 'finished';
 
 const SNAP_IDLE_MS = 150;
+/** A wheel gesture ends after this long without wheel events; a flick's momentum tail has no such gap. */
+const WHEEL_GESTURE_GAP_MS = 160;
+const WHEEL_STEP_PX = 40;
+const WHEEL_LINE_PX = 16;
 const KEY_GUARD_MS = 1000;
 const SETTLE_FALLBACK_MS = 2500;
 const READ_MIN_MS = 4000;
@@ -60,6 +64,8 @@ export function setupStoryNav(host: StoryNavHost): () => void {
   let targetIndex: number | null = null;
   let snapTimer = 0;
   let lastWheel = 0;
+  let wheelSum = 0;
+  let wheelStepped = false;
   let lastNativeKey = 0;
   let touches = 0;
   let pointerHeld = false;
@@ -123,11 +129,31 @@ export function setupStoryNav(host: StoryNavHost): () => void {
     return last && scrollY > last.top ? shots.length - 1 : -1;
   }
 
+  /** Index of the resting point nearest to the scroll position: -1 is the top of the page. */
+  function nearestIndex(shots: StoryShot[]): number {
+    let best = -1;
+    let distance = scrollY;
+    shots.forEach((shot, index) => {
+      const gap = Math.abs(shot.top - scrollY);
+      if (gap < distance) {
+        best = index;
+        distance = gap;
+      }
+    });
+    return best;
+  }
+
+  /** Steps from where the page is (or is already heading), so a stale active shot never skips one. */
   function step(direction: 1 | -1): void {
     const shots = host.shots();
     if (!shots.length) return;
-    const base = targetIndex ?? currentIndex(shots);
-    goToIndex(Math.min(Math.max(base + direction, -1), shots.length - 1));
+    let next: number;
+    if (targetIndex !== null) next = targetIndex + direction;
+    else if (direction > 0) {
+      next = shots.findIndex(shot => shot.top > scrollY + 2);
+      if (next < 0) next = shots.length - 1;
+    } else next = shots.findLastIndex(shot => shot.top < scrollY - 2);
+    goToIndex(Math.min(Math.max(next, -1), shots.length - 1));
   }
 
   function goto(detail: StoryGotoDetail | undefined): void {
@@ -153,13 +179,11 @@ export function setupStoryNav(host: StoryNavHost): () => void {
     }
     if (html.matches(':has(dialog[open])')) return;
     const shots = host.shots();
-    const first = shots[0];
-    const last = shots.at(-1);
-    const active = shots[host.activeIndex()];
-    if (!first || !last || !active || scrollY < first.top || scrollY > last.top) return;
-    const distance = Math.abs(active.top - scrollY);
-    if (distance < 2 || distance > innerHeight) return;
-    scrollToY(active.top, host.activeIndex());
+    if (!shots.length) return;
+    const index = nearestIndex(shots);
+    const top = index < 0 ? 0 : shots[index]!.top;
+    if (Math.abs(top - scrollY) < 2) return;
+    scrollToY(top, index < 0 ? null : index);
   }
 
   function scheduleSnap(): void {
@@ -301,9 +325,46 @@ export function setupStoryNav(host: StoryNavHost): () => void {
   const onScroll = () => {
     if (!tween) scheduleSnap();
   };
+  /** The wheel belongs to something else: a scrollable box under the pointer, a dialog or the HUD menu. */
+  function wheelOwnedElsewhere(event: WheelEvent): boolean {
+    if (html.matches(':has(dialog[open])')) return true;
+    for (let el = event.target instanceof Element ? event.target : null; el && el !== document.body; el = el.parentElement) {
+      if (el.matches('dialog, [data-hud-menu], [role="listbox"]')) return true;
+      const overflow = getComputedStyle(el).overflowY;
+      if ((overflow === 'auto' || overflow === 'scroll') && el.scrollHeight > el.clientHeight + 1) return true;
+    }
+    return false;
+  }
+
+  /**
+   * One wheel gesture moves at most one shot: the first ~40 px in a direction step through
+   * `story:goto`; the rest of the gesture, and any wheel while a step tween runs, is swallowed.
+   */
   const onWheel = (event: WheelEvent) => {
-    lastWheel = performance.now();
+    const now = performance.now();
+    if (now - lastWheel > WHEEL_GESTURE_GAP_MS) {
+      wheelSum = 0;
+      wheelStepped = false;
+    }
+    lastWheel = now;
     interrupt(event);
+    if (event.ctrlKey || event.metaKey || event.altKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+    if (wheelOwnedElsewhere(event)) return;
+    if (wheelStepped || tween) {
+      if (event.cancelable) event.preventDefault();
+      if (wheelStepped) return;
+    }
+    const scale = event.deltaMode === 1 ? WHEEL_LINE_PX : event.deltaMode === 2 ? innerHeight : 1;
+    const delta = event.deltaY * scale;
+    if (Math.sign(delta) !== Math.sign(wheelSum)) wheelSum = 0;
+    wheelSum += delta;
+    if (Math.abs(wheelSum) < WHEEL_STEP_PX) return;
+    if (event.cancelable) event.preventDefault();
+    wheelStepped = true;
+    wheelSum = 0;
+    window.dispatchEvent(
+      new CustomEvent<StoryGotoDetail>('story:goto', { detail: { step: delta > 0 ? 1 : -1 } })
+    );
   };
   const onTouchStart = (event: TouchEvent) => {
     touches = event.touches.length;
@@ -342,7 +403,7 @@ export function setupStoryNav(host: StoryNavHost): () => void {
   const listeners: Array<[EventTarget, string, EventListener, AddEventListenerOptions]> = [
     [window, 'keydown', onKeyDown as EventListener, {}],
     [window, 'scroll', onScroll, { passive: true }],
-    [window, 'wheel', onWheel as EventListener, { passive: true, capture: true }],
+    [window, 'wheel', onWheel as EventListener, { passive: false, capture: true }],
     [window, 'touchstart', onTouchStart as EventListener, { passive: true, capture: true }],
     [window, 'touchend', onTouchEnd as EventListener, { passive: true, capture: true }],
     [window, 'touchcancel', onTouchEnd as EventListener, { passive: true, capture: true }],

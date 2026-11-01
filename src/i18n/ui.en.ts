@@ -37,6 +37,8 @@ export const en = {
   'hero.ctaProducts': 'See products',
   'hero.ctaContact': 'Get in touch',
   'hero.fallbackAlt': 'Alfa, the TUSOCIO IA mascot, over a network of connected nodes',
+  'stage.loading': 'Switching on the desk…',
+  'stage.loaded': 'Desk switched on',
   'hero.metrics.label': 'By the numbers',
   'hero.metrics.performance.value': '+30–40%',
   'hero.metrics.performance.label': 'performance gain at Intercorp Retail',

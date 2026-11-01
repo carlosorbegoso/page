@@ -1,4 +1,4 @@
-import { ACESFilmicToneMapping, PerspectiveCamera, SRGBColorSpace, WebGLRenderer } from 'three';
+import { ACESFilmicToneMapping, PerspectiveCamera, SRGBColorSpace, Vector3, WebGLRenderer } from 'three';
 import { bindRenderer } from './assets';
 import {
   onRegistryChange,
@@ -48,6 +48,8 @@ const IDLE_WINDOW_MS = 8000;
 const DISSOLVE_HALF_MS = 150;
 const INTRO_SECONDS = 2.4;
 const PHONE_MONITOR_PUSH = 0.1;
+/** The intro holds 4 % further back on the same axis, so leaving it is a short dolly-in onto the hero. */
+const INTRO_PULLBACK = 0.04;
 /** Sub-shots when neither the desk nor the plates say otherwise. */
 const DEFAULT_SUBS: Partial<Record<ChapterId, number>> = { products: 3 };
 /**
@@ -55,6 +57,11 @@ const DEFAULT_SUBS: Partial<Record<ChapterId, number>> = { products: 3 };
  * (monitor, phone) stay still, because their 1:1 text would shimmer or slide on the glass.
  */
 const BREATHING_CHAPTERS: ReadonlySet<ChapterId> = new Set(['company', 'products', 'experience', 'outro']);
+
+/** Boot milestones for the pre-three loader in StageCanvas (0…1). */
+function progress(value: number): void {
+  window.dispatchEvent(new CustomEvent('stage:progress', { detail: { value } }));
+}
 
 declare global {
   interface Window {
@@ -156,14 +163,18 @@ export class Stage {
     this.renderer.setPixelRatio(capture ? window.devicePixelRatio || 1 : this.dpr.value);
     bindRenderer(this.renderer);
     container.appendChild(this.canvas);
+    progress(0.55);
     await yieldToMain();
 
     await this.loadExtensions();
+    progress(0.7);
     this.world = new World();
     await this.world.load();
+    progress(0.78);
     this.applyTokens();
     this.measure(true);
     await this.syncRegistry();
+    progress(0.88);
     this.cleanups.push(onRegistryChange(() => void this.syncRegistry()));
     await yieldToMain();
 
@@ -172,6 +183,7 @@ export class Stage {
     this.director.request({ id: first.id, subIndex: first.sub, shot: this.shotFor(first.id, first.sub) }, 'instant');
     this.director.update(this.camera, 0, this.fov(), { x: 0, y: 0 }, true);
     await this.renderer.compileAsync(this.world.scene, this.camera);
+    progress(0.96);
     await yieldToMain();
     this.ready = true;
 
@@ -196,7 +208,7 @@ export class Stage {
     const fixed = this.options.capture ?? (this.options.forcedChapter ? { chapter: this.options.forcedChapter, sub: this.options.forcedSub ?? 0 } : null);
     if (fixed) return { id: fixed.chapter, sub: fixed.sub };
     if (scrollY < 4 && this.movesAllowed) {
-      this.introUntil = performance.now() + INTRO_SECONDS * 1000;
+      this.introUntil = Number.POSITIVE_INFINITY;
       return { id: 'intro', sub: 0 };
     }
     return { id: 'hero', sub: 0 };
@@ -208,8 +220,9 @@ export class Stage {
    */
   private shotFor(id: ChapterId, sub: number): Shot {
     const shot = this.world.shot(id, sub);
-    if (this.layout !== 'phone' || (id !== 'hero' && id !== 'intro')) return shot;
-    const position = shot.position.clone().lerp(shot.target, PHONE_MONITOR_PUSH);
+    const push = (this.layout === 'phone' && (id === 'hero' || id === 'intro') ? PHONE_MONITOR_PUSH : 0) - (id === 'intro' ? INTRO_PULLBACK : 0);
+    if (!push) return shot;
+    const position = shot.position.clone().lerp(shot.target, push);
     return { ...shot, position };
   }
 
@@ -468,12 +481,25 @@ export class Stage {
   }
 
   private reveal(): void {
+    const intro = this.introUntil === Number.POSITIVE_INFINITY;
+    if (intro) this.introUntil = performance.now() + INTRO_SECONDS * 1000;
+    window.dispatchEvent(new CustomEvent('stage:reveal', { detail: { intro, lamp: this.screenPoint('lamp') } }));
     this.options.container.dataset.ready = 'true';
     if (this.options.capture) {
       requestAnimationFrame(() => {
         window.__captureReady = true;
       });
     }
+  }
+
+  /** Where a desk anchor lands on screen (CSS px), clamped near the frame for anchors outside it. */
+  private screenPoint(name: string): { x: number; y: number } | null {
+    const anchor = this.world.anchor(name);
+    if (!anchor) return null;
+    const ndc = new Vector3().copy(anchor).project(this.camera);
+    if (ndc.z > 1) return null;
+    const clampNdc = (v: number) => Math.min(Math.max(v, -1.3), 1.3);
+    return { x: ((clampNdc(ndc.x) + 1) / 2) * this.size.width, y: ((1 - clampNdc(ndc.y)) / 2) * this.size.height };
   }
 
   private adapt(now: number, work: number): void {

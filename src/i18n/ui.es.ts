@@ -35,6 +35,8 @@ export const es = {
   'hero.ctaProducts': 'Ver productos',
   'hero.ctaContact': 'Escríbeme',
   'hero.fallbackAlt': 'Alfa, la mascota de TUSOCIO IA, sobre una red de nodos conectados',
+  'stage.loading': 'Encendiendo el escritorio…',
+  'stage.loaded': 'Escritorio encendido',
   'hero.metrics.label': 'En cifras',
   'hero.metrics.performance.value': '+30–40 %',
   'hero.metrics.performance.label': 'de rendimiento en Intercorp Retail',

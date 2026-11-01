@@ -565,6 +565,7 @@ export class DeskSet implements ShotProvider {
 
   getAnchor(name: string): Vector3 | null {
     if (!this.context) return null;
+    if (name === 'lamp') return this.lamp.getWorldPosition(new Vector3());
     const view = this.viewport();
     const all = framings(view, this.phoneSurface());
     for (const list of Object.values(all)) {

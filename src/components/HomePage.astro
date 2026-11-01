@@ -23,7 +23,7 @@ const { locale } = Astro.props;
 
 <Base locale={locale}>
   <HeroFallbackPreload slot="head" />
-  <StageCanvas />
+  <StageCanvas locale={locale} />
   <Header locale={locale} />
   <main id="main" tabindex="-1" class="relative z-(--z-content)">
     <Hero locale={locale} />

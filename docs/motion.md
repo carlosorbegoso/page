@@ -104,6 +104,7 @@ La monta `setupChapterScroll` (`src/three/scroll.ts`) con `setupStoryNav(host)`:
 |---|---|
 | Teclado (`keys.ts`) | ↓ / Re Pág / Espacio → siguiente; ↑ / Av Pág / Mayús+Espacio → anterior; Inicio / Fin. Sin modificadores ni repetición. Cede a campos, `dialog`, `[data-hud-menu]`, `menu`, `listbox`, `slider` y a Espacio sobre botones/enlaces |
 | Rueda (`wheel.ts`) | Un plano por gesto: acumula 40 px (líneas × 16 px); un hueco > 160 ms abre gesto nuevo; `preventDefault` mientras dura. Cede a `dialog`, menús y cualquier contenedor con scroll propio |
+| Deslizar en horizontal (`gestures.ts`) | Un dedo, ≥ 48 px, 1.5× más horizontal que vertical, en < 800 ms: a la izquierda → siguiente plano, a la derecha → anterior. Cede al celular de Contacto (`surface-phone`, que tiene su propio deslizar), a campos, `dialog`, `[data-hud-menu]` y a los 24 px de cada borde (el «atrás» de iOS) |
 | Snap (`snap.ts`) | 150 ms sin scroll → asienta en el plano más cercano. No con tween en curso, dedo o botón del ratón abajo, diálogo abierto, 1 s tras una tecla cedida, ni con motion reducido |
 | Enlaces (`anchors.ts`) | `a[href="#capitulo"]` de la misma página → `replaceState` + tween |
 | Tween (`scroll.ts`) | GSAP `scrollTo`, `power2.inOut`, 0.35–1.2 s según distancia, `autoKill` (el usuario lo interrumpe). Sin motion: salto instantáneo |

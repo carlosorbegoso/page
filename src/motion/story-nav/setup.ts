@@ -47,7 +47,7 @@ interface InputParts {
 }
 
 function inputListeners(host: StoryNavHost, state: NavState, { scroller, navigator, snapper, interrupt }: InputParts): Listener[] {
-  const gestures = createGestureHandlers(state, snapper, interrupt);
+  const gestures = createGestureHandlers(state, snapper, interrupt, delta => navigator.step(delta));
   const onScroll = () => {
     if (!state.tween) snapper.schedule();
   };

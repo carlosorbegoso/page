@@ -4,7 +4,7 @@ Qué archivo editar en el motor 3D: arranque, Stage, director, scroll, placas, i
 
 | Para cambiar… | Edita |
 | --- | --- |
-| Pantalla de arranque: diagrama, paquete, `200 OK`, monograma, 503 y salto (`docs/3d/boot.md`) | `src/components/three/boot/` (`BootScreen.astro`, `sequence.ts`, `timeline.ts`, `progress.ts`), estilos en `src/styles/boot/boot.css` |
+| Pantalla de arranque: diagrama, paquete, `200 OK`, monograma, 503 y salto (`docs/3d/boot.md`) | `src/components/three/boot/` (`BootScreen.astro`, `sequence.ts`, `timeline.ts`, `progress.ts`), estilos en `src/styles/boot/` (`boot.css` base, `exit.css` fases, `media.css` vertical y movimiento reducido) |
 | La intro del 3D espera a la pantalla de arranque | `src/three/stage/intro-gate.ts` |
 | Arranque del Stage y cableado de piezas (ensamblador) | `src/three/Stage.ts` |
 | Bucle de render a demanda, ventana de inactividad, DPR adaptativo | `src/three/stage/frame-loop.ts` |

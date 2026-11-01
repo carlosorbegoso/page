@@ -1,0 +1,156 @@
+.boot[data-phase='ok'] .boot__response,
+.boot[data-phase='fail'] .boot__response {
+  opacity: 1;
+  animation: boot-flash 520ms var(--ease-standard);
+}
+
+.boot[data-phase='fail'] .boot__response {
+  color: var(--color-text-muted);
+}
+
+.boot[data-phase='mark'] .boot__response {
+  opacity: 0;
+  transform: scaleX(0.08);
+  letter-spacing: -0.4em;
+  transition:
+    opacity 260ms var(--ease-standard) 160ms,
+    transform 380ms var(--boot-ease),
+    letter-spacing 380ms var(--boot-ease);
+}
+
+.boot[data-phase='mark'] .boot__route,
+.boot[data-phase='led'] .boot__stage,
+.boot[data-phase='open'] .boot__stage,
+.boot[data-phase='done'] .boot__stage {
+  opacity: 0;
+}
+
+.boot[data-phase='mark'] .boot__route {
+  transition: opacity 300ms var(--ease-standard);
+}
+
+.boot[data-phase='mark'] .boot__mark {
+  opacity: 1;
+}
+
+.boot[data-phase='mark'] .boot__arc,
+.boot[data-phase='led'] .boot__arc {
+  stroke-dashoffset: 0;
+}
+
+.boot[data-phase='mark'] .boot__led,
+.boot[data-phase='led'] .boot__led {
+  transform: scale(1);
+}
+
+.boot[data-phase='mark'] .boot__signature {
+  color: var(--boot-ink);
+}
+
+.boot[data-phase='led'] .boot__mark {
+  transform: translate(calc(-73.44% + var(--boot-dx)), calc(-50% + var(--boot-dy))) scale(0.2);
+  opacity: 0;
+  transition:
+    transform 480ms var(--boot-ease),
+    opacity 160ms var(--ease-standard) 400ms;
+}
+
+.boot[data-phase='led'] .boot__arc {
+  opacity: 0;
+  transition: opacity 260ms var(--ease-standard) 100ms;
+}
+
+.boot[data-phase='led'] .boot__beacon,
+.boot[data-phase='open'] .boot__beacon,
+.boot[data-phase='done'] .boot__beacon {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.boot[data-phase='led'] .boot__beacon {
+  transition-delay: 380ms;
+}
+
+.boot[data-phase='led'] .boot__signature,
+.boot[data-phase='open'] .boot__signature,
+.boot[data-phase='done'] .boot__signature {
+  opacity: 0;
+}
+
+.boot[data-phase='led'] {
+  --boot-reveal: -6rem;
+}
+
+.boot[data-phase='led'],
+.boot[data-phase='open'],
+.boot[data-phase='done'] {
+  mask-image: radial-gradient(
+    circle at var(--boot-x) var(--boot-y),
+    transparent var(--boot-reveal),
+    #000 calc(var(--boot-reveal) + 6rem)
+  );
+}
+
+.boot[data-phase='open'],
+.boot[data-phase='done'] {
+  --boot-reveal: 150vmax;
+  pointer-events: none;
+  transition: --boot-reveal 750ms cubic-bezier(0.5, 0, 0.75, 0);
+}
+
+.boot[data-phase='done'] {
+  opacity: 0;
+  transition: opacity 200ms var(--ease-standard);
+}
+
+:root .boot[data-still],
+:root .boot[data-still] * {
+  animation: none !important;
+  transition-duration: 360ms !important;
+  transition-delay: 0ms !important;
+}
+
+:root .boot[data-still] .boot__track,
+:root .boot[data-still] .boot__wire--lit {
+  transition: none !important;
+}
+
+.boot[data-still][data-phase] .boot__response {
+  transform: none;
+  letter-spacing: 0.08em;
+}
+
+.boot[data-still] .boot__arc {
+  stroke-dashoffset: 0;
+}
+
+.boot[data-still] .boot__led {
+  transform: scale(1);
+}
+
+.boot[data-still][data-phase] .boot__mark {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.boot[data-still][data-phase] .boot__beacon {
+  transform: translate(-50%, -50%);
+}
+
+.boot[data-still][data-phase] {
+  mask-image: none;
+}
+
+.boot[data-still][data-phase='open'],
+.boot[data-still][data-phase='done'] {
+  opacity: 0;
+  transition: opacity 360ms var(--ease-standard);
+}
+
+html.booting [data-hud] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+[data-hud] {
+  transition: opacity 600ms var(--ease-standard);
+}

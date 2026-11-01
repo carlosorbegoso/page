@@ -6,7 +6,7 @@ Qué hace la pantalla de carga (`src/components/three/boot/`), de dónde sale su
 | Qué | Dónde |
 | --- | --- |
 | Marcado (diagrama, paquete, respuesta, monograma, firma, `role="status"`) | `src/components/three/boot/BootScreen.astro` |
-| Estilos, fases (`data-phase`), mobile vertical, reduced motion | `src/styles/boot/boot.css` |
+| Estilos: base en `src/styles/boot/boot.css`, fases (`data-phase`) y modo quieto en `exit.css`, mobile vertical, reduced motion y keyframes en `media.css` | `src/styles/boot/` |
 | Progreso real → posición del paquete (`.boot__track` se mueve con `transform`, igual que el cable encendido, para que no se separen cuando el hilo principal está ocupado) | `src/components/three/boot/progress.ts` |
 | Tiempos de cada salida (normal, rápida, quieta, error) | `src/components/three/boot/timeline.ts` |
 | Máquina de estados, salto, 503, visita en caliente | `src/components/three/boot/sequence.ts` |

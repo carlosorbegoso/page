@@ -73,6 +73,15 @@ export const FIGURE_HEIGHT = { alfa: 0.133, skymek: 0.06, parati: 0.07, ventixs:
 export type FigureId = keyof typeof FIGURES;
 export const PRODUCT_FIGURES = ['skymek', 'parati', 'ventixs'] as const;
 
+/** Carlos's Pikachu, on the monitor stand's base right of the column (where others keep a rubber duck). */
+export const PIKACHU = { base: new Vector3(-0.072, DESK.top + 0.01, -0.09), yaw: -0.2 } as const;
+
+/** Charizard on the same stand, left of the column, turned a little towards Pikachu. */
+export const CHARIZARD = { base: new Vector3(-0.226, DESK.top + 0.01, -0.1), yaw: 0.22 } as const;
+
+/** Carlos's living succulent on the desk, in the gap between the laptop and the monitor stand. */
+export const SUCCULENT = new Vector3(-0.335, DESK.top, -0.02);
+
 /** Open TCS folder on the desk, left of the keyboard ("today's folder"). */
 export const OPEN_FOLDER = { centre: new Vector3(-0.46, DESK.top, 0.17), width: 0.42, depth: 0.29, yaw: 0.12 } as const;
 

@@ -1,0 +1,51 @@
+---
+import ExternalLink from '../../ui/ExternalLink.astro';
+import { useTranslations, type Locale } from '../../../i18n/utils';
+import type { getProducts, getProfile } from '../../../lib/content';
+import { displayUrl } from './links';
+
+interface Props {
+  locale: Locale;
+  company: Awaited<ReturnType<typeof getProfile>>['company'];
+  products: Awaited<ReturnType<typeof getProducts>>;
+}
+
+const { locale, company, products } = Astro.props;
+const t = useTranslations(locale);
+const statusLabel = {
+  production: t('products.status.production'),
+  building: t('products.status.building')
+} as const;
+---
+
+<section class="cv-section" aria-labelledby="cv-company">
+  <h2 id="cv-company" class="cv-heading">{t('products.title')}</h2>
+  <div class="cv-body">
+    <p class="cv-company">
+      <strong>{company.legalName}</strong> · {company.role}
+    </p>
+    <div class="cv-prose">
+      {company.summary.map(paragraph => <p>{paragraph}</p>)}
+    </div>
+    <ul class="cv-list cv-products" role="list">
+      {products.map(product => (
+        <li class="cv-entry" data-product-id={product.id}>
+          <div class="cv-entry__head">
+            <h3 class="cv-entry__title">
+              {product.name} · <span class="cv-entry__org">{product.tagline}</span>
+            </h3>
+            <p class="cv-entry__dates">
+              <span class="cv-dot" aria-hidden="true"></span>
+              {statusLabel[product.status]}
+            </p>
+          </div>
+          <p>{product.description}</p>
+          <p class="cv-stack">
+            <span class="cv-stack__label">{t('products.role')}:</span> {product.role} ·{' '}
+            <ExternalLink href={product.url} locale={locale}>{displayUrl(product.url)}</ExternalLink>
+          </p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

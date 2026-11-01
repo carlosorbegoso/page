@@ -1,0 +1,38 @@
+---
+import CvLink from '../../ui/CvLink.astro';
+import ExternalLink from '../../ui/ExternalLink.astro';
+import { SITE } from '../../../config/site';
+import { useTranslations, type Locale } from '../../../i18n/utils';
+import { displayUrl, SOCIAL } from './links';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<section class="cv-section" aria-labelledby="cv-contact">
+  <h2 id="cv-contact" class="cv-heading">{t('contact.title')}</h2>
+  <div class="cv-body">
+    <p class="cv-lead">{t('contact.subtitle')}</p>
+    <dl class="cv-skills">
+      <div>
+        <dt>{t('contact.email')}</dt>
+        <dd><a href={`mailto:${SITE.email}`}>{SITE.email}</a></dd>
+      </div>
+      {SOCIAL.map(item => (
+        <div>
+          <dt>{item.label}</dt>
+          <dd>
+            <ExternalLink href={item.href} locale={locale}>{displayUrl(item.href)}</ExternalLink>
+          </dd>
+        </div>
+      ))}
+    </dl>
+    <div class="cv-actions no-print">
+      <CvLink locale={locale} />
+    </div>
+  </div>
+</section>

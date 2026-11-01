@@ -1,0 +1,38 @@
+/*
+ * A panel taller than the room under the HUD is clipped by the engine; its hidden edges fade instead
+ * of cutting. The top fade at rest stays inside the plate's own padding, above the first line.
+ */
+.stage-panels__panel[data-plate-overflow] {
+  --plate-fade-top: 1.25rem;
+  --plate-fade-bottom: 3rem;
+
+  box-sizing: border-box;
+  overflow: hidden auto;
+  scrollbar-width: none;
+  pointer-events: none !important;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--plate-fade-top),
+    #000 calc(100% - var(--plate-fade-bottom)),
+    transparent 100%
+  );
+}
+
+.stage-panels__panel[data-plate-overflow] > .plate[data-active] {
+  pointer-events: auto;
+}
+
+/* The pool must not stretch the scroll range: below the plate it would add a screen of empty scrolling. */
+.is-3d .stage-panels__panel[data-plate-overflow] > .plate::before {
+  bottom: 0;
+}
+
+.stage-panels__panel[data-plate-overflow='middle'],
+.stage-panels__panel[data-plate-overflow='end'] {
+  --plate-fade-top: 2.5rem;
+}
+
+.stage-panels__panel[data-plate-overflow='end'] {
+  --plate-fade-bottom: 0;
+}

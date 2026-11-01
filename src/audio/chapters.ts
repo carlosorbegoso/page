@@ -1,4 +1,4 @@
-import type { ChapterId } from '../three/contracts';
+import { isChapterId, type ChapterId } from '../three/contracts';
 
 export { isChapterId, type ChapterId } from '../three/contracts';
 
@@ -42,4 +42,15 @@ export const PRESETS: Record<ChapterId, ChapterPreset> = {
 
 export function midiToHz(note: number): number {
   return 440 * 2 ** ((note - 69) / 12);
+}
+
+/** The chapter whose section crosses the middle of the viewport, for a bed started mid-page. */
+export function chapterFromDom(): ChapterId {
+  const centre = innerHeight / 2;
+  for (const section of document.querySelectorAll<HTMLElement>('[data-station]')) {
+    const box = section.getBoundingClientRect();
+    const id = section.dataset.station;
+    if (box.top <= centre && box.bottom >= centre && isChapterId(id)) return id;
+  }
+  return 'hero';
 }

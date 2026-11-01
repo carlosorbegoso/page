@@ -1,8 +1,13 @@
-import { createImpulse, createNoise } from './buffers';
-import { isChapterId, midiToHz, PRESETS, type ChapterId, type ChapterPreset } from './chapters';
+import { createNoise } from './buffers';
+import { chapterFromDom, isChapterId, PRESETS, type ChapterId } from './chapters';
+import { padCutoff, roomMix } from './daylight';
+import { listenDeskSounds } from './desk-sounds';
+import { createMixGraph, type MixGraph } from './mix-graph';
 import { MusicBed } from './music';
+import { ChordLayer, rampTo } from './pad';
 import { RoomTone } from './room';
-import { playChime, playKey, playTock } from './voices';
+import { listenUiSounds } from './ui-sounds';
+import { playChime } from './voices';
 
 /** Master level at full volume. Keep it low: this is a background bed, not music. */
 export const MASTER_LEVEL = 0.11;
@@ -14,9 +19,6 @@ const LEVELS = {
   music: 2.2,
   sample: 0.5,
   room: 1,
-  key: 0.1,
-  tockHover: 0.09,
-  tockClick: 0.18,
   chime: 0.16
 } as const;
 
@@ -25,13 +27,8 @@ const SUB_SHOT_SWELL_GAIN = 1.2;
 const FADE_IN_SECONDS = 2.5;
 const FADE_OUT_SECONDS = 1.2;
 const HIDDEN_FADE_SECONDS = 0.6;
-const KEY_GAP_MS = 28;
-const TOCK_GAP_MS = 250;
 const CHIME_GAP_MS = 4000;
 const FALLBACK_CHIME_DELAY_MS = 900;
-const DETUNE_CENTS = 7;
-const FILTER_LFO_HZ = 0.045;
-const FILTER_LFO_DEPTH_HZ = 90;
 
 type Source = 'chapter' | 'station' | 'section';
 
@@ -39,53 +36,6 @@ interface ChapterDetail {
   id?: string | null;
   subIndex?: number;
   progress?: number;
-}
-
-class ChordLayer {
-  private readonly output: GainNode;
-  private readonly oscillators: OscillatorNode[] = [];
-
-  constructor(context: AudioContext, preset: ChapterPreset, destination: AudioNode) {
-    this.output = context.createGain();
-    this.output.gain.value = 0;
-    this.output.connect(destination);
-
-    const voiceGain = 1 / Math.sqrt(preset.chord.length * 2);
-    preset.chord.forEach((note, index) => {
-      const voice = context.createGain();
-      voice.gain.value = voiceGain;
-      voice.connect(this.output);
-      const drift = index % 2 === 0 ? 1.5 : -1.5;
-      for (const [type, detune] of [
-        ['triangle', -DETUNE_CENTS],
-        ['sine', DETUNE_CENTS]
-      ] as const) {
-        const oscillator = context.createOscillator();
-        oscillator.type = type;
-        oscillator.frequency.value = midiToHz(note);
-        oscillator.detune.value = detune + drift;
-        oscillator.connect(voice);
-        this.oscillators.push(oscillator);
-      }
-    });
-    for (const oscillator of this.oscillators) oscillator.start();
-  }
-
-  fadeIn(at: number, seconds: number): void {
-    rampTo(this.output.gain, 1, at, seconds);
-  }
-
-  fadeOutAndStop(at: number, seconds: number): void {
-    rampTo(this.output.gain, 0, at, seconds);
-    for (const oscillator of this.oscillators) oscillator.stop(at + seconds + 0.05);
-    this.oscillators[0]?.addEventListener('ended', () => this.output.disconnect());
-  }
-}
-
-function rampTo(param: AudioParam, target: number, at: number, seconds: number): void {
-  param.cancelScheduledValues(at);
-  param.setValueAtTime(param.value, at);
-  param.linearRampToValueAtTime(target, at + seconds);
 }
 
 export class Ambience {
@@ -100,58 +50,23 @@ export class Ambience {
   private readonly roomTone: RoomTone;
   private readonly noise: AudioBuffer;
   private readonly lfo: OscillatorNode;
+  private readonly connectWithSends: MixGraph['connectWithSends'];
   private layer: ChordLayer | null = null;
   private chapter: ChapterId | null = null;
   private subIndex = 0;
   private driver: Source | null = null;
   private paused: boolean;
   private enabled = false;
-  private lastKey = 0;
-  private lastTock = 0;
   private lastChime = 0;
-  private lastHoverLabel: string | null = null;
   private chimeTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly abort = new AbortController();
   private readonly music: MusicBed;
 
   constructor(private readonly context: AudioContext) {
-    const limiter = context.createDynamicsCompressor();
-    limiter.threshold.value = -18;
-    limiter.knee.value = 12;
-    limiter.ratio.value = 6;
-    limiter.attack.value = 0.01;
-    limiter.release.value = 0.4;
-    limiter.connect(context.destination);
-
-    this.master = context.createGain();
-    this.master.gain.value = 0;
-    this.master.connect(limiter);
-
-    const roomVerb = context.createConvolver();
-    roomVerb.buffer = createImpulse(context, 1.2, 2.8, 3000);
-    const hallVerb = context.createConvolver();
-    hallVerb.buffer = createImpulse(context, 3.6, 2, 4200);
-    this.roomSend = context.createGain();
-    this.hallSend = context.createGain();
-    this.roomSend.connect(roomVerb).connect(this.master);
-    this.hallSend.connect(hallVerb).connect(this.master);
-
-    this.padBus = context.createGain();
-    this.padBus.gain.value = LEVELS.pad;
-    this.padFilter = context.createBiquadFilter();
-    this.padFilter.type = 'lowpass';
-    this.padFilter.Q.value = 0.6;
-    this.padFilter.frequency.value = PRESETS.hero.cutoff;
-    this.swell = context.createGain();
-    this.padBus.connect(this.padFilter).connect(this.swell);
-    this.connectWithSends(this.swell, 1, 1, 1);
-
-    this.lfo = context.createOscillator();
-    this.lfo.frequency.value = FILTER_LFO_HZ;
-    const lfoDepth = context.createGain();
-    lfoDepth.gain.value = FILTER_LFO_DEPTH_HZ;
-    this.lfo.connect(lfoDepth).connect(this.padFilter.frequency);
-    this.lfo.start();
+    const graph = createMixGraph(context, LEVELS.pad);
+    ({ master: this.master, roomSend: this.roomSend, hallSend: this.hallSend, padBus: this.padBus } = graph);
+    ({ padFilter: this.padFilter, swell: this.swell, lfo: this.lfo } = graph);
+    this.connectWithSends = graph.connectWithSends;
 
     this.noise = createNoise(context, 4);
     this.roomTone = new RoomTone(context, this.noise);
@@ -160,6 +75,9 @@ export class Ambience {
 
     this.fxBus = context.createGain();
     this.connectWithSends(this.fxBus, 0.85, 0.35, 0.05);
+    const foley = { context, output: this.fxBus, noise: this.noise, signal: this.abort.signal };
+    listenUiSounds({ ...foley, canPlay: () => this.canPlayDetail() });
+    listenDeskSounds({ ...foley, canPlay: () => this.enabled && context.state === 'running' });
     this.chimeBus = context.createGain();
     this.connectWithSends(this.chimeBus, 0.6, 0.6, 0.5);
 
@@ -180,8 +98,8 @@ export class Ambience {
     this.enabled = true;
     if (this.context.state !== 'running') await this.context.resume();
     if (!this.enabled) return;
-    if (!this.layer) this.setChapter(this.chapter ?? this.chapterFromDom(), false);
-    this.music.follow(this.chapter ?? this.chapterFromDom());
+    if (!this.layer) this.setChapter(this.chapter ?? chapterFromDom(), false);
+    this.music.follow(this.chapter ?? chapterFromDom());
     if (document.visibilityState === 'hidden') return;
     this.rampMaster(MASTER_LEVEL, FADE_IN_SECONDS);
   }
@@ -214,12 +132,10 @@ export class Ambience {
     on<ChapterDetail>('section:active', detail => this.onEnter('section', detail?.id));
     on<ChapterDetail>('chapter:settled', detail => this.onSettled(detail?.id));
     on<ChapterDetail>('chapter:progress', detail => this.onProgress(detail));
-    on<{ label?: string | null }>('scene:hover', detail => this.onHover(detail?.label ?? null));
-    on<{ source?: string }>('product:focus', detail => this.onSceneSelect(detail?.source));
-    on<{ source?: string }>('experience:focus', detail => this.onSceneSelect(detail?.source));
-    on<unknown>('desk:key', () => this.onKey());
     on<unknown>('time:toggle', () => {
-      if (this.enabled && this.chapter) this.music.follow(this.chapter);
+      if (!this.chapter) return;
+      if (this.enabled) this.music.follow(this.chapter);
+      this.applyTimeOfDay(this.chapter, PRESETS[this.chapter].crossfade + 2);
     });
     on<{ on?: boolean }>('desk:switch', detail => {
       if (this.enabled) void this.music.playSample(detail?.on === false ? 'switchOff' : 'switchOn', LEVELS.sample);
@@ -278,12 +194,17 @@ export class Ambience {
     next.fadeIn(now, seconds);
     this.layer = next;
 
-    this.padFilter.frequency.setTargetAtTime(preset.cutoff, now, tau);
     this.roomSend.gain.setTargetAtTime(preset.room, now, tau);
     this.hallSend.gain.setTargetAtTime(preset.hall, now, tau);
-    this.roomTone.set(preset, seconds);
+    this.applyTimeOfDay(id, seconds);
 
     if (withSwell) this.swellBy(SWELL_GAIN);
+  }
+
+  private applyTimeOfDay(id: ChapterId, seconds: number): void {
+    const preset = PRESETS[id];
+    this.padFilter.frequency.setTargetAtTime(padCutoff(id, preset), this.context.currentTime, seconds / 3);
+    this.roomTone.set(roomMix(id, preset), seconds);
   }
 
   private swellBy(peak: number): void {
@@ -299,34 +220,8 @@ export class Ambience {
   private onProgress(detail: ChapterDetail | undefined): void {
     if (this.paused || this.chapter !== 'outro' || detail?.id !== 'outro') return;
     const progress = Math.min(1, Math.max(0, Number(detail.progress) || 0));
-    const cutoff = PRESETS.outro.cutoff * (0.7 + 0.3 * progress);
+    const cutoff = padCutoff('outro', PRESETS.outro) * (0.7 + 0.3 * progress);
     this.padFilter.frequency.setTargetAtTime(cutoff, this.context.currentTime, 0.6);
-  }
-
-  private onHover(label: string | null): void {
-    const changed = label !== this.lastHoverLabel;
-    this.lastHoverLabel = label;
-    if (label && changed) this.tock(LEVELS.tockHover);
-  }
-
-  private onSceneSelect(source: string | undefined): void {
-    if (source === 'scene') this.tock(LEVELS.tockClick);
-  }
-
-  private tock(level: number): void {
-    if (!this.canPlayDetail()) return;
-    const now = performance.now();
-    if (now - this.lastTock < TOCK_GAP_MS) return;
-    this.lastTock = now;
-    playTock(this.context, this.fxBus, level);
-  }
-
-  private onKey(): void {
-    if (!this.canPlayDetail()) return;
-    const now = performance.now();
-    if (now - this.lastKey < KEY_GAP_MS) return;
-    this.lastKey = now;
-    playKey(this.context, this.fxBus, this.noise, LEVELS.key);
   }
 
   private canPlayDetail(): boolean {
@@ -347,19 +242,6 @@ export class Ambience {
     this.rampMaster(MASTER_LEVEL, FADE_IN_SECONDS);
   }
 
-  private connectWithSends(node: AudioNode, dry: number, room: number, hall: number): void {
-    for (const [destination, level] of [
-      [this.master, dry],
-      [this.roomSend, room],
-      [this.hallSend, hall]
-    ] as const) {
-      if (level <= 0) continue;
-      const gain = this.context.createGain();
-      gain.gain.value = level;
-      node.connect(gain).connect(destination);
-    }
-  }
-
   private rampMaster(target: number, seconds: number): void {
     rampTo(this.master.gain, target, this.context.currentTime, seconds);
   }
@@ -367,16 +249,6 @@ export class Ambience {
   private clearChimeTimer(): void {
     if (this.chimeTimer) clearTimeout(this.chimeTimer);
     this.chimeTimer = null;
-  }
-
-  private chapterFromDom(): ChapterId {
-    const centre = innerHeight / 2;
-    for (const section of document.querySelectorAll<HTMLElement>('[data-station]')) {
-      const box = section.getBoundingClientRect();
-      const id = section.dataset.station;
-      if (box.top <= centre && box.bottom >= centre && isChapterId(id)) return id;
-    }
-    return 'hero';
   }
 
   private wait(seconds: number): Promise<void> {

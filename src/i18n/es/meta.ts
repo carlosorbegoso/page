@@ -1,0 +1,39 @@
+export const meta = {
+  'meta.title': 'Carlos Orbegoso · Backend Developer Java y Quarkus',
+  'meta.description':
+    'Backend Developer en Lima. Modernizo servicios del BCP con Java y Quarkus en TCS y construyo SkyMek, Parati y Ventixs con TUSOCIO IA.',
+  'meta.ogTitle': 'Carlos Orbegoso: backends para la banca y productos propios',
+  'meta.ogDescription':
+    'De día, backends para el BCP en TCS. De noche, SkyMek, Parati y Ventixs con TUSOCIO IA, la empresa que fundé con dos amigos.',
+  'meta.ogImage': 'images/og-es.jpg',
+  'meta.ogImageAlt': 'Carlos Orbegoso, Backend Developer en Java y Quarkus',
+  skipLink: 'Saltar al contenido',
+  'lang.label': 'Idioma',
+  'lang.switchTo': 'English',
+  'lang.current': 'Español',
+  'motion.pause': 'Pausar animación',
+  'motion.play': 'Reanudar animación',
+  'audio.enable': 'Activar sonido',
+  'audio.mute': 'Silenciar',
+  'audio.armed': 'Sonido activado: toca para reanudarlo',
+  'audio.available': 'Hay sonido disponible',
+  'stage.loading': 'Encendiendo el escritorio…',
+  'stage.loaded': 'Escritorio encendido',
+  'cv.download': 'Descargar CV',
+  'cv.format': 'PDF, en español',
+  'time.toDay': 'Ver la oficina de día',
+  'time.toNight': 'Ver la oficina de noche',
+  'link.newTab': '(se abre en una pestaña nueva)',
+  'footer.tagline': 'Hecho en Lima con Astro y Three.js.',
+  'footer.rights': 'Todos los derechos reservados.',
+  'footer.backToTop': 'Volver arriba',
+  'notFound.metaTitle': 'Página no encontrada · Carlos Orbegoso',
+  'notFound.description':
+    'Esta página no existe o cambió de lugar. Vuelve al inicio para ver mi experiencia, mis productos y cómo escribirme.',
+  'notFound.title': 'Página no encontrada',
+  'notFound.kicker': 'Error 404 · Lima, de noche',
+  'notFound.body':
+    'Busqué en el archivo del escritorio y esta hoja no está. Puede que nunca haya existido o que cambiara de lugar.',
+  'notFound.home': 'Volver al inicio',
+  'notFound.paper': 'No encontrado'
+} as const;

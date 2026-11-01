@@ -1,0 +1,58 @@
+@layer components {
+  .plate {
+    --plate-accent: var(--product-accent, var(--color-accent));
+
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: var(--plate-width);
+    color: var(--color-text);
+    text-align: start;
+  }
+
+  html:not(.is-3d) .plate {
+    border: 1px solid var(--color-plate-border);
+    border-radius: var(--plate-radius);
+    background-color: var(--color-plate-solid);
+    box-shadow: var(--shadow-md);
+    transition: border-color var(--duration-base) var(--ease-standard);
+  }
+
+  html:not(.is-3d) .plate[data-active] {
+    border-color: var(--color-plate-border-active);
+  }
+
+  .plate[data-plate-accent='skymek'] {
+    --plate-accent: var(--color-skymek);
+  }
+
+  .plate[data-plate-accent='parati'] {
+    --plate-accent: var(--color-parati);
+  }
+
+  .plate[data-plate-accent='ventixs'] {
+    --plate-accent: var(--color-ventixs);
+  }
+
+  .plate[data-plate-accent='live'] {
+    --plate-accent: var(--color-status-live);
+  }
+
+  /* Block, not inline: the signal sits above the eyebrow so every line keeps the same left edge. */
+  .plate :is(p:has(+ h1, + h2, + h3), [data-signal])::before {
+    content: '';
+    display: block;
+    width: var(--plate-signal-width);
+    height: 2px;
+    margin-block-end: 0.75rem;
+    border-radius: 2px;
+    background-color: var(--plate-accent);
+    transition:
+      width var(--duration-slow) var(--ease-out),
+      box-shadow var(--duration-slow) var(--ease-standard);
+  }
+
+  .plate[data-active] :is(p:has(+ h1, + h2, + h3), [data-signal])::before {
+    width: var(--plate-signal-width-active);
+  }
+}

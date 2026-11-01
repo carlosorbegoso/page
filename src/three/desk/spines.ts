@@ -123,6 +123,7 @@ export function createSpineLabels(): SpineLabels {
   cover.raycast = () => undefined;
   const coverRest = cover.position.x;
   cover.userData.restX = coverRest;
+  cover.userData.restZ = cover.position.z;
   return {
     meshes,
     cover,

@@ -1,7 +1,7 @@
 import { tokenNumber } from '../tokens';
 import type { Tier } from '../tier';
 
-/** FX design tokens (`--fx-*` in tokens.css, values from docs/design/desk.md §7). */
+/** FX design tokens (`--fx-*` in styles/tokens/stage.css, values from docs/design/desk.md §7). */
 export interface FxTokens {
   bloomStrength: number;
   bloomRadius: number;

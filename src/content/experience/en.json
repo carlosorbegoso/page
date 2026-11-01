@@ -60,9 +60,8 @@
       "start": "2020-01",
       "end": "2021-12",
       "summary": "Usable, fast web applications with JavaScript at an IT consultancy.",
-      "highlights": [],
-      "stack": ["JavaScript", "HTML", "CSS"],
-      "compact": true
+      "highlights": ["Built usable, fast web applications with JavaScript, HTML and CSS for the consultancy's clients."],
+      "stack": ["JavaScript", "HTML", "CSS"]
     }
   ]
 }

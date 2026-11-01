@@ -1,0 +1,51 @@
+---
+import { formatTimelineMonth } from '../../experience/dates';
+import { useTranslations, type Locale } from '../../../i18n/utils';
+import type { getExperience } from '../../../lib/content';
+
+interface Props {
+  locale: Locale;
+  experience: Awaited<ReturnType<typeof getExperience>>;
+}
+
+const { locale, experience } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<section class="cv-section" aria-labelledby="cv-experience">
+  <h2 id="cv-experience" class="cv-heading">{t('experience.title')}</h2>
+  <ol class="cv-body cv-list" role="list">
+    {experience.map(job => (
+      <li class="cv-entry">
+        <div class="cv-entry__head">
+          <h3 class="cv-entry__title">
+            {job.role} · <span class="cv-entry__org">{job.company}</span>
+          </h3>
+          <p class="cv-entry__dates">
+            <time datetime={job.start}>{formatTimelineMonth(job.start, locale)}</time>
+            {' – '}
+            {job.end ? (
+              <time datetime={job.end}>{formatTimelineMonth(job.end, locale)}</time>
+            ) : (
+              t('experience.present')
+            )}
+          </p>
+        </div>
+        {job.client && (
+          <p class="cv-entry__client">
+            {t('experience.client')}: {job.client}
+          </p>
+        )}
+        <p>{job.summary}</p>
+        {job.highlights.length > 0 && (
+          <ul class="cv-bullets">
+            {job.highlights.map(item => <li>{item}</li>)}
+          </ul>
+        )}
+        <p class="cv-stack">
+          <span class="cv-stack__label">{t('experience.stack')}:</span> {job.stack.join(' · ')}
+        </p>
+      </li>
+    ))}
+  </ol>
+</section>

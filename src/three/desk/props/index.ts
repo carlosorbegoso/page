@@ -1,0 +1,12 @@
+export { buildShelves, buildChair, buildDesk, buildRoom } from './room';
+export { buildPlant, buildTelescope } from './decor';
+export { buildFigures } from './figures';
+export { buildOpenFolder } from './openFolder';
+export { buildCharizard, CHARIZARD_COLORS, CHARIZARD_RIG, charizardFrame } from './charizard';
+export { buildPikachu, PIKACHU_COLORS, PIKACHU_RIG, pikachuFrame } from './pikachu';
+export { buildSucculent } from './succulent';
+export { readPalette, type Palette, type Quality } from './palette';
+export { buildContactShadows, contactShadowSpots } from './shadows';
+export { buildLaptop, buildLaptopLid, laptopHingeMatrix, laptopKeyboardMatrix, LAPTOP_LID } from './laptop';
+export { laptopKeys, LAPTOP_KEYBOARD, type LaptopKey } from './laptopKeys';
+export { buildLamp, buildMonitorHead, buildPhone, buildWorkstation } from './workstation';

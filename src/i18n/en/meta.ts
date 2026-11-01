@@ -1,0 +1,39 @@
+export const meta = {
+  'meta.title': 'Carlos Orbegoso · Java & Quarkus Backend Developer',
+  'meta.description':
+    'Lima-based backend developer. I modernize BCP services with Java and Quarkus at TCS and build SkyMek, Parati and Ventixs with TUSOCIO IA.',
+  'meta.ogTitle': 'Carlos Orbegoso: banking backends and products of my own',
+  'meta.ogDescription':
+    'By day, backends for BCP at TCS. By night, SkyMek, Parati and Ventixs with TUSOCIO IA, the company I started with two friends.',
+  'meta.ogImage': 'images/og-en.jpg',
+  'meta.ogImageAlt': 'Carlos Orbegoso, Java and Quarkus Backend Developer',
+  skipLink: 'Skip to content',
+  'lang.label': 'Language',
+  'lang.switchTo': 'Español',
+  'lang.current': 'English',
+  'motion.pause': 'Pause animation',
+  'motion.play': 'Resume animation',
+  'audio.enable': 'Turn sound on',
+  'audio.mute': 'Mute',
+  'audio.armed': 'Sound is on: tap to resume it',
+  'audio.available': 'Sound is available',
+  'stage.loading': 'Switching on the desk…',
+  'stage.loaded': 'Desk switched on',
+  'cv.download': 'Download CV',
+  'cv.format': 'PDF, in Spanish',
+  'time.toDay': 'See the office by day',
+  'time.toNight': 'See the office at night',
+  'link.newTab': '(opens in a new tab)',
+  'footer.tagline': 'Made in Lima with Astro and Three.js.',
+  'footer.rights': 'All rights reserved.',
+  'footer.backToTop': 'Back to top',
+  'notFound.metaTitle': 'Page not found · Carlos Orbegoso',
+  'notFound.description':
+    "This page doesn't exist or has moved. Head back home to see my work, my products and how to reach me.",
+  'notFound.title': 'Page not found',
+  'notFound.kicker': 'Error 404 · Lima, at night',
+  'notFound.body':
+    "I searched the archive on my desk and this sheet isn't there. It may never have existed, or it has moved.",
+  'notFound.home': 'Back to home',
+  'notFound.paper': 'Not found'
+} as const;

@@ -1,0 +1,58 @@
+import type { ChapterId, SurfaceName } from '../contracts';
+import { Plates } from '../plates';
+import type { Vector3 } from 'three';
+import type { PlateAnchor } from '../contracts';
+
+/** `data-plate-stacked` plates switch to this mode on stacked phones; `data-plate-wide` keeps the authored one. */
+const STACKED_MODE = 'anchored';
+const DISSOLVE_HALF_MS = 150;
+
+export interface PlateHost {
+  surface(name: SurfaceName): PlateAnchor | null;
+  anchor(name: string): Vector3 | null;
+  scrollTo(chapter: ChapterId, sub: number): void;
+  reduced(): boolean;
+  invalidate(): void;
+}
+
+/** Sets each switchable plate's `data-plate-mode` for the current layout, before the plates mount. */
+function applyPlateModes(stacked: boolean): void {
+  for (const plate of document.querySelectorAll<HTMLElement>('[data-plate-stacked]')) {
+    plate.dataset.plateWide ??= plate.dataset.plateMode ?? '';
+    plate.dataset.plateMode = stacked ? STACKED_MODE : plate.dataset.plateWide;
+  }
+}
+
+/** Moves the HTML plates into their CSS3D / panel layers; undefined when the page has none. */
+export function mountPlates(host: PlateHost, stacked: boolean, size: { width: number; height: number }): Plates | undefined {
+  applyPlateModes(stacked);
+  const plates = new Plates({
+    surface: name => host.surface(name),
+    anchor: name => host.anchor(name),
+    scrollTo: (chapter, sub) => host.scrollTo(chapter, sub),
+    reduced: () => host.reduced(),
+    invalidate: () => host.invalidate()
+  });
+  if (!plates.mount()) return undefined;
+  plates.setSize(size.width, size.height);
+  return plates;
+}
+
+/**
+ * Reduced motion / pause: 300 ms dip to black (WAAPI, so the global transition kill-switch does not
+ * flatten it). Layers are darkened, not faded: the hero fallback picture sits behind the canvas
+ * and the monitor's screen behind the plates, and fading would double-expose them over the new shot.
+ */
+export function dissolve(layers: HTMLElement[], cut: () => void, invalidate: () => void): void {
+  const fade = (direction: PlaybackDirection, fill: FillMode) =>
+    layers.map(el => el.animate([{ filter: 'brightness(1)' }, { filter: 'brightness(0)' }], { duration: DISSOLVE_HALF_MS, fill, direction }));
+  const out = fade('normal', 'forwards');
+  void Promise.all(out.map(a => a.finished)).then(() => {
+    cut();
+    invalidate();
+    requestAnimationFrame(() => {
+      fade('reverse', 'none');
+      for (const a of out) a.cancel();
+    });
+  });
+}

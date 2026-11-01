@@ -1,0 +1,175 @@
+---
+import { useTranslations, type Locale } from '../../i18n/utils';
+import { getExperience } from '../../lib/content';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const years = (await getExperience(locale)).map(entry => entry.start.slice(0, 4)).toSorted();
+const tonight = (time: string) => `${time} · ${t('story.tonight')}`;
+const night = (time: string) => `${time} · ${t('story.night')}`;
+/** What the HUD shows per chapter and sub-shot: the clock tonight, the year during the day years. */
+const storyBeats: Record<string, string[]> = {
+  hero: [tonight('23:00')],
+  about: [tonight('23:20'), tonight('23:30')],
+  experience: [`${t('story.day')} · ${years[0]} →`, ...years.map(year => `${t('story.day')} · ${year}`)],
+  company: [night('00:30')],
+  products: [night('01:30'), night('02:00'), night('02:30')],
+  contact: [night('03:30')],
+  outro: [`05:58 · ${t('story.dawn')}`]
+};
+const today = (time: string) => `${time} · ${t('story.today')}`;
+const afterWork = (time: string) => `${time} · ${t('story.afterWork')}`;
+/** By day the same walk runs from a morning at the office to nightfall, when the lamp comes on. */
+const storyBeatsDay: Record<string, string[]> = {
+  ...storyBeats,
+  hero: [today('10:00')],
+  about: [today('10:20'), today('10:40')],
+  company: [afterWork('18:10')],
+  products: [afterWork('18:20'), afterWork('18:30'), afterWork('18:40')],
+  contact: [`18:50 · ${t('story.dusk')}`],
+  outro: [`19:05 · ${t('story.nightfall')}`]
+};
+---
+
+<div class="flex items-center gap-1">
+  <button
+    type="button"
+    data-hud-toggle
+    aria-expanded="false"
+    aria-controls="hud-menu"
+    aria-label={t('hud.label')}
+    aria-describedby="hud-audio-hint"
+    class="group hud-control hud-icon"
+  >
+    <span
+      aria-hidden="true"
+      class="absolute top-2 right-2 hidden size-1.5 rounded-full bg-accent shadow-[0_0_6px_var(--color-accent)] group-data-[audio-hint]:block"
+    ></span>
+    <svg viewBox="0 0 64 64" width="22" height="22" aria-hidden="true">
+      <path
+        d="M43.5 22.4A15 15 0 1 0 43.5 41.6"
+        fill="none"
+        class="stroke-text"
+        stroke-width="7"
+      ></path>
+      <circle cx="47" cy="32" r="4.5" class="fill-accent"></circle>
+    </svg>
+  </button>
+  <span
+    id="hud-audio-hint"
+    data-hud-audio-hint
+    data-label={t('audio.available')}
+    class="sr-only"
+    aria-live="polite"
+  ></span>
+  <div class="relative">
+    <button
+      type="button"
+      data-hud-clock
+      hidden
+      aria-haspopup="dialog"
+      aria-controls="section-index"
+      aria-expanded="false"
+      class="hud-clock group/clock inline-flex min-h-tap items-center rounded-full px-3 focus-visible:shadow-focus focus-visible:outline-none"
+    >
+      <span
+        data-hud-chapter
+        data-story-beats={JSON.stringify(storyBeats)}
+        data-story-beats-day={JSON.stringify(storyBeatsDay)}
+        class="hud-beat font-mono text-xs tracking-caps text-text-muted tabular-nums opacity-0 transition-[opacity,color] duration-(--duration-base) ease-standard group-hover/clock:text-text data-[ready=true]:opacity-100"
+      ></span>
+      <span class="sr-only">· {t('story.openIndex')}</span>
+    </button>
+    <span
+      data-hud-progress
+      hidden
+      role="progressbar"
+      aria-label={t('story.progress')}
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="0"
+      data-value-template={t('story.progressValue')}
+      class="hud-progress pointer-events-none absolute inset-x-2 bottom-2 h-0.5 overflow-hidden rounded-full"
+    >
+      <span data-hud-progress-fill class="hud-progress__fill block h-full bg-accent"></span>
+    </span>
+  </div>
+  <button
+    type="button"
+    data-story-tour-quick
+    hidden
+    aria-pressed="false"
+    aria-label={t('tour.start')}
+    title={t('tour.start')}
+    class="group/quick hud-control hud-icon"
+  >
+    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" class="shrink-0 fill-current">
+      <path d="M8 5.5v13l10.5-6.5z" class="group-aria-pressed/quick:hidden"></path>
+      <path d="M7 6h3.5v12H7zM13.5 6H17v12h-3.5z" class="hidden group-aria-pressed/quick:block"></path>
+    </svg>
+  </button>
+  <span
+    data-hud-tour-badge
+    data-label-playing={t('tour.badgePlaying')}
+    data-label-paused={t('tour.badgePaused')}
+    aria-hidden="true"
+    hidden
+    class="hud-beat inline-flex items-center gap-1.5 font-mono text-xs tracking-caps text-text-muted"
+  >
+    <span
+      data-hud-tour-dot
+      class="size-1.5 rounded-full bg-text-muted data-[state=playing]:bg-accent"
+    ></span>
+    <span data-hud-tour-text></span>
+  </span>
+  <span
+    data-story-tour-status
+    data-label-playing={t('tour.playing')}
+    data-label-paused={t('tour.paused')}
+    data-label-finished={t('tour.finished')}
+    class="sr-only"
+    aria-live="polite"
+  ></span>
+</div>
+
+<style>
+  /* The story clock sits over bright windows at dawn: a halo keeps it legible on any frame. */
+  .hud-beat {
+    text-shadow: var(--plate-text-halo);
+  }
+
+  /* A soft glass pill keeps the story clock legible over bright windows and warm close-ups. */
+  .hud-clock {
+    background: rgb(8 11 18 / 0.55);
+    backdrop-filter: blur(10px) saturate(1.2);
+    -webkit-backdrop-filter: blur(10px) saturate(1.2);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08);
+  }
+
+  .hud-clock .hud-beat {
+    color: rgb(233 238 245 / 0.86);
+  }
+
+  .hud-progress {
+    background-color: color-mix(in srgb, var(--color-text-muted) 25%, transparent);
+  }
+
+  .hud-progress__fill {
+    transform: scaleX(var(--story-progress, 0));
+    transform-origin: left center;
+  }
+
+  @media (forced-colors: active) {
+    .hud-progress {
+      background-color: GrayText;
+    }
+
+    .hud-progress__fill {
+      background-color: Highlight;
+    }
+  }
+</style>

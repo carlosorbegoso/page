@@ -1,0 +1,148 @@
+---
+import CopyEmail from '../contact/CopyEmail.astro';
+import CvLink from '../ui/CvLink.astro';
+import { SECTION_IDS, SITE } from '../../config/site';
+import { useTranslations, type Locale } from '../../i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const sections = [
+  { id: SECTION_IDS.hero, label: t('nav.hero') },
+  { id: SECTION_IDS.about, label: t('nav.about') },
+  { id: SECTION_IDS.experience, label: t('nav.experience') },
+  { id: SECTION_IDS.company, label: t('nav.company') },
+  { id: SECTION_IDS.products, label: t('nav.products') },
+  { id: SECTION_IDS.contact, label: t('nav.contact') }
+];
+---
+
+<dialog
+  id="section-index"
+  data-index
+  aria-labelledby="section-index-title"
+  class:list={[
+    'index-sheet m-0 w-full max-w-none overflow-y-auto border border-border bg-surface-raised p-0 text-text shadow-lg backdrop:bg-scrim',
+    'fixed inset-x-0 top-auto bottom-0 max-h-[85dvh] rounded-t-xl border-b-0',
+    'md:inset-y-0 md:right-0 md:left-auto md:h-dvh md:max-h-none md:w-[24rem] md:rounded-none md:rounded-l-xl md:border-e-0 md:border-b'
+  ]}
+>
+  <div class="flex min-h-full flex-col gap-5 px-gutter pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] md:px-6 md:pt-6">
+    <span
+      class="mx-auto h-1 w-10 rounded-full bg-border-strong md:hidden"
+      aria-hidden="true"
+    ></span>
+    <div class="flex items-center justify-between gap-3">
+      <h2 id="section-index-title" class="font-display text-xl font-semibold tracking-tight">
+        {t('nav.index')}
+      </h2>
+      <button
+        type="button"
+        data-index-close
+        aria-label={t('nav.closeIndex')}
+        class="inline-flex size-tap items-center justify-center rounded-md border border-border text-text transition-colors duration-(--duration-fast) ease-standard hover:bg-surface focus-visible:shadow-focus focus-visible:outline-none"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="22"
+          height="22"
+          aria-hidden="true"
+          class="fill-none stroke-current"
+          stroke-width="2"
+          stroke-linecap="round"
+        >
+          <path d="M6 6l12 12M18 6 6 18"></path>
+        </svg>
+      </button>
+    </div>
+
+    <nav aria-label={t('nav.label')}>
+      <ol class="flex flex-col gap-1">
+        {sections.map((section, index) => (
+          <li>
+            <a
+              href={`#${section.id}`}
+              data-index-link={section.id}
+              class:list={[
+                'group flex min-h-12 items-center gap-3 rounded-md border-s-2 border-transparent px-4 text-base font-medium text-text-muted',
+                'transition-colors duration-(--duration-fast) ease-standard hover:bg-surface hover:text-text',
+                'focus-visible:shadow-focus focus-visible:outline-none',
+                'aria-[current=true]:border-accent aria-[current=true]:bg-accent-soft aria-[current=true]:text-text'
+              ]}
+            >
+              <span
+                class="font-mono text-xs text-text-subtle tabular-nums group-aria-[current=true]:text-accent"
+                aria-hidden="true"
+              >
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              {section.label}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+
+    <section
+      aria-labelledby="index-actions"
+      class="mt-auto flex flex-col gap-3 border-t border-border pt-5"
+    >
+      <h3
+        id="index-actions"
+        class="font-sans text-xs font-semibold tracking-caps text-text-muted uppercase"
+      >
+        {t('nav.quickActions')}
+      </h3>
+      <CopyEmail locale={locale} email={SITE.email} />
+      <CvLink locale={locale} size="lg" class="w-full" />
+    </section>
+  </div>
+</dialog>
+
+<style>
+  .index-sheet {
+    --sheet-offset: translateY(100%);
+    transform: var(--sheet-offset);
+    transition:
+      transform var(--duration-slow) var(--ease-out),
+      overlay var(--duration-slow) allow-discrete,
+      display var(--duration-slow) allow-discrete;
+  }
+
+  @media (width >= 48rem) {
+    .index-sheet {
+      --sheet-offset: translateX(100%);
+    }
+  }
+
+  .index-sheet[open] {
+    transform: none;
+
+    @starting-style {
+      transform: var(--sheet-offset);
+    }
+  }
+
+  .index-sheet::backdrop {
+    opacity: 0;
+    transition:
+      opacity var(--duration-slow) var(--ease-out),
+      overlay var(--duration-slow) allow-discrete,
+      display var(--duration-slow) allow-discrete;
+  }
+
+  .index-sheet[open]::backdrop {
+    opacity: 1;
+
+    @starting-style {
+      opacity: 0;
+    }
+  }
+
+  :global(html:has(.index-sheet[open])) {
+    overflow: hidden;
+  }
+</style>

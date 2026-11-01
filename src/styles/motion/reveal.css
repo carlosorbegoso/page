@@ -1,0 +1,122 @@
+/* Hidden ("not yet revealed") states. */
+:root.k-armed .kinetic:not([data-reveal='in']) .k-i {
+  opacity: 0;
+  translate: calc(min(var(--k-i, 0), 6) * 0.04em) 115%;
+  filter: blur(var(--k-blur));
+  transition:
+    opacity var(--k-exit) var(--ease-in),
+    translate var(--k-exit) var(--ease-in),
+    filter var(--k-exit) var(--ease-in);
+}
+
+:root.k-armed .kinetic[data-kinetic='chars']:not([data-reveal='in']) .k-c {
+  translate: calc(var(--k-ci, 0) * 0.06em) 115%;
+}
+
+:root.k-armed .kinetic[data-kinetic-variant='type']:not([data-reveal='in']) .k-i {
+  translate: none;
+  filter: none;
+}
+
+:root.k-armed .kinetic[data-kinetic='block']:not([data-reveal='in']) {
+  opacity: 0;
+  translate: 0 12px;
+  filter: blur(4px);
+  transition:
+    opacity var(--k-exit) var(--ease-in),
+    translate var(--k-exit) var(--ease-in),
+    filter var(--k-exit) var(--ease-in);
+}
+
+:root.k-armed [data-kinetic-cascade]:not([data-reveal='in']) > * {
+  opacity: 0;
+  translate: 0 8px;
+  transition:
+    opacity var(--k-exit) var(--ease-in),
+    translate var(--k-exit) var(--ease-in);
+}
+
+/* Each word is masked by its own box (with room for accents and descenders); the shine lifts the mask once settled, since clipped glyphs escape background-clip. */
+:root.k-armed .kinetic:not([data-kinetic-variant='type']) .k-w {
+  clip-path: inset(-0.14em -0.2em -0.24em -0.2em);
+}
+
+/* Revealed. */
+:root.k-armed .kinetic[data-reveal='in'] .k-i {
+  --k-wait: calc(var(--k-delay) + var(--k-n) * var(--k-stagger));
+
+  transition:
+    opacity calc(var(--k-rise) * 0.8) var(--ease-out) var(--k-wait),
+    translate var(--k-rise) var(--ease-out) var(--k-wait),
+    filter calc(var(--k-rise) * 0.7) var(--ease-out) var(--k-wait);
+}
+
+:root.k-armed .kinetic[data-kinetic-variant='type'][data-reveal='in'] .k-i {
+  transition: opacity var(--duration-instant) linear var(--k-wait);
+}
+
+:root.k-armed .kinetic[data-kinetic='block'][data-reveal='in'] {
+  transition:
+    opacity var(--k-rise) var(--ease-out) var(--k-delay),
+    translate var(--k-rise) var(--ease-out) var(--k-delay),
+    filter var(--k-rise) var(--ease-out) var(--k-delay);
+}
+
+:root.k-armed [data-kinetic-cascade][data-reveal='in'] > * {
+  --k-wait: calc(var(--k-cascade-delay, 120ms) + min(var(--k-i, 0), 6) * var(--k-stagger-cascade));
+
+  transition:
+    opacity var(--duration-slow) var(--ease-out) var(--k-wait),
+    translate var(--duration-slow) var(--ease-out) var(--k-wait);
+}
+
+/* Continuous micro-life, only on the plate being read. */
+:root.k-armed:not(.is-3d) .plate[data-motion-live]::after {
+  opacity: 0.9;
+  animation: k-signal 7s var(--ease-in-out) infinite alternate;
+}
+
+:root.k-armed [data-motion-live] [data-kinetic-cursor][data-reveal='in']::after {
+  animation: k-cursor 1.6s var(--ease-in-out) infinite alternate;
+}
+
+/* Once the entrance is over the mask goes away, so hover lifts and the shine are never cut. */
+:root.k-armed .kinetic[data-settled] .k-w {
+  clip-path: none;
+}
+
+/* The only motion at rest: the content of the plate being read floats ±1 px. It stops while the camera moves, because the plate loses data-motion-live between chapter:enter and chapter:settled. */
+:root.k-armed .plate[data-motion-live] > * {
+  animation: k-float 7s var(--ease-in-out) infinite alternate;
+}
+
+/* Hover. */
+[data-kinetic-cascade] > li > * {
+  transition: translate var(--duration-base) var(--ease-out);
+}
+
+:root.k-armed [data-kinetic-cascade] > li:hover > * {
+  translate: 0 -2px;
+}
+
+[data-magnetic]:hover .magnetic__inner {
+  scale: 1.035;
+}
+
+.magnetic__inner {
+  transition:
+    translate var(--duration-slow) var(--ease-out),
+    scale var(--duration-base) var(--ease-out);
+}
+
+.plate a:not([data-magnetic]) {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0 1px;
+  transition: background-size var(--duration-base) var(--ease-out);
+}
+
+.plate a:not([data-magnetic]):is(:hover, :focus-visible) {
+  background-size: 100% 1px;
+}

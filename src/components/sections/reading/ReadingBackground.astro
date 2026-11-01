@@ -1,0 +1,42 @@
+---
+import { useTranslations, type Locale } from '../../../i18n/utils';
+import type { getProfile } from '../../../lib/content';
+
+interface Props {
+  locale: Locale;
+  profile: Awaited<ReturnType<typeof getProfile>>;
+  credentials: string[];
+}
+
+const { locale, profile, credentials } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<section class="cv-section" aria-labelledby="cv-education">
+  <h2 id="cv-education" class="cv-heading">{t('about.education')}</h2>
+  <ul class="cv-body cv-list" role="list">
+    <li class="cv-entry">
+      <h3 class="cv-entry__title">
+        {profile.education.degree} · <span class="cv-entry__org">{profile.education.institution}</span>
+      </h3>
+      <p>{profile.education.status}</p>
+    </li>
+    {credentials.map(item => (
+      <li class="cv-entry">
+        <p>{item}</p>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<section class="cv-section" aria-labelledby="cv-stack">
+  <h2 id="cv-stack" class="cv-heading">{t('about.stack')}</h2>
+  <dl class="cv-body cv-skills">
+    {profile.stack.map(group => (
+      <div>
+        <dt>{group.category}</dt>
+        <dd>{group.items.join(' · ')}</dd>
+      </div>
+    ))}
+  </dl>
+</section>

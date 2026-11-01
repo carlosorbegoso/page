@@ -1,0 +1,62 @@
+---
+import { Picture } from 'astro:assets';
+import SectionHeader from '../../ui/SectionHeader.astro';
+import photo from '../../../assets/profile.jpeg';
+import { useTranslations, type Locale } from '../../../i18n/utils';
+import { getProfile } from '../../../lib/content';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const profile = await getProfile(locale);
+
+/* The last two summary paragraphs are the CIBERTEC and Alura credentials, so AboutStack lists them under education. */
+const body = profile.summary.slice(0, -2);
+const facts = (['now', 'before', 'night'] as const).map(key => ({
+  label: t(`about.facts.${key}.label`),
+  value: t(`about.facts.${key}.value`),
+  detail: t(`about.facts.${key}.detail`)
+}));
+---
+
+<div class="about-bio @container flex flex-col gap-6">
+  <SectionHeader
+    id="about-title"
+    eyebrow={profile.location}
+    title={t('about.title')}
+    subtitle={t('about.subtitle')}
+  />
+
+  <div class="about-bio__row flex flex-col gap-5 @md:flex-row @md:items-start">
+    <Picture
+      src={photo}
+      formats={['avif', 'webp']}
+      widths={[320, 480, 720]}
+      sizes="(min-width: 768px) 22rem, 12rem"
+      alt={profile.photoAlt}
+      loading="lazy"
+      pictureAttributes={{ class: 'shrink-0' }}
+      decoding="async"
+      class="about-bio__photo aspect-square w-28 rounded-lg border border-border object-cover @md:w-36"
+    />
+    <div class="about-bio__text flex flex-col gap-4 text-base text-text-muted">
+      {body.map(paragraph => <p class="text-pretty">{paragraph}</p>)}
+    </div>
+    <dl class="about-facts hidden" aria-label={t('about.facts.label')}>
+      {
+        facts.map(fact => (
+          <div>
+            <dt>{fact.label}</dt>
+            <dd>
+              <span class="about-facts__value">{fact.value}</span>
+              <span class="about-facts__detail">{fact.detail}</span>
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</div>

@@ -1,0 +1,108 @@
+.about-code {
+  display: none;
+}
+
+/* Landscape monitor: the stack is the file Carlos has open tonight, not a web table. The semantic list stays for assistive tech. */
+@container surface (orientation: landscape) {
+  .is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-stack {
+    display: block;
+    padding: 0;
+  }
+
+  .is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-stack > section {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin: -5.12cqw -6.82cqw;
+    height: calc(100% + 10.24cqw);
+    font-family: var(--font-mono);
+    background: rgb(6 9 15 / 0.55);
+  }
+
+  .is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code__bar {
+    display: flex;
+    align-items: center;
+    gap: 3cqw;
+    height: 8cqh;
+    padding-inline: 3cqw;
+    border-bottom: 1px solid rgb(255 255 255 / 0.07);
+    background: rgb(255 255 255 / 0.03);
+  }
+
+  .is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code__dots {
+    display: flex;
+    gap: 1.2cqh;
+  }
+
+  .is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code__dots i {
+    width: 1.8cqh;
+    height: 1.8cqh;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.16);
+  }
+
+  .is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code__tab {
+    padding: 1.2cqh 2.4cqw;
+    border-radius: 1cqh 1cqh 0 0;
+    background: rgb(255 255 255 / 0.06);
+    font-size: 2.6cqh;
+    color: var(--color-text);
+  }
+
+  .is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code__lines {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.3cqh;
+    margin: 0;
+    padding: 0 5cqw 0 0;
+    list-style: none;
+    counter-reset: line;
+    font-size: 3.4cqh;
+    line-height: 1.4;
+    color: var(--color-text);
+  }
+
+  .is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code__lines li {
+    counter-increment: line;
+    position: relative;
+    padding-left: calc(9cqw + var(--indent) * 3.4cqw);
+    text-indent: 0;
+  }
+
+  .is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code__lines li::before {
+    content: counter(line);
+    position: absolute;
+    left: 0;
+    width: 5.5cqw;
+    text-align: right;
+    color: rgb(255 255 255 / 0.22);
+  }
+
+  .is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code .c-comment {
+    color: var(--color-text-subtle);
+    font-style: italic;
+  }
+
+  .is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code .c-key {
+    color: var(--color-accent);
+  }
+
+  .is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code .c-punct {
+    color: rgb(255 255 255 / 0.4);
+  }
+
+  .is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code .c-string {
+    color: #e8d8b0;
+  }
+}

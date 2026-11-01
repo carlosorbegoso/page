@@ -1,0 +1,129 @@
+/* Kinetic layer: life inside the plates. Hidden states only exist under html.k-armed, which JS adds and removes, so without JS (or with reduced motion / pause) every text is plainly visible. */
+
+@property --signal-progress {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+:root {
+  --k-rise: calc(var(--duration-slow) * 1.05);
+  --k-exit: var(--duration-base);
+  --k-stagger-words: 30ms;
+  --k-stagger-chars: 12ms;
+  --k-stagger-type: 18ms;
+  --k-stagger-lines: 60ms;
+  --k-stagger-cascade: 30ms;
+  --k-blur: 6px;
+}
+
+@layer components {
+  .kinetic {
+    --k-delay: 0ms;
+    --k-stagger: var(--k-stagger-words);
+  }
+
+  .kinetic[data-kinetic='chars'] {
+    --k-stagger: var(--k-stagger-chars);
+  }
+
+  .kinetic[data-kinetic='lines'] {
+    --k-stagger: var(--k-stagger-lines);
+  }
+
+  .kinetic[data-kinetic-variant='type'] {
+    --k-stagger: var(--k-stagger-type);
+  }
+
+  .k-w {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .k-i {
+    display: inline-block;
+    --k-n: min(var(--k-i, 0), 8);
+  }
+
+  .k-c {
+    --k-n: min(var(--k-c, 0), 20);
+  }
+
+  .kinetic[data-kinetic-variant='type'] .k-c {
+    --k-n: var(--k-c, 0);
+  }
+
+  [data-kinetic-count] {
+    display: inline-block;
+    min-width: calc(var(--k-digits, 1) * 1ch);
+    font-variant-numeric: tabular-nums;
+    text-align: end;
+  }
+
+  [data-kinetic-cursor]::after {
+    content: '_';
+    content: '_' / '';
+    margin-inline-start: 0.2em;
+    color: var(--color-accent);
+    opacity: 0.6;
+  }
+
+  .plate::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    inset-inline: var(--plate-radius);
+    height: 1px;
+    background-image: linear-gradient(90deg, transparent, var(--plate-accent), transparent);
+    background-repeat: no-repeat;
+    background-size: 7rem 1px;
+    background-position-x: calc(var(--signal-progress) * 100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-slow) var(--ease-standard);
+  }
+
+  .magnetic__inner {
+    display: inline-flex;
+    flex-wrap: inherit;
+    align-items: center;
+    justify-content: center;
+    gap: inherit;
+    min-width: 0;
+    max-width: 100%;
+    translate: var(--mx, 0px) var(--my, 0px);
+  }
+
+  [data-magnetic] {
+    position: relative;
+  }
+
+  [data-magnetic]:not([data-variant='ghost'])::after {
+    content: '';
+    position: absolute;
+    inset-inline: 1rem;
+    bottom: 0.5rem;
+    height: 1px;
+    border-radius: 1px;
+    background-color: currentColor;
+    opacity: 0.5;
+    scale: 0 1;
+    transform-origin: left center;
+    pointer-events: none;
+    transition: scale var(--duration-base) var(--ease-out);
+  }
+
+  [data-magnetic]:hover::after,
+  [data-magnetic]:focus-visible::after {
+    scale: 1 1;
+  }
+
+  [data-magnetic]:focus-visible::after {
+    opacity: 0.85;
+    height: 2px;
+  }
+
+  [data-magnetic]:focus-visible .magnetic__inner {
+    translate: 0 -1px;
+  }
+}

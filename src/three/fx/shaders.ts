@@ -35,7 +35,8 @@ uniform float uThreshold;
 uniform float uSmoothing;
 uniform bool uPrefilter;
 varying vec2 vUv;
-vec3 tap(float x, float y) { return texture2D(tInput, vUv + vec2(x, y) * uTexel).rgb; }
+vec3 finite(vec3 c) { return any(isnan(c)) || any(isinf(c)) ? vec3(0.0) : c; }
+vec3 tap(float x, float y) { return finite(texture2D(tInput, vUv + vec2(x, y) * uTexel).rgb); }
 float luma(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
 vec3 keep(vec3 c) { return c * smoothstep(uThreshold, uThreshold + uSmoothing, luma(c)); }
 float karis(vec3 c) { return 1.0 / (1.0 + luma(c)); }
@@ -91,8 +92,9 @@ uniform float uStride;
 uniform float uKeep;
 varying vec2 vUv;
 float luma(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
+vec3 finite(vec3 c) { return any(isnan(c)) || any(isinf(c)) ? vec3(0.0) : c; }
 vec3 bright(vec2 uv) {
-  vec3 c = texture2D(tInput, uv).rgb;
+  vec3 c = finite(texture2D(tInput, uv).rgb);
   return uKeep > 0.0 ? c * smoothstep(uKeep, uKeep * 1.15, luma(c)) : c;
 }
 void main() {
@@ -118,9 +120,10 @@ uniform vec2 uTexel;
 uniform float uMaxRadius;
 varying vec2 vUv;
 #define TAPS ${taps}
+vec3 finite(vec3 c) { return any(isnan(c)) || any(isinf(c)) ? vec3(0.0) : c; }
 void main() {
   float c0 = circleOfConfusion(vUv);
-  vec3 sum = texture2D(tColor, vUv).rgb;
+  vec3 sum = finite(texture2D(tColor, vUv).rgb);
   float total = 1.0;
   for (int i = 0; i < TAPS; i++) {
     float fi = float(i) + 0.5;
@@ -130,7 +133,7 @@ void main() {
     float cs = circleOfConfusion(suv);
     float reach = cs > c0 ? min(abs(cs), abs(c0)) : abs(cs);
     float w = clamp(reach * uMaxRadius - r + 1.0, 0.0, 1.0);
-    sum += texture2D(tColor, suv).rgb * w;
+    sum += finite(texture2D(tColor, suv).rgb) * w;
     total += w;
   }
   gl_FragColor = vec4(sum / total, abs(c0));

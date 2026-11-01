@@ -190,7 +190,8 @@ vec3 sky(vec2 p) {
   float folds = fbm(deck * vec2(0.6, 1.3) - drift * 1.7 + 3.1);
   float cloud = clamp(rolls * 0.7 + folds * 0.45 - 0.08, 0.0, 1.0);
   float horizonFog = exp(-elevation / 4.5);
-  float band = exp(-pow(rise / 7.0, 2.0));
+  float bandAt = rise / 7.0;
+  float band = exp(-bandAt * bandAt);
 
   vec3 night = mix(uHorizon * 2.2, uZenith + uDawnHigh * 0.006, smoothstep(0.0, 0.8, alt));
   night += (uSodium * 0.022 + uSeaHaze * 0.25) * cloud * cloud * exp(-alt * 2.5);
@@ -217,7 +218,7 @@ vec3 sky(vec2 p) {
     earth = mix(earth, uCityDay * vec3(0.98, 0.94, 0.86), uDay);
     earth *= 0.9 + 0.2 * noise(p * vec2(0.6, 2.2));
     color = mix(earth, hazeTint(), mix(0.62, 0.8, uDay));
-    float lamps = step(0.78, fract(p.x * 0.9)) * exp(-pow((p.y - cliffTop + 0.35) * 6.0, 2.0));
+    float lamps = step(0.78, fract(p.x * 0.9)) * exp(-(p.y - cliffTop + 0.35) * (p.y - cliffTop + 0.35) * 36.0);
     color += uSodium * lamps * 1.4 * nightLights;
   } else if (p.y < HORIZON && p.y > shore) {
     vec3 sea = mix(uSeaHaze * 0.7, uDayHaze * 0.8, uDay);
@@ -523,29 +524,34 @@ float fbm(vec2 p) {
   return sum;
 }
 void main() {
-  float y = vUv.y;
-  float t = uTime * (0.8 + 0.25 * vSeed);
+  float y = clamp(vUv.y, 0.0, 1.0);
+  float t = uTime;
   float phase = vSeed * 6.2831;
-  vec2 flow = vec2(vSeed * 11.0, y * 2.4 - t * 0.32);
-  float advect = (fbm(flow) - 0.5) * 0.55 * y;
-  float curl = sin(y * 8.0 - t * 1.3 + phase) * 0.07 * y + sin(y * 3.1 - t * 0.55 + phase * 1.7) * 0.1 * y * y;
-  float drift = 0.12 * y * y;
-  float centre = 0.5 + advect + curl + drift;
-  float width = mix(0.05, 0.2, y);
+  float life = fract(t / (4.5 + 2.0 * vSeed) + vSeed * 3.7);
+  float rise = t * (0.16 + 0.05 * vSeed);
+  vec2 warpBase = vec2(vUv.x * 1.6 + vSeed * 7.3, y * 1.4 - rise);
+  vec2 warp = vec2(fbm(warpBase), fbm(warpBase + vec2(5.2, 1.3))) - 0.5;
+  float sway = sin(y * 3.4 - t * 0.7 + phase) * 0.09 * y + sin(y * 7.0 - t * 1.1 + phase * 1.9) * 0.035 * y;
+  float centre = 0.5 + sway + warp.x * 0.5 * y + 0.06 * y * y * sin(phase);
+  float width = mix(0.07, 0.24, pow(y, 0.8));
   float d = (vUv.x - centre) / width;
-  float ribbon = exp(-d * d * 1.6);
-  float puffs = fbm(vec2(vUv.x * 5.0 + vSeed * 13.0 + advect * 3.0, y * 4.2 - t * 0.55));
-  float density = ribbon * smoothstep(0.18, 0.62, puffs + 0.25 * (1.0 - y));
-  float fade = smoothstep(0.0, 0.1, y) * pow(1.0 - y, 1.8);
-  float edges = smoothstep(0.0, 0.1, vUv.x) * (1.0 - smoothstep(0.9, 1.0, vUv.x));
-  float breath = 0.65 + 0.35 * sin(t * 0.45 + phase * 2.3);
-  float a = density * fade * edges * breath * uStrength;
+  float body = exp(-d * d * 2.2);
+  float bend = d * 0.9 + warp.y * 3.2 * (0.25 + y) + sin(y * 5.0 - t * 0.6 + phase) * 0.4 * y;
+  float strand = clamp(1.0 - abs(noise(vec2(bend * 1.1 + vSeed * 19.0, y * 2.4 - rise * 2.2)) * 2.0 - 1.0), 0.0, 1.0);
+  float strands = pow(strand, 3.0) * 0.55 + pow(strand, 10.0) * 0.25;
+  float breakup = fbm(vec2(vUv.x * 3.0 + warp.x * 2.0 + vSeed * 4.0, y * 2.6 - rise * 1.3));
+  float dissolve = smoothstep(0.28 + 0.34 * y, 0.5 + 0.34 * y, breakup + 0.12);
+  float density = body * (0.4 + strands) * mix(1.0, dissolve, smoothstep(0.08, 0.5, y));
+  float fade = smoothstep(0.0, 0.14, y) * pow(1.0 - y, 1.6);
+  float edges = smoothstep(0.0, 0.12, vUv.x) * (1.0 - smoothstep(0.88, 1.0, vUv.x));
+  float pulse = smoothstep(0.0, 0.25, life) * (1.0 - smoothstep(0.6, 1.0, life));
+  float a = density * fade * edges * (0.3 + 0.7 * pulse) * uStrength * 0.6;
   gl_FragColor = vec4(uColor * a, a * uOcclusion);
 }
 `;
 
 export interface SteamOptions {
-  /** Billboard wisps rising from the cup (3 on `high`, 2 on `mid`). */
+  /** Billboard wisps rising from the cup (6 on `high`, 4 on `mid`). */
   wisps: number;
   /** Noise octaves per sample; fewer on `mid`. */
   octaves: number;
@@ -559,24 +565,24 @@ export interface Steam {
   dispose(): void;
 }
 
-const STEAM_SIZE = { width: 0.1, height: 0.24 } as const;
-const STEAM_NIGHT = new Color(1.1, 1.0, 0.92);
-const STEAM_DAY = new Color(0.95, 0.95, 0.96);
+const STEAM_SIZE = { width: 0.11, height: 0.2 } as const;
+const STEAM_NIGHT = new Color(0.95, 0.88, 0.8);
+const STEAM_DAY = new Color(1.0, 1.0, 1.0);
 
 /**
  * Hot-coffee steam: camera-facing wisps that curl through advected noise, widen and fade with
  * height and drift slightly. Premultiplied blending: additive at night (`uOcclusion` ≈ 0), a
  * light veil by day. Linear HDR output, tone-mapped by the post chain; peaks stay below bloom.
  */
-export function createSteam(options: SteamOptions = { wisps: 3, octaves: 3 }): Steam {
+export function createSteam(options: SteamOptions = { wisps: 6, octaves: 3 }): Steam {
   const count = Math.max(1, options.wisps);
   const positions = new Float32Array(count * 4 * 3);
   const corners = new Float32Array(count * 4 * 2);
   const seeds = new Float32Array(count * 4);
   const index: number[] = [];
   for (let w = 0; w < count; w++) {
-    const angle = (w / count) * Math.PI * 2 + 0.7;
-    const radius = count > 1 ? 0.011 : 0;
+    const angle = w * 2.399 + 0.7;
+    const radius = count > 1 ? 0.006 + 0.016 * ((w * 0.618) % 1) : 0;
     const seed = (w + 0.37) / count;
     const quad = [
       [-1, 0],
@@ -633,8 +639,8 @@ export function createSteam(options: SteamOptions = { wisps: 3, octaves: 3 }): S
     },
     setStrength: (level, day = 0) => {
       color.copy(STEAM_NIGHT).lerp(STEAM_DAY, day);
-      material.uniforms.uStrength!.value = level * (1 - 0.45 * day);
-      material.uniforms.uOcclusion!.value = 0.55 * day;
+      material.uniforms.uStrength!.value = level * (1 - 0.2 * day);
+      material.uniforms.uOcclusion!.value = 0.35 * day;
     },
     dispose: () => {
       geometry.dispose();

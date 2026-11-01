@@ -401,7 +401,7 @@ export class DeskSet implements ShotProvider {
     );
     this.room.add(this.clockModel.group);
     if (high || context.tier === 'mid') {
-      this.steam = createSteam(high ? { wisps: 3, octaves: 3 } : { wisps: 2, octaves: 2 });
+      this.steam = createSteam(high ? { wisps: 6, octaves: 3 } : { wisps: 4, octaves: 2 });
       this.room.add(this.steam.mesh);
       this.disposables.push(this.steam);
     }

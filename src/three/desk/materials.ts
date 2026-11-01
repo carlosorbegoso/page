@@ -95,7 +95,7 @@ uniform float uDeskTop;
 
 float woodGrain(vec3 p) {
   float rings = p.z * 58.0 + p.y * 40.0 + sin(p.x * 4.3) * 1.7 + sin(p.x * 11.0 + p.z * 9.0) * 0.45;
-  float figure = pow(0.5 + 0.5 * sin(rings), 2.5);
+  float figure = pow(max(0.5 + 0.5 * sin(rings), 0.0), 2.5);
   float pores = 0.5 + 0.5 * sin(p.x * 210.0 + sin(p.z * 70.0 + p.y * 50.0) * 2.4);
   return 0.78 + 0.3 * figure - 0.08 * pores;
 }
@@ -197,7 +197,7 @@ export function createAtlasMaterial(
         int objectId = clamp(int(vOid + 0.5), 0, ${OBJECT_SLOTS - 1});
         totalEmissiveRadiance += diffuseColor.rgb * (vPbr.z * uSignal[objectId] * uPresence[objectId] + uGlow[objectId]);
         float hovered = (1.0 - step(0.5, abs(vOid - uHoverId))) * step(0.5, vOid);
-        float rim = pow(1.0 - abs(dot(normalize(normal), normalize(vViewPosition))), 2.5);
+        float rim = pow(clamp(1.0 - abs(dot(normalize(normal), normalize(vViewPosition))), 0.0, 1.0), 2.5);
         totalEmissiveRadiance += uHoverColor * hovered * uHoverMix * (0.05 + 0.6 * rim);`
       );
   };

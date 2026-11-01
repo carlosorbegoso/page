@@ -1,0 +1,112 @@
+---
+import LangSwitch from '../LangSwitch.astro';
+import MotionToggle from '../MotionToggle.astro';
+import TimeToggle from '../TimeToggle.astro';
+import AudioToggle from '../AudioToggle.astro';
+import { SITE } from '../../config/site';
+import { localeUrl, useTranslations, withBase, type Locale } from '../../i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const readingUrl = localeUrl(locale, locale === 'es' ? 'lectura' : 'reading');
+const menuItem =
+  'flex min-h-tap w-full items-center gap-3 rounded-md px-3 text-xs font-medium tracking-caps text-text-muted uppercase transition-colors duration-(--duration-fast) ease-standard hover:bg-surface hover:text-text focus-visible:shadow-focus focus-visible:outline-none';
+---
+
+<div
+  id="hud-menu"
+  data-hud-menu
+  hidden
+  class="hud-menu mt-1 flex w-60 flex-col gap-1 rounded-lg border border-border bg-scrim p-2 shadow-lg backdrop-blur-md"
+>
+  <div class="flex items-center gap-1 border-b border-border pb-2">
+    <LangSwitch locale={locale} compact hud />
+    <AudioToggle locale={locale} />
+    <MotionToggle locale={locale} floating />
+    <TimeToggle locale={locale} />
+  </div>
+  <button
+    type="button"
+    data-index-open
+    aria-expanded="false"
+    aria-controls="section-index"
+    aria-haspopup="dialog"
+    class={menuItem}
+  >
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      aria-hidden="true"
+      class="shrink-0 fill-none stroke-current"
+      stroke-width="2"
+      stroke-linecap="round"
+    >
+      <path d="M4 7h16M4 12h16M4 17h10"></path>
+    </svg>
+    {t('nav.index')}
+  </button>
+  <button
+    type="button"
+    data-story-tour
+    hidden
+    aria-pressed="false"
+    class:list={[menuItem, 'group/tour aria-pressed:text-text']}
+  >
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="shrink-0 fill-current">
+      <path d="M8 5.5v13l10.5-6.5z" class="group-aria-pressed/tour:hidden"></path>
+      <path d="M7 6h3.5v12H7zM13.5 6H17v12h-3.5z" class="hidden group-aria-pressed/tour:block"
+      ></path>
+    </svg>
+    {t('tour.start')}
+  </button>
+  <a href={readingUrl} class={menuItem}>
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      aria-hidden="true"
+      class="shrink-0 fill-none stroke-current"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z"></path>
+    </svg>
+    {t('reading.enter')}
+  </a>
+  <a href={withBase(SITE.cvPath)} download type="application/pdf" class={menuItem}>
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      aria-hidden="true"
+      class="shrink-0 fill-none stroke-current"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path>
+    </svg>
+    {t('cv.download')}
+    <span class="sr-only">({t('cv.format')})</span>
+  </a>
+</div>
+
+<style>
+  .hud-menu {
+    transform-origin: top left;
+    transition:
+      opacity var(--duration-base) var(--ease-out),
+      translate var(--duration-base) var(--ease-out);
+
+    @starting-style {
+      opacity: 0;
+      translate: 0 -0.25rem;
+    }
+  }
+</style>

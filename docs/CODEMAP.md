@@ -29,7 +29,10 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 ## HUD y cabecera
 | Para cambiar… | Edita |
 | --- | --- |
-| Marcado y estilos de la cabecera, menú, índice | `src/components/Header.astro` |
+| Cabecera: compone barra, menú e índice | `src/components/Header.astro` |
+| Barra del HUD: logo, reloj de la historia, progreso, recorrido rápido | `src/components/hud/HudBar.astro` (frases por capítulo en su frontmatter) |
+| Menú del HUD: idioma, sonido, movimiento, hora, enlaces | `src/components/hud/HudMenu.astro` |
+| Hoja de índice de secciones | `src/components/hud/IndexSheet.astro` |
 | Abrir y cerrar el menú (hover, clic, Escape) | `src/components/hud/menu.ts` |
 | Hoja de índice (cerrar, devolver el foco) | `src/components/hud/index-sheet.ts` |
 | Barra de progreso de la historia | `src/components/hud/progress.ts` |

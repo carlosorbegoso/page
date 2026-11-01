@@ -54,7 +54,7 @@ Qué archivo editar en el escritorio 3D: encuadres (shots), luz, props, figuras,
 | Pikachu de vinilo sobre la base del monitor (posición en `PIKACHU` de `layout.ts`) | `src/three/desk/props/pikachu.ts` |
 | Charizard de vinilo junto a Pikachu, llama de la cola emisiva (`CHARIZARD` en `layout.ts`) | `src/three/desk/props/charizard.ts` |
 | Corcho de TUSOCIO tras la peana: marco, corcho y chinches (`geometry.ts`), y lo impreso encima (`print.ts`: título a mano, ficha con rol y frase, tarjeta de Alfa, post-its de SkyMek, Parati y Ventixs en `BOARD_LAYOUT`) | `src/three/desk/notes/corkboard/` |
-| Corcho y tarjetas de producto en teléfono vertical: ficha grande del corcho, tarjeta con descripción corta (`product-shorts.json`) y botón «Visitar sitio» de 14 mm; se cambian al girar el teléfono y llegan después del primer frame | `src/three/desk/notes/stacked/` (`board.ts`, `card.ts`, `index.ts`) |
+| Corcho y tarjetas de producto en teléfono vertical: ficha grande del corcho, tarjeta con descripción corta (`product-shorts.json`) y botón «Visitar sitio» de 14 mm; se cambian al girar el teléfono (el mapa y el emisivo a la vez, o la impresión ancha se ve encima como un fantasma) y llegan después del primer frame | `src/three/desk/notes/stacked/` (`board.ts`, `card.ts`, `index.ts`) |
 | Suculenta viva en maceta entre la laptop y el monitor (`SUCCULENT` en `layout.ts`) | `src/three/desk/props/succulent.ts` |
 | Planta (maceta y hojas) y telescopio | `src/three/desk/props/decor.ts` |
 | Peana y coleccionables: Alfa, Burbu (Ventixs), regalo (Parati), llave (SkyMek), un archivo cada uno | `src/three/desk/props/figures/` |

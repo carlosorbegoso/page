@@ -36,6 +36,11 @@ function cardSurface(): PrintSurface {
   return { canvas, context: canvas.getContext('2d')!, texture, scale: CARD_DENSITY };
 }
 
+function printOn(mesh: PrintMesh, texture: Texture | null): void {
+  mesh.material.map = texture;
+  mesh.material.emissiveMap = texture;
+}
+
 function shortDescription(id: ProductId): string {
   const locale = document.documentElement.lang.startsWith('en') ? 'en' : 'es';
   return (shorts[locale] as Partial<Record<ProductId, string>>)[id] ?? readProduct(id).description;
@@ -81,7 +86,7 @@ export class StackedPrints {
     if (this.stacked && !this.cardsDrawn) this.drawCards();
     for (const card of this.cards) {
       card.wide ??= card.mesh.material.map;
-      card.mesh.material.map = this.stacked ? card.print.texture : card.wide;
+      printOn(card.mesh, this.stacked ? card.print.texture : card.wide);
     }
   }
 
@@ -97,7 +102,7 @@ export class StackedPrints {
   dispose(): void {
     window.removeEventListener('resize', this.onResize);
     for (const card of this.cards) {
-      if (card.wide) card.mesh.material.map = card.wide;
+      if (card.wide) printOn(card.mesh, card.wide);
       card.print.texture.dispose();
     }
   }

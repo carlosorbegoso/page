@@ -23,6 +23,9 @@ export function productFocus(id: string | null): ProductId | null {
   return (PRODUCT_FIGURES as readonly string[]).includes(id ?? '') ? (id as ProductId) : null;
 }
 
+/** A lying card's link isn't offered: its pick box ignores the raycaster until the card stands. */
+const skipRaycast = (): void => undefined;
+
 function placed<T extends Object3D>(object: T, z: number): T {
   object.position.set(0, PRODUCT_CARD.height / 2, z);
   object.updateMatrix();
@@ -90,11 +93,12 @@ export class ProductCards {
     return moving;
   }
 
-  /** Writes each card's matrix for its current raise. */
+  /** Writes each card's matrix for its current raise, and lets its pick box be hit only while it stands. */
   pose(): void {
     for (const card of this.cards) {
       card.group.matrix.copy(cardFaceMatrix(card.id, card.raise));
       card.group.matrixWorldNeedsUpdate = true;
+      card.pick.raycast = card.raise > RAISED ? Mesh.prototype.raycast : skipRaycast;
     }
   }
 

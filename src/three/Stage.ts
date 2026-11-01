@@ -256,15 +256,21 @@ export class Stage {
     this.bump();
   }
 
-  /** Reduced motion / pause: 300 ms dissolve (WAAPI, so the global transition kill-switch does not flatten it). */
+  /**
+   * Reduced motion / pause: 300 ms dip to black (WAAPI, so the global transition kill-switch does not
+   * flatten it). Layers are darkened, not faded: the hero fallback picture sits behind the canvas
+   * and the monitor's screen behind the plates, and fading would double-expose them over the new shot.
+   */
   private dissolve(cut: () => void): void {
     const layers = [this.canvas, this.plates?.css3d.domElement, this.plates?.panels].filter(Boolean) as HTMLElement[];
-    const out = layers.map(el => el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: DISSOLVE_HALF_MS, fill: 'forwards' }));
+    const fade = (direction: PlaybackDirection, fill: FillMode) =>
+      layers.map(el => el.animate([{ filter: 'brightness(1)' }, { filter: 'brightness(0)' }], { duration: DISSOLVE_HALF_MS, fill, direction }));
+    const out = fade('normal', 'forwards');
     void Promise.all(out.map(a => a.finished)).then(() => {
       cut();
       this.invalidate();
       requestAnimationFrame(() => {
-        for (const el of layers) el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: DISSOLVE_HALF_MS, fill: 'none' });
+        fade('reverse', 'none');
         for (const a of out) a.cancel();
       });
     });

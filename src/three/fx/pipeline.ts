@@ -527,7 +527,7 @@ class CinematicPipeline implements CinematicFx {
     this.timer?.end();
   }
 
-  /** Two horizontal passes over the bloom's bright pass: short stride, then long stride. */
+  /** Two horizontal passes over the bloom's bright pass: contiguous taps, then a stride inside their footprint. */
   private renderStreak(renderer: WebGLRenderer, targets: Targets): void {
     const pair = targets.streak;
     const source = targets.down[0];
@@ -536,8 +536,8 @@ class CinematicPipeline implements CinematicFx {
     this.timer?.begin('streak');
     this.quad.material = this.streak;
     const passes: Array<[WebGLRenderTarget, WebGLRenderTarget, number, number]> = [
-      [source, pair[0], 1.5, this.tokens.streakThreshold],
-      [pair[0], pair[1], 9, 0]
+      [source, pair[0], 1, this.tokens.streakThreshold],
+      [pair[0], pair[1], 2.5, 0]
     ];
     for (const [input, output, stride, keep] of passes) {
       u.tInput!.value = input.texture;

@@ -1,5 +1,9 @@
 @import 'tailwindcss';
-@import './tokens.css';
+@import './tokens/fonts.css';
+@import './tokens/colors.css';
+@import './tokens/scale.css';
+@import './tokens/stage.css';
+@import './tokens/modes.css';
 @import './plates.css';
 @import './motion.css';
 

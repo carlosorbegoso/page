@@ -1,0 +1,94 @@
+/* static: the 3D stage reads several of these with getComputedStyle, and no utility class references them. */
+@theme static {
+  --color-*: initial;
+
+  --color-bg: #0a0e14;
+  --color-surface: #111723;
+  --color-surface-raised: #18202e;
+  --color-border: #243042;
+  --color-border-strong: #6a7b94;
+  --color-text: #e9eef5;
+  --color-text-muted: #9ba8bb;
+  --color-text-subtle: #7d8ba0;
+  --color-accent: #5aa9ff;
+  --color-accent-hover: #86c0ff;
+  --color-accent-soft: #10233a;
+  --color-on-accent: #04101f;
+  --color-focus: #8cc8ff;
+  --color-scrim: rgb(10 14 20 / 0.9);
+
+  --color-status-live: #4ade9a;
+  --color-status-building: #f5b94a;
+  --color-danger: #ff7a7a;
+
+  --color-skymek: #f0a43c;
+  --color-skymek-soft: #2a1e0e;
+  --color-parati: #f28ba0;
+  --color-parati-soft: #2c1820;
+  --color-ventixs: #3fcf8e;
+  --color-ventixs-soft: #0e2a1f;
+
+  --color-scene-bg: #0a0e14;
+  --color-alfa-body: #10131a;
+  --color-alfa-signal: #5aa9ff;
+  --color-alfa-ring: #b08a4a;
+  --color-burbu-body: #1f6e52;
+  --color-burbu-signal: #3fcf8e;
+  --color-gift-body: #2a3142;
+  --color-gift-ribbon: #f28ba0;
+  --color-tool-body: #8c97a8;
+  --color-tool-band: #f0a43c;
+
+  --color-sky-zenith: #04060b;
+  --color-sky-horizon: #0a0e14;
+
+  --color-desk-wall: #121722;
+  --color-desk-floor: #17140f;
+  --color-desk-wood: #5a3e2b;
+  --color-desk-metal: #2b313c;
+  --color-desk-fabric: #232a3a;
+  --color-desk-ceramic: #e6e0d4;
+  --color-desk-coffee: #2a1a10;
+  --color-desk-plant: #2f5a44;
+  --color-desk-pot: #8c5a44;
+  --color-desk-paper: #d8d2c4;
+  --color-window-frame: #1a1f29;
+  --color-window-glass: #0b1220;
+  --color-desk-brass: #b08a4a;
+  --color-folder-tcs: #33405a;
+  --color-folder-intercorp: #6b4a35;
+  --color-folder-baufest: #4a5847;
+  --color-folder-sysarp: #7e776a;
+  --color-phone-body: #15181e;
+  --color-phone-screen: #05070b;
+  --color-city-silhouette: #0d121b;
+  --color-city-sodium: #e8a25a;
+  --color-city-led: #8fb4e8;
+  --color-rain: #9db8e8;
+  --color-dawn-low: #e9a47a;
+  --color-dawn-high: #6f86ae;
+  --color-sea-haze: #1b2532;
+  --color-day-sky-high: #a9b1b9;
+  --color-day-sky-low: #c9cbc8;
+  --color-day-haze: #bcbfbe;
+  --color-day-city: #7f858c;
+  --color-screen-bg: #0b0f16;
+  --color-telescope: #c9ced6;
+  --color-telescope-brass: #b08a4a;
+  --color-monitor-bezel: #0c0f14;
+  --color-monitor-glow: #7fb8ff;
+  --color-lamp: #ffb566;
+  --color-lamp-shade: #1d222b;
+  --color-moonlight: #9db8e8;
+
+  --color-plate-solid: #0b1019;
+  --color-plate-border: #2a3b57;
+  --color-plate-border-active: #3d5a85;
+  --color-plate-pool: rgb(4 6 11 / 0.85);
+  --color-plate-pool-edge: rgb(4 6 11 / 0.7);
+
+  /* Stub names kept as aliases: global.css and SkipLink (not owned by design) still use them. */
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-text);
+  --color-muted: var(--color-text-muted);
+}

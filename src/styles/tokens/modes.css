@@ -1,0 +1,98 @@
+/* Day mode on the stage: the walls stay dim, so loose panels keep light ink on their dark pool; only the HUD scrim turns lighter. */
+/* Muted and subtle ink lift with it: over the lighter day backdrop the 0.78 pool alone left them at 3.2–4.5:1. */
+:root[data-time='day'].is-3d {
+  --color-text-muted: #b4bfcf;
+  --color-text-subtle: #aab6c8;
+  --color-plate-pool: rgb(4 6 11 / 0.78);
+  --color-plate-pool-edge: rgb(4 6 11 / 0.6);
+}
+
+/* Light is opt-in and only for the flat fallback: the 3D desk is a night scene by definition, and the hero LCP image is captured dark (PLAN §3.4). */
+:root[data-theme='light']:not(.is-3d) {
+  color-scheme: light;
+
+  --color-bg: #f5f7fa;
+  --color-surface: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-border: #d9dfe8;
+  --color-border-strong: #7a8699;
+  --color-text: #0d1320;
+  --color-text-muted: #4a5568;
+  --color-text-subtle: #5f6b7e;
+  --color-accent: #0a55bd;
+  --color-accent-hover: #084298;
+  --color-accent-soft: #e6effc;
+  --color-on-accent: #ffffff;
+  --color-focus: #0a55bd;
+  --color-scrim: rgb(245 247 250 / 0.9);
+
+  --color-status-live: #0e7a45;
+  --color-status-building: #8f5a00;
+  --color-danger: #c21f1f;
+
+  --color-skymek: #9a5a00;
+  --color-skymek-soft: #fbf0e0;
+  --color-parati: #b4234a;
+  --color-parati-soft: #fce8ed;
+  --color-ventixs: #0e7a45;
+  --color-ventixs-soft: #e3f4ea;
+
+  --color-scene-bg: #f5f7fa;
+  --color-alfa-body: #3a4b66;
+  --color-alfa-signal: #2f86f0;
+  --color-burbu-body: #2a8a64;
+  --color-gift-body: #e3e7ee;
+  --color-gift-ribbon: #d1456a;
+  --color-tool-body: #9aa5b5;
+  --color-tool-band: #d98a1f;
+
+  --shadow-color: rgb(16 24 40 / 0.14);
+
+  --color-plate-solid: #ffffff;
+  --color-plate-border: #d9dfe8;
+  --color-plate-border-active: #7a8699;
+  --scene-tone-exposure: 0.9;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 0.01ms;
+    --duration-fast: 0.01ms;
+    --duration-base: 0.01ms;
+    --duration-slow: 0.01ms;
+    --duration-scene: 0.01ms;
+  }
+
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Same overrides behind the visible "pause animation" control (WCAG 2.2.2), which sets data-motion="paused" on <html>. */
+:root[data-motion='paused'] {
+  --duration-instant: 0.01ms;
+  --duration-fast: 0.01ms;
+  --duration-base: 0.01ms;
+  --duration-slow: 0.01ms;
+  --duration-scene: 0.01ms;
+}
+
+:root[data-motion='paused'] *,
+:root[data-motion='paused'] ::before,
+:root[data-motion='paused'] ::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Copy that depends on the time shown on the stage. */
+:root:not([data-time='day']) .when-day,
+:root[data-time='day'] .when-night {
+  display: none !important;
+}

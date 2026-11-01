@@ -11,10 +11,14 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Animaciones CSS, `prefers-reduced-motion` | `src/styles/motion.css` |
 | Placas HTML sobre la escena 3D | `src/styles/plates.css`, `src/three/plates.ts` |
 
-## Tokens de diseño *(pendiente: `src/styles/tokens/`)*
+## Tokens de diseño
 | Para cambiar… | Edita |
 | --- | --- |
-| Colores, tipografía, escala, tokens del Stage | `src/styles/tokens.css` |
+| Fuentes (`@font-face`, familias, pesos) | `src/styles/tokens/fonts.css` |
+| Colores (UI, escena, marcas, día) | `src/styles/tokens/colors.css` (Base.astro lee `--color-bg` de aquí para theme-color) |
+| Tipografía fluida, espaciado, radios, sombras, easing | `src/styles/tokens/scale.css` |
+| Duraciones, z-index, materiales, placas, luces y fx del Stage | `src/styles/tokens/stage.css` |
+| Modo día, tema claro, movimiento reducido o pausado | `src/styles/tokens/modes.css` |
 | Cómo lee three los tokens (`tokenColor`, `tokenNumber`) | `src/three/tokens.ts` |
 
 ## HUD y cabecera *(pendiente: `src/components/hud/`)*

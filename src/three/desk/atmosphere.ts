@@ -104,6 +104,10 @@ uniform vec3 uSilhouette;
 uniform vec3 uBeacon;
 uniform float uDawn;
 uniform float uLate;
+uniform float uDay;
+uniform vec3 uDayHigh;
+uniform vec3 uDayLow;
+uniform vec3 uCityDay;
 uniform float uTime;
 varying vec2 vUv;
 varying float vLayer;
@@ -116,7 +120,9 @@ void main() {
     vec3 night = mix(uHorizon * 1.6, uZenith, h);
     vec3 dawn = mix(uDawnLow, uDawnHigh, smoothstep(0.2, 0.75, vUv.y));
     vec3 sky = mix(night, dawn, uDawn);
-    float glow = exp(-pow((vUv.y - 0.3) * 5.0, 2.0)) * 0.006 * (1.0 - uDawn);
+    vec3 overcast = mix(uDayLow, uDayHigh, smoothstep(0.15, 0.9, vUv.y));
+    sky = mix(sky, overcast, uDay * (1.0 - uDawn));
+    float glow = exp(-pow((vUv.y - 0.3) * 5.0, 2.0)) * 0.006 * (1.0 - uDawn) * (1.0 - uDay);
     gl_FragColor = vec4(sky + vec3(0.9, 0.6, 0.35) * glow, 1.0);
   } else {
     float row = 3.0 - vLayer;
@@ -126,8 +132,9 @@ void main() {
     float haze = vLayer < 1.5 ? 0.55 : (vLayer < 2.5 ? 0.3 : 0.08);
     vec3 hazeColor = mix(uHorizon * 2.2, mix(uDawnLow, uDawnHigh, 0.5) * 0.7, uDawn);
     vec3 body = mix(uSilhouette * (1.0 + uDawn * 1.8), hazeColor, haze);
+    body = mix(body, mix(uCityDay, uDayLow, min(haze * 1.4, 1.0)), uDay * (1.0 - uDawn * 0.6));
     vec2 cell = floor(uv * vec2(256.0, 192.0));
-    float off = step(hash(cell), max(uDawn * 1.15, uLate));
+    float off = step(hash(cell), max(max(uDawn * 1.15, uLate), uDay));
     vec3 lights = city.rgb * 2.2 * (1.0 - off) * (1.0 - haze * 0.6);
     float beacon = vLayer > 1.5 && vLayer < 2.5 ? step(0.92, fract(uTime / 3.0)) * exp(-pow(length((vUv - vec2(0.62, 0.86)) * vec2(60.0, 30.0)), 2.0)) : 0.0;
     gl_FragColor = vec4(body + lights + uBeacon * beacon * 3.0, 1.0);
@@ -141,6 +148,8 @@ export interface Backdrop {
   setDawn(value: number): void;
   /** 0 early night … 1 every city window dark (the story clock). */
   setLateness(value: number): void;
+  /** 0 night … 1 Lima's overcast daylight ("panza de burro"): pale sky, hazy grey city, windows dark. */
+  setDay(value: number): void;
   setTime(time: number): void;
   dispose(): void;
 }
@@ -167,6 +176,10 @@ export function createBackdrop(): Backdrop {
       uBeacon: { value: new Color(1, 0.12, 0.08) },
       uDawn: { value: 0 },
       uLate: { value: 0 },
+      uDay: { value: 0 },
+      uDayHigh: { value: tokenColor('--color-day-sky-high', '#c3cfdb') },
+      uDayLow: { value: tokenColor('--color-day-sky-low', '#e9ebe7') },
+      uCityDay: { value: tokenColor('--color-day-city', '#8a8f96') },
       uTime: { value: 0 }
     },
     depthWrite: false
@@ -183,6 +196,9 @@ export function createBackdrop(): Backdrop {
     },
     setLateness: value => {
       material.uniforms.uLate!.value = value;
+    },
+    setDay: value => {
+      material.uniforms.uDay!.value = value;
     },
     setTime: time => {
       material.uniforms.uTime!.value = time;
@@ -210,6 +226,8 @@ uniform vec3 uLamp;
 uniform float uTime;
 uniform float uAspect;
 uniform float uLampReflection;
+uniform float uDay;
+uniform vec3 uTintDay;
 varying vec2 vUv;
 
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
@@ -242,8 +260,9 @@ void main() {
   float drops = droplets(uv, 34.0) + droplets(uv + 0.37, 61.0) * 0.6;
   float trail = streaks(uv);
   float lamp = exp(-pow(length((vUv - vec2(0.12, 0.22)) * vec2(uAspect, 1.0)) * 4.0, 2.0)) * uLampReflection;
-  vec3 color = uTint + uRain * (drops * 0.22 + trail * 0.18) + uLamp * lamp * 0.12;
-  float alpha = 0.12 + drops * 0.12 + trail * 0.1 + lamp * 0.1;
+  float rain = 1.0 - uDay * 0.75;
+  vec3 color = mix(uTint, uTintDay, uDay) + uRain * (drops * 0.22 * rain + trail * 0.18 * (1.0 - uDay)) + uLamp * lamp * 0.12;
+  float alpha = mix(0.12, 0.05, uDay) + drops * 0.12 * rain + trail * 0.1 * (1.0 - uDay) + lamp * 0.1;
   gl_FragColor = vec4(color, alpha);
   #include <colorspace_fragment>
 }
@@ -253,6 +272,8 @@ export interface RainGlass {
   mesh: Mesh<PlaneGeometry, ShaderMaterial>;
   setTime(time: number): void;
   setLampReflection(level: number): void;
+  /** By day only a light drizzle is left on a pale glass. */
+  setDay(value: number): void;
   dispose(): void;
 }
 
@@ -271,7 +292,9 @@ export function createRainGlass(): RainGlass {
         uLamp: { value: tokenColor('--color-lamp', '#ffb566') },
         uTime: { value: 0 },
         uAspect: { value: width / height },
-        uLampReflection: { value: 1 }
+        uLampReflection: { value: 1 },
+        uDay: { value: 0 },
+        uTintDay: { value: tokenColor('--color-window-glass-day', '#dfe6ec') }
       },
       transparent: true,
       depthWrite: false
@@ -288,6 +311,9 @@ export function createRainGlass(): RainGlass {
     },
     setLampReflection: level => {
       material.uniforms.uLampReflection!.value = level;
+    },
+    setDay: value => {
+      material.uniforms.uDay!.value = value;
     },
     dispose: () => {
       geometry.dispose();

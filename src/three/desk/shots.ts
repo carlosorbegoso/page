@@ -143,16 +143,16 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
   const subjectY = portrait ? 0.3 : 0.5;
 
   const heroDistance = portrait
-    ? clamp(widthFit(screenSpan, 0.62, view), 1.2, 2.3)
+    ? clamp(Math.max(widthFit(screenSpan, 0.8, view), heightFit(screenRise, 0.78, view)), 1.0, 2.3)
     : clamp(widthFit(screenSpan, 0.5, view), 1.05, HERO_EYE.distanceTo(screen));
   const hero: Framing = {
     eye: screen.clone().addScaledVector(monitor.normal, heroDistance),
     focus: screen,
     sx: portrait ? 0.5 : 0.42,
-    sy: portrait ? 0.42 : 0.47
+    sy: portrait ? 0.5 : 0.47
   };
   const aboutDistance = portrait
-    ? clamp(Math.max(widthFit(screenSpan, 0.86, view), heightFit(screenRise, 0.86, view)), 0.7, heroDistance - 0.2) : clamp(widthFit(screenSpan, 0.7, view), 0.7, heroDistance - 0.25);
+    ? clamp(Math.max(widthFit(screenSpan, 0.86, view), heightFit(screenRise, 0.86, view)), 0.7, heroDistance - 0.05) : clamp(widthFit(screenSpan, 0.7, view), 0.7, heroDistance - 0.25);
   const about: Framing = {
     eye: screen.clone().addScaledVector(monitor.normal, aboutDistance),
     focus: screen,
@@ -185,7 +185,7 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
     const setup = productSetup[id];
     const layout = layoutFor(setup.side);
     return {
-      eye: eyeFor(focus, portrait ? setup.heading * 0.5 : setup.heading, portrait ? -24 : setup.pitch, portrait ? 0.5 : setup.distance),
+      eye: eyeFor(focus, portrait ? setup.heading * 0.5 : setup.heading, portrait ? -18 : setup.pitch, portrait ? 0.4 : setup.distance),
       focus,
       sx: layout.sx,
       sy: portrait ? subjectY : 0.56,
@@ -229,24 +229,24 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
   });
   const experience = [shelf, ...folders];
 
-  const phoneDistance = portrait ? clamp(widthFit(0.075, 0.9, view), 0.36, 0.5) : 0.42;
+  const phoneDistance = portrait ? clamp(widthFit(0.075, 0.82, view), 0.28, 0.5) : 0.42;
   const contact: Framing = {
     eye: phone.centre.clone().addScaledVector(phone.normal, phoneDistance),
     focus: phone.centre,
     sx: 0.5,
-    sy: portrait ? 0.42 : 0.5
+    sy: portrait ? 0.48 : 0.5
   };
 
   const back = hero.eye.clone().sub(screen).normalize();
   const outro: Framing = {
-    eye: screen.clone().addScaledVector(back, Math.min(heroDistance + 0.2, 1.75)),
+    eye: screen.clone().addScaledVector(back, Math.min(heroDistance + 0.08, 1.75)),
     focus: screen,
     sx: hero.sx,
     sy: hero.sy,
     panel: {
       name: 'outro',
       sx: portrait ? 0.08 : 0.07,
-      sy: portrait ? 0.12 : 0.22,
+      sy: portrait ? 0.12 : 0.26,
       plane: new Plane(new Vector3(0, 0, 1), -(ROOM.back + 0.005))
     }
   };

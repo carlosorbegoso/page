@@ -6,10 +6,13 @@ import { localeUrl, useTranslations } from '../i18n/utils';
 
 const es = useTranslations('es');
 const en = useTranslations('en');
+const paperLabel = `${es('notFound.paper')} · ${en('notFound.paper')}`;
 ---
 
 <Base locale="es" title={es('notFound.metaTitle')} description={es('notFound.description')} indexable={false}>
-  <main id="main" tabindex="-1" class="container-content flex min-h-dvh flex-col justify-center gap-10 py-section">
+  <div data-nf-stage data-paper-label={paperLabel} aria-hidden="true"></div>
+
+  <main id="main" tabindex="-1" class="nf-content container-content flex min-h-dvh flex-col justify-center gap-8 py-section">
     <a
       href={localeUrl('es')}
       aria-label={es('nav.home')}
@@ -23,19 +26,124 @@ const en = useTranslations('en');
       <span class="font-display text-lg font-semibold tracking-tight text-text">{SITE.name}</span>
     </a>
 
-    <h1 class="font-display text-5xl font-semibold tracking-display text-accent">404</h1>
+    <div class="flex max-w-xl flex-col gap-3">
+      <p class="font-mono text-meta tracking-caps text-text-subtle uppercase">{es('notFound.kicker')}</p>
+      <h1 class="font-display text-display font-semibold tracking-display text-accent">404</h1>
+    </div>
 
-    <div class="grid gap-6 md:grid-cols-2">
-      <section aria-labelledby="not-found-es" class="flex flex-col items-start gap-4 rounded-lg border border-border bg-surface p-6">
+    <div class="grid max-w-xl gap-8">
+      <section aria-labelledby="not-found-es" class="flex flex-col items-start gap-4">
         <h2 id="not-found-es" class="text-2xl font-semibold tracking-tight text-text">{es('notFound.title')}</h2>
         <p class="text-text-muted">{es('notFound.body')}</p>
-        <Button href={localeUrl('es')} variant="primary">{es('notFound.home')}</Button>
+        <div class="flex flex-wrap items-center gap-3">
+          <Button href={localeUrl('es')} variant="primary">{es('notFound.home')}</Button>
+          <Button href={localeUrl('es', 'lectura')} variant="ghost">{es('reading.enter')}</Button>
+        </div>
       </section>
-      <section lang="en" aria-labelledby="not-found-en" class="flex flex-col items-start gap-4 rounded-lg border border-border bg-surface p-6">
+      <section lang="en" aria-labelledby="not-found-en" class="flex flex-col items-start gap-4 border-t border-border pt-8">
         <h2 id="not-found-en" class="text-2xl font-semibold tracking-tight text-text">{en('notFound.title')}</h2>
         <p class="text-text-muted">{en('notFound.body')}</p>
-        <Button href={localeUrl('en')} variant="secondary" hreflang="en-US">{en('notFound.home')}</Button>
+        <div class="flex flex-wrap items-center gap-3">
+          <Button href={localeUrl('en')} variant="secondary" hreflang="en-US">{en('notFound.home')}</Button>
+          <Button href={localeUrl('en', 'reading')} variant="ghost" hreflang="en-US">{en('reading.enter')}</Button>
+        </div>
       </section>
     </div>
   </main>
 </Base>
+
+<script>
+  import { onIdle } from '../three/idle';
+  import { detectTier } from '../three/tier';
+
+  const stage = document.querySelector<HTMLElement>('[data-nf-stage]');
+
+  async function boot(container: HTMLElement): Promise<void> {
+    const tier = detectTier(new URLSearchParams(location.search).get('tier'));
+    container.dataset.tier = tier.tier;
+    if (tier.tier === 'none') return;
+    try {
+      const { mountNotFound } = await import('../three/notfound/scene');
+      const dispose = await mountNotFound({
+        container,
+        paperLabel: container.dataset.paperLabel ?? '404',
+        quality: tier.tier === 'high' ? 'high' : 'mid'
+      });
+      window.addEventListener('pagehide', event => {
+        if (!event.persisted) dispose();
+      });
+    } catch (error) {
+      container.dataset.degraded = 'error';
+      console.error('[404] 3D unavailable', error);
+    }
+  }
+
+  if (stage) {
+    const start = () => onIdle(() => void boot(stage));
+    if (document.readyState === 'complete') start();
+    else window.addEventListener('load', start, { once: true });
+  }
+</script>
+
+<style>
+  [data-nf-stage] {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-canvas);
+    pointer-events: none;
+    overflow: hidden;
+    background: linear-gradient(180deg, var(--color-sky-zenith), var(--color-sky-horizon));
+  }
+
+  /* Scrim between canvas and copy: keeps body text at AA contrast wherever the lamp lands. */
+  [data-nf-stage]::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--color-bg) 0%, rgb(10 14 20 / 0.82) 34%, rgb(10 14 20 / 0) 62%);
+    opacity: 0;
+    transition: opacity var(--duration-scene) var(--ease-standard);
+  }
+
+  [data-nf-stage] :global([data-nf-canvas]) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity var(--duration-scene) var(--ease-standard);
+  }
+
+  [data-nf-stage][data-ready='true']::after,
+  [data-nf-stage][data-ready='true'] :global([data-nf-canvas]) {
+    opacity: 1;
+  }
+
+  [data-nf-stage][data-degraded] :global([data-nf-canvas]),
+  [data-nf-stage][data-degraded]::after {
+    display: none;
+  }
+
+  @media (orientation: portrait) {
+    [data-nf-stage]::after {
+      background: linear-gradient(0deg, var(--color-bg) 0%, rgb(10 14 20 / 0.86) 46%, rgb(10 14 20 / 0) 66%);
+    }
+
+    /* Reserved whether or not WebGL boots, so the scene never shifts the copy. */
+    .nf-content {
+      justify-content: flex-end;
+      padding-top: 38svh;
+    }
+  }
+
+  @media (forced-colors: active) {
+    [data-nf-stage] {
+      display: none;
+    }
+  }
+
+  .nf-content {
+    position: relative;
+    z-index: var(--z-content);
+  }
+</style>

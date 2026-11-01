@@ -37,6 +37,8 @@ export const en = {
   'hero.ctaProducts': 'See products',
   'hero.ctaContact': 'Get in touch',
   'hero.fallbackAlt': 'Alfa, the TUSOCIO IA mascot, over a network of connected nodes',
+  'stage.loading': 'Switching on the desk…',
+  'stage.loaded': 'Desk switched on',
   'hero.metrics.label': 'By the numbers',
   'hero.metrics.performance.value': '+30–40%',
   'hero.metrics.performance.label': 'performance gain at Intercorp Retail',
@@ -63,6 +65,12 @@ export const en = {
   'story.night': 'By night',
   'story.dawn': 'Dawn',
   'about.code.extra': 'CIBERTEC 2023, Alura Java Bootcamp 2023',
+  'time.toDay': 'See the office by day',
+  'time.toNight': 'See the office at night',
+  'story.today': 'Today',
+  'story.afterWork': 'After work',
+  'story.dusk': 'Sunset',
+  'story.nightfall': 'Nightfall',
   'about.education': 'Education',
   'about.stack': 'Main stack',
   'company.title': 'TUSOCIO IA',
@@ -112,6 +120,9 @@ export const en = {
   'notFound.description':
     "This page doesn't exist or has moved. Head back home to see my work, my products and how to reach me.",
   'notFound.title': 'Page not found',
-  'notFound.body': "This page doesn't exist or has moved.",
-  'notFound.home': 'Back to home'
+  'notFound.kicker': 'Error 404 · Lima, at night',
+  'notFound.body':
+    "I searched the archive on my desk and this sheet isn't there. It may never have existed, or it has moved.",
+  'notFound.home': 'Back to home',
+  'notFound.paper': 'Not found'
 } as const satisfies Record<UiKey, string>;

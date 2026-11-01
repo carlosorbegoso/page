@@ -1,6 +1,7 @@
 ---
 import LangSwitch from './LangSwitch.astro';
 import MotionToggle from './MotionToggle.astro';
+import TimeToggle from './TimeToggle.astro';
 import AudioToggle from './AudioToggle.astro';
 import CopyEmail from './contact/CopyEmail.astro';
 import CvLink from './ui/CvLink.astro';
@@ -27,6 +28,18 @@ const storyBeats: Record<string, string[]> = {
   products: [night('01:30'), night('02:00'), night('02:30')],
   contact: [night('03:30')],
   outro: [`05:58 · ${t('story.dawn')}`]
+};
+const today = (time: string) => `${time} · ${t('story.today')}`;
+const afterWork = (time: string) => `${time} · ${t('story.afterWork')}`;
+/** By day the same walk runs from a morning at the office to nightfall, when the lamp comes on. */
+const storyBeatsDay: Record<string, string[]> = {
+  ...storyBeats,
+  hero: [today('10:00')],
+  about: [today('10:20'), today('10:40')],
+  company: [afterWork('18:10')],
+  products: [afterWork('18:20'), afterWork('18:30'), afterWork('18:40')],
+  contact: [`18:50 · ${t('story.dusk')}`],
+  outro: [`19:05 · ${t('story.nightfall')}`]
 };
 const sections = [
   { id: SECTION_IDS.hero, label: t('nav.hero') },
@@ -78,8 +91,9 @@ const menuItem =
     <span
       data-hud-chapter
       data-story-beats={JSON.stringify(storyBeats)}
+      data-story-beats-day={JSON.stringify(storyBeatsDay)}
       aria-hidden="true"
-      class="font-mono text-xs tracking-caps text-text-muted tabular-nums opacity-0 transition-opacity duration-(--duration-base) ease-standard data-[ready=true]:opacity-100"
+      class="hud-beat font-mono text-xs tracking-caps text-text-muted tabular-nums opacity-0 transition-opacity duration-(--duration-base) ease-standard data-[ready=true]:opacity-100"
     ></span>
   </div>
 
@@ -93,6 +107,7 @@ const menuItem =
       <LangSwitch locale={locale} compact hud />
       <AudioToggle locale={locale} />
       <MotionToggle locale={locale} floating />
+      <TimeToggle locale={locale} />
     </div>
     <button
       type="button"
@@ -232,6 +247,11 @@ const menuItem =
 </dialog>
 
 <style>
+  /* The story clock sits over bright windows at dawn: a halo keeps it legible on any frame. */
+  .hud-beat {
+    text-shadow: var(--plate-text-halo);
+  }
+
   .hud-menu {
     transform-origin: top left;
     transition:
@@ -312,14 +332,26 @@ const menuItem =
       if (!open && restoreFocus) toggle!.focus();
     }
 
-    toggle.addEventListener('click', () => setOpen(!isOpen()));
+    let openedByHover = false;
+
+    /* Hover already opened the menu on desktop: the click that follows must not close it again. */
+    toggle.addEventListener('click', () => {
+      if (openedByHover && isOpen()) {
+        openedByHover = false;
+        return;
+      }
+      setOpen(!isOpen());
+    });
 
     hud.addEventListener('pointerenter', event => {
-      if (event.pointerType === 'mouse' && finePointer.matches) setOpen(true);
+      if (event.pointerType !== 'mouse' || !finePointer.matches || isOpen()) return;
+      openedByHover = true;
+      setOpen(true);
     });
     hud.addEventListener('pointerleave', event => {
       if (event.pointerType !== 'mouse' || !finePointer.matches) return;
-      if (hud.contains(document.activeElement)) return;
+      openedByHover = false;
+      if (hud.contains(document.activeElement)) (document.activeElement as HTMLElement).blur();
       closeTimer = window.setTimeout(() => setOpen(false), HOVER_CLOSE_DELAY_MS);
     });
 
@@ -400,11 +432,14 @@ const menuItem =
 
   const indexLinks = [...document.querySelectorAll<HTMLAnchorElement>('[data-index-link]')];
   const stations = [...document.querySelectorAll<HTMLElement>(STATION_SELECTOR)];
-  const storyBeats = JSON.parse(chapter?.dataset.storyBeats ?? '{}') as Record<string, string[]>;
+  const nightBeats = JSON.parse(chapter?.dataset.storyBeats ?? '{}') as Record<string, string[]>;
+  const dayBeats = JSON.parse(chapter?.dataset.storyBeatsDay ?? '{}') as Record<string, string[]>;
   let activeId: string | null = null;
+  let activeSub = 0;
 
   function showBeat(id: string, sub: number) {
-    const beats = storyBeats[id];
+    activeSub = sub;
+    const beats = (document.documentElement.dataset.time === 'day' ? dayBeats : nightBeats)[id];
     if (!chapter || !beats?.length) return;
     chapter.textContent = beats[Math.min(Math.max(sub, 0), beats.length - 1)]!;
     chapter.dataset.ready = 'true';
@@ -421,6 +456,10 @@ const menuItem =
     }
     window.dispatchEvent(new CustomEvent('section:active', { detail: { id } }));
   }
+
+  window.addEventListener('time:toggle', () => {
+    if (activeId) showBeat(activeId, activeSub);
+  });
 
   for (const type of ['station:enter', 'chapter:enter']) {
     window.addEventListener(type, event => {

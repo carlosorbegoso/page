@@ -13,7 +13,7 @@ import {
   SpotLight,
   Vector3,
   type CanvasTexture,
-  type Color,
+  Color,
   Matrix4,
   type Texture
 } from 'three';
@@ -24,7 +24,7 @@ import { createLampBeam, type LampBeam } from './beam';
 import { createSpineLabels } from './spines';
 import { StoryClock, storyMinutes } from './clock';
 import { OBJECT_ID, PartBuilder } from './builder';
-import { DESK, FIGURE_HEIGHT, FIGURES, FOLDER, FOLDERS, GLASS_Z, LAMP, MONITOR, OPEN_FOLDER, PHONE, PRODUCT_FIGURES, ROOM, WINDOW, folderCentre, type FigureId, type FolderId } from './layout';
+import { DESK, FIGURE_HEIGHT, FIGURES, FOLDER, FOLDERS, GLASS_Z, LAMP, LAPTOP, MONITOR, OPEN_FOLDER, PHONE, PRODUCT_FIGURES, ROOM, WINDOW, folderCentre, type FigureId, type FolderId } from './layout';
 import {
   bakeNightEnvironment,
   createAtlasDepthMaterial,
@@ -45,6 +45,8 @@ import {
   buildLamp,
   buildMonitorHead,
   buildOpenFolder,
+  buildLaptop,
+  laptopScreenFrame,
   buildPhone,
   buildPlant,
   buildRoom,
@@ -104,6 +106,29 @@ const CHAPTER_LIGHT: Record<ChapterId, ChapterLight> = {
 };
 
 /**
+ * Day mode (`html[data-time="day"]`): the same office under Lima's overcast daylight. The window
+ * light becomes the key (the `moon` light turns into a soft sun), the lamp stays off until nightfall
+ * at the end, and the monitor no longer lights the room.
+ */
+const CHAPTER_LIGHT_DAY: Record<ChapterId, ChapterLight> = {
+  intro: { lamp: 0, monitor: 5, moon: 2.2, shelf: 0 },
+  hero: { lamp: 0, monitor: 5, moon: 2.2, shelf: 0 },
+  about: { lamp: 0, monitor: 5, moon: 2.2, shelf: 0 },
+  experience: { lamp: 0, monitor: 5, moon: 2.6, shelf: 1.6 },
+  company: { lamp: 0, monitor: 1.5, moon: 1.7, shelf: 0 },
+  products: { lamp: 0, monitor: 1.5, moon: 1.6, shelf: 0 },
+  contact: { lamp: 0, monitor: 1, moon: 1.3, shelf: 0 },
+  outro: { lamp: 22, monitor: 0.6, moon: 0.6, shelf: 0 }
+};
+const LAMP_SWITCH_DAY: Partial<Record<ChapterId, number>> = { outro: 0.4 };
+const DIM_PRESENCE_DAY = 0.5;
+const SUN_COLOR = '#fff1dc';
+const SKY_FILL = '#dfe8f2';
+const GROUND_FILL = '#a08c72';
+/** Hemisphere gain by day: overcast light fills the whole room. */
+const DAY_FILL_GAIN = 14;
+
+/**
  * The day years are a memory lit by the monitor and the window; the night starts with the lamp
  * clicking on once the camera has landed on TUSOCIO IA, and ends with it clicking off at dawn.
  * Light never changes while the camera moves towards these chapters (one motion at a time).
@@ -137,6 +162,8 @@ const FIGURE_ORDER: readonly FigureId[] = ['alfa', 'ventixs', 'parati', 'skymek'
 const ALFA_TURN = 20 * (Math.PI / 180);
 const MAX_TURN_SPEED = 0.05;
 const FIGURE_LIFT = 0.012;
+const PLAY_SECONDS = 0.9;
+const PLAY_HOP = 0.02;
 /** Warm bounce on the focused figure (desk.md §5: +10 %), as self-illumination of its albedo. */
 const FOCUS_BOUNCE = 0.03;
 
@@ -219,11 +246,18 @@ export class DeskSet implements ShotProvider {
   private shelfLight!: SpotLight;
   private moonNight!: Color;
   private moonDawn!: Color;
+  private readonly sunColor = new Color(SUN_COLOR);
+  private readonly nightSky = new Color(0x1b2436);
+  private readonly nightGround = new Color(0x0a0806);
+  private readonly daySky = new Color(SKY_FILL);
+  private readonly dayGround = new Color(GROUND_FILL);
+  private moonAt = new Vector3();
+  private readonly sunAt = new Vector3();
   private triangles = 0;
   private chapter: ChapterId = 'intro';
   private subIndex = 0;
   private introStart = -1;
-  private readonly level = { lamp: 0, monitor: 0, moon: 0.45, shelf: 0, dawn: 0, phone: 0, alfaSignal: 1, alfaYaw: 0, late: 0 };
+  private readonly level = { lamp: 0, monitor: 0, moon: 0.45, shelf: 0, dawn: 0, phone: 0, alfaSignal: 1, alfaYaw: 0, late: 0, day: 0 };
   private settledAt = -1;
   private readonly presence = new Map<FigureId, number>(FIGURE_ORDER.map(id => [id, 1]));
   private readonly neonSince = new Map<FigureId, number>();
@@ -240,13 +274,21 @@ export class DeskSet implements ShotProvider {
   private lampToggledAt = -1;
   private storySwitched = false;
   private clockModel: StoryClock | null = null;
+  private laptopScreen: Mesh<PlaneGeometry, MeshBasicMaterial> | null = null;
   private clockMinutes = 60;
   /** 0 closed … 1 open: the TCS folder stays shut until the story reaches today. */
   private folderOpen = 0;
   private readonly hingeMatrix = new Matrix4();
   private clock = 0;
+  private readonly playStart = new Map<FigureId, number>();
   private readonly onAction = (event: Event) => {
-    if ((event as CustomEvent<{ action?: string }>).detail?.action !== 'lamp') return;
+    const detail = (event as CustomEvent<{ action?: string; id?: string }>).detail;
+    if (detail?.action === 'play' && detail.id && (FIGURE_ORDER as readonly string[]).includes(detail.id)) {
+      if (this.context?.motion()) this.playStart.set(detail.id as FigureId, this.clock);
+      this.context?.invalidate();
+      return;
+    }
+    if (detail?.action !== 'lamp') return;
     this.lampOff = !this.lampOff;
     this.lampToggledAt = this.clock;
     window.dispatchEvent(new CustomEvent('desk:switch', { detail: { on: !this.lampOff } }));
@@ -298,6 +340,7 @@ export class DeskSet implements ShotProvider {
     buildChair(statics, palette, q);
     buildTelescope(statics, palette, q);
     buildOpenFolder(statics, palette);
+    buildLaptop(statics, palette);
     this.phoneMatrix = buildPhone(statics, palette);
     buildFigures(statics, palette, q);
     const geometry = statics.build();
@@ -378,6 +421,19 @@ export class DeskSet implements ShotProvider {
     this.phoneScreen.quaternion.copy(phone.quaternion);
     this.room.add(this.phoneScreen);
     this.disposables.push(screenMaterial, this.screenTexture, this.screen.geometry, phoneMaterial, this.phoneTexture, this.phoneScreen.geometry);
+
+    const laptopTexture = createScreenTexture();
+    drawScreen(laptopTexture, LAPTOP.screen.width / LAPTOP.screen.height, tokenColor('--color-monitor-glow', '#7fb8ff'));
+    const laptopMaterial = new MeshBasicMaterial({ map: laptopTexture });
+    const laptopGlass = new Mesh(new PlaneGeometry(LAPTOP.screen.width, LAPTOP.screen.height), laptopMaterial);
+    const glassFrame = laptopScreenFrame();
+    laptopGlass.name = 'desk-laptop-screen';
+    laptopGlass.position.copy(glassFrame.centre);
+    laptopGlass.quaternion.copy(glassFrame.quaternion);
+    laptopGlass.raycast = () => undefined;
+    this.laptopScreen = laptopGlass;
+    this.room.add(laptopGlass);
+    this.disposables.push(laptopTexture, laptopMaterial, laptopGlass.geometry);
   }
 
   private phoneSurface(): SurfaceFrame {
@@ -461,6 +517,8 @@ export class DeskSet implements ShotProvider {
     this.moonDawn = tokenColor('--color-dawn-low', '#e9a47a');
     this.moon = new DirectionalLight(this.moonNight.clone(), 0);
     this.moon.position.set(WINDOW.x + 1.2, WINDOW.y + 1.6, ROOM.back - 3);
+    this.moonAt = this.moon.position.clone();
+    this.sunAt.set(WINDOW.x - 1.6, WINDOW.y + 3.4, ROOM.back - 3);
     this.moon.target.position.set(0, 0.6, 0.8);
     this.fill = new HemisphereLight(0x1b2436, 0x0a0806, tokenNumber('--desk-ambient-intensity', 0.08) * LIGHT_CALIBRATION.fill);
     this.shelfLight = new SpotLight(this.moonNight.clone(), 0, 0, 0.42, 0.85, 2);
@@ -516,6 +574,7 @@ export class DeskSet implements ShotProvider {
 
   getAnchor(name: string): Vector3 | null {
     if (!this.context) return null;
+    if (name === 'lamp') return this.lamp.getWorldPosition(new Vector3());
     const view = this.viewport();
     const all = framings(view, this.phoneSurface());
     for (const list of Object.values(all)) {
@@ -580,7 +639,8 @@ export class DeskSet implements ShotProvider {
     if (state.settled && this.settledAt < 0) this.settledAt = time;
     let settling = false;
     this.syncOrientation();
-    const light = CHAPTER_LIGHT[this.chapter];
+    const day = document.documentElement.dataset.time === 'day';
+    const light = (day ? CHAPTER_LIGHT_DAY : CHAPTER_LIGHT)[this.chapter];
     const level = this.level;
     if (this.chapter === 'intro' && motion) {
       if (this.introStart < 0) this.introStart = time;
@@ -589,7 +649,7 @@ export class DeskSet implements ShotProvider {
       level.monitor = intro.monitor * light.monitor;
       settling = time - this.introStart < 1.4;
     } else {
-      const switchDelay = LAMP_SWITCH[this.chapter];
+      const switchDelay = (day ? LAMP_SWITCH_DAY : LAMP_SWITCH)[this.chapter];
       if (this.lampToggledAt >= 0) {
         level.lamp = motion ? filamentSwitch(level.lamp, this.lampOff ? 0 : light.lamp, time - this.lampToggledAt, step) : this.lampOff ? 0 : light.lamp;
         settling ||= Math.abs(level.lamp - (this.lampOff ? 0 : light.lamp)) > 0.05;
@@ -606,6 +666,10 @@ export class DeskSet implements ShotProvider {
       level.monitor = damp(level.monitor, light.monitor, 5, step);
     }
     level.late = damp(level.late, LATENESS[this.chapter], 1.2, step);
+    const dayGoal = day ? 1 : 0;
+    level.day = damp(level.day, dayGoal, 1.6, step);
+    if (Math.abs(level.day - dayGoal) < 0.002) level.day = dayGoal;
+    settling ||= level.day !== dayGoal;
     const rank = storyRank(this.chapter, this.subIndex);
     const openGoal = rank >= FOLDER_OPENS_AT ? 1 : 0;
     const opening = motion && rank === FOLDER_OPENS_AT && openGoal > this.folderOpen;
@@ -614,7 +678,7 @@ export class DeskSet implements ShotProvider {
       if (Math.abs(this.folderOpen - openGoal) < 0.001) this.folderOpen = openGoal;
     }
     settling ||= this.folderOpen !== openGoal;
-    const minutesGoal = storyMinutes(this.chapter, this.subIndex);
+    const minutesGoal = storyMinutes(this.chapter, this.subIndex, day);
     const minutes = damp(this.clockMinutes, minutesGoal, 1.6, step);
     if (Math.abs(minutes - this.clockMinutes) > 0.01 || Math.abs(minutes - minutesGoal) < 0.01) {
       this.clockMinutes = Math.abs(minutes - minutesGoal) < 0.05 ? minutesGoal : minutes;
@@ -636,7 +700,7 @@ export class DeskSet implements ShotProvider {
     for (const id of FIGURE_ORDER) {
       const [introChapter, introSub] = FIGURE_INTRO[id];
       const introRank = storyRank(introChapter, introSub);
-      const goal = this.chapter === 'outro' || rank >= introRank ? 1 : DIM_PRESENCE;
+      const goal = this.chapter === 'outro' || rank >= introRank ? 1 : day ? DIM_PRESENCE_DAY : DIM_PRESENCE;
       const current = this.presence.get(id)!;
       const ready = this.settledAt >= 0 && time - this.settledAt >= PRESENCE_DELAY;
       if (motion && rank === introRank && ready && current < 0.5 && !this.neonSince.has(id)) this.neonSince.set(id, time);
@@ -650,6 +714,7 @@ export class DeskSet implements ShotProvider {
     }
 
     const focused = this.chapter === 'products' ? PRODUCT_FIGURES[Math.min(this.subIndex, PRODUCT_FIGURES.length - 1)] : null;
+    if (this.playStart.size) settling = true;
     for (const id of PRODUCT_FIGURES) {
       const goal = id === focused || OBJECT_ID[id] === this.hoverId ? FIGURE_LIFT : 0;
       const lift = damp(this.figureLift.get(id)!, goal, 5, step);
@@ -699,6 +764,19 @@ export class DeskSet implements ShotProvider {
   }
 
   /** Rounded lift and turn of the figures: the lamp shadow is re-rendered only when it changes. */
+  /** A clicked figure hops and turns once around, like picking up a desk toy. */
+  private playOffset(id: FigureId): { lift: number; yaw: number } {
+    const started = this.playStart.get(id);
+    if (started === undefined) return { lift: 0, yaw: 0 };
+    const t = (this.clock - started) / PLAY_SECONDS;
+    if (t >= 1) {
+      this.playStart.delete(id);
+      return { lift: 0, yaw: 0 };
+    }
+    const eased = 1 - Math.pow(1 - t, 3);
+    return { lift: Math.sin(Math.PI * t) * PLAY_HOP, yaw: eased * Math.PI * 2 };
+  }
+
   private figurePose(): string {
     const parts = [Math.round(this.level.alfaYaw * 200)];
     for (const id of PRODUCT_FIGURES) parts.push(Math.round((this.figureLift.get(id) ?? 0) * 2000), Math.round((this.figureYaw.get(id) ?? 0) * 200));
@@ -724,23 +802,30 @@ export class DeskSet implements ShotProvider {
   private applyLevels(): void {
     const level = this.level;
     this.lamp.intensity = level.lamp * LIGHT_CALIBRATION.lamp;
-    this.monitorLight.intensity = level.monitor * LIGHT_CALIBRATION.monitor;
+    this.monitorLight.intensity = level.monitor * LIGHT_CALIBRATION.monitor * (1 - 0.8 * level.day);
     this.moon.intensity = level.moon * LIGHT_CALIBRATION.moon;
     this.shelfLight.intensity = level.shelf * LIGHT_CALIBRATION.shelf;
-    this.moon.color.copy(this.moonNight).lerp(this.moonDawn, level.dawn * 0.7);
-    this.fill.intensity = tokenNumber('--desk-ambient-intensity', 0.08) * LIGHT_CALIBRATION.fill * (1 + level.dawn * 1.5);
+    this.moon.color.copy(this.moonNight).lerp(this.sunColor, level.day).lerp(this.moonDawn, level.dawn * 0.7);
+    this.moon.position.copy(this.moonAt).lerp(this.sunAt, level.day);
+    this.fill.color.copy(this.nightSky).lerp(this.daySky, level.day);
+    this.fill.groundColor.copy(this.nightGround).lerp(this.dayGround, level.day);
+    this.fill.intensity = tokenNumber('--desk-ambient-intensity', 0.08) * LIGHT_CALIBRATION.fill * (1 + level.dawn * 1.5 + level.day * DAY_FILL_GAIN);
     this.screen.material.color.setScalar(SCREEN_HDR * Math.min(level.monitor / 5, 1.2));
     this.phoneScreen.material.color.setScalar(0.06 + level.phone * SCREEN_HDR * 0.9);
+    this.laptopScreen?.material.color.setScalar(SCREEN_HDR * 0.55 * Math.min(level.monitor / 5, 1));
     this.backdrop.setDawn(level.dawn);
     this.backdrop.setLateness(level.late);
+    this.backdrop.setDay(level.day);
+    this.glass.setDay(level.day);
     this.glass.setLampReflection(Math.min(level.lamp / 28, 1));
     this.beam.setLevel(Math.min(level.lamp / 28, 1.2));
     this.beam.setPixelScale(this.context.renderer.domElement.height, this.viewport().fov);
-    this.steam?.setStrength(this.chapter === 'hero' || this.chapter === 'about' || this.chapter === 'intro' ? 0.22 : 0.1);
+    this.steam?.setStrength((this.chapter === 'hero' || this.chapter === 'about' || this.chapter === 'intro' ? 0.22 : 0.1) * (1 - this.level.day));
     const uniforms = this.uniforms;
     FIGURE_ORDER.forEach((id, index) => {
-      uniforms.uFigLift.value[index] = this.figureLift.get(id) ?? 0;
-      uniforms.uFigYaw.value[index] = id === 'alfa' ? level.alfaYaw : (this.figureYaw.get(id) ?? 0);
+      const play = this.playOffset(id);
+      uniforms.uFigLift.value[index] = (this.figureLift.get(id) ?? 0) + play.lift;
+      uniforms.uFigYaw.value[index] = (id === 'alfa' ? level.alfaYaw : (this.figureYaw.get(id) ?? 0)) + play.yaw;
     });
     uniforms.uSignal.value[OBJECT_ID.alfa] = level.alfaSignal;
     for (const id of FOLDERS) uniforms.uGlow.value[OBJECT_ID[id]] = (this.folderGlow.get(id) ?? 0) * 0.32;

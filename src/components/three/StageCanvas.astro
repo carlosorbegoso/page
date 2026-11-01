@@ -1,5 +1,11 @@
 ---
-import { withBase } from '../../i18n/utils';
+import { useTranslations, withBase, type Locale } from '../../i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+
+const t = useTranslations(Astro.props.locale);
 
 const fallback = (name: string, width: number, format: string) => withBase(`fallback/${name}-${width}.${format}`);
 const sources = (name: string) => [
@@ -29,11 +35,18 @@ const sources = (name: string) => [
       fetchpriority="high"
     />
   </picture>
+  <canvas data-stage-loader hidden></canvas>
 </div>
+<p class="stage-status" data-stage-status data-done={t('stage.loaded')} hidden>
+  <span data-stage-clock aria-hidden="true">22:48</span>
+  <span role="status" aria-live="polite">{t('stage.loading')}</span>
+  <span data-stage-percent aria-hidden="true">0%</span>
+</p>
 
 <script>
   import { onIdle } from '../../three/idle';
   import { detectTier } from '../../three/tier';
+  import { startStageLoader } from './stage-loader';
 
   const BOOT_TIMEOUT_MS = 3000;
   const INTERACTIONS = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'] as const;
@@ -68,6 +81,7 @@ const sources = (name: string) => [
       container.dataset.tier = tier.tier;
       if (capture || params.has('debug')) console.info('[stage] tier', tier);
       if (tier.tier === 'none') return;
+      window.dispatchEvent(new CustomEvent('stage:progress', { detail: { value: 0.3 } }));
       try {
         const { boot } = await import('../../three/index');
         await boot({ container, tier, params });
@@ -85,6 +99,7 @@ const sources = (name: string) => [
   }
   if (container && !container.dataset.booted) {
     container.dataset.booted = 'true';
+    startStageLoader(container);
     void init(container);
   }
 </script>
@@ -163,6 +178,43 @@ const sources = (name: string) => [
     opacity: 1;
   }
 
+  [data-stage-loader] {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    transition: opacity var(--duration-slow) var(--ease-standard);
+  }
+
+  [data-stage-loader][data-leaving],
+  .stage-status[data-leaving] {
+    opacity: 0;
+  }
+
+  .stage-status {
+    position: fixed;
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    left: max(var(--spacing-gutter), env(safe-area-inset-left));
+    z-index: var(--z-content);
+    display: flex;
+    gap: 0.75ch;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    line-height: 1;
+    color: var(--color-text-muted);
+    text-shadow: var(--plate-text-halo);
+    pointer-events: none;
+    font-variant-numeric: tabular-nums;
+    transition: opacity var(--duration-slow) var(--ease-standard) 1.2s;
+  }
+
+  .stage-status[hidden],
+  [data-stage-loader][hidden] {
+    display: none;
+  }
+
   [data-stage][data-degraded] :global([data-stage-canvas]) {
     display: none;
   }
@@ -175,6 +227,7 @@ const sources = (name: string) => [
   }
 
   @media (forced-colors: active) {
+    [data-stage-loader],
     [data-stage] :global([data-stage-canvas]) {
       display: none;
     }

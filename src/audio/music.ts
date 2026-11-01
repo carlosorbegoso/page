@@ -54,7 +54,8 @@ export class MusicBed {
 
   /** Switches to the act of a chapter; repeated calls for the same act do nothing. */
   follow(chapter: ChapterId): void {
-    void this.play(ACT_OF[chapter]);
+    const day = document.documentElement.dataset.time === 'day';
+    void this.play(day ? (chapter === 'outro' ? 'night' : 'day') : ACT_OF[chapter]);
   }
 
   async playSample(id: SampleId, level: number): Promise<void> {

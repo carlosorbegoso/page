@@ -23,7 +23,7 @@ const centered = align === 'center';
 >
   {
     eyebrow && (
-      <p class="font-sans text-xs font-semibold tracking-caps text-accent uppercase">{eyebrow}</p>
+      <p class="font-sans text-sm font-medium text-text-muted">{eyebrow}</p>
     )
   }
   {act && <span class="section-act" aria-hidden="true">{act}</span>}
@@ -47,7 +47,7 @@ const centered = align === 'center';
     order: -1;
     margin-bottom: 0.25rem;
     font-family: var(--font-display);
-    font-size: clamp(3rem, 7vw, 6rem);
+    font-size: clamp(2.75rem, min(7vw, 10vh), 6rem);
     font-weight: 600;
     line-height: 0.95;
     letter-spacing: -0.035em;
@@ -58,8 +58,6 @@ const centered = align === 'center';
     font-family: var(--font-sans);
     font-size: var(--text-xs);
     font-weight: 600;
-    letter-spacing: var(--tracking-caps, 0.14em);
-    text-transform: uppercase;
     color: var(--color-text-muted);
   }
 </style>

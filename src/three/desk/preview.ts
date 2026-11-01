@@ -112,7 +112,7 @@ export async function mountDeskPreview(container: HTMLElement, options: DeskPrev
       element.innerHTML = html;
       const scale = anchor.scale ?? 0.001;
       const size = anchor.size ?? { width: 0.5, height: 0.3 };
-      element.style.cssText = `width:${Math.round(size.width / scale)}px;height:${Math.round(size.height / scale)}px;color:#e9eef5;font-family:Sora,system-ui;background:#0b0f16;padding:24px;box-sizing:border-box;overflow:hidden`;
+      element.style.cssText = `width:${Math.round(size.width / scale)}px;height:${Math.round(size.height / scale)}px;color:#e9eef5;font-family:Geist,system-ui;background:#0b0f16;padding:24px;box-sizing:border-box;overflow:hidden`;
       plate = new CSS3DObject(element);
       plate.position.copy(anchor.position);
       plate.quaternion.copy(anchor.quaternion);

@@ -7,7 +7,9 @@ import { DESK, HERO_EYE } from './layout';
 const URL = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}models/alarm-clock/alarm-clock.gltf`;
 /** A faint luminous dial: the clock sits outside the lamp's cone and would read as a black disc. */
 const DIAL_GLOW = 0.22;
-export const CLOCK_POSITION = new Vector3(-0.54, DESK.top, -0.24);
+/** Back right, between the monitor and the lamp: in the wide shots, below the frame in the close ones. */
+export const CLOCK_POSITION = new Vector3(0.57, DESK.top, -0.41);
+const CLOCK_SCALE = 0.8;
 
 /** The story clock, in minutes after 22:00, per chapter and sub-shot (matches the HUD beats). */
 const STORY_MINUTES: Record<ChapterId, number[]> = {
@@ -21,8 +23,20 @@ const STORY_MINUTES: Record<ChapterId, number[]> = {
   outro: [478]
 };
 
-export function storyMinutes(chapter: ChapterId, subIndex: number): number {
-  const list = STORY_MINUTES[chapter];
+/** By day, minutes after 10:00 (same 12-hour dial): a morning at the office until nightfall. */
+const STORY_MINUTES_DAY: Record<ChapterId, number[]> = {
+  intro: [0],
+  hero: [0],
+  about: [20, 40],
+  experience: [60, 65, 70, 75, 80],
+  company: [490],
+  products: [500, 510, 520],
+  contact: [530],
+  outro: [545]
+};
+
+export function storyMinutes(chapter: ChapterId, subIndex: number, day = false): number {
+  const list = (day ? STORY_MINUTES_DAY : STORY_MINUTES)[chapter];
   return list[Math.min(Math.max(subIndex, 0), list.length - 1)]!;
 }
 
@@ -44,6 +58,7 @@ export class StoryClock {
   constructor(onReady: () => void) {
     this.group.name = 'desk-clock';
     this.group.position.copy(CLOCK_POSITION);
+    this.group.scale.setScalar(CLOCK_SCALE);
     acquireGltf(URL)
       .then(gltf => {
         if (this.disposed) return;

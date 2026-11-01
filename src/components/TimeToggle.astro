@@ -1,0 +1,58 @@
+---
+import { useTranslations, type Locale } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<button
+  type="button"
+  data-time-toggle
+  data-label-day={t('time.toDay')}
+  data-label-night={t('time.toNight')}
+  aria-label={t('time.toDay')}
+  title={t('time.toDay')}
+  class="group hud-control hud-icon"
+>
+  <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" class="shrink-0 fill-none stroke-current group-data-[state=day]:hidden" stroke-width="2" stroke-linecap="round">
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+  </svg>
+  <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" class="hidden shrink-0 fill-current group-data-[state=day]:block">
+    <path d="M20.5 14.6A8.5 8.5 0 0 1 9.4 3.5a8.5 8.5 0 1 0 11.1 11.1Z"></path>
+  </svg>
+</button>
+
+<script>
+  const STORAGE_KEY = 'time';
+  const root = document.documentElement;
+
+  function render() {
+    const day = root.dataset.time === 'day';
+    for (const button of document.querySelectorAll<HTMLButtonElement>('[data-time-toggle]')) {
+      const label = (day ? button.dataset.labelNight : button.dataset.labelDay) ?? '';
+      button.dataset.state = day ? 'day' : 'night';
+      button.setAttribute('aria-label', label);
+      button.title = label;
+    }
+  }
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-time-toggle]')) {
+    button.addEventListener('click', () => {
+      const next = root.dataset.time === 'day' ? 'night' : 'day';
+      root.dataset.time = next;
+      try {
+        localStorage.setItem(STORAGE_KEY, next);
+      } catch {
+        /* Private mode: the choice lasts for this page only. */
+      }
+      render();
+      window.dispatchEvent(new CustomEvent('time:toggle', { detail: { day: next === 'day' } }));
+    });
+  }
+  render();
+</script>

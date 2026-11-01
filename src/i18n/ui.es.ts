@@ -35,6 +35,8 @@ export const es = {
   'hero.ctaProducts': 'Ver productos',
   'hero.ctaContact': 'Escríbeme',
   'hero.fallbackAlt': 'Alfa, la mascota de TUSOCIO IA, sobre una red de nodos conectados',
+  'stage.loading': 'Encendiendo el escritorio…',
+  'stage.loaded': 'Escritorio encendido',
   'hero.metrics.label': 'En cifras',
   'hero.metrics.performance.value': '+30–40 %',
   'hero.metrics.performance.label': 'de rendimiento en Intercorp Retail',
@@ -62,6 +64,12 @@ export const es = {
   'story.night': 'De noche',
   'story.dawn': 'Amanece',
   'about.code.extra': 'CIBERTEC 2023, Alura Java Bootcamp 2023',
+  'time.toDay': 'Ver la oficina de día',
+  'time.toNight': 'Ver la oficina de noche',
+  'story.today': 'Hoy',
+  'story.afterWork': 'Al salir',
+  'story.dusk': 'Atardece',
+  'story.nightfall': 'Cae la noche',
   'about.education': 'Formación',
   'about.stack': 'Stack principal',
   'company.title': 'TUSOCIO IA',
@@ -111,8 +119,11 @@ export const es = {
   'notFound.description':
     'Esta página no existe o cambió de lugar. Vuelve al inicio para ver mi experiencia, mis productos y cómo escribirme.',
   'notFound.title': 'Página no encontrada',
-  'notFound.body': 'Esta página no existe o cambió de lugar.',
-  'notFound.home': 'Volver al inicio'
+  'notFound.kicker': 'Error 404 · Lima, de noche',
+  'notFound.body':
+    'Busqué en el archivo del escritorio y esta hoja no está. Puede que nunca haya existido o que cambiara de lugar.',
+  'notFound.home': 'Volver al inicio',
+  'notFound.paper': 'No encontrado'
 } as const;
 
 export type UiKey = keyof typeof es;

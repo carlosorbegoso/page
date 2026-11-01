@@ -57,7 +57,7 @@ const stackId = `${headingId}-stack`;
     compact ? (
       <article aria-labelledby={headingId} class="max-w-measure">
         <span class="era-year" aria-hidden="true">{start.slice(0, 4)}</span>
-        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-text-muted">
+        <div class="compact-line flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-text-muted">
           <span class="tabular-nums">
             <time datetime={start}>{formatTimelineMonth(start, locale)}</time>
             {' – '}
@@ -107,7 +107,7 @@ const stackId = `${headingId}-stack`;
 
         {highlights.length > 0 && (
           <div class="flex flex-col gap-2">
-            <p id={highlightsId} class="stage-hidden text-xs font-semibold tracking-caps text-text-muted uppercase">
+            <p id={highlightsId} class="stage-hidden text-sm font-medium text-text-muted">
               {t('experience.highlights')}
             </p>
             <ul
@@ -162,7 +162,7 @@ const stackId = `${headingId}-stack`;
     order: -1;
     margin-bottom: 0.35rem;
     font-family: var(--font-display);
-    font-size: clamp(3rem, 6.5vw, 5.5rem);
+    font-size: clamp(2.75rem, min(6.5vw, 9.5vh), 5.5rem);
     font-weight: 600;
     line-height: 0.9;
     letter-spacing: -0.04em;
@@ -190,6 +190,21 @@ const stackId = `${headingId}-stack`;
   @media (width < 48rem) {
     :global(.is-3d) .wide-only {
       display: none;
+    }
+
+    /* On phones the one-line entry stacks like the others: dates, company, role. */
+    :global(.is-3d) .compact-line {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
+    }
+
+    :global(.is-3d) .compact-line > span:first-child {
+      order: 0;
+    }
+
+    :global(.is-3d) .compact-line h3 {
+      font-size: var(--text-2xl);
     }
   }
 </style>

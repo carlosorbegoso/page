@@ -588,6 +588,7 @@ export class Stage {
     this.plates?.unmount();
     this.plates = undefined;
     this.options.container.dataset.degraded = reason;
+    document.documentElement.classList.remove('stage-pending');
     this.debug?.note(`degraded: ${reason}`);
   }
 

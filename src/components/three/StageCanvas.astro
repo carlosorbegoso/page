@@ -23,6 +23,24 @@ const sources = (name: string) => [
 );
 ---
 
+<script is:inline>
+  (() => {
+    /* While the 3D stage boots, only the poster shows: the flat page under it is a different layout and would jump. */
+    const params = new URLSearchParams(location.search);
+    if (params.get('tier') === 'none' || params.has('capture') || navigator.connection?.saveData) return;
+    let gl = null;
+    try {
+      gl = document.createElement('canvas').getContext('webgl2');
+    } catch {
+      gl = null;
+    }
+    if (!gl) return;
+    const root = document.documentElement;
+    root.classList.add('stage-pending');
+    setTimeout(() => root.classList.remove('stage-pending'), 12000);
+  })();
+</script>
+
 <div data-stage aria-hidden="true">
   <picture data-stage-fallback="hero">
     {sources('hero').map(s => <source media={s.media} type={s.type} srcset={s.srcset} width={s.width} height={s.height} />)}

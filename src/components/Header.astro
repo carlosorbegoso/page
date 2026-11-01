@@ -96,7 +96,7 @@ const menuItem =
         aria-haspopup="dialog"
         aria-controls="section-index"
         aria-expanded="false"
-        class="group/clock inline-flex min-h-tap items-center rounded-md px-2 focus-visible:shadow-focus focus-visible:outline-none"
+        class="hud-clock group/clock inline-flex min-h-tap items-center rounded-full px-3 focus-visible:shadow-focus focus-visible:outline-none"
       >
         <span
           data-hud-chapter
@@ -325,6 +325,18 @@ const menuItem =
   /* The story clock sits over bright windows at dawn: a halo keeps it legible on any frame. */
   .hud-beat {
     text-shadow: var(--plate-text-halo);
+  }
+
+  /* A soft glass pill keeps the story clock legible over bright windows and warm close-ups. */
+  .hud-clock {
+    background: rgb(8 11 18 / 0.55);
+    backdrop-filter: blur(10px) saturate(1.2);
+    -webkit-backdrop-filter: blur(10px) saturate(1.2);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08);
+  }
+
+  .hud-clock .hud-beat {
+    color: rgb(233 238 245 / 0.86);
   }
 
   .hud-progress {

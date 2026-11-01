@@ -75,6 +75,7 @@ export function startStageLoader(container: HTMLElement): void {
   let handoff: { at: number; intro: boolean } | null = null;
   let frame = 0;
   let finished = false;
+  let veil = -1;
 
   const still = () => reducedQuery.matches || root.dataset.motion === 'paused';
   const day = () => root.dataset.time === 'day';
@@ -157,7 +158,7 @@ export function startStageLoader(container: HTMLElement): void {
     ctx.fillRect((at.x - radius) * scale, (at.y - radius) * scale, radius * 2 * scale, radius * 2 * scale);
   }
 
-  function draw(time: number, since: number): void {
+  function draw(time: number, since: number, dt: number): void {
     const moving = !still();
     const intro = handoff ? handoff.intro : scrollY < 4 && moving;
     const warm = smooth(0, 1, shown);
@@ -176,7 +177,9 @@ export function startStageLoader(container: HTMLElement): void {
       cone(sun, beam, height * 1.15, minSide * 0.32, SUN_RGB, 0.12 * (0.4 + 0.6 * warm) * light);
       drawMotes(sun, beam, height * 1.1, minSide * 0.3, SUN_RGB, 0.55 * light, moving ? time : 0);
     } else {
-      ctx.fillStyle = `rgba(4,6,11,${(intro ? 0.22 + 0.64 * warm : moving ? 0.16 + 0.1 * warm : 0.12) * scene})`;
+      const veilGoal = intro ? 0.22 + 0.64 * warm : moving ? 0.16 + 0.1 * warm : 0.12;
+      veil = veil < 0 || !moving ? veilGoal : veil + (veilGoal - veil) * (1 - Math.exp(-3 * dt));
+      ctx.fillStyle = `rgba(4,6,11,${veil * scene})`;
       ctx.fillRect(0, 0, canvas!.width, canvas!.height);
       ctx.globalCompositeOperation = 'lighter';
       const flicker = moving ? 0.9 + 0.1 * Math.sin(time * 23) * Math.sin(time * 3.1) : 1;
@@ -213,7 +216,7 @@ export function startStageLoader(container: HTMLElement): void {
       lamp = { x: lamp.x + (lampGoal.x - lamp.x) * k, y: lamp.y + (lampGoal.y - lamp.y) * k };
     }
     const since = handoff ? (now - handoff.at) / 1000 : 0;
-    draw(now / 1000, since);
+    draw(now / 1000, since, dt);
     writeStatus();
     const done = handoff && (still() || since > (handoff.intro && !day() ? LAMP_RAMP[1] : CANVAS_FADE_S));
     if (done) finish(true);

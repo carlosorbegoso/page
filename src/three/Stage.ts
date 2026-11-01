@@ -185,6 +185,8 @@ export class Stage {
     await this.renderer.compileAsync(this.world.scene, this.camera);
     progress(0.96);
     await yieldToMain();
+    // The idle window starts when the scene is first seen: a long boot would otherwise skip the power-on.
+    this.lastInteraction = performance.now();
     this.ready = true;
 
     this.listen();

@@ -61,7 +61,12 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Para cambiar… | Edita |
 | --- | --- |
 | Scroll por capítulos, tour, snap *(pendiente: `story-nav/`)* | `src/motion/story-nav.ts` |
-| Texto cinético | `src/motion/kinetic.ts` |
+| Texto cinético: arranque, eventos de capítulo | `src/motion/kinetic/boot.ts` (`motion/kinetic.ts` es el punto de entrada) |
+| Texto cinético: marcado por letra o palabra, líneas, cascadas | `src/motion/kinetic/split-markup.ts` |
+| Texto cinético: cuándo entra cada placa (3D por capítulo, plano por intersección) | `src/motion/kinetic/modes.ts`, `groups.ts` |
+| Texto cinético: entrar y salir, fin de la transición | `src/motion/kinetic/reveal.ts`, `settle.ts` |
+| Contadores animados | `src/motion/kinetic/count.ts` |
+| Sonido de tecla al escribir (`desk:key`) | `src/motion/kinetic/type-keys.ts` |
 | Botones magnéticos | `src/motion/magnetic.ts` |
 
 ## Sonido

@@ -1,7 +1,9 @@
-import { Group, Matrix4, Vector3, type BufferGeometry, type Camera, type Material, type Mesh } from 'three';
+import { Group, Matrix4, Vector3, type BufferGeometry, type Camera, type Material, type Mesh, type Object3D } from 'three';
 import { FIGURES, MUG, type FigureId } from '../layout';
 import type { AtlasUniforms } from '../materials';
 import { OBJECT_ID } from '../builder';
+import { ProductCards, productFocus } from '../notes/cards';
+import type { ProductId } from '../notes/layout';
 import type { Palette } from '../props';
 import { AlfaLife } from './alfa';
 import { BubbleLife, splitDots } from './bubble';
@@ -59,6 +61,7 @@ export class DeskLife {
   private readonly wrench: WrenchLife;
   private readonly mug: MugLife;
   private readonly pokemon: PokemonLife;
+  private readonly cards = new ProductCards();
   private readonly frames = new Map<FigureId, Matrix4>((Object.keys(SLOT) as FigureId[]).map(id => [id, new Matrix4()]));
   private readonly disposables: Array<{ dispose(): void }> = [];
   private hovered: string | null = null;
@@ -94,6 +97,8 @@ export class DeskLife {
     this.disposables.push(this.pokemon);
     this.object3D.add(this.gift.sparks.points, this.bubble.message);
     this.disposables.push(this.gift, this.bubble);
+    this.object3D.add(this.cards.object3D);
+    this.disposables.push(this.cards);
   }
 
   play(toy: LifeToy, time: number, motion: boolean): void {
@@ -131,7 +136,8 @@ export class DeskLife {
     const mug = this.mug.update(dt, time, motion);
     const pokemon = this.pokemon.update(time, motion);
     const press = this.press.update(time);
-    return alfa || gift || bubble || wrench || mug || pokemon || press || Math.abs(liftGoal - this.alfaLift) > 1e-5;
+    const cards = this.cards.update(dt, productFocus(frame.focused), motion);
+    return alfa || gift || bubble || wrench || mug || pokemon || press || cards || Math.abs(liftGoal - this.alfaLift) > 1e-5;
   }
 
   offset(id: FigureId): FigureOffset {
@@ -148,6 +154,16 @@ export class DeskLife {
   glow(id: string): number {
     const own = id === 'parati' ? this.gift.glow(this.time) : id === 'ventixs' ? this.bubble.glow(this.time) : id === 'skymek' ? this.wrench.glow(this.time) : 0;
     return own + this.press.glow(id, this.time);
+  }
+
+  /** The invisible pick box over each product card's printed face. */
+  cardTargets(): ReadonlyMap<ProductId, Object3D> {
+    return this.cards.targets();
+  }
+
+  /** Whether a product card stands facing the camera (its link is clickable then). */
+  cardRaised(id: ProductId): boolean {
+    return this.cards.isRaised(id);
   }
 
   signalGain(): number {
@@ -167,11 +183,12 @@ export class DeskLife {
     this.wrench.pose(this.time, this.frames.get('skymek')!);
     this.mug.pose(this.time);
     this.pokemon.pose(this.time);
+    this.cards.pose();
   }
 
   /** Changes whenever a part moves enough for the lamp shadow to need a new render. */
   poseKey(): string {
-    return `${this.alfa?.poseKey() ?? ''}|${this.gift.poseKey(this.time)}|${this.wrench.poseKey(this.time)}|${this.mug.poseKey()}|${this.pokemon.poseKey()}`;
+    return `${this.alfa?.poseKey() ?? ''}|${this.gift.poseKey(this.time)}|${this.wrench.poseKey(this.time)}|${this.mug.poseKey()}|${this.pokemon.poseKey()}|${this.cards.poseKey()}`;
   }
 
   dispose(): void {

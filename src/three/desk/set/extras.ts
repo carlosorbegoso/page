@@ -7,7 +7,6 @@ import type { RoomMeshes } from './room';
 
 type Disposables = Array<{ dispose(): void }>;
 
-/** The animated collectibles and the mug, split out of the static room so they can move. */
 export function addDeskLife(room: Group, meshes: RoomMeshes, palette: Palette, high: boolean, disposables: Disposables): DeskLife {
   const { material, depthMaterial } = meshes;
   const life = new DeskLife({ geometry: meshes.figures.build(), workstation: meshes.workstation.build(), material, depthMaterial, shadows: high, palette });

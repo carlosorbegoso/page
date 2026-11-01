@@ -4,15 +4,12 @@ import { setupStoryNav, type StoryShot } from '../motion/story-nav';
 import type { ScrollTrigger as ScrollTriggerApi } from 'gsap/ScrollTrigger';
 
 export interface ChapterScrollHost {
-  /** Number of sub-shots of a chapter (products, experience). */
   subCount(chapter: ChapterId): number;
-  /** The section owning the viewport changed (or its sub-shot). */
   onChapter(chapter: ChapterId, sub: number): void;
   onProgress(chapter: ChapterId, progress: number): void;
 }
 
 export interface ChapterScroll {
-  /** Scroll position that shows a chapter's sub-shot. */
   positionOf(chapter: ChapterId, sub: number): number | null;
   refresh(): void;
   dispose(): void;
@@ -32,10 +29,8 @@ interface Tracker {
 
 const subsOf = (tracker: Tracker, chapter: ChapterId) => Math.max(1, tracker.host.subCount(chapter));
 const storyChapters = (tracker: Tracker) => SECTION_CHAPTERS.filter(chapter => tracker.triggers.has(chapter));
-/** The last trigger runs 2 px past the maximum scroll: ScrollTrigger is inactive at progress 1. */
 const edgeOf = (tracker: Tracker, chapter: ChapterId) => (chapter === tracker.lastChapter ? 2 : 0);
 
-/** Overall progress maps the centre of the first sub-shot to 0 and the centre of the last one to 1. */
 function reportStory(tracker: Tracker, chapter: ChapterId, progress: number): void {
   let before = 0;
   let total = 0;
@@ -61,7 +56,6 @@ function report(tracker: Tracker, chapter: ChapterId, progress: number): void {
   tracker.host.onChapter(chapter, sub);
 }
 
-/** The most recently entered active trigger owns the camera; on leave, fall back to any other active one. */
 function toggle(tracker: Tracker, chapter: ChapterId, active: boolean, progress: number): void {
   if (active) {
     tracker.current = chapter;
@@ -78,7 +72,6 @@ function toggle(tracker: Tracker, chapter: ChapterId, active: boolean, progress:
   report(tracker, other[0], other[1].progress);
 }
 
-/** Sections are bare spacers once the plates live in their layers: each box is exactly subs × 100svh. */
 function sizeSpacers(tracker: Tracker): void {
   for (const chapter of SECTION_CHAPTERS) {
     const section = chapterElement(chapter);
@@ -114,7 +107,6 @@ function createTriggers(tracker: Tracker): void {
   }
 }
 
-/** Re-measures every spacer and hands the camera to the shot the real scrollY shows. */
 function sync(tracker: Tracker): void {
   sizeSpacers(tracker);
   tracker.ScrollTrigger.refresh();
@@ -132,13 +124,11 @@ function positionOf(tracker: Tracker, chapter: ChapterId, sub: number): number |
   const subs = subsOf(tracker, chapter);
   const span = trigger.end - trigger.start - edgeOf(tracker, chapter);
   const index = Math.min(sub, subs - 1);
-  /* The final shot rests at the very bottom so nothing scrolls past the credits. */
   if (chapter === tracker.lastChapter && index === subs - 1)
     return Math.min(trigger.start + span - 1, tracker.ScrollTrigger.maxScroll(window));
   return trigger.start + ((index + 0.5) / subs) * span;
 }
 
-/** A shot requested while the power-on held the camera can land after a newer one: ask again for the shot the scroll shows. */
 function healSettledShot(tracker: Tracker, event: Event): void {
   const detail = (event as CustomEvent<{ id: ChapterId; subIndex: number }>).detail;
   const { current, currentSub } = tracker;
@@ -176,17 +166,8 @@ async function loadGsap() {
   return { gsap, ScrollTrigger };
 }
 
-/**
- * Chapters on scroll (GSAP ScrollTrigger, loaded only inside the 3D chunk). Every sub-shot owns
- * exactly one viewport of scroll and nothing else scrolls: every section is a `subs × 100svh` spacer,
- * with no pin and no scrub, on every device. A chapter fires when its section reaches 50 % of the
- * viewport and the camera changes shot only at sub-shot boundaries. No `normalizeScroll`.
- * Also emits `story:progress` (overall 0..1 across every sub-shot) and mounts the shot-by-shot
- * navigation (`src/motion/story-nav.ts`: settle, keyboard, `story:goto`, auto tour).
- */
 export async function setupChapterScroll(host: ChapterScrollHost): Promise<ChapterScroll> {
   const { gsap, ScrollTrigger } = await loadGsap();
-  /* A restored mid-page scroll lands before the pins exist and shows the wrong shot; the story starts at the top. */
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   const tracker: Tracker = {
     host,

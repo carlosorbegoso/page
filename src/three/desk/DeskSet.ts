@@ -23,15 +23,8 @@ import { DeskWeather } from './set/weather';
 import { WallPortrait } from './portrait';
 import { RoomLife } from './room-life';
 
-/** Chapters where Alfa is on screen and its head follows the pointer. */
 const ALFA_LOOKS: readonly ChapterId[] = ['company', 'products'];
 
-/**
- * "Una noche en el escritorio": the whole set (room, props, collectibles, city and rain, lights)
- * plus the director's data — one fixed shot per chapter / sub-shot, the CSS3D surfaces and the
- * anchors of the 2D panels. Chapter actions run in `update` from the director's state; each
- * concern lives in `set/*` and reports whether it still moves.
- */
 export class DeskSet implements ShotProvider {
   readonly object3D = new Group();
   private readonly pickSet = new DeskPicks();
@@ -161,7 +154,6 @@ export class DeskSet implements ShotProvider {
     return this.framing.framing(chapter, subIndex)?.focus.clone() ?? null;
   }
 
-  /** Highlights a navigable prop (or clears with null). Accepts the pick's object or a descendant. */
   setHover(object: Object3D | null): void {
     const { name, changed } = this.pickSet.hover(object, this.uniforms);
     this.life?.setHover(name ?? null);
@@ -171,7 +163,6 @@ export class DeskSet implements ShotProvider {
     if (changed) this.context?.invalidate();
   }
 
-  /** Finds the pick an object belongs to (walking up the parents). */
   resolvePick(object: Object3D): StationPick | null {
     return this.pickSet.resolve(object);
   }
@@ -237,7 +228,6 @@ export class DeskSet implements ShotProvider {
     return this.life?.update(frame.dt, frame.time, { motion: frame.motion, look, pixelScale, focused }) ?? false;
   }
 
-  /** Clock ringing, figure poses and the held folder: the lamp shadow map is re-rendered only when one of them changes. Returns whether anything still moves. */
   private updateShadows(frame: DeskFrame): boolean {
     const high = this.context.tier === 'high';
     const ringing = this.clockWiring?.ring(frame) ?? false;
@@ -274,7 +264,6 @@ export class DeskSet implements ShotProvider {
     if (this.folders.action(action, id, this.chapter, this.subIndex, this.shotEye)) this.context.invalidate();
   }
 
-  /** Room triangle count and visible meshes (debug overlay, docs). */
   stats(): { triangles: number; meshes: number } {
     let meshes = 0;
     this.object3D.traverse(node => {

@@ -11,7 +11,6 @@ import type { DeskFrame } from './frame';
 import type { LightLevels } from './levels';
 
 const SCREEN_HDR = 1.8;
-/** The MacBook never goes fully dark: at dawn it keeps a dim standby glow so it reads as a screen, not a black slab. */
 const LAPTOP_STANDBY = 0.32;
 const LAPTOP_HOVER_GAIN = 0.12;
 
@@ -23,7 +22,6 @@ export interface ScreensOptions {
   disposables: Array<{ dispose(): void }>;
 }
 
-/** The monitor, phone and laptop glass: pictures whose brightness follows the chapter light. */
 export class DeskScreens {
   readonly screen: Mesh;
   private readonly monitor: MonitorGlass;
@@ -77,7 +75,6 @@ export class DeskScreens {
     this.laptopHover = id === 'laptop' ? 1 : 0;
   }
 
-  /** Redraws the phone lock screen on change and runs the laptop; returns true while one moves. */
   update(frame: DeskFrame, level: LightLevels): boolean {
     const notify = level.phone > 0.5;
     if (notify !== this.phoneNotified) {

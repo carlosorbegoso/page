@@ -5,10 +5,8 @@ import type { FluidField } from './field';
 import { FluidPointerInput } from './pointer';
 import { FLUID_IDLE_TEXTURE, FLUID_MAX_PX, fluidUniforms } from './uniforms';
 
-/** Owns the fluid field and its pointer input, and keeps the shared fluid uniforms in sync each frame. */
 export class FluidDriver {
   private field: FluidField | null = null;
-  /** The simulation comes in its own chunk on the first pointer stir, off the first-frame path. */
   private fieldClass: typeof FluidField | null = null;
   private fieldLoading = false;
   private readonly input: FluidPointerInput;
@@ -27,7 +25,6 @@ export class FluidDriver {
     this.input.invalidateRect();
   }
 
-  /** Advances the field while it runs; otherwise drains the pointer, clears the field and parks the uniforms. */
   step(renderer: WebGLRenderer, dt: number, running: boolean, profile: TierProfile, bufferSize: Vector2, timer: GpuTimer | null): void {
     if (!running) {
       this.input.consume(dt);
@@ -68,7 +65,6 @@ export class FluidDriver {
     return Math.max(1, renderer.domElement.clientHeight || bufferSize.y / renderer.getPixelRatio());
   }
 
-  /** Drops the field (tier change); the input keeps listening. */
   reset(): void {
     this.field?.dispose();
     this.field = null;

@@ -5,7 +5,6 @@ import { LaptopDesktop } from '../screens/desktop';
 import { DESKTOP_SIZE } from '../screens/laptopDisplay';
 import type { RoomMeshes } from '../set/room';
 
-/** The folder taken off the shelf to be read, precompiled before it is first shown. */
 export function createFolderDetail(context: StationContext, meshes: RoomMeshes, palette: Palette): FolderDetail {
   const detail = new FolderDetail({
     material: meshes.material,

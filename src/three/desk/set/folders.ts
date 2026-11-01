@@ -18,11 +18,8 @@ import { EXPERIENCE_IDS, FOLDER_OPENS_AT } from './story';
 const FOLDER_OPEN_DELAY = 0.3;
 const FOLDER_HINGE_AXIS = new Vector3(Math.sin(OPEN_FOLDER.yaw), 0, Math.cos(OPEN_FOLDER.yaw));
 const FOLDER_HINGE_ORIGIN = OPEN_FOLDER.centre.clone().add(new Vector3(0, 0.009, 0));
-/** Metres a folder slides off the shelf when its year is told (or under the pointer). */
 const FOLDER_PULL = 0.03;
-/** How long a folder clicked from another shot waits for the camera to land on its own shot. */
 const REQUEST_TIMEOUT_MS = 5000;
-/** Pause after the camera lands before the requested folder comes out. */
 const REQUEST_SETTLE = 0.15;
 
 interface FolderRequest {
@@ -37,15 +34,12 @@ function requestedFolder(interactId: string): FolderId | null {
   return (FOLDERS as readonly string[]).includes(key) ? (key as FolderId) : null;
 }
 
-/** The archive shelf (pull, glow, spine labels, the folder taken out to read) and the open TCS folder's hinge. */
 export class DeskFolders {
   detail: FolderDetail | null = null;
-  /** TCS's job printed over the open folder's baked sheets. */
   readonly print = new OpenFolderPrint();
   private request: FolderRequest | null = null;
   private readonly autoOpen = new FolderAutoOpen();
   private focusKey = '';
-  /** 0 closed … 1 open: the TCS folder stays shut until the story reaches today. */
   private open = 0;
   private readonly pull = new Map<FolderId, number>(FOLDERS.map(id => [id, 0]));
   private readonly glow = new Map<string, number>(FOLDERS.map(id => [id, 0]));
@@ -72,7 +66,6 @@ export class DeskFolders {
     return this.open !== openGoal;
   }
 
-  /** Returns whether anything still moves and whether the held folder's pose changed (the lamp shadow must be redrawn). */
   updateShelf(frame: DeskFrame, hoverId: number, eye: () => Vector3): { settling: boolean; posed: boolean } {
     const { chapter, subIndex, dt, motion, step } = frame;
     let settling = false;
@@ -107,7 +100,6 @@ export class DeskFolders {
     return { settling, posed };
   }
 
-  /** Racks the depth of field onto the held box while it is out, and back to the shot when it goes back. */
   private announceFocus(detail: FolderDetail): void {
     const point = detail.heldFocus;
     const key = point ? `${detail.active}:${point.toArray().join(',')}` : '';
@@ -116,10 +108,6 @@ export class DeskFolders {
     window.dispatchEvent(new CustomEvent('desk:focus', { detail: { point: point?.clone() ?? null } }));
   }
 
-  /**
-   * A folder clicked (`desk:interact` activate). When it is not the current shot's folder the
-   * navigator flies there; the folder then comes out once the camera lands (see `serveRequest`).
-   */
   requestFolder(interactId: string, eye: () => Vector3): void {
     const id = requestedFolder(interactId);
     this.request = id ? { id, at: performance.now(), eye } : null;
@@ -138,7 +126,6 @@ export class DeskFolders {
     detail.toggle(folder, request.eye());
   }
 
-  /** Takes the folder of the current sub-shot off the shelf, or puts it back (`folder-close` only puts it back). Returns whether it acted. */
   action(action: 'folder' | 'folder-close', id: string | undefined, chapter: ChapterId, subIndex: number, eye: () => Vector3): boolean {
     const detail = this.detail;
     if (!detail) return false;
@@ -175,7 +162,6 @@ export class DeskFolders {
     uniforms.uGlow.value[OBJECT_ID.openFolder] = (this.glow.get('tcs') ?? 0) * 0.25 + (life?.glow('openFolder') ?? 0);
   }
 
-  /** The archive cover label rides the held box's front cover, so it swings away as the box opens. */
   private placeArchiveCover(cover: Mesh, id: FolderId, pull: number): void {
     const restX = cover.userData.restX as number;
     const restZ = cover.userData.restZ as number;

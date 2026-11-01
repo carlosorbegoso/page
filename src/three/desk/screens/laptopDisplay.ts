@@ -3,21 +3,14 @@ import { LAPTOP } from '../layout';
 import type { LaptopDesktop } from './desktop';
 import { drawLockScreen } from './lockScreen';
 
-/** Logical canvas size; the backing store is scaled down on lighter tiers. */
 const WIDTH = 768;
 const HEIGHT = Math.round(WIDTH / (LAPTOP.screen.width / LAPTOP.screen.height));
 const MENU_HEIGHT = 16;
 
 export type LaptopPicture = 'live' | 'lock' | 'off';
 
-/** The size the lazily loaded desktop draws at. */
 export const DESKTOP_SIZE = { width: WIDTH, height: HEIGHT, menuHeight: MENU_HEIGHT } as const;
 
-/**
- * The MacBook's picture on a canvas texture: the working desktop (`desktop.ts`, attached after the
- * first frame), a lock screen in standby — and in place of the desktop until it arrives — and black
- * when the lid is shut.
- */
 export class LaptopDisplay {
   readonly texture: CanvasTexture;
   private readonly ctx: CanvasRenderingContext2D;

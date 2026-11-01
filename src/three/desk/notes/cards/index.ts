@@ -1,7 +1,7 @@
 import { BoxGeometry, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, type Object3D } from 'three';
 import { PRODUCT_FIGURES } from '../../layout';
 import { readProduct } from '../content';
-import { cardFaceMatrix, PRODUCT_CARD, type ProductId } from '../layout';
+import { cardFaceMatrix, cardsStaged, PRODUCT_CARD, type ProductId } from '../layout';
 import { PAPER_LEVEL, printedFace, whenFontsReady, type PrintedFace } from '../paper';
 import { drawProductCard } from './print';
 
@@ -102,7 +102,7 @@ export class ProductCards {
   }
 
   poseKey(): string {
-    return this.cards.map(card => card.raise.toFixed(2)).join(',');
+    return `${cardsStaged()}:${this.cards.map(card => card.raise.toFixed(2)).join(',')}`;
   }
 
   dispose(): void {

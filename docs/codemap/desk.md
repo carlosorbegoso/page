@@ -12,6 +12,7 @@ Qué archivo editar en el escritorio 3D: encuadres (shots), luz, props, figuras,
 | Encuadre horizontal: caja de encuadre centrada con 7 % de margen bajo el HUD, distancia según el aspecto | `src/three/desk/shots/box-fit.ts` |
 | Cámara del estante y las carpetas | `src/three/desk/shots/experience-shots.ts` |
 | Teléfono vertical: corcho, tarjeta de producto y hoja de TCS de frente al 90 % del ancho, bajo el HUD (texto impreso en vez de tarjeta HTML) | `src/three/desk/shots/printed-shots.ts` |
+| Teléfono vertical, productos: la figura arriba bajo el HUD y su tarjeta parada en el escritorio delante, al 92 % del ancho; busca el picado más suave que deja ver la figura entera sobre la tarjeta (llega con `deferred`, registrado con `useStackedProductShot`) | `src/three/desk/shots/stacked-product-shot.ts` |
 | Encuadre vertical: protagonistas enteros, vecinos fuera, retoques | `src/three/desk/shots/portrait-fit.ts`, puntos en `protagonists.ts` |
 | Mezcla por aspecto, ajuste por ancho o alto | `src/three/desk/shots/math.ts`; zona libre bajo el HUD en `context.ts` |
 | Proyección, `toShot`, ancla de panel | `src/three/desk/shots/projection.ts` |
@@ -54,7 +55,7 @@ Qué archivo editar en el escritorio 3D: encuadres (shots), luz, props, figuras,
 | Pikachu de vinilo sobre la base del monitor (posición en `PIKACHU` de `layout.ts`) | `src/three/desk/props/pikachu.ts` |
 | Charizard de vinilo junto a Pikachu, llama de la cola emisiva (`CHARIZARD` en `layout.ts`) | `src/three/desk/props/charizard.ts` |
 | Corcho de TUSOCIO tras la peana: marco, corcho y chinches (`geometry.ts`), y lo impreso encima (`print.ts`: título a mano, ficha con rol y frase, tarjeta de Alfa, post-its de SkyMek, Parati y Ventixs en `BOARD_LAYOUT`) | `src/three/desk/notes/corkboard/` |
-| Corcho y tarjetas de producto en teléfono vertical: ficha grande del corcho, tarjeta con descripción corta (`product-shorts.json`) y botón «Visitar sitio» de 14 mm; se cambian al girar el teléfono (el mapa y el emisivo a la vez, o la impresión ancha se ve encima como un fantasma) y llegan después del primer frame | `src/three/desk/notes/stacked/` (`board.ts`, `card.ts`, `index.ts`) |
+| Corcho y tarjetas de producto en teléfono vertical: ficha grande del corcho, tarjeta con descripción corta (`product-shorts.json`) y botón «Visitar sitio» de 14 mm; se cambian al girar el teléfono (el mapa y el emisivo a la vez, o la impresión ancha se ve encima como un fantasma) y llegan después del primer frame | `src/three/desk/notes/stacked/` (`board.ts`, `card.ts`, `index.ts`; `places.ts`: cada tarjeta delante de su figura, inclinada 30°, puesta con `stageCards` de `notes/layout.ts`) |
 | Suculenta viva en maceta entre la laptop y el monitor (`SUCCULENT` en `layout.ts`) | `src/three/desk/props/succulent.ts` |
 | Planta (maceta y hojas) y telescopio | `src/three/desk/props/decor.ts` |
 | Peana y coleccionables: Alfa, Burbu (Ventixs), regalo (Parati), llave (SkyMek), un archivo cada uno | `src/three/desk/props/figures/` |

@@ -8,7 +8,7 @@ import { centreOf, takenSheetPoints } from './protagonists';
 import type { Framing, Region, Setup } from './types';
 
 export const PRINT_FILL = 0.9;
-const HUD_CLEAR_PX = 124;
+export const HUD_CLEAR_PX = 124;
 const PRINT_Y = 0.52;
 const SHEET_FACING = { heading: -10, pitch: -24 } as const;
 const BOARD_PITCH = -20;
@@ -16,7 +16,7 @@ const SHEET_PASSES = 3;
 
 type Facing = Omit<Setup, 'distance'>;
 
-function printRegion(ctx: ShotContext): Region {
+export function printRegion(ctx: ShotContext): Region {
   return { left: (1 - PRINT_FILL) / 2, right: (1 + PRINT_FILL) / 2, top: HUD_CLEAR_PX / ctx.view.height, bottom: 0.97 };
 }
 
@@ -36,8 +36,21 @@ export function printedCompanyShot(ctx: ShotContext): Framing {
   return frontOn(ctx, boardCorners(), { ...facingOf(boardFaceMatrix()), pitch: BOARD_PITCH }, 'company');
 }
 
+type ProductShot = (ctx: ShotContext, id: ProductId) => Framing;
+
+let stackedProductShot: ProductShot | null = null;
+
+export function useStackedProductShot(shot: ProductShot): void {
+  stackedProductShot = shot;
+}
+
+export function printedShotsKey(): string {
+  return stackedProductShot ? 'staged' : '';
+}
+
 export function printedProductShot(ctx: ShotContext, id: ProductId): Framing {
-  return frontOn(ctx, cardCorners(id, 1), facingOf(cardFaceMatrix(id, 1)), `product-${id}`);
+  if (stackedProductShot) return stackedProductShot(ctx, id);
+  return frontOn(ctx, cardCorners(id, 1), facingOf(cardFaceMatrix(id, 1, null)), `product-${id}`);
 }
 
 export function printedSheetShot(ctx: ShotContext, panel: string): Framing {

@@ -58,15 +58,31 @@ export const CARD_PLACES: Record<ProductId, { hinge: Vector3; yaw: number }> = {
   parati: { hinge: new Vector3(0.64, DESK.top, 0.03), yaw: -0.3 }
 };
 
-export function cardFaceMatrix(id: ProductId, raise: number): Matrix4 {
-  const { hinge, yaw } = CARD_PLACES[id];
-  const tilt = -(PRODUCT_CARD.lean + (1 - Math.min(Math.max(raise, 0), 1)) * (Math.PI / 2 - PRODUCT_CARD.lean));
+export interface CardStage {
+  places: Record<ProductId, { hinge: Vector3; yaw: number }>;
+  lean: number;
+}
+
+let staged: CardStage | null = null;
+
+export function stageCards(stage: CardStage | null): void {
+  staged = stage;
+}
+
+export function cardsStaged(): boolean {
+  return staged !== null;
+}
+
+export function cardFaceMatrix(id: ProductId, raise: number, stage = staged): Matrix4 {
+  const { hinge, yaw } = (stage?.places ?? CARD_PLACES)[id];
+  const lean = stage?.lean ?? PRODUCT_CARD.lean;
+  const tilt = -(lean + (1 - Math.min(Math.max(raise, 0), 1)) * (Math.PI / 2 - lean));
   const rotation = new Quaternion().setFromAxisAngle(UP, yaw).multiply(new Quaternion().setFromAxisAngle(X, tilt));
   return new Matrix4().compose(hinge.clone().add(new Vector3(0, PRODUCT_CARD.thickness, 0)), rotation, ONE);
 }
 
-export function cardCorners(id: ProductId, raise = 1): Vector3[] {
-  const frame = cardFaceMatrix(id, raise);
+export function cardCorners(id: ProductId, raise = 1, stage: CardStage | null = null): Vector3[] {
+  const frame = cardFaceMatrix(id, raise, stage);
   const half = PRODUCT_CARD.width / 2;
   return [
     [-half, 0],

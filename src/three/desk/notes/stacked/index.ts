@@ -4,10 +4,11 @@ import { stackedLayout } from '../../../scenes/common';
 import { PRODUCT_FIGURES } from '../../layout';
 import { readProduct } from '../content';
 import { drawBoard } from '../corkboard/print';
-import { PRODUCT_CARD, type ProductId } from '../layout';
+import { PRODUCT_CARD, stageCards, type ProductId } from '../layout';
 import { PRINT_DENSITY, type PrintSurface } from '../paper';
 import { drawStackedBoard } from './board';
 import { drawStackedCard } from './card';
+import { STACKED_CARDS } from './places';
 
 const CARD_DENSITY = 8000;
 
@@ -65,7 +66,7 @@ export class StackedPrints {
       const mesh = room.getObjectByName(`product-card-face-${id}`) as PrintMesh | undefined;
       return mesh ? [{ id, mesh, wide: null, print: cardSurface() }] : [];
     });
-    this.apply();
+    if (this.apply()) invalidate();
     window.addEventListener('resize', this.onResize);
     void document.fonts?.ready.then(() => this.redraw());
   }
@@ -94,6 +95,7 @@ export class StackedPrints {
     const stacked = stackedLayout({ width: innerWidth, height: innerHeight });
     if (stacked === this.stacked) return false;
     this.stacked = stacked;
+    stageCards(stacked ? STACKED_CARDS : null);
     if (this.board) (stacked ? drawStackedBoard : drawBoard)(this.board);
     this.swapCards();
     return true;
@@ -101,6 +103,7 @@ export class StackedPrints {
 
   dispose(): void {
     window.removeEventListener('resize', this.onResize);
+    stageCards(null);
     for (const card of this.cards) {
       if (card.wide) printOn(card.mesh, card.wide);
       card.print.texture.dispose();

@@ -2,6 +2,7 @@ import type { ChapterId } from '../../contracts';
 import { shotContext } from './context';
 import { experienceShots } from './experience-shots';
 import { companyShot } from './figure-shots';
+import { printedShotsKey } from './printed-shots';
 import { productShots } from './product-shots';
 import { roomShot } from './about-shots';
 import { aboutShot, contactShot, heroDistance, heroShot, outroPanel, outroShot, stackedMonitorShots } from './monitor-shots';
@@ -10,7 +11,7 @@ import type { Framing, SurfaceFrame, Viewport } from './types';
 let cached: { key: string; value: Record<ChapterId, Framing[]> } | null = null;
 
 export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId, Framing[]> {
-  const key = `${view.width}x${view.height}@${view.fov}:${phone.centre.toArray().join()}:${phone.normal.toArray().join()}`;
+  const key = `${view.width}x${view.height}@${view.fov}:${phone.centre.toArray().join()}:${phone.normal.toArray().join()}:${printedShotsKey()}`;
   if (cached?.key !== key) cached = { key, value: computeFramings(view, phone) };
   return cached.value;
 }

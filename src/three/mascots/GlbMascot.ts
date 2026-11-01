@@ -13,10 +13,6 @@ function isEmissive(material: Material): material is MeshStandardMaterial {
   return Boolean(standard.emissive) && (standard.emissive.getHex() !== 0 || Boolean(standard.emissiveMap));
 }
 
-/**
- * Mascot backed by an optimised GLB. Node naming convention (see docs/3d/assets.md):
- * `lid` (lifted on focus), `dot-0..2` (sequenced signals); any emissive material is a signal.
- */
 class GltfMascot implements Mascot {
   private readonly motion = new Group();
   private readonly signals: MeshStandardMaterial[] = [];
@@ -86,7 +82,6 @@ class GltfMascot implements Mascot {
   }
 }
 
-/** Loads a GLB mascot through the refcounted cache and adds a baked contact shadow. */
 export async function loadGltfMascot(id: MascotId, url: string, shadowSize: number, withShadow = true): Promise<Mascot> {
   const gltf = await acquireGltf(url);
   const hasShadow = Boolean(gltf.scene.getObjectByName('shadow'));

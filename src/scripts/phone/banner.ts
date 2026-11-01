@@ -2,7 +2,6 @@ import { afterTransition, nextPaint } from './dom';
 
 const BANNER_MS = 2500;
 
-/** Lock-screen style notification; shown at most once per page load. */
 export function createBanner(el: HTMLElement | null) {
   let timer: number | undefined;
   let used = false;

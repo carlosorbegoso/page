@@ -8,7 +8,6 @@ import { buildBurbu } from './burbu';
 import { buildGift } from './gift';
 import { buildSkyMek } from './skymek';
 
-/** The walnut plinth and the four executive desk pieces (mascots.md §2–3). */
 export function buildFigures(b: PartBuilder, p: Palette, q: Quality): void {
   const { centre, width, depth, height } = PLINTH;
   b.add(new RoundedBoxGeometry(width, height, depth, 2, 0.003), p.wood, { position: [centre.x, centre.y + height / 2, centre.z] });

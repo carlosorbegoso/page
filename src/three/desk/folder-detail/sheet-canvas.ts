@@ -32,7 +32,6 @@ export function fillPaper(context: CanvasRenderingContext2D): void {
   context.textAlign = 'left';
 }
 
-/** Dates, company, role and client; returns the baseline of the rule that closes the heading. */
 export function drawHeading(context: CanvasRenderingContext2D, content: SheetContent, fonts: SheetFonts, text: number): number {
   const width = context.canvas.width;
   context.fillStyle = MUTED;
@@ -64,7 +63,6 @@ interface HighlightLayout {
   lines: string[][];
 }
 
-/** Largest highlight size at which every highlight fits whole in `room` pixels. */
 function fitHighlights(context: CanvasRenderingContext2D, highlights: string[], fonts: SheetFonts, text: number, room: number): HighlightLayout {
   let layout: HighlightLayout = { size: HIGHLIGHT_SIZES[0]!, lines: [] };
   for (const size of HIGHLIGHT_SIZES) {
@@ -77,7 +75,6 @@ function fitHighlights(context: CanvasRenderingContext2D, highlights: string[], 
   return layout;
 }
 
-/** Bulleted highlights between the heading and `bottom`; returns the next free baseline. */
 function drawHighlights(context: CanvasRenderingContext2D, content: SheetContent, fonts: SheetFonts, top: number, text: number, bottom: number): number {
   let y = top + 72;
   context.fillStyle = MUTED;
@@ -108,7 +105,6 @@ function drawStack(context: CanvasRenderingContext2D, content: SheetContent, fon
   for (const line of wrap(context, content.stack.join(' · '), text).slice(0, 3)) context.fillText(line, MARGIN, (y += 48));
 }
 
-/** The whole job on one page: heading, every highlight (shrunk to fit) and the stack at the foot. */
 export function drawSheet(canvas: HTMLCanvasElement, content: SheetContent): void {
   const context = canvas.getContext('2d')!;
   const fonts = sheetFonts();
@@ -120,7 +116,6 @@ export function drawSheet(canvas: HTMLCanvasElement, content: SheetContent): voi
   if (content.stack.length) drawStack(context, content, fonts, stackTop, text);
 }
 
-/** A cover letter: heading and the job's summary as a paragraph, for the sheet tucked in the pocket. */
 export function drawSummarySheet(canvas: HTMLCanvasElement, content: SheetContent): void {
   const context = canvas.getContext('2d')!;
   const fonts = sheetFonts();

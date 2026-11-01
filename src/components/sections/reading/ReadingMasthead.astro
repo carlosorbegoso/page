@@ -1,6 +1,7 @@
 ---
 import CvLink from '../../ui/CvLink.astro';
 import ExternalLink from '../../ui/ExternalLink.astro';
+import Monogram from '../../ui/Monogram.astro';
 import { SITE } from '../../../config/site';
 import { useTranslations, type Locale } from '../../../i18n/utils';
 import type { getProfile } from '../../../lib/content';
@@ -17,6 +18,7 @@ const t = useTranslations(locale);
 
 <header class="cv-masthead">
   <p class="cv-intro no-print">{t('reading.intro')}</p>
+  <Monogram size={36} class="cv-mark" />
   <h1 class="cv-name">{profile.name}</h1>
   <p class="cv-role">{profile.role}</p>
   <p class="cv-meta">{profile.location} · {profile.tagline}</p>

@@ -16,8 +16,8 @@ import {
   SUCCULENT,
   TELESCOPE
 } from '../layout';
+import { CORKBOARD } from '../notes/layout';
 
-/** Rectangles (centre x/z and size) that receive a soft contact shadow, in room space. */
 export function contactShadowSpots(): Array<{ x: number; y: number; z: number; w: number; d: number; yaw?: number }> {
   const top = DESK.top + 0.0012;
   const plinthTop = PLINTH.centre.y + PLINTH.height + 0.0012;
@@ -32,6 +32,7 @@ export function contactShadowSpots(): Array<{ x: number; y: number; z: number; w
     { x: CHARIZARD.base.x, y: CHARIZARD.base.y + 0.0012, z: CHARIZARD.base.z - 0.01, w: 0.07, d: 0.075 },
     { x: SUCCULENT.x, y: top, z: SUCCULENT.z, w: 0.1, d: 0.1 },
     { x: PHONE.base.x, y: top, z: PHONE.base.z, w: 0.14, d: 0.12, yaw: PHONE.yaw },
+    { x: CORKBOARD.base.x, y: top, z: CORKBOARD.base.z - CORKBOARD.depth / 2, w: CORKBOARD.width + 0.03, d: 0.045 },
     { x: LAMP.base.x, y: top, z: LAMP.base.z, w: 0.2, d: 0.2 },
     { x: PLINTH.centre.x, y: top, z: PLINTH.centre.z, w: PLINTH.width + 0.07, d: PLINTH.depth + 0.06 },
     { x: FIGURES.alfa.x, y: plinthTop, z: FIGURES.alfa.z, w: 0.065, d: 0.06 },
@@ -45,7 +46,6 @@ export function contactShadowSpots(): Array<{ x: number; y: number; z: number; w
   ];
 }
 
-/** Merges the contact-shadow quads into one geometry (uv kept for the blob texture). */
 export function buildContactShadows(): BufferGeometry {
   const quads = contactShadowSpots().map(spot =>
     new PlaneGeometry(spot.w, spot.d).rotateX(-Math.PI / 2).rotateY(spot.yaw ?? 0).translate(spot.x, spot.y, spot.z)

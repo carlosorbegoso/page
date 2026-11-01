@@ -5,6 +5,7 @@ import { setupChapterScroll, type ChapterScroll } from '../scroll';
 import { chapterElement } from '../sections';
 import type { World } from '../world';
 import type { StageLoop } from './frame-loop';
+import { listenDetour } from './detour';
 import { PickNavigator } from './navigate';
 import { dissolve, mountPlates } from './plates-mount';
 import { DEFAULT_SUBS, type StageLayout } from './shots';
@@ -19,13 +20,13 @@ export interface ChaptersHost {
   invalidate(): void;
 }
 
-/** Scroll ↔ chapter: the plates, the scroll driver, chapter requests (held during the intro) and clicks that travel. */
 export class StageChapters {
   plates: Plates | undefined;
   readonly progress = new Map<ChapterId, number>();
   private scroll: ChapterScroll | undefined;
   private pending: { id: ChapterId; sub: number } | null = null;
   private readonly navigator: PickNavigator;
+  private readonly releaseDetour: () => void;
 
   constructor(private readonly host: ChaptersHost) {
     this.navigator = new PickNavigator({
@@ -33,6 +34,7 @@ export class StageChapters {
       movesAllowed: () => host.movesAllowed(),
       scrollToChapter: (chapter, sub) => this.scrollTo(chapter, sub)
     });
+    this.releaseDetour = listenDetour(host.director.detour, () => host.loop.bump());
   }
 
   navigate(pick: StationPick): void {
@@ -44,7 +46,6 @@ export class StageChapters {
     return Math.max(1, this.host.world().subShotCount(chapter, Math.max(fromPlates, DEFAULT_SUBS[chapter] ?? 1)));
   }
 
-  /** Scroll selected a chapter (or sub-shot): the director moves, or cuts under reduced motion. */
   request(id: ChapterId, sub: number): void {
     const { director, layout, loop } = this.host;
     if (performance.now() < loop.introUntil) {
@@ -55,7 +56,6 @@ export class StageChapters {
     loop.bump();
   }
 
-  /** The intro ended: go where the visitor scrolled meanwhile, or to the hero. */
   finishIntro(): void {
     const next = this.pending ?? { id: 'hero' as ChapterId, sub: 0 };
     this.pending = null;
@@ -80,7 +80,6 @@ export class StageChapters {
     if (plates) this.plates = plates;
   }
 
-  /** Plates choose their layer at mount, so crossing the stacked breakpoint remounts them. */
   remountPlates(): void {
     if (!this.plates) return;
     this.plates.unmount();
@@ -114,7 +113,6 @@ export class StageChapters {
     this.scroll?.refresh();
   }
 
-  /** Back to the plain page: scroll driver off, plates back in the document. */
   teardown(): void {
     this.scroll?.dispose();
     this.scroll = undefined;
@@ -123,6 +121,7 @@ export class StageChapters {
   }
 
   dispose(): void {
+    this.releaseDetour();
     this.scroll?.dispose();
     this.plates?.dispose();
   }

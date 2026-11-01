@@ -5,13 +5,11 @@ import type { Origin, PlateEntry } from './types';
 
 const MODES: readonly PlateMode[] = ['surface-monitor', 'surface-phone', 'anchored'];
 
-/** Plates without a valid `data-plate-mode` are anchored (same default as plates.css). */
 function plateMode(el: HTMLElement): PlateMode {
   const value = el.dataset.plateMode as PlateMode | undefined;
   return value && MODES.includes(value) ? value : 'anchored';
 }
 
-/** Explicit `data-plate-sub` (absent = every sub-shot) when any plate of the chapter has one, else one sub-shot per plate. */
 function plateSub(el: HTMLElement, index: number, explicitSubs: boolean): number | null {
   if (!explicitSubs) return index;
   return el.dataset.plateSub === undefined ? null : Number(el.dataset.plateSub);
@@ -28,7 +26,6 @@ export function styleLayers(surfaceRoot: HTMLElement, panels: HTMLElement): void
   panels.style.overflow = 'hidden';
 }
 
-/** Wraps a plate in the element the engine moves, remembering where the plate came from. */
 export function wrapPlate(el: HTMLElement, chapter: ChapterId, sub: number | null, origins: Origin[]): PlateEntry {
   origins.push({ plate: el, parent: el.parentNode!, next: el.nextSibling });
   const wrapper = document.createElement('div');
@@ -53,7 +50,6 @@ export function prepareSurfacePlate(entry: PlateEntry, css3d: CSS3DRenderer): CS
   return entry.object;
 }
 
-/** Each section with plates, its plates and their sub-shots, in story order. */
 export function sectionPlates(): { chapter: ChapterId; section: HTMLElement; plates: { el: HTMLElement; sub: number | null }[] }[] {
   const found = [];
   for (const chapter of SECTION_CHAPTERS) {

@@ -1,4 +1,3 @@
-/* Unlayered on purpose: the 3D type scale must win over the card utilities the sections ship for the flat fallback. */
 .is-3d .plate {
   max-width: none;
   border: 0;
@@ -48,7 +47,6 @@
   line-height: var(--text-display--line-height);
 }
 
-/* An edgeless pool of darkness behind loose text keeps AA over the lit scene; it must never read as a rectangle. */
 .is-3d .plate:not([data-plate-mode^='surface-'])::before {
   content: '';
   position: absolute;
@@ -65,7 +63,6 @@
   );
 }
 
-/* Anchored panels float over the room: a frosted, edgeless pool hides the out-of-focus props behind the text. */
 .is-3d .plate[data-plate-mode='anchored']:not([data-compact])::before {
   inset: -50% -38%;
   background: radial-gradient(
@@ -80,10 +77,6 @@
   mask-image: radial-gradient(closest-side, #000 60%, rgb(0 0 0 / 0.5) 82%, transparent 100%);
 }
 
-/*
- * Upright phones dock every panel at the bottom (stackedLayout): the pool becomes a full-bleed
- * gradient from the panel down, like a subtitle band, so the room above stays clean.
- */
 @media (width < 48rem) and (orientation: portrait) {
   .is-3d .plate:not([data-plate-mode^='surface-'])::before {
     backdrop-filter: none;

@@ -5,6 +5,7 @@ import KineticText from '../ui/KineticText.astro';
 import { SECTION_IDS } from '../../config/site';
 import { useTranslations, type Locale } from '../../i18n/utils';
 import { getProfile } from '../../lib/content';
+import '../../styles/sections/hero/monitor-portrait.css';
 
 interface Props {
   locale: Locale;
@@ -31,7 +32,6 @@ const metrics = [
     data-plate
     data-plate-id="hero"
     data-plate-anchor="hero"
-    data-plate-stacked
     data-plate-mode="surface-monitor"
   >
     <div class="hero-screen @container flex flex-col">
@@ -102,7 +102,6 @@ const metrics = [
     }
   }
 
-  /* Only the delayed children animate opacity; the h1 just slides so it paints in the first frame (LCP). */
   .hero-enter {
     animation: hero-enter var(--duration-slow) var(--ease-out) both;
     animation-delay: var(--enter-delay, 0ms);
@@ -112,7 +111,6 @@ const metrics = [
     animation-name: hero-slide;
   }
 
-  /* On the monitor the engine owns the reveal (chapter:settled); a CSS slide would move text on a 1:1 surface. */
   :global(.is-3d) .hero-enter {
     animation: none;
   }
@@ -121,7 +119,6 @@ const metrics = [
     padding-inline: 0.75rem;
   }
 
-  /* The monitor is a fixed-size screen: every size is a share of its height so nothing ever clips. */
   :global(.is-3d [data-plate-mode='surface-monitor']) .hero-screen {
     height: 100%;
     justify-content: center;
@@ -168,7 +165,6 @@ const metrics = [
     gap: 0 5cqw;
   }
 
-  /* Column-reverse packs from the bottom by default, which dropped values with shorter labels. */
   :global(.is-3d [data-plate-mode='surface-monitor']) .hero-metrics div {
     justify-content: flex-end;
     gap: 0.8cqh;
@@ -198,7 +194,6 @@ const metrics = [
     margin-top: 6cqh;
   }
 
-  /* On a screen the actions read as links, not web pills. */
   :global(.is-3d [data-plate-mode='surface-monitor']) .hero-ctas > :global(*) {
     grid-column: auto;
     min-height: 0;
@@ -224,7 +219,6 @@ const metrics = [
     height: 3.8cqh;
   }
 
-  /* Upright phones: the room holds the top of the frame, so the opening titles dock under it as a caption. */
   :global(.is-3d [data-plate-mode='anchored']) .hero-screen h1 {
     gap: 0.25rem;
   }

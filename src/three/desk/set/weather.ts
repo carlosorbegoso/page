@@ -8,7 +8,6 @@ import type { DeskLife } from '../life';
 import type { LightLevels } from './levels';
 
 type Disposables = Array<{ dispose(): void }>;
-/** An additive shaft vanishes against a daylit room: by day it is drawn denser so a lit lamp still shows its cone. */
 const DAY_BEAM_GAIN = 2.5;
 
 function steamStrength(chapter: ChapterId): number {
@@ -16,7 +15,6 @@ function steamStrength(chapter: ChapterId): number {
   return chapter === 'hero' || chapter === 'about' || chapter === 'intro' ? 0.7 : 0.45;
 }
 
-/** Everything beyond the furniture that moves with time: city and sky, rain on the glass, cup steam, the lamp's beam. */
 export class DeskWeather {
   private backdrop!: Backdrop;
   private glass!: RainGlass;
@@ -30,7 +28,6 @@ export class DeskWeather {
     disposables.push(this.backdrop, this.glass);
   }
 
-  /** Steam only on `high` and `mid`: fewer wisps and octaves on `mid`. */
   addSteam(room: Group, tier: Tier, disposables: Disposables): void {
     const high = tier === 'high';
     if (!high && tier !== 'mid') return;

@@ -1,5 +1,4 @@
 const CONTROLS = 'a, button, input, select, textarea, summary, [role="button"], [role="menu"], [role="dialog"]';
-/** A click on the held folder toggles it through `desk:action` in the same task; this window lets that win. */
 const TOGGLE_WINDOW_MS = 80;
 
 export interface OutsideClickHost {
@@ -8,10 +7,6 @@ export interface OutsideClickHost {
   close(): void;
 }
 
-/**
- * Puts the held folder back when the visitor clicks or taps anywhere but a control or the folder
- * itself (which toggles on its own). Returns the cleanup.
- */
 export function listenOutsideClick(host: OutsideClickHost): () => void {
   const onClick = (event: MouseEvent) => {
     if (!host.isOut() || event.button !== 0) return;

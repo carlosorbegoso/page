@@ -1,6 +1,5 @@
 import type { ChapterId } from './chapters';
 
-/** The score follows the story: tonight's lofi, a sparse piano for the day years, a pad at dawn. */
 export type Act = 'night' | 'day' | 'dawn';
 
 const ACT_OF: Record<ChapterId, Act> = {
@@ -14,7 +13,6 @@ const ACT_OF: Record<ChapterId, Act> = {
   outro: 'dawn'
 };
 
-/** CC0 tracks (docs/audio.md, "Créditos"); fetched only once the visitor turns the sound on. */
 const TRACKS: Record<Act, string> = {
   night: 'audio/music-night.m4a',
   day: 'audio/music-day.m4a',
@@ -28,7 +26,6 @@ const SAMPLES = {
 } as const;
 export type SampleId = keyof typeof SAMPLES;
 
-/** AAC pads the start of a file; skipping it keeps the seamless loops seamless. */
 const ENCODER_PRIMING_SECONDS = 0.046;
 const CROSSFADE_SECONDS = 3;
 const DAWN_CROSSFADE_SECONDS = 5;
@@ -37,7 +34,6 @@ function assetUrl(path: string): string {
   return `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}${path}`;
 }
 
-/** Looping music beds crossfaded per act, plus one-shot samples (lamp switch, page flip). */
 export class MusicBed {
   readonly output: GainNode;
   private readonly buffers = new Map<string, Promise<AudioBuffer | null>>();
@@ -52,7 +48,6 @@ export class MusicBed {
     this.output = context.createGain();
   }
 
-  /** Switches to the act of a chapter; repeated calls for the same act do nothing. */
   follow(chapter: ChapterId): void {
     const day = document.documentElement.dataset.time === 'day';
     void this.play(day ? (chapter === 'outro' ? 'night' : 'day') : ACT_OF[chapter]);

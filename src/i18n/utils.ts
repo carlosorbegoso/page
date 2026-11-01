@@ -17,21 +17,18 @@ export function isLocale(value: unknown): value is Locale {
   return LOCALES.includes(value as Locale);
 }
 
-/** Resolves the locale from Astro.currentLocale, falling back to the first path segment after BASE_URL. */
 export function getLocale(currentLocale: string | undefined, url: URL): Locale {
   if (isLocale(currentLocale)) return currentLocale;
   const [segment] = url.pathname.slice(import.meta.env.BASE_URL.length).split('/');
   return isLocale(segment) ? segment : DEFAULT_LOCALE;
 }
 
-/** Returns a translator bound to one locale. */
 export function useTranslations(locale: Locale) {
   return function t(key: UiKey): string {
     return dictionaries[locale][key];
   };
 }
 
-/** Prefixes a public-folder path with BASE_URL, tolerating a leading slash. */
 export function withBase(path: string): string {
   const base = import.meta.env.BASE_URL.endsWith('/')
     ? import.meta.env.BASE_URL
@@ -39,7 +36,6 @@ export function withBase(path: string): string {
   return `${base}${path.replace(/^\/+/, '')}`;
 }
 
-/** Root-relative URL of a page in a locale, e.g. `/page/en/`. */
 export function localeUrl(locale: Locale, path = ''): string {
   return getRelativeLocaleUrl(locale, path);
 }
@@ -48,7 +44,6 @@ export function otherLocale(locale: Locale): Locale {
   return locale === 'es' ? 'en' : 'es';
 }
 
-/** Formats a `YYYY-MM` string as a short month and year in the given locale. */
 export function formatYearMonth(value: string, locale: Locale): string {
   const [year, month] = value.split('-').map(Number);
   return new Intl.DateTimeFormat(LOCALE_TAGS[locale].bcp47, {

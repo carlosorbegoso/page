@@ -1,0 +1,44 @@
+import type { Group } from 'three';
+import type { StationContext } from '../../contracts';
+import type { DeskLife } from '../life';
+import type { WallPortrait } from '../portrait';
+import type { Palette } from '../props';
+import type { DeskFolders } from './folders';
+import type { RoomMeshes } from './room';
+import type { DeskScreens } from './screens';
+
+export interface LateDeskOptions {
+  context: StationContext;
+  room: Group;
+  meshes: RoomMeshes;
+  palette: Palette;
+  folders: DeskFolders;
+  screens: DeskScreens;
+  portrait: WallPortrait | null;
+  life: DeskLife | null;
+  disposables: Array<{ dispose(): void }>;
+}
+
+export function firstFrameShown(context: StationContext): Promise<void> {
+  if (context.capture || document.querySelector('[data-stage][data-ready="true"]')) return Promise.resolve();
+  return new Promise(resolve => window.addEventListener('stage:reveal', () => resolve(), { once: true }));
+}
+
+export async function mountLateDesk(options: LateDeskOptions): Promise<void> {
+  const { context, room, meshes, palette, folders, screens, portrait, life, disposables } = options;
+  await firstFrameShown(context);
+  try {
+    const late = await import('../deferred');
+    const detail = late.createFolderDetail(context, meshes, palette);
+    room.add(detail.object3D);
+    disposables.push(detail);
+    folders.detail = detail;
+    screens.attachDesktop(late.createLaptopDesktop());
+    portrait?.attachBioCard(late.createBioCard());
+    life?.attachBeats(late.createStoryBeats());
+    disposables.push(late.createStackedPrints(room, () => context.invalidate()));
+    context.invalidate();
+  } catch (error) {
+    console.error('[desk] late features failed', error);
+  }
+}

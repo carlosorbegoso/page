@@ -33,10 +33,6 @@ function buildPot(b: PartBuilder, p: Palette, q: Quality, at: (m: Matrix4) => Ma
   }
 }
 
-/**
- * Echeveria rosette: fleshy pointed leaves on a golden-angle spiral, the outer ones long and nearly
- * flat, the inner ones short and upright, each with a blushed tip.
- */
 function buildRosette(b: PartBuilder, q: Quality, at: (m: Matrix4) => Matrix4): void {
   const count = Math.round(22 + 10 * q);
   const random = seeded(17);
@@ -57,7 +53,6 @@ function buildRosette(b: PartBuilder, q: Quality, at: (m: Matrix4) => Matrix4): 
   }
 }
 
-/** Carlos's living succulent: a blue-green echeveria in a small ceramic pot with pebbles, beside the laptop. */
 export function buildSucculent(b: PartBuilder, p: Palette, q: Quality): void {
   const frame = new Matrix4().compose(SUCCULENT, new Quaternion(), new Vector3(1, 1, 1));
   const at = (m: Matrix4) => new Matrix4().multiplyMatrices(frame, m);

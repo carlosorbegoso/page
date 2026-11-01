@@ -5,10 +5,6 @@ import { seg, UP } from './geometry';
 import type { Quality } from './palette';
 
 const VINYL = { roughness: 0.42, metalness: 0 } as const;
-/**
- * The ears and the tail move (`life/pokemon`), which finds their triangles by these colours: each is
- * a hair off the body's so the eye cannot tell, but `sameColor` can.
- */
 export const PIKACHU_RIG = {
   ear: new Color('#f2c432'),
   earTip: new Color('#141214'),
@@ -32,14 +28,12 @@ const FINISH = {
   brown: { color: new Color('#7a4a1e'), ...VINYL }
 } satisfies Record<string, Finish>;
 
-/** Every colour of the figure, so `life/pokemon` can lift the whole body when Pikachu walks. */
 export const PIKACHU_COLORS: readonly Color[] = Object.values(FINISH).map(finish => finish.color);
 
 const HEAD = { centre: new Vector3(0, 0.052, 0.002), radii: new Vector3(0.0213, 0.018, 0.018) };
 
 type Place = (position: Vector3, rotation?: Quaternion, scale?: Vector3) => Matrix4;
 
-/** Point on the front of the head ellipsoid at (x, y) and the rotation that lays a decal flat on it. */
 function onHead(x: number, y: number, lift = 0): { position: Vector3; facing: Quaternion } {
   const { centre, radii } = HEAD;
   const u = x / radii.x;
@@ -97,7 +91,6 @@ function buildFace(b: PartBuilder, q: Quality, place: Place): void {
   }
 }
 
-/** Zigzag lightning tail, drawn in its own plane: x runs backwards from the root, y up. */
 function tailGeometry(): ExtrudeGeometry {
   const points = [
     [0, 0],
@@ -133,7 +126,6 @@ export function pikachuFrame(): Matrix4 {
   return new Matrix4().compose(PIKACHU.base, new Quaternion().setFromAxisAngle(UP, PIKACHU.yaw), new Vector3(1, 1, 1));
 }
 
-/** Carlos's Pikachu vinyl figure (about 8 cm with the ears) on the monitor stand, where most desks keep a rubber duck. */
 export function buildPikachu(b: PartBuilder, q: Quality): void {
   const frame = pikachuFrame();
   const place: Place = (position, rotation = new Quaternion(), scale = new Vector3(1, 1, 1)) =>

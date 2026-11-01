@@ -1,61 +1,24 @@
 import { Group, Quaternion, Vector3, type Mesh, type MeshStandardMaterial, type Object3D } from 'three';
 import { acquireGltf, release } from '../assets';
-import type { ChapterId } from '../contracts';
 import { createClockParts, type ClockParts } from './clock/parts';
 import { DESK, HERO_EYE } from './layout';
 
-/** CC0 "Alarm Clock 01" from Poly Haven (public/models/alarm-clock/CREDITS.txt). */
 const URL = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}models/alarm-clock/alarm-clock.gltf`;
-/** A faint luminous dial: the clock sits outside the lamp's cone and would read as a black disc. */
 const DIAL_GLOW = 0.22;
-/** Back right, between the monitor and the lamp: in the wide shots, below the frame in the close ones. */
 export const CLOCK_POSITION = new Vector3(0.57, DESK.top, -0.41);
 const CLOCK_SCALE = 0.8;
-/** Window event that rings the alarm (dispatched when the clock is clicked). */
 export const CLOCK_RING_EVENT = 'desk:clock';
 const RING_SECONDS = 1.2;
-/** The winding crown turns about one revolution every half minute. */
 const CROWN_SPEED = 0.21;
 const SECOND_STEP = Math.PI / 30;
-
-/** The story clock, in minutes after 22:00, per chapter and sub-shot (matches the HUD beats). */
-const STORY_MINUTES: Record<ChapterId, number[]> = {
-  intro: [60],
-  hero: [60],
-  about: [80, 90],
-  experience: [100, 105, 110, 115, 120],
-  company: [150],
-  products: [210, 240, 270],
-  contact: [330],
-  outro: [478]
-};
-
-/** By day, minutes after 10:00 (same 12-hour dial): a morning at the office until nightfall. */
-const STORY_MINUTES_DAY: Record<ChapterId, number[]> = {
-  intro: [0],
-  hero: [0],
-  about: [20, 40],
-  experience: [60, 65, 70, 75, 80],
-  company: [490],
-  products: [500, 510, 520],
-  contact: [530],
-  outro: [545]
-};
-
-export function storyMinutes(chapter: ChapterId, subIndex: number, day = false): number {
-  const list = (day ? STORY_MINUTES_DAY : STORY_MINUTES)[chapter];
-  return list[Math.min(Math.max(subIndex, 0), list.length - 1)]!;
-}
 
 interface Hand {
   node: Object3D;
   rest: Quaternion;
-  /** Unit direction the hand points to at rest, in the clock's space. */
   restDirection: Vector3;
   turnsPerHour: number;
 }
 
-/** An analog desk clock whose hands show the story hour; the hands sweep forward between chapters. */
 export class StoryClock {
   readonly group = new Group();
   private hands: Hand[] = [];
@@ -75,8 +38,6 @@ export class StoryClock {
     this.wake?.();
   };
 
-  /** `prepare` compiles the model's shaders before it joins the scene (no first-frame link stall). */
-  /** `wake` asks the on-demand loop for a frame when the alarm is rung while nothing else animates. */
   constructor(
     onReady: () => void,
     prepare?: (model: Object3D) => Promise<void>,
@@ -90,46 +51,7 @@ export class StoryClock {
     acquireGltf(URL)
       .then(gltf => {
         if (this.disposed) return;
-        const body = gltf.scene.getObjectByName('alarm_clock_01');
-        if (body) this.faceNormal = new Vector3(1, 0, 0).applyQuaternion(body.quaternion).normalize();
-        const toEye = HERO_EYE.clone().sub(CLOCK_POSITION);
-        this.group.rotation.y = Math.atan2(toEye.x, toEye.z) - Math.atan2(this.faceNormal.x, this.faceNormal.z);
-        const handOf = (name: string, turnsPerHour: number): Hand | null => {
-          const node = gltf.scene.getObjectByName(name);
-          if (!node) return null;
-          const restDirection = new Vector3(-1, 0, 0).applyQuaternion(node.quaternion).normalize();
-          return { node, rest: node.quaternion.clone(), restDirection, turnsPerHour };
-        };
-        this.hands = [handOf('houd_hand', 1 / 12), handOf('minute_hand', 1)].filter((hand): hand is Hand => hand !== null);
-        const second = gltf.scene.getObjectByName('second_hand');
-        if (second) {
-          /* Unlike the other two hands, the second hand's mesh is modelled along its local +Y. */
-          const restDirection = new Vector3(0, 1, 0).applyQuaternion(second.quaternion).normalize();
-          this.secondHand = { node: second, rest: second.quaternion.clone(), restDirection };
-        }
-        gltf.scene.traverse(object => {
-          object.castShadow = true;
-          object.receiveShadow = true;
-          const materials = (object as Mesh).material;
-          for (const material of (Array.isArray(materials) ? materials : [materials]) as Array<MeshStandardMaterial | undefined>) {
-            if (!material?.isMeshStandardMaterial) continue;
-            if (material.name.endsWith('_Glass')) {
-              /* The glass ships with an opaque JPG as base colour, which would paint the dial black. */
-              material.map = null;
-              material.color.setScalar(1);
-              material.opacity = 0.08;
-              material.transparent = true;
-              material.roughness = 0.05;
-              material.depthWrite = false;
-              material.needsUpdate = true;
-              continue;
-            }
-            if (!material.map) continue;
-            material.emissiveMap = material.map;
-            material.emissive.setScalar(1);
-            material.emissiveIntensity = DIAL_GLOW;
-          }
-        });
+        this.adoptModel(gltf.scene);
         const show = () => {
           if (this.disposed) return;
           this.parts = createClockParts();
@@ -142,7 +64,6 @@ export class StoryClock {
       .catch(() => undefined);
   }
 
-  /** Points the hands at `minutes` after 22:00. */
   show(minutes: number): void {
     const up = new Vector3(0, 1, 0).projectOnPlane(this.faceNormal).normalize();
     const hours = 10 + minutes / 60;
@@ -154,11 +75,6 @@ export class StoryClock {
     }
   }
 
-  /**
-   * Advances the living parts: the second hand ticks with real seconds, the crown winds and a
-   * pending ring plays. Returns true while the case itself moves (ring or reduced-motion nudge):
-   * keep rendering and refresh the shadow map on those frames.
-   */
   update(time: number, motion: boolean): boolean {
     if (!this.parts) return false;
     this.tickSeconds(Date.now() / 1000, motion);
@@ -199,13 +115,22 @@ export class StoryClock {
     release(URL);
   }
 
+  private adoptModel(scene: Object3D): void {
+    const body = scene.getObjectByName('alarm_clock_01');
+    if (body) this.faceNormal = new Vector3(1, 0, 0).applyQuaternion(body.quaternion).normalize();
+    const toEye = HERO_EYE.clone().sub(CLOCK_POSITION);
+    this.group.rotation.y = Math.atan2(toEye.x, toEye.z) - Math.atan2(this.faceNormal.x, this.faceNormal.z);
+    this.hands = [handOf(scene, 'houd_hand', 1 / 12), handOf(scene, 'minute_hand', 1)].filter((hand): hand is Hand => hand !== null);
+    this.secondHand = secondHandOf(scene);
+    scene.traverse(tuneClockSurface);
+  }
+
   private pose(hop: number, roll: number, pitch: number, hammer: number): void {
     this.body.position.y = hop;
     this.body.rotation.set(pitch, 0, roll);
     if (this.parts) this.parts.hammer.rotation.z = hammer;
   }
 
-  /** Quartz step: the hand jumps on the second, overshoots by a sixth of a step and settles. */
   private tickSeconds(now: number, motion: boolean): void {
     const hand = this.secondHand;
     if (!hand) return;
@@ -217,6 +142,47 @@ export class StoryClock {
     const up = this.target.set(0, 1, 0).projectOnPlane(this.faceNormal).normalize();
     up.applyAxisAngle(this.faceNormal, -(step % 60) * SECOND_STEP);
     hand.node.quaternion.copy(this.turn.setFromUnitVectors(hand.restDirection, up)).multiply(hand.rest);
+  }
+}
+
+function handOf(scene: Object3D, name: string, turnsPerHour: number): Hand | null {
+  const node = scene.getObjectByName(name);
+  if (!node) return null;
+  const restDirection = new Vector3(-1, 0, 0).applyQuaternion(node.quaternion).normalize();
+  return { node, rest: node.quaternion.clone(), restDirection, turnsPerHour };
+}
+
+function secondHandOf(scene: Object3D): { node: Object3D; rest: Quaternion; restDirection: Vector3 } | null {
+  const second = scene.getObjectByName('second_hand');
+  if (!second) return null;
+  const restDirection = new Vector3(0, 1, 0).applyQuaternion(second.quaternion).normalize();
+  return { node: second, rest: second.quaternion.clone(), restDirection };
+}
+
+function clearGlass(material: MeshStandardMaterial): void {
+  material.map = null;
+  material.color.setScalar(1);
+  material.opacity = 0.08;
+  material.transparent = true;
+  material.roughness = 0.05;
+  material.depthWrite = false;
+  material.needsUpdate = true;
+}
+
+function tuneClockSurface(object: Object3D): void {
+  object.castShadow = true;
+  object.receiveShadow = true;
+  const materials = (object as Mesh).material;
+  for (const material of (Array.isArray(materials) ? materials : [materials]) as Array<MeshStandardMaterial | undefined>) {
+    if (!material?.isMeshStandardMaterial) continue;
+    if (material.name.endsWith('_Glass')) {
+      clearGlass(material);
+      continue;
+    }
+    if (!material.map) continue;
+    material.emissiveMap = material.map;
+    material.emissive.setScalar(1);
+    material.emissiveIntensity = DIAL_GLOW;
   }
 }
 

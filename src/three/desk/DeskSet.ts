@@ -7,11 +7,12 @@ import { readPalette } from './props';
 import { SUB_SHOTS, phoneFrame, type SurfaceFrame } from './shots';
 import { createActionListener } from './set/actions';
 import { ClockWiring } from './set/clock-wiring';
-import { addDeskLife, addFolderDetail, addSpines } from './set/extras';
+import { addDeskLife, addSpines } from './set/extras';
 import { DeskFigures } from './set/figures';
 import { DeskFolders } from './set/folders';
 import type { DeskFrame } from './set/frame';
 import { DeskFraming } from './set/framing';
+import { mountLateDesk } from './set/deferred';
 import { DeskLevels } from './set/levels';
 import { LightRig } from './set/lighting';
 import { DeskPicks } from './set/picks';
@@ -19,17 +20,11 @@ import { addContactShadows, buildRoomMeshes } from './set/room';
 import { DeskScreens } from './set/screens';
 import { focusedFigure, shotObject, storyRank } from './set/story';
 import { DeskWeather } from './set/weather';
+import { WallPortrait } from './portrait';
 import { RoomLife } from './room-life';
 
-/** Chapters where Alfa is on screen and its head follows the pointer. */
 const ALFA_LOOKS: readonly ChapterId[] = ['company', 'products'];
 
-/**
- * "Una noche en el escritorio": the whole set (room, props, collectibles, city and rain, lights)
- * plus the director's data — one fixed shot per chapter / sub-shot, the CSS3D surfaces and the
- * anchors of the 2D panels. Chapter actions run in `update` from the director's state; each
- * concern lives in `set/*` and reports whether it still moves.
- */
 export class DeskSet implements ShotProvider {
   readonly object3D = new Group();
   private readonly pickSet = new DeskPicks();
@@ -50,6 +45,7 @@ export class DeskSet implements ShotProvider {
   private framing!: DeskFraming;
   private life: DeskLife | null = null;
   private roomLife: RoomLife | null = null;
+  private portrait: WallPortrait | null = null;
   private triangles = 0;
   private chapter: ChapterId = 'intro';
   private subIndex = 0;
@@ -66,11 +62,12 @@ export class DeskSet implements ShotProvider {
     levels: this.levels,
     folderAction: (action, id) => this.onFolderAction(action, id)
   });
+  private readonly shotEye = () => this.framing.framing(this.chapter, this.subIndex)?.eye ?? this.context.camera.position;
   private readonly onInteract = (event: Event) => {
     const detail = (event as CustomEvent<{ id?: string; phase?: string }>).detail;
     if (detail?.phase !== 'activate' || !detail.id) return;
     this.life?.press.pulse(detail.id.replace(/^folder-/, ''), this.clock);
-    this.folders.requestFolder(detail.id, () => this.framing.framing(this.chapter, this.subIndex)?.eye ?? this.context.camera.position);
+    this.folders.requestFolder(detail.id, this.shotEye);
     this.context?.invalidate();
   };
   private readonly onFolderKey = (event: KeyboardEvent) => {
@@ -97,9 +94,12 @@ export class DeskSet implements ShotProvider {
     this.roomLife = new RoomLife(context, this.levels);
     this.roomLife.build(this.room, { material: meshes.material, depthMaterial: meshes.depthMaterial, palette });
     this.disposables.push(this.roomLife);
-    this.folders.detail = addFolderDetail(this.room, context, meshes, palette, this.disposables);
+    this.portrait = new WallPortrait(context.camera, meshes.material.envMap, () => context.invalidate());
+    this.room.add(this.portrait.group);
+    this.disposables.push(this.portrait);
     window.addEventListener('keydown', this.onFolderKey);
     this.screens = new DeskScreens(context, { room: this.room, phone: this.phoneSurface(), material: meshes.material, depthMaterial: meshes.depthMaterial, disposables: this.disposables });
+    const late = mountLateDesk({ context, room: this.room, meshes, palette, folders: this.folders, screens: this.screens, portrait: this.portrait, life: this.life, disposables: this.disposables });
     this.weather.addWindow(this.room, this.disposables);
     addSpines(this.room, this.folders, this.disposables);
     window.addEventListener('desk:action', this.onAction);
@@ -108,11 +108,12 @@ export class DeskSet implements ShotProvider {
     this.room.add(this.clockWiring.group);
     this.weather.addSteam(this.room, context.tier, this.disposables);
     addContactShadows(this.room, this.disposables);
-    this.pickSet.build(this.room, this.phoneSurface(), this.disposables);
+    this.pickSet.build(this.room, this.phoneSurface(), this.disposables, this.life?.cardTargets());
     this.lights = new LightRig(this.lightRig, high);
     this.weather.addBeam(this.room, this.lights.lamp.position, high, this.disposables);
     if (high) this.enableShadows();
     this.applyLevels();
+    if (context.capture) await late;
     context.invalidate();
   }
 
@@ -153,16 +154,15 @@ export class DeskSet implements ShotProvider {
     return this.framing.framing(chapter, subIndex)?.focus.clone() ?? null;
   }
 
-  /** Highlights a navigable prop (or clears with null). Accepts the pick's object or a descendant. */
   setHover(object: Object3D | null): void {
     const { name, changed } = this.pickSet.hover(object, this.uniforms);
     this.life?.setHover(name ?? null);
     this.screens?.setHover(name ?? null);
     this.roomLife?.setHover(object ? (this.resolvePick(object)?.key.slice(5) ?? null) : null);
+    this.portrait?.setHover(object ? this.resolvePick(object)?.key === 'desk:portrait' : false);
     if (changed) this.context?.invalidate();
   }
 
-  /** Finds the pick an object belongs to (walking up the parents). */
   resolvePick(object: Object3D): StationPick | null {
     return this.pickSet.resolve(object);
   }
@@ -192,6 +192,8 @@ export class DeskSet implements ShotProvider {
     settling ||= hovering;
     const toys = this.roomLife?.update(frame) ?? false;
     settling ||= toys;
+    const glinting = this.portrait?.update(frame) ?? false;
+    settling ||= glinting;
     if (frame.motion) {
       this.weather.setTime(time);
       settling = true;
@@ -223,10 +225,9 @@ export class DeskSet implements ShotProvider {
     const { pointer, camera, renderer } = this.context;
     const look = frame.motion && ALFA_LOOKS.includes(this.chapter) && pointer.active && pointer.enabled ? { ndc: pointer.ndc, camera } : null;
     const pixelScale = renderer.domElement.height / (2 * Math.tan((camera.fov * Math.PI) / 360));
-    return this.life?.update(frame.dt, frame.time, { motion: frame.motion, look, pixelScale, focused }) ?? false;
+    return this.life?.update(frame.dt, frame.time, { motion: frame.motion, look, pixelScale, focused, shot: `${frame.chapter}:${frame.subIndex}` }) ?? false;
   }
 
-  /** Clock ringing, figure poses and the held folder: the lamp shadow map is re-rendered only when one of them changes. Returns whether anything still moves. */
   private updateShadows(frame: DeskFrame): boolean {
     const high = this.context.tier === 'high';
     const ringing = this.clockWiring?.ring(frame) ?? false;
@@ -238,7 +239,7 @@ export class DeskSet implements ShotProvider {
         redraw = true;
       }
     }
-    const shelf = this.folders.updateShelf(frame, this.pickSet.hoverId);
+    const shelf = this.folders.updateShelf(frame, this.pickSet.hoverId, this.shotEye);
     if (shelf.posed && high) redraw = true;
     if (redraw) this.context.renderer.shadowMap.needsUpdate = true;
     return ringing || shelf.settling;
@@ -248,6 +249,7 @@ export class DeskSet implements ShotProvider {
     const level = this.levels.level;
     this.lights.apply(level);
     this.roomLife?.apply(level);
+    this.portrait?.apply(level);
     this.screens.apply(level);
     this.weather.apply(level, this.chapter, this.life, this.context.renderer.domElement.height, this.framing.viewport().fov);
     this.figures.apply(this.uniforms, level, this.life);
@@ -259,11 +261,9 @@ export class DeskSet implements ShotProvider {
 
   private onFolderAction(action: 'folder' | 'folder-close', id?: string): void {
     if (!this.context) return;
-    const eye = () => this.framing.framing(this.chapter, this.subIndex)?.eye ?? this.context.camera.position;
-    if (this.folders.action(action, id, this.chapter, this.subIndex, eye)) this.context.invalidate();
+    if (this.folders.action(action, id, this.chapter, this.subIndex, this.shotEye)) this.context.invalidate();
   }
 
-  /** Room triangle count and visible meshes (debug overlay, docs). */
   stats(): { triangles: number; meshes: number } {
     let meshes = 0;
     this.object3D.traverse(node => {

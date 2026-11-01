@@ -8,7 +8,6 @@ const TURN = 0.42;
 const HOVER_TURN = 0.07;
 const IDENTITY = new Matrix4();
 
-/** The coffee mug: a click turns it a little on the desk and the steam puffs harder for two seconds. */
 export class MugLife {
   private startedAt = -1;
   private gentle = false;
@@ -37,7 +36,6 @@ export class MugLife {
     this.hovered = hovered;
   }
 
-  /** Multiplier on the steam strength. */
   steamGain(time: number): number {
     const t = progress(this.startedAt, time, SECONDS);
     if (t < 0) return 1;

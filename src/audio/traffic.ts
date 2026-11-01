@@ -2,7 +2,6 @@ const PASS_LEVEL = 0.05;
 const TICK_MS = 1000;
 const PASSES_PER_SECOND = 0.22;
 
-/** Distant cars going by: a filtered noise swell that pans across, now and then. */
 export class CityPasses {
   private readonly bus: GainNode;
   private level = 0;

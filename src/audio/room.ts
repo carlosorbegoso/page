@@ -11,7 +11,6 @@ export const ROOM_LEVELS = {
 const DROPS_PER_SECOND = 9;
 const DROP_TICK_MS = 120;
 
-/** Continuous room tone: rain on the window glass, a faint room hum and a distant city. */
 export class RoomTone {
   readonly output: GainNode;
   private readonly rain: GainNode;

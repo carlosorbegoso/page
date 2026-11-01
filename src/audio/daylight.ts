@@ -1,6 +1,5 @@
 import type { ChapterId, ChapterPreset } from './chapters';
 
-/** `html[data-time]` is only day or night; the last chapters of a day visit read as dusk. */
 export type TimeOfDay = 'day' | 'dusk' | 'night';
 
 export interface RoomMix {
@@ -18,7 +17,6 @@ const SCALE: Record<TimeOfDay, RoomMix> = {
   night: { rain: 1, hum: 1, city: 1, passes: 0.12 }
 };
 
-/** Day brightens the pad a little: the room is lit by the window, not the lamp. */
 const CUTOFF_SCALE: Record<TimeOfDay, number> = { day: 1.35, dusk: 1.1, night: 1 };
 
 export function timeOfDay(chapter: ChapterId): TimeOfDay {

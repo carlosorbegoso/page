@@ -1,36 +1,52 @@
 import { Vector3 } from 'three';
 import { FOLDERS, OPEN_FOLDER, folderSpine, type FolderId } from '../layout';
+import { clearOfText, placeBeside } from './beside-text';
 import { TEXT_LEFT, type ShotContext } from './context';
 import { storyShot } from './portrait-fit';
-import { coverPoints, folderPoints, FOLDER_PULL, openFolderPoints } from './protagonists';
+import { printedSheetShot } from './printed-shots';
+import { centreOf, coverPoints, folderPoints, FOLDER_PULL, takenSheetPoints } from './protagonists';
 import { EXPERIENCE_ANCHOR, EXPERIENCE_ORDER } from './story';
-import type { Framing, Place } from './types';
+import type { Framing, Place, Setup } from './types';
 
-/**
- * The whole shelf opens the day years. It also bridges the cut from the monitor: about → the first
- * folder alone turns about 35°, past SHOT_LIMITS; through the shelf each cut stays under 25°.
- */
+const SHELF_LANDSCAPE: Setup = { heading: -6, pitch: -4, distance: 1.1 };
+const SHELF_PORTRAIT: Setup = { heading: -20, pitch: -4, distance: 0.9 };
+const OPEN_LANDSCAPE: Setup = { heading: -8, pitch: -18, distance: 0.7 };
+const OPEN_PORTRAIT: Setup = { heading: -14, pitch: -18, distance: 0.7 };
+const OVERVIEW_STAGE_BOTTOM = 0.7;
+
+function withStageBottom(ctx: ShotContext, bottom: number): ShotContext {
+  const stage = { ...ctx.stage, bottom };
+  return { ...ctx, stage, stageY: (stage.top + stage.bottom) / 2 };
+}
+
 function shelfShot(ctx: ShotContext, place: Place, panel: Place): Framing {
   const shelfFocus = folderSpine('baufest').lerp(folderSpine('intercorp'), 0.5);
+  const points = [...coverPoints(0), ...FOLDERS.flatMap(id => folderPoints(id, 0))];
+  const aim = ctx.portrait ? shelfFocus : centreOf(points);
+  const landscape = clearOfText(ctx, 'left', aim, SHELF_LANDSCAPE, points);
+  const fitCtx = ctx.portrait ? withStageBottom(ctx, OVERVIEW_STAGE_BOTTOM) : ctx;
+  const where = ctx.portrait ? place : placeBeside(ctx, 'left', place);
+  const frame = storyShot(fitCtx, aim, landscape, SHELF_PORTRAIT, where, points);
   return {
-    ...storyShot(
-      ctx,
-      shelfFocus,
-      { heading: -14, pitch: -4, distance: 1.6 },
-      { heading: -20, pitch: -4, distance: 1.6 },
-      place,
-      [...coverPoints(0), ...FOLDERS.flatMap(id => folderPoints(id, 0))]
-    ),
+    ...frame,
+    aim: frame.aim ?? aim,
     focus: shelfFocus,
     panel: { name: 'exp-intro', ...panel }
   };
 }
 
 function openFolderShot(ctx: ShotContext, sx: number, panel: Place): Framing {
-  const focus = OPEN_FOLDER.centre.clone().add(new Vector3(0, 0.01, 0));
-  const place = { sx, sy: ctx.stacked ? ctx.subjectY : ctx.portrait ? 0.32 : 0.56 };
+  if (ctx.stacked) return printedSheetShot(ctx, EXPERIENCE_ANCHOR.tcs);
+  const focus = OPEN_FOLDER.centre.clone().add(new Vector3(0, 0.06, 0));
+  const sheet = takenSheetPoints();
+  const points = sheet;
+  const aim = centreOf(points);
+  const place = ctx.portrait ? { sx, sy: ctx.stacked ? ctx.subjectY : 0.32 } : placeBeside(ctx, 'left', { sx, sy: 0.56 });
+  const landscape = clearOfText(ctx, 'left', aim, OPEN_LANDSCAPE, points);
+  const frame = storyShot(ctx, aim, landscape, OPEN_PORTRAIT, place, points);
   return {
-    ...storyShot(ctx, focus, { heading: -8, pitch: -18, distance: 0.85 }, { heading: -20, pitch: -18, distance: 1.05 }, place, openFolderPoints()),
+    ...frame,
+    aim: frame.aim ?? aim,
     focus,
     panel: { name: EXPERIENCE_ANCHOR.tcs, ...panel }
   };
@@ -52,7 +68,6 @@ function shelfFolderShot(ctx: ShotContext, id: Exclude<FolderId, 'tcs'>, place: 
   };
 }
 
-/** Portrait keeps the archive cover sheet in frame with the current box, so it looks along the stack less steeply. */
 export function experienceShots(ctx: ShotContext): Framing[] {
   const layout = ctx.layoutFor(TEXT_LEFT);
   const place = { sx: layout.sx, sy: ctx.portrait ? ctx.subjectY : 0.5 };

@@ -9,7 +9,6 @@ export interface FrameLoop {
   readonly running: boolean;
   play(): void;
   stop(): void;
-  /** Renders one centred frame, used when motion is off or the loop is paused. */
   still(): void;
   setMotion(allowed: boolean): void;
 }

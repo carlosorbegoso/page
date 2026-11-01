@@ -58,7 +58,6 @@ function geometries(): ToolGeometries {
   };
 }
 
-/** SkyMek's tool: a stylised combination wrench resting on its ring, tilted 30°. */
 export const toolRecipe: MascotRecipe<ToolGeometries> = {
   id: 'tool',
   height: Math.sin(TILT) * (HEAD_X - RING_X + HEAD_R) + RING_R,

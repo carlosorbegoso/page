@@ -156,7 +156,6 @@ const stackId = `${headingId}-stack`;
     display: none;
   }
 
-  /* On the stage each job is a title card: the year, who and what, one result. The rest lives in reading mode. */
   :global(.is-3d) .era-year {
     display: block;
     order: -1;
@@ -174,8 +173,19 @@ const stackId = `${headingId}-stack`;
     display: none;
   }
 
-  :global(.is-3d) .stage-hidden,
-  :global(.is-3d) [data-plate] li:nth-child(n + 2) {
+  :global(.is-3d) [data-experience]:not(:focus-visible) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  :global(.is-3d) [data-experience]:focus-visible :is(.stage-hidden, li:nth-child(n + 2)) {
     display: none;
   }
 
@@ -192,7 +202,6 @@ const stackId = `${headingId}-stack`;
       display: none;
     }
 
-    /* On phones the one-line entry stacks like the others: dates, company, role. */
     :global(.is-3d) .compact-line {
       flex-direction: column;
       align-items: flex-start;

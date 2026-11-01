@@ -4,26 +4,17 @@ import { FOLDER, GLASS_Z, LAMP, ROOM, WINDOW, folderCentre } from '../layout';
 import { monitorFrame } from '../shots';
 import type { LightLevels } from './levels';
 
-/**
- * The light tokens are physical values (cd, nits, lux); the renderer's ACES exposure is tuned
- * high, so the room scales them to keep desk.md's balance: a warm pool that does not clip, a
- * readable moon rim and a fill that keeps the walls off pure black. The monitor is a soft cold
- * point light in front of the glass (a RectAreaLight's LTC tables would triple the chunk).
- */
 const LIGHT_CALIBRATION = { lamp: 0.4, monitor: 0.16, moon: 3, fill: 2.5, shelf: 9 } as const;
 const SUN_COLOR = '#fff1dc';
 const SKY_FILL = '#dfe8f2';
 const GROUND_FILL = '#a08c72';
-/** Hemisphere gain by day: overcast light fills the whole room. */
+const CLOTH_GLOW = '#f2cf9c';
 const DAY_FILL_GAIN = 14;
-/** Share of the window light (moon or sun, its wall spill, the shelf rake) a lowered blind holds back. */
 const BLIND_SHADE = 0.85;
-/** Share of the daylight fill that came through the window. */
 const BLIND_FILL_SHADE = 0.6;
-/** With the window covered the lamp reads brighter against the room. */
-const BLIND_LAMP_GAIN = 0.2;
+const BLIND_LAMP_GAIN = 0.3;
+const CLOTH_TINT = 0.45;
 
-/** Lamp, monitor glow, moon (the sun by day), hemisphere fill and the shelf rake. */
 export class LightRig {
   readonly lamp: SpotLight;
   private readonly monitorLight: PointLight;
@@ -38,6 +29,7 @@ export class LightRig {
   private readonly nightGround = new Color(0x0a0806);
   private readonly daySky = new Color(SKY_FILL);
   private readonly dayGround = new Color(GROUND_FILL);
+  private readonly clothGlow = new Color(CLOTH_GLOW);
   private readonly moonAt: Vector3;
   private readonly sunAt = new Vector3();
 
@@ -81,7 +73,7 @@ export class LightRig {
     this.shelfLight.intensity = level.shelf * LIGHT_CALIBRATION.shelf * opening;
     this.moon.color.copy(this.moonNight).lerp(this.sunColor, level.day).lerp(this.moonDawn, level.dawn * 0.7);
     this.moon.position.copy(this.moonAt).lerp(this.sunAt, level.day);
-    this.fill.color.copy(this.nightSky).lerp(this.daySky, level.day);
+    this.fill.color.copy(this.nightSky).lerp(this.daySky, level.day).lerp(this.clothGlow, CLOTH_TINT * level.blind * level.day);
     this.fill.groundColor.copy(this.nightGround).lerp(this.dayGround, level.day);
     const daylight = level.day * DAY_FILL_GAIN * (1 - BLIND_FILL_SHADE * level.blind);
     this.fill.intensity = this.ambientIntensity * LIGHT_CALIBRATION.fill * (1 + level.dawn * 1.5 * opening + daylight);

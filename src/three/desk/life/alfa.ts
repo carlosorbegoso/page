@@ -15,7 +15,6 @@ export interface AlfaParts {
   head: RigPart;
   eyes?: RigPart;
   antenna?: RigPart;
-  /** Base of the neck, the pivot the head turns on. */
   neck: Vector3;
   signal: Color;
 }
@@ -26,7 +25,6 @@ function happyEyeGeometry(): BufferGeometry {
   return mergeGeometries([stroke(-0.68), stroke(Math.PI + 0.68)], false)!;
 }
 
-/** A posed-by-matrix overlay that starts hidden and ignores the pointer. */
 function overlayMesh<T extends Mesh>(mesh: T, name: string): T {
   mesh.name = name;
   mesh.matrixAutoUpdate = false;
@@ -35,10 +33,6 @@ function overlayMesh<T extends Mesh>(mesh: T, name: string): T {
   return mesh;
 }
 
-/**
- * Alfa's life: it blinks every few seconds, its head follows the pointer (clamped and damped), and a
- * click makes it happy — "^ ^" eyes, a glow pulse, the antenna light blinking, a hop and a head wave.
- */
 export class AlfaLife {
   readonly overlays = new Group();
   private readonly headCentre: Vector3;
@@ -82,7 +76,6 @@ export class AlfaLife {
     if (antenna) this.antennaGlow = this.addAntennaGlow(antenna, color);
   }
 
-  /** Centres of the left and right eye, from the eye mesh's face centroids. */
   private eyeCentres(eyes: RigPart): Vector3[] {
     return [-1, 1].map(sign => {
       const points = eyes.centroids.filter(point => Math.sign(point.clone().sub(eyes.centre).dot(this.side)) === sign);
@@ -123,7 +116,6 @@ export class AlfaLife {
     this.happyGentle = !motion;
   }
 
-  /** Hop and wiggle of the whole figure during the happy reaction. */
   offset(time: number): FigureOffset {
     const t = this.happyT(time);
     if (t < 0 || this.happyGentle) return { lift: 0, yaw: 0 };
@@ -131,16 +123,11 @@ export class AlfaLife {
     return { lift, yaw: 0.16 * Math.sin(t * Math.PI * 3) * (1 - t) };
   }
 
-  /** Multiplier on Alfa's emissive signal (eyes, chest and antenna). */
   signalGain(time: number): number {
     const t = this.happyT(time);
     return t < 0 ? 1 : 1 + 1.1 * bump(t);
   }
 
-  /**
-   * Advances blink, gaze and the happy reaction. `look` is the pointer's NDC when Alfa should follow
-   * it, else null (the head eases back). Returns true while something is still moving.
-   */
   update(dt: number, time: number, motion: boolean, look: { ndc: { x: number; y: number }; camera: Camera; frame: Matrix4 } | null): boolean {
     this.motion = motion;
     let moving = false;
@@ -172,7 +159,6 @@ export class AlfaLife {
     return moving;
   }
 
-  /** Writes the part matrices for the figure transform `frame` the shader applies this frame. */
   pose(time: number, frame: Matrix4): void {
     const t = this.happyT(time);
     const wave = t >= 0 && !this.happyGentle ? 0.26 * Math.sin(t * Math.PI * 4) * Math.pow(1 - t, 1.2) : 0;

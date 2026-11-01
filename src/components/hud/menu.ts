@@ -24,7 +24,6 @@ function menuControl(toggle: HTMLButtonElement, menu: HTMLElement): MenuControl 
   return { isOpen, setOpen, closeLater };
 }
 
-/** Desktop hover opens the menu; the click that follows must not close it again. */
 function bindHover(hud: HTMLElement, toggle: HTMLButtonElement, control: MenuControl): void {
   const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
   let openedByHover = false;
@@ -48,7 +47,6 @@ function bindHover(hud: HTMLElement, toggle: HTMLButtonElement, control: MenuCon
   });
 }
 
-/** Escape, focus leaving the HUD (unless into the index sheet) and a press outside close the menu. */
 function bindDismiss(hud: HTMLElement, sheet: HTMLDialogElement | null, control: MenuControl): void {
   hud.addEventListener('keydown', event => {
     if (event.key === 'Escape' && control.isOpen()) {
@@ -84,7 +82,6 @@ function bindMenuActions({ sheet, indexButton, clock, tourButton }: HudElements,
   });
 }
 
-/** HUD menu: opens on hover with a fine pointer or on click, closes on Escape, focus loss or an outside press. */
 export function initMenu(elements: HudElements, opener: IndexOpener): void {
   const { hud, toggle, menu, sheet } = elements;
   if (!hud || !toggle || !menu) return;

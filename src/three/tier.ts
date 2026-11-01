@@ -1,7 +1,3 @@
-/**
- * Device capability tiers (PLAN §3.3). This module never imports three: the initial
- * bundle uses it to decide whether the 3D chunk is downloaded at all.
- */
 export type Tier = 'none' | 'low' | 'mid' | 'high';
 
 export interface TierResult {
@@ -33,10 +29,6 @@ function probeWebGL2(): { ok: boolean; renderer: string } {
   }
 }
 
-/**
- * Classifies the device before three is downloaded. `low` is never returned here:
- * it is a later degradation decided by the frame-time monitor.
- */
 export function detectTier(override?: string | null): TierResult {
   const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
   if (matchMedia('(forced-colors: active)').matches) {
@@ -58,10 +50,6 @@ export function detectTier(override?: string | null): TierResult {
   return { tier: 'high', reason: 'default', renderer: probe.renderer };
 }
 
-/**
- * Measures the empty requestAnimationFrame interval (detects 30/60/120 Hz and iOS
- * low-power mode). Returns the median interval in milliseconds.
- */
 export function calibrateRefreshInterval(durationMs = 500): Promise<number> {
   return new Promise(resolve => {
     const deltas: number[] = [];
@@ -83,7 +71,6 @@ export function calibrateRefreshInterval(durationMs = 500): Promise<number> {
   });
 }
 
-/** Rolling frame-time sampler that reports the 75th percentile. */
 export class FrameSampler {
   private samples: number[] = [];
   private skipped = 0;
@@ -121,11 +108,9 @@ export class FrameSampler {
 export interface DprPolicy {
   steps: number[];
   initialIndex: number;
-  /** Rendered frames per refresh: 1 = every frame, 2 = alternate frames (30 fps at 60 Hz). */
   frameDivisor: number;
 }
 
-/** DPR ladder per tier: `high` starts at min(dpr, 2); `mid` starts at 1.0 and may climb to 1.5. */
 export function dprPolicy(tier: Tier, devicePixelRatio = window.devicePixelRatio || 1): DprPolicy {
   if (tier === 'high') {
     const top = Math.min(devicePixelRatio, 2);
@@ -141,13 +126,8 @@ export function dprPolicy(tier: Tier, devicePixelRatio = window.devicePixelRatio
 
 export type DprDecision = 'up' | 'down' | 'fail' | 'keep';
 
-/** Below 20 fps at the lowest DPR the 3D gives way to the static fallback. */
 export const UNACCEPTABLE_FRAME_MS = 50;
 
-/**
- * Adaptive resolution rule: p75 above 1.5x the target interval steps down; at the DPR floor
- * only a p75 above UNACCEPTABLE_FRAME_MS fails. p75 under 60 % of the target, sustained 3 s, steps up.
- */
 export class DprController {
   private index: number;
   private goodSince = -1;

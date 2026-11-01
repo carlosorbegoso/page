@@ -5,7 +5,6 @@ import { between, seg, UP } from './geometry';
 import type { Quality } from './palette';
 
 const VINYL = { roughness: 0.42, metalness: 0 } as const;
-/** Moving parts for `life/pokemon`, found by colour (each a hair off its neighbour) and the pivots they turn on. */
 export const CHARIZARD_RIG = {
   wing: new Color('#e2722c'),
   membrane: new Color('#2f7d88'),
@@ -34,7 +33,6 @@ const FINISH = {
   core: { color: CHARIZARD_RIG.core, roughness: 0.5, metalness: 0, emissive: 2.4 }
 } satisfies Record<string, Finish>;
 
-/** Every colour of the figure, so `life/pokemon` can move the whole body in the battle. */
 export const CHARIZARD_COLORS: readonly Color[] = Object.values(FINISH).map(finish => finish.color);
 
 type Place = (position: Vector3, rotation?: Quaternion, scale?: Vector3) => Matrix4;
@@ -74,7 +72,6 @@ function buildHead(b: PartBuilder, q: Quality, place: Place): void {
   }
 }
 
-/** Bat wing, x outwards and y up: the bone rises to the tip, the membrane scallops back down to the root. */
 const WING_OUTLINE = [
   [0, 0],
   [0.013, 0.031],
@@ -123,7 +120,6 @@ export function charizardFrame(): Matrix4 {
   return new Matrix4().compose(CHARIZARD.base, new Quaternion().setFromAxisAngle(UP, CHARIZARD.yaw), new Vector3(1, 1, 1));
 }
 
-/** Carlos's Charizard vinyl figure (about 10 cm) on the monitor stand, left of the column; its tail flame glows. */
 export function buildCharizard(b: PartBuilder, q: Quality): void {
   const frame = charizardFrame();
   const place: Place = (position, rotation = new Quaternion(), scale = new Vector3(1, 1, 1)) =>

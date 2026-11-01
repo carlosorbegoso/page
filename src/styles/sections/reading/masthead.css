@@ -1,4 +1,3 @@
-/* Reading page (CV): page column, links and masthead. */
 .cv {
   display: flex;
   flex-direction: column;
@@ -39,6 +38,12 @@
   margin-bottom: 1rem;
   color: var(--color-text-muted);
   font-size: var(--text-sm);
+}
+
+.cv-mark {
+  display: block;
+  margin-bottom: 0.75rem;
+  color: var(--color-text);
 }
 
 .cv-name {

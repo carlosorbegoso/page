@@ -1,6 +1,5 @@
 import { COC_CHUNK } from './coc.glsl';
 
-/** Fused final pass: chromatic fringe, DoF mix, bloom and streak, chapter grade, renderer tone mapping, contrast, vignette, grain. */
 export const COMPOSITE_FRAG = /* glsl */ `
 ${COC_CHUNK}
 uniform sampler2D tScene;
@@ -35,7 +34,6 @@ float hash(vec2 p) {
 
 void main() {
   vec2 fromCentre = vUv - 0.5;
-  // Lens fringe only towards the corners: the text column and the subject stay clean.
   vec2 fringe = fromCentre * dot(fromCentre, fromCentre) * uAberration;
   vec3 color = vec3(texture2D(tScene, vUv + fringe).r, texture2D(tScene, vUv).g, texture2D(tScene, vUv - fringe).b);
 
@@ -48,7 +46,6 @@ void main() {
   color += texture2D(tStreak, vUv).rgb * STREAK_TINT * uStreakStrength;
 
   color *= uExposure * uBalance;
-  // Split toning on a Reinhard-compressed luma, so HDR highlights do not saturate the weight.
   float l = dot(color, LUMA);
   float w = smoothstep(0.0, 1.0, l / (1.0 + l));
   color *= mix(vec3(1.0), mix(SHADOW_TINT, HIGHLIGHT_TINT, w), uSplit);
@@ -64,7 +61,6 @@ void main() {
   float d = length(fromCentre);
   c *= smoothstep(0.8, uVignetteOffset * 0.799, d * (uVignetteDarkness + uVignetteOffset));
 
-  // Overlay blend with mono noise, weighted towards the shadows.
   float n = hash(gl_FragCoord.xy + uSeed * 37.0);
   vec3 overlay = mix(2.0 * c * n, 1.0 - 2.0 * (1.0 - c) * (1.0 - n), step(0.5, c));
   float shadows = 1.0 - 0.6 * dot(c, LUMA);

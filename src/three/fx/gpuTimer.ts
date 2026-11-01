@@ -11,15 +11,10 @@ interface PendingQuery {
 const MAX_PENDING = 48;
 const SMOOTHING = 0.1;
 
-/**
- * Per-pass GPU timings through `EXT_disjoint_timer_query_webgl2` (Chrome/Edge/Firefox desktop,
- * most Android). Safari exposes no timer: `supported` is false and `ms` stays empty.
- */
 export class GpuTimer {
   private readonly ext: TimerExtension | null;
   private readonly pending: PendingQuery[] = [];
   private active: PendingQuery | null = null;
-  /** Exponential moving average per label, in milliseconds. */
   readonly ms = new Map<string, number>();
   private samples = 0;
   private readonly metal: boolean;
@@ -35,16 +30,10 @@ export class GpuTimer {
     return this.ext !== null;
   }
 
-  /**
-   * ANGLE's Metal backend (Chrome/Edge on macOS) answers the query with wall time between command
-   * buffer boundaries: measured 3-4 ms for a pass that costs 0.2 ms. Its numbers are shown but never
-   * used to switch effects off.
-   */
   get trusted(): boolean {
     return this.ext !== null && !this.metal;
   }
 
-  /** Number of completed frames measured since the last reset. */
   get sampleCount(): number {
     return this.samples;
   }

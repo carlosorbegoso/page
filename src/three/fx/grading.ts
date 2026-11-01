@@ -1,38 +1,28 @@
 import { Vector3 } from 'three';
 
-/** Colour grade of one chapter, applied in linear light before the renderer's ACES. */
 export interface Grade {
-  /** Multiplier on top of `renderer.toneMappingExposure`. */
   exposure: number;
-  /** -1 cold (monitor, moonlight) … +1 warm (lamp, dawn). */
   temperature: number;
-  /** Strength of the cool-shadows / warm-highlights split (lamp vs window). */
   split: number;
   vignette: number;
-  /** In-focus depth band in metres: wide for the room shots, a few cm for the macro of the figures. */
   focusRange: number;
-  /** S-curve after tone mapping (0 = none): the film-still contrast of the chapter. */
   contrast: number;
-  /** Multiplier of the bokeh radius: wide for the macro of the collectibles, 1 for the room. */
   bokeh: number;
 }
 
-/** Seconds to reach a chapter's grade; the dawn of `outro` takes 2.5 s (docs/PLAN.md). */
 const DEFAULT_SECONDS = 1.2;
 
-/** `delay` holds the old grade while the camera travels, so the warmth lands with the lamp switch. */
 const GRADES: Record<string, Grade & { seconds?: number; delay?: number }> = {
   intro: { exposure: 0.55, temperature: -0.3, split: 0.15, contrast: 0.2, vignette: 0.6, focusRange: 0.6, bokeh: 1, seconds: 0 },
   hero: { exposure: 1, temperature: 0, split: 0.38, contrast: 0.22, vignette: 0.55, focusRange: 0.6, bokeh: 1, seconds: 0.8 },
   about: { exposure: 1, temperature: -0.08, split: 0.25, contrast: 0.15, vignette: 0.45, focusRange: 0.6, bokeh: 1 },
   company: { exposure: 1.04, temperature: 0.18, split: 0.5, contrast: 0.3, vignette: 0.6, focusRange: 0.3, bokeh: 1.2, seconds: 1.4, delay: 1.6 },
-  products: { exposure: 1, temperature: 0.14, split: 0.48, contrast: 0.3, vignette: 0.6, focusRange: 0.035, bokeh: 2.6 },
+  products: { exposure: 1, temperature: 0.14, split: 0.48, contrast: 0.3, vignette: 0.6, focusRange: 0.3, bokeh: 1.2 },
   experience: { exposure: 0.96, temperature: -0.22, split: 0.2, contrast: 0.2, vignette: 0.6, focusRange: 0.25, bokeh: 1.4 },
   contact: { exposure: 1, temperature: -0.06, split: 0.32, contrast: 0.2, vignette: 0.55, focusRange: 0.2, bokeh: 1.2 },
   outro: { exposure: 1.3, temperature: 0.35, split: 0.2, contrast: 0.15, vignette: 0.35, focusRange: 0.8, bokeh: 1, seconds: 2.5 }
 };
 
-/** Overcast daylight: flatter, brighter, less vignette; the warmth comes back towards nightfall. */
 const GRADES_DAY: Record<string, Partial<Grade>> = {
   intro: { exposure: 0.95, temperature: 0.05, split: 0.12, contrast: 0.12, vignette: 0.25 },
   hero: { exposure: 0.95, temperature: 0.05, split: 0.12, contrast: 0.12, vignette: 0.25 },
@@ -64,7 +54,6 @@ function mix(a: Grade, b: Grade, t: number): Grade {
   };
 }
 
-/** Tweens the grade between chapters (`power2.inOut`-like). */
 export class ChapterGrading {
   private from: Grade = { ...NEUTRAL };
   private to: Grade = { ...NEUTRAL };
@@ -73,7 +62,6 @@ export class ChapterGrading {
   private duration = 0;
   private chapter = '';
 
-  /** Starts the transition to `chapter`; unknown ids keep the current grade. */
   enter(chapter: string, instant: boolean, force = false): void {
     const night = GRADES[chapter];
     if (!night || (chapter === this.chapter && !force)) return;
@@ -111,7 +99,6 @@ export class ChapterGrading {
   }
 }
 
-/** White-balance gains for a temperature (luma-preserving). */
 export function balanceGains(temperature: number, out: Vector3): Vector3 {
   out.set(1 + 0.12 * temperature, 1 + 0.02 * temperature, 1 - 0.14 * temperature);
   const luma = 0.2126 * out.x + 0.7152 * out.y + 0.0722 * out.z;

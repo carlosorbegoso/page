@@ -1,5 +1,8 @@
 import type { StationContext } from '../../contracts';
+import { PRODUCT_FIGURES } from '../layout';
 import type { DeskLife, LifeToy } from '../life';
+import { readProduct } from '../notes/content';
+import type { ProductId } from '../notes/layout';
 import type { RoomLife } from '../room-life';
 import type { DeskLevels } from './levels';
 import type { DeskScreens } from './screens';
@@ -16,7 +19,12 @@ export interface DeskActionHost {
   folderAction(action: 'folder' | 'folder-close', id?: string): void;
 }
 
-/** `desk:action` router: toys play, Pikachu and Charizard battle, folders open, the laptop lid and room objects toggle, the lamp switches. */
+function visit(host: DeskActionHost, id: string | undefined): void {
+  const product = id?.replace(/^visit-/, '') as ProductId | undefined;
+  if (!product || !PRODUCT_FIGURES.includes(product) || !host.life()?.cardRaised(product)) return;
+  window.open(readProduct(product).url, '_blank', 'noopener,noreferrer');
+}
+
 export function createActionListener(host: DeskActionHost): (event: Event) => void {
   return event => {
     const detail = (event as CustomEvent<{ action?: string; id?: string }>).detail;
@@ -35,6 +43,12 @@ export function createActionListener(host: DeskActionHost): (event: Event) => vo
       host.folderAction(detail.action, detail.id);
       return;
     }
+    if (detail?.action === 'time') {
+      host.levels.followMode(host.clock());
+      context?.invalidate();
+      return;
+    }
+    if (detail?.action === 'visit') return visit(host, detail.id);
     if (detail?.action === 'laptop') {
       host.screens().toggleLaptop(host.clock());
       return;

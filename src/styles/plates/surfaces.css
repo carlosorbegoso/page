@@ -1,7 +1,3 @@
-/*
- * Screens have a fixed size set by the engine (--surface-width/height) and must never clip, so
- * each section sizes its screen content in container units (cqh/cqw) of the plate.
- */
 .is-3d .plate[data-plate-mode^='surface-'] {
   container: surface / size;
   width: var(--surface-width, var(--plate-width));
@@ -34,7 +30,6 @@
   box-shadow: 0 0 12px 1px var(--plate-accent);
 }
 
-/* Fade the children, not the plate: opacity below 1 on a CSS3D plate flattens its children's depth. */
 .is-3d .plate > * {
   transition: opacity var(--duration-slow) var(--ease-standard);
 }

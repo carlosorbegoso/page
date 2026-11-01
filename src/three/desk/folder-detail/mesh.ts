@@ -19,7 +19,6 @@ function hideFromPointer(mesh: Mesh): void {
   mesh.raycast = () => undefined;
 }
 
-/** The shelf box's twin, posed by matrix and hidden until the box is taken out. */
 export function createTwinMesh(id: ShelfFolder, look: TwinLook): Mesh {
   const twin = new Mesh(buildTwin(id, look.palette).build(), look.material);
   twin.name = `desk-folder-twin-${id}`;

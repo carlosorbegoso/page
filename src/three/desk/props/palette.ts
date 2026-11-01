@@ -3,7 +3,6 @@ import { tokenColor, tokenNumber } from '../../tokens';
 import type { Finish } from '../builder';
 import type { FolderId } from '../layout';
 
-/** Segment multiplier: 1 on `high`, lower on `mid`. */
 export type Quality = number;
 
 export interface Palette {
@@ -52,26 +51,22 @@ export interface Palette {
   phone: Finish;
 }
 
-/**
- * The wall and floor tokens describe how the surfaces should *look* at night; as albedos they
- * are near-black paint (< 1 % reflectance) and would render pure black, so they are lifted.
- */
 const PERCEIVED_TO_ALBEDO = { wall: 3.5, floor: 2 } as const;
 
-/** One finish family for the collectibles (matte ceramic, satin glaze, brass accents), so they read as a designed set. */
 const COLLECTIBLE = { matte: 0.62, satin: 0.4 } as const;
 
-/** Brand colour as a glaze: desaturated by `mute` (0–1) and scaled in value. */
 function ceramic(color: Color, mute: number, value: number): Color {
   const hsl = { h: 0, s: 0, l: 0 };
   color.getHSL(hsl);
   return new Color().setHSL(hsl.h, hsl.s * (1 - mute), Math.min(hsl.l * value, 0.85));
 }
 
-/** Room finishes read from the design tokens (desk.md §2–3, mascots.md §2). */
-export function readPalette(): Palette {
-  const c = (token: string, fallback: string) => tokenColor(token, fallback);
-  const brass: Finish = { color: c('--color-desk-brass', '#b08a4a'), roughness: 0.38, metalness: 1 };
+const c = (token: string, fallback: string) => tokenColor(token, fallback);
+
+type CollectibleKey = Extract<keyof Palette, `alfa${string}` | `burbu${string}` | `gift${string}` | `tool${string}`>;
+type DeskKey = Exclude<keyof Palette, CollectibleKey | 'folders' | 'label' | 'phone'>;
+
+function readDeskFinishes(): Pick<Palette, DeskKey> {
   return {
     wall: { color: c('--color-desk-wall', '#121722').multiplyScalar(PERCEIVED_TO_ALBEDO.wall), roughness: 0.95, metalness: 0 },
     floor: { color: c('--color-desk-floor', '#17140f').multiplyScalar(PERCEIVED_TO_ALBEDO.floor), roughness: 0.7, metalness: 0, grain: 0.7 },
@@ -96,7 +91,12 @@ export function readPalette(): Palette {
     diffuser: { color: c('--color-lamp', '#ffb566'), roughness: 0.5, metalness: 0, emissive: 2 },
     telescope: { color: c('--color-telescope', '#c9ced6'), roughness: 0.3, metalness: 0.1 },
     telescopeBrass: { color: c('--color-telescope-brass', '#b08a4a'), roughness: 0.35, metalness: 1 },
-    lens: { color: new Color(0.01, 0.015, 0.03), roughness: 0.05, metalness: 0.4 },
+    lens: { color: new Color(0.01, 0.015, 0.03), roughness: 0.05, metalness: 0.4 }
+  };
+}
+
+function readCollectibleFinishes(brass: Finish): Pick<Palette, CollectibleKey> {
+  return {
     alfaBody: { color: c('--color-desk-ceramic', '#e6e0d4').lerp(new Color('#f4f7fb'), 0.6), roughness: 0.24, metalness: 0 },
     alfaVisor: { color: c('--color-alfa-body', '#10131a'), roughness: 0.1, metalness: 0.35 },
     alfaRing: brass,
@@ -112,7 +112,15 @@ export function readPalette(): Palette {
     toolBody: { color: new Color('#c9ccd1'), roughness: 0.24, metalness: 1 },
     toolBand: brass,
     toolStand: { color: c('--color-alfa-body', '#10131a').multiplyScalar(1.6), roughness: COLLECTIBLE.satin, metalness: 0 },
-    toolSignal: { color: c('--color-tool-band', '#f0a43c'), roughness: 0.4, metalness: 0, emissive: 0.6 },
+    toolSignal: { color: c('--color-tool-band', '#f0a43c'), roughness: 0.4, metalness: 0, emissive: 0.6 }
+  };
+}
+
+export function readPalette(): Palette {
+  const brass: Finish = { color: c('--color-desk-brass', '#b08a4a'), roughness: 0.38, metalness: 1 };
+  return {
+    ...readDeskFinishes(),
+    ...readCollectibleFinishes(brass),
     folders: {
       sysarp: { color: c('--color-folder-sysarp', '#7e776a'), roughness: 0.85, metalness: 0 },
       baufest: { color: c('--color-folder-baufest', '#4a5847'), roughness: 0.85, metalness: 0 },

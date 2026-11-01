@@ -2,7 +2,6 @@ import type { HudElements } from './elements';
 
 const INVITE_HINT_MS = 10_000;
 
-/** Marks the menu toggle while audio is armed or the scene invites the visitor to turn it on. */
 export function initAudioHint({ toggle }: HudElements): void {
   const audioHint = document.querySelector<HTMLElement>('[data-hud-audio-hint]');
   const audioToggle = document.querySelector<HTMLButtonElement>('[data-audio-toggle]');

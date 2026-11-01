@@ -40,7 +40,6 @@ function relayout(container: HTMLElement, renderer: WebGLRenderer, rig: CameraRi
   dust.uPixel.value = rig.layout(container, renderer) / 900;
 }
 
-/** Mounts the decorative 404 scene into `container` and returns a disposer. */
 export async function mountNotFound({ container, paperLabel, quality }: NotFoundOptions): Promise<() => void> {
   await fontsReady();
   const renderer = createRenderer(container, quality);
@@ -58,7 +57,6 @@ export async function mountNotFound({ container, paperLabel, quality }: NotFound
 
   relayout(container, renderer, rig, dust);
   loop.still();
-  // The lamp never moves: the shadow map is drawn once by the still frame above and then frozen.
   renderer.shadowMap.autoUpdate = false;
   container.dataset.ready = 'true';
   loop.play();

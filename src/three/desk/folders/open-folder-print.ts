@@ -3,16 +3,13 @@ import { drawSheet, drawSummarySheet } from '../folder-detail/sheet-canvas';
 import { readExperience, type SheetContent } from '../folder-detail/sheet-content';
 import { OPEN_FOLDER } from '../layout';
 
-/* Mirrors buildOpenFolder in props/openFolder.ts: its sheets are baked into the atlas, so the print is laid over them. */
 const BOARD_ROLL = 0.02;
 const BOARD_TOP = 0.004;
 const BOARD_WIDTH = OPEN_FOLDER.width / 2 - 0.004;
 const RIGHT_SHEET = { width: BOARD_WIDTH - 0.03, depth: OPEN_FOLDER.depth - 0.03, lift: BOARD_TOP + 0.0029, yaw: -0.008 } as const;
 const LEFT_SHEET = { width: BOARD_WIDTH - 0.036, depth: OPEN_FOLDER.depth - 0.05, at: new Vector3(0.002, BOARD_TOP + 0.0018, 0.008), yaw: 0.035 } as const;
-/** The pocket covers the tucked sheet from this depth (board frame) towards the visitor. */
 const POCKET_TOP = 0.004;
 const CANVAS_WIDTH = 1024;
-/** The lamp washes the lit paper out, so the printed sheet is darkened to keep its ink readable. */
 const PAPER_LEVEL = 0.74;
 const UP = new Vector3(0, 1, 0);
 const ONE = new Vector3(1, 1, 1);
@@ -52,7 +49,6 @@ function rightRest(): Matrix4 {
   return boardMatrix(1).multiply(new Matrix4().compose(new Vector3(0, RIGHT_SHEET.lift, 0), turn, ONE));
 }
 
-/** Only the part of the tucked sheet above the pocket is printed over. */
 function leftRest(visibleDepth: number): Matrix4 {
   const turn = new Quaternion().setFromAxisAngle(UP, LEFT_SHEET.yaw);
   const sheet = new Matrix4().compose(LEFT_SHEET.at, turn, ONE);
@@ -60,10 +56,6 @@ function leftRest(visibleDepth: number): Matrix4 {
   return boardMatrix(-1).multiply(sheet).multiply(new Matrix4().makeTranslation(0, 0, top + visibleDepth / 2));
 }
 
-/**
- * TCS's real job printed on the open folder's top sheets: the full sheet on the right board and a
- * cover letter (the summary) tucked in the left pocket, which swings with the left board's hinge.
- */
 export class OpenFolderPrint {
   readonly object3D = new Group();
   private readonly right: PrintedSheet;
@@ -92,7 +84,6 @@ export class OpenFolderPrint {
     }
   }
 
-  /** The left board's swing (rotation about `origin`), the same one the atlas applies to it. */
   applyHinge(rotation: Matrix4, origin: Vector3): void {
     this.left.mesh.matrix
       .makeTranslation(origin.x, origin.y, origin.z)

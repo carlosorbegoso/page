@@ -24,7 +24,6 @@ function visor() {
     .translate(0, RADIUS * STRETCH + HOVER + 0.1, 0);
 }
 
-/** Alfa, TUSOCIO IA's parent-brand mascot: faceted core with a glowing visor ring. */
 export const alfaRecipe: MascotRecipe<{ body: IcosahedronGeometry; visor: TorusGeometry }> = {
   id: 'alfa',
   height: RADIUS * STRETCH * 2 + HOVER,

@@ -10,6 +10,7 @@ import {
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { OBJECT_ID, PartBuilder } from '../builder';
 import {
+  BLIND,
   CHAIR,
   DESK,
   FOLDER,
@@ -24,8 +25,16 @@ import { SPINE_LABEL } from '../spines';
 import { rod, seeded, seg, shade, UP } from './geometry';
 import type { Palette, Quality } from './palette';
 
-export function buildRoom(b: PartBuilder, p: Palette): void {
-  const t = ROOM.wallThickness;
+function windowEdges() {
+  return {
+    left: WINDOW.x - WINDOW.width / 2,
+    right: WINDOW.x + WINDOW.width / 2,
+    bottom: WINDOW.y - WINDOW.height / 2,
+    top: WINDOW.y + WINDOW.height / 2
+  };
+}
+
+function buildFloor(b: PartBuilder, p: Palette): void {
   const random = seeded(7);
   const plank = 0.18;
   const length = ROOM.front - ROOM.back;
@@ -40,12 +49,13 @@ export function buildRoom(b: PartBuilder, p: Palette): void {
       b.add(new BoxGeometry(w, 0.02, z1 - z0 - 0.003), tone, { position: [x + w / 2, -0.01, (z0 + z1) / 2] });
     }
   }
+}
 
+function buildWalls(b: PartBuilder, p: Palette): void {
+  const t = ROOM.wallThickness;
+  const length = ROOM.front - ROOM.back;
   const backZ = ROOM.back - t / 2;
-  const left = WINDOW.x - WINDOW.width / 2;
-  const right = WINDOW.x + WINDOW.width / 2;
-  const bottom = WINDOW.y - WINDOW.height / 2;
-  const top = WINDOW.y + WINDOW.height / 2;
+  const { left, right, bottom, top } = windowEdges();
   const span = ROOM.right - ROOM.left;
   b.add(new BoxGeometry(left - ROOM.left, ROOM.height, t), p.wall, { position: [(ROOM.left + left) / 2, ROOM.height / 2, backZ] });
   b.add(new BoxGeometry(ROOM.right - right, ROOM.height, t), p.wall, { position: [(right + ROOM.right) / 2, ROOM.height / 2, backZ] });
@@ -59,7 +69,10 @@ export function buildRoom(b: PartBuilder, p: Palette): void {
   b.add(new BoxGeometry(span, 0.07, 0.012), skirting, { position: [(ROOM.left + ROOM.right) / 2, 0.035, ROOM.back + 0.006] });
   b.add(new BoxGeometry(0.012, 0.07, length), skirting, { position: [ROOM.left + 0.006, 0.035, (ROOM.back + ROOM.front) / 2] });
   b.add(new BoxGeometry(0.012, 0.07, length), skirting, { position: [ROOM.right - 0.006, 0.035, (ROOM.back + ROOM.front) / 2] });
+}
 
+function buildWindowFrame(b: PartBuilder, p: Palette): void {
+  const { left, right, bottom, top } = windowEdges();
   const f = WINDOW.frame;
   const depth = 0.06;
   b.add(new BoxGeometry(WINDOW.width + 0.12, 0.025, 0.16), shade(p.wall, 1.4), { position: [WINDOW.x, bottom - 0.0125, ROOM.back + 0.02] });
@@ -69,6 +82,13 @@ export function buildRoom(b: PartBuilder, p: Palette): void {
   b.add(new BoxGeometry(f, WINDOW.height, depth), p.frame, { position: [right - f / 2, WINDOW.y, GLASS_Z] });
   b.add(new BoxGeometry(f * 0.8, WINDOW.height, depth * 0.9), p.frame, { position: [WINDOW.mullion, WINDOW.y, GLASS_Z] });
   b.add(new BoxGeometry(0.012, 0.11, 0.02), p.brass, { position: [WINDOW.mullion + 0.03, WINDOW.y - 0.05, GLASS_Z + 0.04] });
+  b.add(new RoundedBoxGeometry(WINDOW.width, BLIND.cassette, BLIND.cassetteDepth, 1, 0.008), shade(p.frame, 1.3), { position: [WINDOW.x, top - BLIND.cassette / 2, BLIND.z] });
+}
+
+export function buildRoom(b: PartBuilder, p: Palette): void {
+  buildFloor(b, p);
+  buildWalls(b, p);
+  buildWindowFrame(b, p);
 }
 
 export function buildDesk(b: PartBuilder, p: Palette, q: Quality): void {
@@ -87,7 +107,6 @@ export function buildDesk(b: PartBuilder, p: Palette, q: Quality): void {
   b.add(new RoundedBoxGeometry(legX * 2, 0.05, 0.02, 1, 0.005), p.metal, { position: [0, legTop - 0.04, -postZ] });
 }
 
-/** Left-wall shelves: a box below, the four archive box files in the middle, books and brass on top. */
 export function buildShelves(b: PartBuilder, p: Palette, q: Quality): void {
   const x = SHELF.x + SHELF.depth / 2;
   const z = SHELF.z;

@@ -1,5 +1,6 @@
 import { isChapterId } from './contracts';
 import { Stage, type CaptureOptions } from './Stage';
+import { watchAssetLoads } from './stage/types';
 import type { TierResult } from './tier';
 
 export interface BootOptions {
@@ -24,7 +25,6 @@ function debugRequested(params: URLSearchParams): boolean {
   }
 }
 
-/** Entry point of the 3D chunk, imported dynamically by StageCanvas. */
 export async function boot({ container, tier, params }: BootOptions): Promise<Stage> {
   const forced = params.get('chapter');
   const forcedSub = Number.parseInt(params.get('sub') ?? '0', 10);
@@ -37,6 +37,7 @@ export async function boot({ container, tier, params }: BootOptions): Promise<St
     debug: debugRequested(params)
   });
   window.__stage = stage;
+  watchAssetLoads();
   await stage.start();
   return stage;
 }

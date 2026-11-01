@@ -22,7 +22,6 @@ function colorTarget(width: number, height: number): WebGLRenderTarget {
   });
 }
 
-/** Scene target with depth, the half-res DoF target, the bloom mip chain and the streak pair for one buffer size. */
 export function createTargets(width: number, height: number, profile: TierProfile, wantsDof: boolean): Targets {
   const depthTexture = new DepthTexture(width, height, UnsignedIntType);
   const scene = new WebGLRenderTarget(width, height, {

@@ -1,14 +1,14 @@
 import { Frustum, Matrix4, Mesh, MeshBasicMaterial, PlaneGeometry, type Camera, type Group, type Material } from 'three';
-import { storyMinutes } from '../clock';
+import { clockText, storyMinutes } from '../../../lib/story-time';
 import { LAPTOP } from '../layout';
 import { LAPTOP_LID } from '../props';
 import type { DeskFrame } from '../set/frame';
+import type { LaptopDesktop } from './desktop';
 import { LaptopDisplay, type LaptopPicture } from './laptopDisplay';
 import { LaptopKeycaps } from './keycaps';
 import { LaptopLid } from './laptopLid';
 import { listenForTyping, type TypedKey } from './typing';
 
-/** How long the lock screen shows after the lid opens, before the desktop comes back. */
 const WAKE_SECONDS = 1.3;
 
 export interface LaptopOptions {
@@ -17,21 +17,10 @@ export interface LaptopOptions {
   depthMaterial: Material | undefined;
   camera: Camera;
   shadows: boolean;
-  /** Full canvas resolution and 24 fps; otherwise 60 % resolution at 15 fps. */
   high: boolean;
   invalidate: () => void;
 }
 
-function clockText(minutes: number, day: boolean): string {
-  const total = ((day ? 600 : 1320) + Math.round(minutes)) % 1440;
-  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
-}
-
-/**
- * The MacBook as a working machine: its picture redraws only while it is in frame (and only at
- * 15–24 fps), the lid shuts and opens on click, and keys typed on the real keyboard sink the
- * matching keycaps and appear in its editor.
- */
 export class DeskLaptop {
   readonly lid: LaptopLid;
   private readonly glass: Mesh<PlaneGeometry, MeshBasicMaterial>;
@@ -41,7 +30,6 @@ export class DeskLaptop {
   private readonly viewProjection = new Matrix4();
   private readonly frameInterval: number;
   private readonly stopTyping: () => void;
-  /** True while the lid is moving, so the lamp's shadow map needs a new render. */
   swinging = false;
   private picture: LaptopPicture | null = null;
   private drawnAt = -Infinity;
@@ -76,6 +64,12 @@ export class DeskLaptop {
     this.lid.setHover(hovered);
   }
 
+  attachDesktop(desktop: LaptopDesktop): void {
+    this.display.attachDesktop(desktop);
+    this.dirty = true;
+    this.options.invalidate();
+  }
+
   private onType(typed: TypedKey): boolean {
     if (!this.visible || !this.lid.open) return false;
     if (this.motion) this.keycaps.press(typed.code, this.time);
@@ -85,7 +79,6 @@ export class DeskLaptop {
     return true;
   }
 
-  /** Advances lid and keys and redraws the picture when due; returns true while something moves. */
   update(frame: DeskFrame, standby: boolean): boolean {
     this.time = frame.time;
     this.motion = frame.motion;
@@ -127,7 +120,6 @@ export class DeskLaptop {
     return this.frustum.intersectsObject(this.glass) || this.frustum.intersectsObject(this.keycaps.mesh);
   }
 
-  /** Panel brightness: the chapter's screen level times how awake the lid is. */
   apply(brightness: number): void {
     this.glass.material.color.setScalar(brightness * this.lid.glow);
   }

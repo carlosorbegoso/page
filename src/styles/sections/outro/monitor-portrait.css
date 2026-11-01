@@ -1,0 +1,36 @@
+@media (width < 48rem) and (orientation: portrait) {
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='outro'] {
+    padding-inline: 4cqw;
+    padding-bottom: 3.5cqw;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='outro'] .outro-label,
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='outro'] .outro-body {
+    display: none;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='outro'] .outro-screen h2 {
+    max-width: none;
+    margin-top: 0;
+    font-size: 6.8cqw;
+    line-height: 1.05;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='outro'] .outro-credits {
+    margin-top: 3cqw;
+    padding-top: 2cqw;
+    gap: 0 2cqw;
+    font-size: 3.9cqw;
+    line-height: 1.4;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='outro'] .outro-credits a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 11.5cqw;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='outro'] .outro-credits__break {
+    font-size: 3.4cqw;
+  }
+}

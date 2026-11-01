@@ -4,7 +4,6 @@ import { PRESETS } from './chapters';
 const FILTER_LFO_HZ = 0.045;
 const FILTER_LFO_DEPTH_HZ = 90;
 
-/** Master bus behind a soft limiter, a short room and a long hall reverb, and the pad chain with its slow filter LFO. */
 export interface MixGraph {
   master: GainNode;
   roomSend: GainNode;
@@ -13,7 +12,6 @@ export interface MixGraph {
   padFilter: BiquadFilterNode;
   swell: GainNode;
   lfo: OscillatorNode;
-  /** Routes `node` dry to the master and wet to the room and hall sends at the given levels (0 skips a send). */
   connectWithSends(node: AudioNode, dry: number, room: number, hall: number): void;
 }
 

@@ -7,7 +7,6 @@ const CUT_ORDER: readonly FxFeature[] = ['fluid', 'dof'];
 const EVALUATE_EVERY_MS = 1000;
 const MIN_SAMPLES = 20;
 
-/** Budget rule of docs/design/desk.md §7: cut fluid → DoF; bloom stays. */
 export class FxBudget {
   private readonly disabled = new Set<FxFeature>();
   private lastEvaluation = 0;
@@ -26,7 +25,6 @@ export class FxBudget {
     this.strikes = 0;
   }
 
-  /** Returns the feature it just cut, if any. */
   evaluate(timer: GpuTimer | null, profile: TierProfile): FxFeature | null {
     if (!timer?.trusted || timer.sampleCount < MIN_SAMPLES) return null;
     const now = performance.now();
@@ -54,7 +52,6 @@ export class FxBudget {
   }
 }
 
-/** GPU ms of the effects alone (everything but `scene`). */
 export function effectsMs(timer: GpuTimer | null): number {
   let total = 0;
   for (const [label, ms] of timer?.ms ?? []) if (label !== 'scene') total += ms;

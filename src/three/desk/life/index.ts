@@ -1,9 +1,12 @@
-import { Group, Matrix4, Vector3, type BufferGeometry, type Camera, type Material, type Mesh } from 'three';
-import { FIGURES, MUG, type FigureId } from '../layout';
+import { Group, Matrix4, Vector3, type BufferGeometry, type Camera, type Material, type Mesh, type Object3D } from 'three';
+import { FIGURE_HEIGHT, FIGURES, MUG, type FigureId } from '../layout';
 import type { AtlasUniforms } from '../materials';
 import { OBJECT_ID } from '../builder';
+import { ProductCards, productFocus } from '../notes/cards';
+import type { ProductId } from '../notes/layout';
 import type { Palette } from '../props';
 import { AlfaLife } from './alfa';
+import type { StoryBeats } from './beats';
 import { BubbleLife, splitDots } from './bubble';
 import { figureParts, mugPart } from './classify';
 import { GiftLife } from './gift';
@@ -17,13 +20,11 @@ import { WrenchLife } from './wrench';
 export type LifeToy = FigureId | 'mug';
 
 const SLOT: Record<FigureId, number> = { alfa: OBJECT_ID.alfa - 1, ventixs: OBJECT_ID.ventixs - 1, parati: OBJECT_ID.parati - 1, skymek: OBJECT_ID.skymek - 1 };
-/** Hover lift of Alfa (the products lift theirs in DeskSet): a few millimetres, eased in ~180 ms. */
 const HOVER_LIFT = 0.003;
+const TOY_SECONDS: Record<LifeToy, number> = { alfa: 1.6, parati: 2, ventixs: 1.2, skymek: 1.3, mug: 1.2 };
 
 export interface DeskLifeOptions {
-  /** The figures and their plinth, built on their own. */
   geometry: BufferGeometry;
-  /** The workstation (keyboard, mug…), built on its own so the mug can turn. */
   workstation: BufferGeometry;
   material: Material;
   depthMaterial?: Material;
@@ -40,16 +41,10 @@ export interface LifeFrame {
   motion: boolean;
   look: LifeLook | null;
   pixelScale: number;
-  /** The product whose sub-shot is on screen, if any. */
   focused: FigureId | null;
+  shot: string;
 }
 
-/**
- * The desk objects come alive: the figures geometry is split into its moving parts (Alfa's head,
- * eyes and antenna, Parati's lid, Ventixs's typing dots, SkyMek's wrench) and the mug out of the
- * workstation; each runs its idle life, its hover response and its click reaction. Call `update`
- * before the levels are applied and `pose` after.
- */
 export class DeskLife {
   readonly object3D = new Group();
   readonly press = new PressPulse();
@@ -59,10 +54,14 @@ export class DeskLife {
   private readonly wrench: WrenchLife;
   private readonly mug: MugLife;
   private readonly pokemon: PokemonLife;
+  private readonly cards = new ProductCards();
   private readonly frames = new Map<FigureId, Matrix4>((Object.keys(SLOT) as FigureId[]).map(id => [id, new Matrix4()]));
   private readonly disposables: Array<{ dispose(): void }> = [];
   private hovered: string | null = null;
-  private alfaLift = 0;
+  private readonly hoverLift = new Map<FigureId, number>();
+  private readonly busyUntil = new Map<LifeToy, number>();
+  private beats: StoryBeats | null = null;
+  private focused: FigureId | null = null;
   private time = 0;
 
   constructor(options: DeskLifeOptions) {
@@ -86,17 +85,35 @@ export class DeskLife {
     const dots = parts.get('bubbleDots');
     const dotParts = dots ? splitPart(dots, splitDots(dots), 3, options) : [];
     for (const dot of dotParts) this.object3D.add(dot.mesh);
-    this.bubble = new BubbleLife(dotParts, p.burbuDots.color);
+    this.bubble = new BubbleLife(dotParts);
     this.wrench = new WrenchLife(parts.get('wrench'));
     this.mug = new MugLife(workstation.parts.get('mug'), MUG);
     this.pokemon = new PokemonLife(workstation.parts);
     this.object3D.add(this.pokemon.overlays);
     this.disposables.push(this.pokemon);
-    this.object3D.add(this.gift.sparks.points, this.bubble.message);
-    this.disposables.push(this.gift, this.bubble);
+    this.object3D.add(this.gift.sparks.points);
+    this.disposables.push(this.gift);
+    this.object3D.add(this.cards.object3D);
+    this.disposables.push(this.cards);
+  }
+
+  attachBeats(beats: StoryBeats): void {
+    this.beats = beats;
+    this.object3D.add(beats.object3D);
   }
 
   play(toy: LifeToy, time: number, motion: boolean): void {
+    if (time < (this.busyUntil.get(toy) ?? -1)) return;
+    const told = toy === 'mug' ? 0 : (this.beats?.play(toy, time, motion, this.anchor(toy), this.focused) ?? 0);
+    this.busyUntil.set(toy, time + Math.max(TOY_SECONDS[toy], told));
+    this.animate(toy, time, motion);
+  }
+
+  private anchor(id: FigureId): Vector3 {
+    return FIGURES[id].clone().setY(FIGURES[id].y + FIGURE_HEIGHT[id]);
+  }
+
+  private animate(toy: LifeToy, time: number, motion: boolean): void {
     if (toy === 'alfa') this.alfa?.play(time, motion);
     else if (toy === 'parati') this.gift.play(time, motion);
     else if (toy === 'ventixs') this.bubble.play(time, motion);
@@ -104,50 +121,66 @@ export class DeskLife {
     else this.mug.play(time, motion);
   }
 
-  /** Pikachu and Charizard fight (Pikachu only sparks when motion is reduced). */
   battle(time: number, motion: boolean): void {
     this.pokemon.battle(time, motion);
   }
 
-  /** The pick under the pointer (its key without `desk:`), or null. */
   setHover(id: string | null): void {
     this.hovered = id;
-    this.gift.setHover(id === 'parati');
-    this.wrench.setHover(id === 'skymek');
     this.mug.setHover(id === 'mug');
   }
 
-  /** Advances every object; returns true while one of them is moving. */
   update(dt: number, time: number, frame: LifeFrame): boolean {
     this.time = time;
     const { motion } = frame;
-    const liftGoal = this.hovered === 'alfa' && motion ? HOVER_LIFT : 0;
-    this.alfaLift += (liftGoal - this.alfaLift) * (1 - Math.exp(-14 * dt));
-    this.bubble.setTyping(this.hovered === 'ventixs' || frame.focused === 'ventixs');
+    this.focused = frame.focused;
+    const lifting = this.updateHoverLift(dt, motion);
+    const beats = this.beats?.update(time, frame.shot, frame.focused) ?? false;
     const alfa = this.alfa?.update(dt, time, motion, frame.look ? { ...frame.look, frame: this.frames.get('alfa')! } : null) ?? false;
-    const gift = this.gift.update(time, motion, frame.pixelScale, this.frames.get('parati')!);
-    const bubble = this.bubble.update(dt, time, motion);
-    const wrench = this.wrench.update(dt, time, motion);
+    const gift = this.gift.update(time, frame.pixelScale, this.frames.get('parati')!);
+    const bubble = this.bubble.update(time);
+    const wrench = this.wrench.update(time);
     const mug = this.mug.update(dt, time, motion);
     const pokemon = this.pokemon.update(time, motion);
     const press = this.press.update(time);
-    return alfa || gift || bubble || wrench || mug || pokemon || press || Math.abs(liftGoal - this.alfaLift) > 1e-5;
+    const cards = this.cards.update(dt, productFocus(frame.focused), motion);
+    return alfa || gift || bubble || wrench || mug || pokemon || press || cards || lifting || beats;
+  }
+
+  private updateHoverLift(dt: number, motion: boolean): boolean {
+    let moving = false;
+    for (const id of Object.keys(SLOT) as FigureId[]) {
+      const goal = this.hovered === id && motion ? HOVER_LIFT : 0;
+      const lift = this.hoverLift.get(id) ?? 0;
+      const next = Math.abs(goal - lift) < 1e-5 ? goal : lift + (goal - lift) * (1 - Math.exp(-14 * dt));
+      this.hoverLift.set(id, next);
+      moving ||= next !== goal;
+    }
+    return moving;
   }
 
   offset(id: FigureId): FigureOffset {
-    if (id === 'alfa') {
-      const play = this.alfa?.offset(this.time) ?? STILL;
-      return { lift: play.lift + this.alfaLift, yaw: play.yaw };
-    }
+    const play = this.playOffset(id);
+    return { lift: play.lift + (this.hoverLift.get(id) ?? 0), yaw: play.yaw };
+  }
+
+  private playOffset(id: FigureId): FigureOffset {
+    if (id === 'alfa') return this.alfa?.offset(this.time) ?? STILL;
     if (id === 'parati') return this.gift.offset(this.time);
     if (id === 'ventixs') return this.bubble.offset(this.time);
     return STILL;
   }
 
-  /** Extra self-illumination of an object from its reaction or a press pulse. */
   glow(id: string): number {
-    const own = id === 'parati' ? this.gift.glow(this.time) : id === 'ventixs' ? this.bubble.glow(this.time) : id === 'skymek' ? this.wrench.glow(this.time) : 0;
-    return own + this.press.glow(id, this.time);
+    return id in SLOT || id === 'mug' ? 0 : this.press.glow(id, this.time);
+  }
+
+  cardTargets(): ReadonlyMap<ProductId, Object3D> {
+    return this.cards.targets();
+  }
+
+  cardRaised(id: ProductId): boolean {
+    return this.cards.isRaised(id);
   }
 
   signalGain(): number {
@@ -158,7 +191,6 @@ export class DeskLife {
     return this.mug.steamGain(this.time);
   }
 
-  /** Writes the part matrices for the figure transforms the atlas shader applies this frame. */
   pose(uniforms: AtlasUniforms): void {
     for (const [id, frame] of this.frames) figureFrame(uniforms, SLOT[id], frame);
     this.alfa?.pose(this.time, this.frames.get('alfa')!);
@@ -167,11 +199,11 @@ export class DeskLife {
     this.wrench.pose(this.time, this.frames.get('skymek')!);
     this.mug.pose(this.time);
     this.pokemon.pose(this.time);
+    this.cards.pose();
   }
 
-  /** Changes whenever a part moves enough for the lamp shadow to need a new render. */
   poseKey(): string {
-    return `${this.alfa?.poseKey() ?? ''}|${this.gift.poseKey(this.time)}|${this.wrench.poseKey(this.time)}|${this.mug.poseKey()}|${this.pokemon.poseKey()}`;
+    return `${this.alfa?.poseKey() ?? ''}|${this.gift.poseKey(this.time)}|${this.bubble.poseKey(this.time)}|${this.wrench.poseKey(this.time)}|${this.mug.poseKey()}|${this.pokemon.poseKey()}|${this.cards.poseKey()}`;
   }
 
   dispose(): void {

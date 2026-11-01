@@ -4,7 +4,6 @@ const TOUR_BADGE_PAUSED_MS = 4000;
 
 type TourState = 'playing' | 'paused' | 'finished';
 
-/** The quick tour button beside the menu mirrors the tour state and toggles it without opening the menu. */
 export function initQuickTour({ quickTour }: HudElements): void {
   quickTour?.addEventListener('click', event => {
     event.stopPropagation();
@@ -16,7 +15,6 @@ export function initQuickTour({ quickTour }: HudElements): void {
   });
 }
 
-/** Menu tour button, its live status text and the corner badge that lingers a few seconds after a pause. */
 export function initTourBadge({ tourButton }: HudElements): void {
   const tourBadge = document.querySelector<HTMLElement>('[data-hud-tour-badge]');
   const tourStatus = document.querySelector<HTMLElement>('[data-story-tour-status]');

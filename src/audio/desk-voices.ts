@@ -1,7 +1,6 @@
 import { grain, ring, thump, vary } from './synth';
 import { playKey } from './voices';
 
-/** One desk object's sound. `pitch` is the ±5 % variation picked for this hit. */
 export type DeskVoice = (
   context: BaseAudioContext,
   out: AudioNode,
@@ -12,7 +11,6 @@ export type DeskVoice = (
 
 const start = (context: BaseAudioContext) => context.currentTime + 0.005;
 
-/** Alarm clock: three quick hammer strikes on a small bell, damped by the hand. */
 const clock: DeskVoice = (context, out, _noise, level, pitch) => {
   const at = start(context);
   for (let strike = 0; strike < 3; strike++) {
@@ -26,7 +24,6 @@ const clock: DeskVoice = (context, out, _noise, level, pitch) => {
   }
 };
 
-/** Laptop hinge: a short friction creak that settles with a soft thud. */
 const laptop: DeskVoice = (context, out, noise, level, pitch) => {
   const at = start(context);
   for (let i = 0; i < 6; i++) {
@@ -40,7 +37,6 @@ const laptop: DeskVoice = (context, out, noise, level, pitch) => {
   thump(context, out, at + 0.19, { from: 160 * pitch, to: 90, level: level * 0.7, decay: 0.09 });
 };
 
-/** Keyboard: two or three mechanical taps, a burst of typing. */
 const keyboard: DeskVoice = (context, out, noise, level) => {
   const taps = 2 + Math.round(Math.random());
   for (let i = 0; i < taps; i++) {
@@ -48,7 +44,6 @@ const keyboard: DeskVoice = (context, out, noise, level) => {
   }
 };
 
-/** Folder and paper: a dry crinkle over the soft slap of card on wood. */
 const folder: DeskVoice = (context, out, noise, level, pitch) => {
   const at = start(context);
   for (let i = 0; i < 7; i++) {
@@ -63,14 +58,12 @@ const folder: DeskVoice = (context, out, noise, level, pitch) => {
   thump(context, out, at + 0.15, { from: 140 * pitch, to: 80, level: level * 0.5, decay: 0.07 });
 };
 
-/** Chat bubble: a round pop that rises, like a message landing. */
 const chat: DeskVoice = (context, out, noise, level, pitch) => {
   const at = start(context);
   thump(context, out, at, { from: 420 * pitch, to: 980 * pitch, level: level * 0.8, decay: 0.08 });
   grain(context, out, noise, at, { hz: 3500, q: 2, level: level * 0.12, decay: 0.012 });
 };
 
-/** Gift: ribbon and wrapping paper, brighter and busier than a folder. */
 const gift: DeskVoice = (context, out, noise, level, pitch) => {
   const at = start(context);
   for (let i = 0; i < 12; i++) {
@@ -84,7 +77,6 @@ const gift: DeskVoice = (context, out, noise, level, pitch) => {
   grain(context, out, noise, at, { hz: 1800 * pitch, q: 1.2, level: level * 0.25, attack: 0.04, decay: 0.28 });
 };
 
-/** Mug: a light tap on porcelain, a high glassy ring with a tiny tick. */
 const mug: DeskVoice = (context, out, noise, level, pitch) => {
   const at = start(context);
   for (const [hz, gain, decay] of [
@@ -95,7 +87,6 @@ const mug: DeskVoice = (context, out, noise, level, pitch) => {
   grain(context, out, noise, at, { hz: 6000, q: 1.5, level: level * 0.2, decay: 0.01 });
 };
 
-/** Wrench: a small steel clink, inharmonic and short. */
 const wrench: DeskVoice = (context, out, noise, level, pitch) => {
   const at = start(context);
   for (const [hz, gain, decay] of [
@@ -106,14 +97,12 @@ const wrench: DeskVoice = (context, out, noise, level, pitch) => {
   grain(context, out, noise, at, { hz: 5000, q: 1.2, level: level * 0.25, decay: 0.008 });
 };
 
-/** Vinyl figure: a soft hollow plastic bump. */
 const toy: DeskVoice = (context, out, noise, level, pitch) => {
   const at = start(context);
   thump(context, out, at, { from: 620 * pitch, to: 330 * pitch, level: level * 0.7, decay: 0.06, type: 'triangle' });
   grain(context, out, noise, at, { hz: 1600 * pitch, q: 3, level: level * 0.2, decay: 0.03 });
 };
 
-/** Phone on the desk: two short vibration pulses. */
 const phone: DeskVoice = (context, out, _noise, level, pitch) => {
   const at = start(context);
   const filter = context.createBiquadFilter();
@@ -138,15 +127,17 @@ const phone: DeskVoice = (context, out, _noise, level, pitch) => {
   setTimeout(() => filter.disconnect(), 600);
 };
 
-/** Window blind: the slats rattle as the cord is pulled. */
 const blind: DeskVoice = (context, out, noise, level, pitch) => {
   const at = start(context);
   let t = at;
-  for (let i = 0; i < 9; i++) {
-    grain(context, out, noise, t, { hz: vary(2300 * pitch, 0.2), q: 6, level: level * vary(0.4, 0.3), decay: 0.025 });
-    t += vary(0.034, 0.25);
+  for (let i = 0; i < 24; i++) {
+    const fade = 1 - i / 30;
+    grain(context, out, noise, t, { hz: vary(2600 * pitch, 0.15), q: 7, level: level * vary(0.22, 0.3) * fade, decay: 0.018 });
+    t += vary(0.038, 0.2);
   }
-  grain(context, out, noise, at, { hz: 700 * pitch, q: 0.9, level: level * 0.2, attack: 0.05, decay: 0.3 });
+  grain(context, out, noise, at, { hz: 900 * pitch, q: 0.7, level: level * 0.16, attack: 0.25, decay: 1 });
+  thump(context, out, at + 1, { from: 170 * pitch, to: 90 * pitch, level: level * 0.35, decay: 0.12 });
+  grain(context, out, noise, at + 1, { hz: 1800 * pitch, q: 2, level: level * 0.12, decay: 0.05 });
 };
 
 export const DESK_VOICES = { clock, laptop, keyboard, folder, chat, gift, mug, wrench, toy, phone, blind } as const;

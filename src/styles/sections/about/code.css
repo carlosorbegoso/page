@@ -2,7 +2,6 @@
   display: none;
 }
 
-/* Landscape monitor: the stack is the file Carlos has open tonight, not a web table. The semantic list stays for assistive tech. */
 @container surface (orientation: landscape) {
   .is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-stack {
     display: block;

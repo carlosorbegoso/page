@@ -12,10 +12,6 @@ import {
 } from 'three';
 import { tokenColor } from '../../tokens';
 
-/**
- * Bakes a tiny night-room environment once (dark slate walls, a warm lamp patch, the cool
- * monitor and the window) so reflections match the room instead of the studio RoomEnvironment.
- */
 export function bakeNightEnvironment(renderer: WebGLRenderer): Texture {
   const scene = new Scene();
   const disposables: Array<{ dispose(): void }> = [];

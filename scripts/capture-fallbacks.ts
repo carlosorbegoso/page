@@ -8,7 +8,7 @@ import { mkdir, readdir, rm, stat } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { chromium } from 'playwright';
+import { type Browser, chromium } from 'playwright';
 import sharp from 'sharp';
 
 const VIEWPORTS = [
@@ -35,41 +35,55 @@ function executablePath(): string | undefined {
   return process.platform === 'darwin' ? shell : undefined;
 }
 
+type Viewport = (typeof VIEWPORTS)[number];
+
+function launchArgs(swiftshader: boolean): string[] {
+  return swiftshader
+    ? ['--enable-unsafe-swiftshader', '--use-angle=swiftshader']
+    : ['--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist'];
+}
+
+async function grabCanvasPng(browser: Browser, base: string, station: string, viewport: Viewport): Promise<Buffer> {
+  const page = await browser.newPage({ viewport, deviceScaleFactor: SCALE });
+  page.on('console', message => {
+    if (message.text().startsWith('[stage]')) console.log(`  ${viewport.width}: ${message.text()}`);
+  });
+  const url = `${base}?capture=${station}&progress=1&w=${viewport.width}`;
+  await page.goto(url, { waitUntil: 'load' });
+  await page.waitForFunction(() => window.__captureReady === true, null, { timeout: 30000 });
+  const dataUrl = await page.evaluate(() =>
+    document.querySelector<HTMLCanvasElement>('[data-stage-canvas]')!.toDataURL('image/png')
+  );
+  await page.close();
+  return Buffer.from(dataUrl.split(',')[1]!, 'base64');
+}
+
+async function writeFallback(png: Buffer, name: string, viewport: Viewport): Promise<number> {
+  const image = sharp(png).resize(viewport.width * SCALE, viewport.height * SCALE);
+  await image.clone().avif({ quality: 50, effort: 6 }).toFile(join(OUT_DIR, `${name}.avif`));
+  await image.clone().webp({ quality: 72, effort: 6 }).toFile(join(OUT_DIR, `${name}.webp`));
+  let total = 0;
+  for (const format of ['avif', 'webp']) {
+    const size = (await stat(join(OUT_DIR, `${name}.${format}`))).size / 1024;
+    total += size;
+    const budget = format === 'avif' ? BUDGET_KB[viewport.width] : undefined;
+    const flag = budget && size > budget ? `  OVER BUDGET (${budget} KB)` : '';
+    console.log(`${name}.${format}: ${size.toFixed(1)} KB${flag}`);
+  }
+  return total;
+}
+
 async function main(): Promise<void> {
   const base = arg('base', 'http://localhost:4321/page/');
   const station = arg('station', 'hero');
-  const swiftshader = process.argv.includes('--swiftshader');
-  const args = swiftshader
-    ? ['--enable-unsafe-swiftshader', '--use-angle=swiftshader']
-    : ['--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist'];
+  const args = launchArgs(process.argv.includes('--swiftshader'));
   const browser = await chromium.launch({ executablePath: executablePath(), args });
   await mkdir(OUT_DIR, { recursive: true });
   let total = 0;
   try {
     for (const viewport of VIEWPORTS) {
-      const page = await browser.newPage({ viewport, deviceScaleFactor: SCALE });
-      page.on('console', message => {
-        if (message.text().startsWith('[stage]')) console.log(`  ${viewport.width}: ${message.text()}`);
-      });
-      const url = `${base}?capture=${station}&progress=1&w=${viewport.width}`;
-      await page.goto(url, { waitUntil: 'load' });
-      await page.waitForFunction(() => window.__captureReady === true, null, { timeout: 30000 });
-      const dataUrl = await page.evaluate(() =>
-        document.querySelector<HTMLCanvasElement>('[data-stage-canvas]')!.toDataURL('image/png')
-      );
-      await page.close();
-      const png = Buffer.from(dataUrl.split(',')[1]!, 'base64');
-      const name = `${station}-${viewport.width}`;
-      const image = sharp(png).resize(viewport.width * SCALE, viewport.height * SCALE);
-      await image.clone().avif({ quality: 50, effort: 6 }).toFile(join(OUT_DIR, `${name}.avif`));
-      await image.clone().webp({ quality: 72, effort: 6 }).toFile(join(OUT_DIR, `${name}.webp`));
-      for (const format of ['avif', 'webp']) {
-        const size = (await stat(join(OUT_DIR, `${name}.${format}`))).size / 1024;
-        total += size;
-        const budget = format === 'avif' ? BUDGET_KB[viewport.width] : undefined;
-        const flag = budget && size > budget ? `  OVER BUDGET (${budget} KB)` : '';
-        console.log(`${name}.${format}: ${size.toFixed(1)} KB${flag}`);
-      }
+      const png = await grabCanvasPng(browser, base, station, viewport);
+      total += await writeFallback(png, `${station}-${viewport.width}`, viewport);
     }
   } finally {
     await browser.close();

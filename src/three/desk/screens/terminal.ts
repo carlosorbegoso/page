@@ -5,7 +5,6 @@ const LINE_HEIGHT = 13;
 const TITLE_HEIGHT = 22;
 const LINES_PER_SECOND = 0.9;
 
-/** The terminal pane: the dev-mode log scrolls up slowly, line by line, in a loop. */
 export function drawTerminal(ctx: CanvasRenderingContext2D, pane: PaneRect, time: number): void {
   ctx.fillStyle = '#18191c';
   ctx.fillRect(pane.x, pane.y, pane.width, pane.height);

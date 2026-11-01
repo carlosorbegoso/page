@@ -44,7 +44,6 @@ function geometries(): GiftGeometries {
   };
 }
 
-/** Parati's gift box: rounded box, separate lid over a glowing seam, flat cross ribbon. */
 export const giftRecipe: MascotRecipe<GiftGeometries> = {
   id: 'gift',
   height: LID_Y + LID_H / 2 + 0.05,

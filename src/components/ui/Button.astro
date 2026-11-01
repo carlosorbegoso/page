@@ -12,7 +12,6 @@ interface Props extends Omit<HTMLAttributes<'a'>, 'href' | 'download' | 'type' |
   external?: boolean;
   download?: boolean | string;
   disabled?: boolean;
-  /** Button type when rendered as `<button>`; MIME type hint (e.g. `application/pdf`) when rendered as a link. */
   type?: 'button' | 'submit' | 'reset' | (string & {});
 }
 

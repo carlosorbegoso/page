@@ -1,9 +1,7 @@
 import { Vector2, type DepthTexture, type PerspectiveCamera, type Scene, type WebGLRenderer } from 'three';
 
-/** Camera layer for translucent effects drawn after depth of field and bloom, so the lens never smears them. */
 export const LATE_LAYER = 1;
 
-/** Shared by every late material: the scene depth they test against by hand, since the screen buffer has none. */
 export const lateUniforms = {
   tSceneDepth: { value: null as DepthTexture | null },
   uLateViewport: { value: new Vector2(1, 1) },

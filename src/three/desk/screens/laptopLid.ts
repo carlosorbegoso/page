@@ -7,20 +7,12 @@ import { buildLaptopLid, laptopHingeMatrix } from '../props';
 const X_AXIS = new Vector3(1, 0, 0);
 const CLOSE_SECONDS = 0.55;
 const OPEN_SECONDS = 0.7;
-/** The lid's back face rests on the keycaps when shut, so the hinge rises by half its thickness plus the caps. */
 const SHUT_LIFT = LAPTOP.lid / 2 + 0.0014;
 const HOVER_OPEN = 0.035;
-/** The panel sleeps once the lid is this far down, and wakes once it is this far up again. */
 const SLEEP_AT = 0.55;
 
-/**
- * The MacBook lid on its own hinge: `toggle` swings it shut over the keyboard (the panel goes dark
- * on the way down) or opens it again (the panel wakes once it is up). Children added to `panel`
- * ride the lid.
- */
 export class LaptopLid {
   readonly pivot = new Group();
-  /** Turns about local X with the lid; the glass mesh is parented here. */
   readonly panel = new Group();
   private readonly mesh: Mesh;
   private shut = 0;
@@ -48,7 +40,6 @@ export class LaptopLid {
     return this.shutGoal === 0;
   }
 
-  /** 0 = dark, 1 = awake: how lit the panel is as the lid moves. */
   get glow(): number {
     return this.power;
   }
@@ -62,7 +53,6 @@ export class LaptopLid {
     this.hovered = hovered;
   }
 
-  /** Advances the swing; `step` is the frame's (large when motion is off). Returns true while moving. */
   update(step: number): boolean {
     const seconds = this.shutGoal > this.shut ? CLOSE_SECONDS : OPEN_SECONDS;
     this.shut = towards(this.shut, this.shutGoal, step / seconds);
@@ -81,7 +71,6 @@ export class LaptopLid {
     this.panel.position.set(0, SHUT_LIFT * eased, 0);
   }
 
-  /** The object the pick proxy and the frustum test follow. */
   get body(): Object3D {
     return this.mesh;
   }

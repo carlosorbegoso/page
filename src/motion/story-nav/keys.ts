@@ -23,7 +23,6 @@ function hasModifier(event: KeyboardEvent): boolean {
   return event.defaultPrevented || event.isComposing || event.altKey || event.ctrlKey || event.metaKey;
 }
 
-/** A field, menu, dialog or native control owns this key, so the page must not step. */
 function keyOwnedElsewhere(event: KeyboardEvent): boolean {
   const target = event.target instanceof Element ? event.target : null;
   return (
@@ -42,7 +41,6 @@ function keyAction(event: KeyboardEvent, host: StoryNavHost, navigator: Navigato
   return null;
 }
 
-/** Arrow, Page, Space, Home and End step shot by shot instead of scrolling the page natively. */
 export function createKeyHandler(
   host: StoryNavHost,
   state: NavState,

@@ -1,0 +1,24 @@
+---
+interface Props {
+  size?: number;
+  class?: string;
+}
+
+const { size = 32, class: className } = Astro.props;
+---
+
+<svg
+  viewBox="0 0 64 64"
+  width={size}
+  height={size}
+  aria-hidden="true"
+  class:list={['monogram', className]}
+>
+  <path
+    d="M43.5 22.4A15 15 0 1 0 43.5 41.6"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="7"
+  ></path>
+  <circle cx="47" cy="32" r="4.5" fill="var(--color-accent)"></circle>
+</svg>

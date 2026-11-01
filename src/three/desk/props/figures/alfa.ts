@@ -5,10 +5,6 @@ import { seg } from '../geometry';
 import type { Palette, Quality } from '../palette';
 import { FRONT, sphereDirection, standing } from './frame';
 
-/**
- * Base ring, waist groove, chest bezel and arms. Everything stays below the neck (6.7 cm) and only the
- * chest light glows, because `life/classify` turns anything higher with the head and treats glow there as eyes.
- */
 function buildAlfaBodyDetails(
   b: PartBuilder,
   p: Palette,
@@ -36,7 +32,28 @@ function buildAlfaBodyDetails(
   }
 }
 
-/** Alfa, TUSOCIO's partner: a small porcelain robot with a smoked visor, two glowing eyes, an antenna light and a brass collar. */
+function buildAlfaHead(b: PartBuilder, p: Palette, q: Quality, at: (m: Matrix4) => Matrix4): void {
+  const id = OBJECT_ID.alfa;
+  const place = (x: number, y: number, z: number) => at(new Matrix4().makeTranslation(x, y, z));
+  const R = 0.027;
+  const headY = 0.0885;
+  const head = at(new Matrix4().compose(new Vector3(0, headY, 0), new Quaternion(), new Vector3(1, 0.93, 0.96)));
+  b.add(new SphereGeometry(R, seg(32, q, 18), seg(24, q, 12)), p.alfaBody, head, id);
+  const visorTheta = 1.5;
+  const visor = new SphereGeometry(R * 1.03, seg(28, q, 14), seg(10, q, 5), Math.PI / 2 - 1.05, 2.1, visorTheta - 0.43, 0.86);
+  b.add(visor, p.alfaVisor, head, id);
+  for (const side of [-1, 1]) {
+    const direction = sphereDirection(Math.PI / 2 + side * 0.36, visorTheta - 0.04);
+    const eye = new Matrix4().compose(direction.clone().multiplyScalar(R * 1.035), new Quaternion().setFromUnitVectors(FRONT, direction), new Vector3(1, 1, 1));
+    b.add(new SphereGeometry(0.0036, seg(14, q, 8), seg(10, q, 6)).scale(1, 1.4, 0.4), p.alfaSignal, new Matrix4().multiplyMatrices(head, eye), id);
+    b.add(new CylinderGeometry(0.0062, 0.0068, 0.004, seg(20, q, 10)).rotateZ(Math.PI / 2), p.alfaRing, place(side * R * 0.98, headY, 0), id);
+  }
+  const crown = headY + R * 0.93;
+  b.add(new CylinderGeometry(0.0034, 0.0042, 0.003, seg(16, q, 8)), p.alfaRing, place(0, crown, 0), id);
+  b.add(new CylinderGeometry(0.0011, 0.0011, 0.013, seg(8, q, 5)), p.alfaRing, place(0, crown + 0.0075, 0), id);
+  b.add(new SphereGeometry(0.0042, seg(14, q, 8), seg(10, q, 6)), p.alfaSignal, place(0, crown + 0.0155, 0), id);
+}
+
 export function buildAlfa(b: PartBuilder, p: Palette, q: Quality): void {
   const id = OBJECT_ID.alfa;
   const at = standing(FIGURES.alfa, 0.12);
@@ -64,22 +81,5 @@ export function buildAlfa(b: PartBuilder, p: Palette, q: Quality): void {
 
   const collar = new TorusGeometry(0.0168, 0.0032, seg(10, q, 6), seg(40, q, 20)).scale(1, 0.9, 1);
   b.add(collar, p.alfaRing, at(new Matrix4().compose(new Vector3(0, 0.0635, 0), new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2), new Vector3(1, 1, 1))), id);
-
-  const R = 0.027;
-  const headY = 0.0885;
-  const head = at(new Matrix4().compose(new Vector3(0, headY, 0), new Quaternion(), new Vector3(1, 0.93, 0.96)));
-  b.add(new SphereGeometry(R, seg(32, q, 18), seg(24, q, 12)), p.alfaBody, head, id);
-  const visorTheta = 1.5;
-  const visor = new SphereGeometry(R * 1.03, seg(28, q, 14), seg(10, q, 5), Math.PI / 2 - 1.05, 2.1, visorTheta - 0.43, 0.86);
-  b.add(visor, p.alfaVisor, head, id);
-  for (const side of [-1, 1]) {
-    const direction = sphereDirection(Math.PI / 2 + side * 0.36, visorTheta - 0.04);
-    const eye = new Matrix4().compose(direction.clone().multiplyScalar(R * 1.035), new Quaternion().setFromUnitVectors(FRONT, direction), new Vector3(1, 1, 1));
-    b.add(new SphereGeometry(0.0036, seg(14, q, 8), seg(10, q, 6)).scale(1, 1.4, 0.4), p.alfaSignal, new Matrix4().multiplyMatrices(head, eye), id);
-    b.add(new CylinderGeometry(0.0062, 0.0068, 0.004, seg(20, q, 10)).rotateZ(Math.PI / 2), p.alfaRing, place(side * R * 0.98, headY, 0), id);
-  }
-  const crown = headY + R * 0.93;
-  b.add(new CylinderGeometry(0.0034, 0.0042, 0.003, seg(16, q, 8)), p.alfaRing, place(0, crown, 0), id);
-  b.add(new CylinderGeometry(0.0011, 0.0011, 0.013, seg(8, q, 5)), p.alfaRing, place(0, crown + 0.0075, 0), id);
-  b.add(new SphereGeometry(0.0042, seg(14, q, 8), seg(10, q, 6)), p.alfaSignal, place(0, crown + 0.0155, 0), id);
+  buildAlfaHead(b, p, q, at);
 }

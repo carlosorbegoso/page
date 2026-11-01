@@ -1,4 +1,3 @@
-/* static: the 3D stage reads several of these with getComputedStyle, and no utility class references them. */
 @theme static {
   --color-*: initial;
 
@@ -87,7 +86,6 @@
   --color-plate-pool: rgb(4 6 11 / 0.85);
   --color-plate-pool-edge: rgb(4 6 11 / 0.7);
 
-  /* Stub names kept as aliases: global.css and SkipLink (not owned by design) still use them. */
   --color-background: var(--color-bg);
   --color-foreground: var(--color-text);
   --color-muted: var(--color-text-muted);

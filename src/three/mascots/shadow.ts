@@ -20,7 +20,6 @@ function bake(): Texture {
   return texture;
 }
 
-/** Baked contact shadow (a transparent plane), shared texture with refcount. */
 export async function createContactShadow(width: number, depth = width): Promise<{ mesh: Mesh; dispose: () => void }> {
   const texture = await acquire(KEY, async () => bake(), t => t.dispose());
   geometry ??= new PlaneGeometry(1, 1).rotateX(-Math.PI / 2);

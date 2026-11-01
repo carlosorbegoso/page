@@ -1,3 +1,4 @@
+import { BEAT_LEVEL, BEAT_VOICES, type BeatSound } from './beat-voices';
 import { DESK_VOICES, type DeskSound } from './desk-voices';
 import { vary } from './synth';
 
@@ -18,7 +19,7 @@ const LEVEL: Record<DeskSound, number> = {
 };
 
 const DEFAULT_GAP_MS = 350;
-const GAP_MS: Partial<Record<DeskSound, number>> = { clock: 1200, phone: 500, blind: 600, gift: 500 };
+const GAP_MS: Partial<Record<DeskSound, number>> = { clock: 1200, phone: 500, blind: 1100, gift: 500 };
 const CONTACT_BUZZ_GAP_MS = 6000;
 const PITCH_SPREAD = 0.05;
 
@@ -43,7 +44,6 @@ const BY_PREFIX: readonly (readonly [string, DeskSound | null])[] = [
   ['lamp', null]
 ];
 
-/** Maps an interaction id (`folder-acme`, `desk:skymek`, `chat`…) to its sound; unknown ids stay silent. */
 export function soundFor(id: unknown): DeskSound | null {
   if (typeof id !== 'string') return null;
   const key = id.toLowerCase().replace(/^desk:/, '');
@@ -58,10 +58,6 @@ interface Options {
   signal: AbortSignal;
 }
 
-/**
- * Per-object foley. Several events can describe the same click (`desk:interact`, `desk:action`,
- * `desk:clock`), so every sound goes through one gate with a minimum interval per sound.
- */
 export function listenDeskSounds({ context, output, noise, canPlay, signal }: Options): void {
   const lastPlayed = new Map<DeskSound, number>();
   let lastContactBuzz = -Infinity;
@@ -84,6 +80,10 @@ export function listenDeskSounds({ context, output, noise, canPlay, signal }: Op
     else if (detail?.action === 'folder' || detail?.action === 'folder-close') play('folder');
   });
   on<unknown>('desk:clock', () => play('clock'));
+  on<{ sound?: BeatSound }>('desk:beat', detail => {
+    const sound = detail?.sound;
+    if (sound && sound in BEAT_VOICES && canPlay()) BEAT_VOICES[sound](context, output, noise, BEAT_LEVEL[sound], vary(1, PITCH_SPREAD));
+  });
   on<{ id?: string }>('chapter:enter', detail => {
     if (detail?.id !== 'contact' || performance.now() - lastContactBuzz < CONTACT_BUZZ_GAP_MS) return;
     lastContactBuzz = performance.now();

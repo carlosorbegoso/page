@@ -1,4 +1,3 @@
-/* Upright phones: the room holds the top of the frame and each slide docks under it as a short caption. */
 .is-3d [data-plate-mode='anchored'][data-plate-id^='about'] :is(.about-bio, .about-stack) {
   gap: 1.25rem;
 }
@@ -32,16 +31,7 @@
 }
 
 .is-3d [data-plate-mode='anchored'][data-plate-id^='about'] .about-bio__row {
-  display: grid;
-  grid-template-columns: 4rem minmax(0, 1fr);
-  align-items: start;
-  gap: 1rem;
-}
-
-.is-3d [data-plate-mode='anchored'][data-plate-id^='about'] .about-bio__photo {
-  width: 4rem;
-  border-radius: 999px;
-  filter: grayscale(0.4) contrast(1.08);
+  display: block;
 }
 
 .is-3d [data-plate-mode='anchored'][data-plate-id^='about'] .about-bio__text {
@@ -83,7 +73,6 @@
   display: none;
 }
 
-/* The stack slide reads as credits: one line per group, the items as plain text. */
 .is-3d [data-plate-mode='anchored'][data-plate-id^='about'] .about-stack > section:first-of-type ul {
   margin-top: 0.5rem;
 }

@@ -1,6 +1,6 @@
 import { PerspectiveCamera, type WebGLRenderer } from 'three';
 import { bindRenderer } from './assets';
-import { onRegistryChange, type ChapterId } from './contracts';
+import { isChapterId, onRegistryChange, type ChapterId } from './contracts';
 import { DebugOverlay } from './debug';
 import { CAMERA_LIMITS, CameraDirector } from './director';
 import { yieldToMain } from './idle';
@@ -11,7 +11,8 @@ import { loadExtensions } from './stage/extensions';
 import { StageLoop } from './stage/frame-loop';
 import { listenStage } from './stage/listen';
 import { StageModules } from './stage/modules';
-import { announceReveal, screenPoint } from './stage/reveal';
+import { holdIntroForBoot } from './stage/intro-gate';
+import { announceReveal, screenPoint, surfaceFoot } from './stage/reveal';
 import { applyStageTokens, createStageRenderer } from './stage/renderer';
 import { breathes, fixedChapter, StageLayout } from './stage/shots';
 import { stationContext } from './stage/station-context';
@@ -30,11 +31,6 @@ declare global {
   }
 }
 
-/**
- * The single WebGL renderer and canvas, driven by chapters (PLAN, final direction): the camera
- * director holds one fixed shot per chapter, scroll only selects the chapter, and text lives on
- * desk surfaces (CSS3D) or in anchored 2D panels. The pieces live in `stage/*`; this class wires them.
- */
 export class Stage {
   readonly camera = new PerspectiveCamera(CAMERA_LIMITS.fovDesktop, 1, 0.05, 60);
   renderer!: WebGLRenderer;
@@ -115,7 +111,6 @@ export class Stage {
     return this.tier;
   }
 
-  /** True when chapter changes animate the camera (no reduced motion, no pause, no capture). */
   get movesAllowed(): boolean {
     return motionAllowed(this.motion) && !this.options.capture;
   }
@@ -126,6 +121,7 @@ export class Stage {
     await this.enterFirstShot();
     this.listen();
     if (this.options.debug) this.debug = new DebugOverlay(this.renderer, this);
+    this.invalidate();
     if (!this.options.capture && !this.options.forcedChapter) await this.chapters.startScroll();
     this.invalidate();
   }
@@ -156,20 +152,17 @@ export class Stage {
     await yieldToMain();
   }
 
-  /** Capture / forced chapter, else `intro` when the page starts at the top, else the hero. */
   private async enterFirstShot(): Promise<void> {
-    /* Read before the plates move into their layers: afterwards scrollY would force that whole re-layout synchronously. */
-    const atTop = scrollY < 4;
+    const opening = scrollY < 4 || isChapterId(location.hash.slice(1));
     if (!this.options.capture) this.chapters.mountPlates();
     let first = fixedChapter(this.options);
-    if (!first && atTop && this.movesAllowed) this.loop.introUntil = Number.POSITIVE_INFINITY;
+    if (!first && opening && this.movesAllowed) this.loop.introUntil = Number.POSITIVE_INFINITY;
     first ??= this.loop.introUntil ? { id: 'intro', sub: 0 } : { id: 'hero', sub: 0 };
     this.director.request({ id: first.id, subIndex: first.sub, shot: this.layout.shot(this.world, first.id, first.sub) }, 'instant');
     this.director.update(this.camera, 0, this.layout.fov(), { x: 0, y: 0 }, true);
     await this.modules.precompile();
     reportProgress(0.96);
     await yieldToMain();
-    /* The idle window starts when the scene is first seen: a long boot would otherwise skip the power-on. */
     this.loop.lastInteraction = performance.now();
     this.ready = true;
   }
@@ -183,7 +176,6 @@ export class Stage {
     if (id) this.director.refresh(this.layout.shot(this.world, id, this.director.subIndex));
   }
 
-  /** Requests a render; starts the loop if it is allowed to run. */
   invalidate(): void {
     this.loop.invalidate();
   }
@@ -230,11 +222,13 @@ export class Stage {
 
   private reveal(): void {
     const intro = this.loop.introUntil === Number.POSITIVE_INFINITY;
-    if (intro) this.loop.introUntil = performance.now() + INTRO_SECONDS * 1000;
-    announceReveal(this.options.container, intro, screenPoint(this.world.anchor('lamp'), this.camera, this.layout.size), Boolean(this.options.capture));
+    if (intro && document.documentElement.classList.contains('booting')) this.cleanups.push(holdIntroForBoot(this.loop));
+    else if (intro) this.loop.introUntil = performance.now() + INTRO_SECONDS * 1000;
+    const { size } = this.layout;
+    const points = { lamp: screenPoint(this.world.anchor('lamp'), this.camera, size), monitor: screenPoint(surfaceFoot(this.world.surface('monitor')), this.camera, size) };
+    announceReveal(this.options.container, intro, points, Boolean(this.options.capture));
   }
 
-  /** Stops 3D and leaves the static fallback and the normal page flow (slow device or lost context). */
   degrade(reason: 'low' | 'context-lost'): void {
     if (reason === 'low') this.tier = 'low';
     this.modules.fx?.setTier(this.tier);
@@ -276,6 +270,7 @@ export class Stage {
         setPointer: pointer => (this.pointer = pointer),
         setMotion: state => (this.motion = state),
         navigate: pick => this.chapters.navigate(pick),
+        refocus: point => this.modules.fx?.setFocus(point ?? (this.director.chapter ? this.world.focus(this.director.chapter, this.director.subIndex) : null)),
         themeChanged: () => {
           applyStageTokens(this.renderer, this.world);
           this.invalidate();

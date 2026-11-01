@@ -15,7 +15,6 @@ export function vary(base: number, spread: number): number {
   return base * (1 + (Math.random() * 2 - 1) * spread);
 }
 
-/** A decaying sine partial: the building block of bells, porcelain and metal. */
 export function ring(
   context: BaseAudioContext,
   destination: AudioNode,
@@ -35,7 +34,6 @@ export function ring(
   releaseAfter(oscillator, [amp]);
 }
 
-/** A short bandpassed slice of noise: clicks, crinkles, rattles and taps. */
 export function grain(
   context: BaseAudioContext,
   destination: AudioNode,
@@ -57,7 +55,6 @@ export function grain(
   releaseAfter(source, [band, amp]);
 }
 
-/** A pitched body with a falling tone: thumps and soft knocks. */
 export function thump(
   context: BaseAudioContext,
   destination: AudioNode,

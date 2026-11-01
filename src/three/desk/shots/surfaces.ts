@@ -2,7 +2,6 @@ import { Euler, Quaternion, Vector3, type Matrix4 } from 'three';
 import { MONITOR } from '../layout';
 import type { SurfaceFrame } from './types';
 
-/** World frame of the monitor glass. */
 export function monitorFrame(): SurfaceFrame {
   const quaternion = new Quaternion().setFromEuler(new Euler(MONITOR.tilt, MONITOR.yaw, 0, 'YXZ'));
   const normal = new Vector3(0, 0, 1).applyQuaternion(quaternion);
@@ -11,7 +10,6 @@ export function monitorFrame(): SurfaceFrame {
   return { centre, normal, quaternion, width, height };
 }
 
-/** World frame of the phone glass (from the prop's matrix). */
 export function phoneFrame(matrix: Matrix4, width: number, height: number): SurfaceFrame {
   const centre = new Vector3();
   const quaternion = new Quaternion();

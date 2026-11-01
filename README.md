@@ -1,45 +1,42 @@
 # Carlos Orbegoso · Portafolio
 
-Sitio estático bilingüe (ES por defecto en `/page/`, EN en `/page/en/`) publicado en
-<https://carlosorbegoso.github.io/page/>. El plan del rediseño está en [`docs/PLAN.md`](docs/PLAN.md).
+Sitio estático bilingüe (ES en `/page/`, EN en `/page/en/`) con un escritorio 3D: <https://carlosorbegoso.github.io/page/>. Documentación en [`docs/README.md`](docs/README.md).
 
 ## Stack
-
-- Astro 7 (estático, i18n nativo, content collections) + TypeScript
-- Tailwind CSS 4 vía `@tailwindcss/vite`, tokens en `src/styles/tokens.css`
-- Three.js + GSAP para la escena 3D (en preparación)
+- Astro 7 (estático, i18n, content collections) + TypeScript
+- Three.js + GSAP (ScrollTrigger) para el escritorio 3D
+- Tailwind CSS 4 vía `@tailwindcss/vite`; tokens en `src/styles/tokens/`
 - Bun 1.4.4 como gestor de paquetes y runtime de scripts
-- ESLint 9 (flat) + Prettier, `astro check`, Playwright y Lighthouse CI para QA
+- ESLint 9 (flat) + Prettier, `astro check`, Playwright y Lighthouse CI
 
 ## Comandos
-
-| Comando           | Acción                                         |
-| ----------------- | ---------------------------------------------- |
-| `bun install`     | Instala dependencias (`bun.lock` es la fuente) |
-| `bun run dev`     | Servidor de desarrollo en `/page/`             |
-| `bun run build`   | Genera `dist/`                                 |
-| `bun run preview` | Sirve `dist/` localmente                       |
-| `bun run check`   | Verifica tipos y componentes Astro             |
-| `bun run lint`    | ESLint                                         |
-| `bun run format`  | Prettier (`format:check` solo verifica)        |
+| Comando | Acción |
+| --- | --- |
+| `bun install` | Instala dependencias (`bun.lock` es la fuente) |
+| `bun run dev` | Servidor de desarrollo en `/page/` |
+| `bun run build` | Genera `dist/` |
+| `bun run preview` | Sirve `dist/` |
+| `bun run check` | Tipos y componentes Astro |
+| `bun run lint` | ESLint |
+| `bun run format` | Prettier (`format:check` solo verifica) |
+| `bun run assets` | Optimiza los GLB de `assets-src/` |
+| `bun run capture` | Saca capturas del 3D a public/fallback/ (con el dev server levantado; la página no las usa) |
 
 ## Estructura
-
 ```
 src/
-  content/            perfil, experiencia y productos en es.json / en.json
-  content.config.ts   schemas de las colecciones
-  i18n/               textos de interfaz (ui.es.ts, ui.en.ts) y helpers
-  config/site.ts      datos fijos: email, redes, ruta del CV, ids de sección
-  layouts/Base.astro  <head>, SEO, hreflang, JSON-LD
-  components/         Header, Footer, LangSwitch, sections/, ui/, three/
-  pages/              index.astro, en/index.astro, 404.astro
-  styles/             global.css y tokens.css
+  pages/        home ES/EN, modo lectura ES/EN, 404
+  layouts/      Base.astro: <head>, SEO, hreflang, JSON-LD
+  components/   HUD, secciones, ui/, three/ (arranque del canvas)
+  content/      perfil, experiencia y productos (es.json / en.json)
+  i18n/         textos de interfaz por idioma y helpers de URL
+  styles/       tokens/, plates/, motion/, sections/
+  motion/       navegación por planos y texto cinético
+  audio/        sonido ambiente
+  three/        motor 3D, escritorio (desk/), postproceso (fx/), 404 (notfound/)
 ```
 
-Las URLs internas se construyen con `withBase()` y `localeUrl()` de `src/i18n/utils.ts`
-para respetar `base: '/page'` y la barra final.
+Las URLs internas se construyen con `withBase()` y `localeUrl()` de `src/i18n/utils.ts` para respetar `base: '/page'` y la barra final.
 
 ## Despliegue
-
 Un push a `main` ejecuta `.github/workflows/deploy.yml` y publica en GitHub Pages.

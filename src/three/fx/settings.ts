@@ -1,7 +1,6 @@
 import { tokenNumber } from '../tokens';
 import type { Tier } from '../tier';
 
-/** FX design tokens (`--fx-*` in styles/tokens/stage.css, values from docs/design/desk.md §7). */
 export interface FxTokens {
   bloomStrength: number;
   bloomRadius: number;
@@ -14,7 +13,6 @@ export interface FxTokens {
   pointerDamping: number;
   streakStrength: number;
   streakThreshold: number;
-  /** Radial lens fringe at the corners (UV); the centre of the frame stays clean. */
   aberration: number;
 }
 
@@ -37,7 +35,6 @@ export function readFxTokens(): FxTokens {
 
 export type DofMode = 'full' | 'lite' | 'off';
 
-/** What each tier runs. `low`/`none` bypass the pipeline (direct render). */
 export interface TierProfile {
   enabled: boolean;
   msaa: number;
@@ -50,9 +47,7 @@ export interface TierProfile {
   fluidSize: number;
   pressureIterations: number;
   vorticity: boolean;
-  /** GPU ms of all effects (scene excluded) before cutting fluid → DoF; 0 = no budget. */
   budgetMs: number;
-  /** DoF is switched off when it alone costs more than this; 0 = never. */
   dofCeilingMs: number;
 }
 
@@ -113,7 +108,6 @@ export function tierProfile(tier: Tier): TierProfile {
   return { ...PROFILES[tier] };
 }
 
-/** Same rule as `detectTier` for the moment before the Stage calls `setTier`. */
 export function guessTier(): Tier {
   return matchMedia('(pointer: coarse)').matches || innerWidth < 1024 ? 'mid' : 'high';
 }

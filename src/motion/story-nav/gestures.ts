@@ -8,7 +8,6 @@ export interface GestureHandlers {
   onPointerUp(): void;
 }
 
-/** Tracks fingers and a held mouse button so the snap never fights a drag; snaps once they let go. */
 export function createGestureHandlers(state: NavState, snapper: Snapper, interrupt: (event: Event) => void): GestureHandlers {
   return {
     onTouchStart(event) {

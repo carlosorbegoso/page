@@ -141,11 +141,6 @@ class CinematicPipeline implements CinematicFx {
     this.dof.dispose();
   }
 
-  /**
-   * Program cache keys depend on the bound render target (tone mapping, output colour space), so the
-   * scene is compiled into `targets.scene` and each pass under the target it draws into; compiling
-   * against the canvas would leave every program to be linked again in the first frame.
-   */
   async precompile(renderer: WebGLRenderer, scene: Scene, camera: PerspectiveCamera, object?: Object3D): Promise<void> {
     const previous = renderer.getRenderTarget();
     if (!this.profile.enabled) {
@@ -161,7 +156,6 @@ class CinematicPipeline implements CinematicFx {
     const pending = [object ? renderer.compileAsync(object, camera, scene) : renderer.compileAsync(scene, camera)];
     this.tone.end(renderer, scene);
     if (!object) {
-      /* Same attributes as FullScreenQuad's triangle (position + uv, no normal): attributes are part of the program key. */
       const geometry = new BufferGeometry();
       geometry.setAttribute('position', new Float32BufferAttribute([-1, 3, 0, -1, -1, 0, 3, -1, 0], 3));
       geometry.setAttribute('uv', new Float32BufferAttribute([0, 2, 0, 0, 2, 0], 2));
@@ -197,7 +191,6 @@ class CinematicPipeline implements CinematicFx {
     if (this.budget.evaluate(this.timer, this.profile) === 'fluid') fluidUniforms.uFluidActive.value = 0;
   }
 
-  /** Tiers without post: straight to the canvas, late layer included. */
   private renderDirect(renderer: WebGLRenderer, scene: Scene, camera: PerspectiveCamera): void {
     renderer.setRenderTarget(null);
     camera.layers.enable(LATE_LAYER);
@@ -275,13 +268,6 @@ class CinematicPipeline implements CinematicFx {
   }
 }
 
-/**
- * Creates the cinematic post pipeline for the night desk: selective bloom with an anamorphic
- * streak, chapter rack focus, teal-orange chapter grading with contrast, ACES via the renderer,
- * corner fringe, vignette and grain, plus the fluid field that feeds the
- * rain, steam and window-glass materials. GPU resources are built
- * lazily on the first `render`, so it can be created before the renderer exists.
- */
 export function createFxPipeline(options: FxOptions = {}): CinematicFx {
   return new CinematicPipeline(options);
 }

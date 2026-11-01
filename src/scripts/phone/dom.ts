@@ -8,12 +8,10 @@ export function reducedMotion(): boolean {
   return MOTION_QUERY.matches || document.documentElement.dataset.motion === 'paused';
 }
 
-/** Runs after a screen transition (immediately when motion is reduced). */
 export function afterTransition(fn: () => void): void {
   window.setTimeout(fn, reducedMotion() ? 0 : TRANSITION_MS);
 }
 
-/** Two frames, so a freshly inserted element paints its start state before the transition. */
 export function nextPaint(fn: () => void): void {
   requestAnimationFrame(() => requestAnimationFrame(fn));
 }
@@ -25,7 +23,6 @@ export function cloneTemplate<T extends HTMLElement>(
   return node instanceof HTMLElement ? (node as T) : null;
 }
 
-/** Focus inside a CSS3D surface must never scroll the page or the 3D layer. */
 export function focusQuietly(el: Element | null | undefined): void {
   if (el instanceof HTMLElement) el.focus({ preventScroll: true });
 }
@@ -33,10 +30,6 @@ export function focusQuietly(el: Element | null | undefined): void {
 const SETTLE_POLL_MS = 250;
 const SETTLE_GIVE_UP_MS = 15000;
 
-/**
- * Runs `delay` ms after `el` is actually on screen: the stage has revealed, the loader is gone and
- * the CSS3D layer has drawn the plate (headless or slow GPUs can take seconds after `data-ready`).
- */
 export function whenShown(el: HTMLElement, fn: () => void, delay: number): void {
   const started = performance.now();
   const shown = () => {

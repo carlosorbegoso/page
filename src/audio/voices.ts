@@ -1,7 +1,6 @@
 import { midiToHz } from './chapters';
 import { envelope, releaseAfter, vary } from './synth';
 
-/** Soft mechanical key: a felted thock under a short bandpassed click. */
 export function playKey(
   context: BaseAudioContext,
   destination: AudioNode,
@@ -37,7 +36,6 @@ export function playKey(
   releaseAfter(thock, [thockGain]);
 }
 
-/** Wooden "tock": a short pitched knock with a dropping tone, like a knuckle on a walnut desk. */
 export function playTock(context: BaseAudioContext, destination: AudioNode, level: number): void {
   const at = context.currentTime + 0.005;
   const pitch = vary(480, 0.06);
@@ -59,7 +57,6 @@ export function playTock(context: BaseAudioContext, destination: AudioNode, leve
   }
 }
 
-/** Phone notification: two soft glassy notes a fifth apart. */
 export function playChime(context: BaseAudioContext, destination: AudioNode, level: number): void {
   const start = context.currentTime + 0.03;
   [

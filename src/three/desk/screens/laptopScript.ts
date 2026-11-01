@@ -1,4 +1,3 @@
-/** Darcula-like colours of the laptop's editor and terminal. */
 export const INK = {
   background: '#1e1f22',
   panel: '#2b2d30',
@@ -17,7 +16,6 @@ export const INK = {
   dim: '#8c9099'
 } as const;
 
-/** A coloured run of an editor line, starting at character column `column`. */
 export interface Token {
   text: string;
   color: string;
@@ -70,7 +68,6 @@ function tokenize(line: string): Token[] {
 
 export const EDITOR_LINES: readonly { length: number; tokens: Token[] }[] = JAVA.split('\n').map(line => ({ length: line.length, tokens: tokenize(line) }));
 
-/** `./mvnw quarkus:dev`, a live reload, a git log and a test run, looping in the terminal pane. */
 export const TERMINAL_LINES: readonly { text: string; color: string }[] = [
   ['$ ./mvnw quarkus:dev', INK.prompt],
   ['[INFO] Scanning for projects...', INK.dim],

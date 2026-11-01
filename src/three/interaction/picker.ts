@@ -5,7 +5,6 @@ import type { PickSource } from './types';
 const UI_SELECTOR =
   'a, button, input, textarea, select, label, summary, [role="button"], [tabindex]:not([tabindex="-1"]), [contenteditable], [data-panel], [data-plate], [data-plate-wrapper]';
 
-/** Raycasts the desk's picks under a pointer event; events over page UI never reach the scene. */
 export function createPicker(source: PickSource, camera: PerspectiveCamera, canvas: HTMLCanvasElement): (event: PointerEvent | MouseEvent) => StationPick | null {
   const raycaster = new Raycaster();
   const ndc = new Vector2();

@@ -67,11 +67,6 @@ function inputListeners(host: StoryNavHost, state: NavState, { scroller, navigat
   ];
 }
 
-/**
- * Shot-by-shot navigation on top of the chapter scroll (3D mode only): a gentle settle on the
- * active sub-shot after the visitor stops, keyboard steps, `story:goto` and the auto tour. It never
- * scrolls while a wheel, touch, pointer drag or unhandled scroll key is in progress.
- */
 export function setupStoryNav(host: StoryNavHost): () => void {
   const html = document.documentElement;
   const state = createNavState();

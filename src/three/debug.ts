@@ -1,7 +1,6 @@
 import type { WebGLRenderer } from 'three';
 import { cacheSnapshot } from './assets';
 
-/** Read-only view of the Stage the overlay needs. */
 interface StageMetrics {
   readonly tierName: string;
   chapterLabel(): string;
@@ -19,11 +18,6 @@ interface StationMetrics {
   dpr: number;
 }
 
-/**
- * Minimal `?debug` overlay (replaces stats.js): FPS from the p75 frame time, DPR,
- * draw calls, triangles and GPU memory. Metrics per station are saved to localStorage
- * (`stage:metrics`) so they can be copied into docs/QA.md.
- */
 export class DebugOverlay {
   private readonly el = document.createElement('pre');
   private lastPaint = 0;
@@ -57,11 +51,19 @@ export class DebugOverlay {
     this.notes = [...this.notes.slice(-3), message];
   }
 
-  /** Called after each rendered frame; repaints at most twice a second. */
   frame(now: number): void {
-    const info = this.renderer.info;
     const station = this.stage.chapterLabel();
     const p75 = this.stage.p75FrameMs();
+    this.recordStation(station, p75);
+    if (now - this.lastPaint < 500) return;
+    this.lastPaint = now;
+    const heap = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize;
+    this.el.textContent = this.overlayLines(station, p75, heap).join('\n');
+    this.saveMetrics(heap);
+  }
+
+  private recordStation(station: string, p75: number): void {
+    const info = this.renderer.info;
     const current = this.perStation[station] ?? { calls: 0, triangles: 0, p75Ms: 0, dpr: 0 };
     this.perStation[station] = {
       calls: Math.max(current.calls, info.render.calls),
@@ -69,10 +71,11 @@ export class DebugOverlay {
       p75Ms: p75 || current.p75Ms,
       dpr: this.stage.dprValue()
     };
-    if (now - this.lastPaint < 500) return;
-    this.lastPaint = now;
-    const heap = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize;
-    const lines = [
+  }
+
+  private overlayLines(station: string, p75: number, heap: number | undefined): string[] {
+    const info = this.renderer.info;
+    return [
       `tier ${this.stage.tierName}  chapter ${station}`,
       `fps(p75) ${p75 ? (1000 / p75).toFixed(0) : '—'}  p75 ${p75.toFixed(1)} ms  refresh ${this.stage.refreshIntervalMs().toFixed(1)} ms`,
       `dpr ${this.stage.dprValue()}  calls ${info.render.calls}  tris ${info.render.triangles}`,
@@ -81,7 +84,9 @@ export class DebugOverlay {
       `cache ${JSON.stringify(cacheSnapshot())}`,
       ...this.notes
     ].filter(Boolean);
-    this.el.textContent = lines.join('\n');
+  }
+
+  private saveMetrics(heap: number | undefined): void {
     try {
       localStorage.setItem(
         METRICS_KEY,
@@ -91,13 +96,12 @@ export class DebugOverlay {
           viewport: `${innerWidth}x${innerHeight}@${devicePixelRatio}`,
           tier: this.stage.tierName,
           refreshMs: this.stage.refreshIntervalMs(),
-          memory: { ...info.memory },
+          memory: { ...this.renderer.info.memory },
           heapMB: heap ? heap / 1048576 : null,
           stations: this.perStation
         })
       );
     } catch {
-      /* storage can be unavailable (private mode); the overlay still works */
     }
   }
 

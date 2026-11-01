@@ -3,7 +3,6 @@ import { AdditiveBlending, BoxGeometry, Color, CylinderGeometry, Group, Mesh, Me
 const UP = new Vector3(0, 1, 0);
 const PUFFS = 12;
 const BOLT_SEGMENTS = 9;
-/** The bolt re-forks this often, like a real arc, instead of holding one shape. */
 const BOLT_RESHAPE = 0.055;
 
 export function glowMaterial(color: string, strength: number): MeshBasicMaterial {
@@ -17,7 +16,6 @@ export function glowBall(radius: number, color: string, strength: number): Mesh<
   return mesh;
 }
 
-/** Stretches a +Y unit primitive from `from` to `to`. */
 function span(mesh: Mesh, from: Vector3, to: Vector3, width: number): void {
   const direction = to.clone().sub(from);
   mesh.position.copy(from).add(to).multiplyScalar(0.5);
@@ -25,7 +23,6 @@ function span(mesh: Mesh, from: Vector3, to: Vector3, width: number): void {
   mesh.scale.set(width, direction.length(), width);
 }
 
-/** Charizard's flamethrower: a flickering cone from its mouth and puffs of fire racing along it. */
 export class FireStream {
   readonly object3D = new Group();
   private readonly cone = new Mesh(new CylinderGeometry(0.5, 1, 1, 14, 1, true), glowMaterial('#ff7a1c', 1.8));
@@ -78,7 +75,6 @@ export class FireStream {
   }
 }
 
-/** Pikachu's thunderbolt: a jagged arc up from Pikachu and down onto Charizard, with a soft glow around it. */
 export class LightningBolt {
   readonly object3D = new Group();
   private readonly core: Mesh<BoxGeometry, MeshBasicMaterial>[] = [];

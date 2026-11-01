@@ -1,9 +1,8 @@
 import type { ChapterId, ChapterState, StationPick } from '../contracts';
 import { SECTION_CHAPTERS } from '../sections';
 
-/** How long a clicked figure reacts on its own before the camera travels (two-step click). */
+const ACTION_MS: Record<string, number> = { alfa: 1500, parati: 1900, skymek: 2300, ventixs: 1200 };
 const FIGURE_REACTION_MS = 550;
-/** Same for objects that only answer with a press pulse (folders, phone). */
 const PRESS_REACTION_MS = 300;
 
 export interface NavigateHost {
@@ -16,11 +15,6 @@ function emit(type: string, detail?: unknown): void {
   window.dispatchEvent(new CustomEvent(type, { detail }));
 }
 
-/**
- * Two-step click: the object reacts first (`desk:action` play, or the press pulse DeskSet runs on
- * `desk:interact`), then — only if the click leads somewhere new — the camera travels once that
- * reaction has read. Toys (lamp, clock, mug) and the shot already on screen stay put.
- */
 export class PickNavigator {
   private travelTimer = 0;
 
@@ -36,7 +30,7 @@ export class PickNavigator {
     if (figure || id === 'mug') emit('desk:action', { action: 'play', id });
     if (id === 'mug') return;
     if (pick.action) {
-      emit('desk:action', { action: pick.action });
+      emit('desk:action', { action: pick.action, id });
       return;
     }
     const chapter = pick.target.replace('#', '') as ChapterId;
@@ -48,12 +42,12 @@ export class PickNavigator {
     }
     const subMatters = Boolean(pick.product) || pick.sub !== undefined;
     if (state.id === chapter && (!subMatters || state.subIndex === sub)) return;
-    this.schedule(() => this.travel(pick, chapter, sub), figure);
+    this.schedule(() => this.travel(pick, chapter, sub), figure ? (ACTION_MS[id] ?? FIGURE_REACTION_MS) : PRESS_REACTION_MS);
   }
 
-  private schedule(travel: () => void, figure: boolean): void {
+  private schedule(travel: () => void, delay: number): void {
     window.clearTimeout(this.travelTimer);
-    if (this.host.movesAllowed()) this.travelTimer = window.setTimeout(travel, figure ? FIGURE_REACTION_MS : PRESS_REACTION_MS);
+    if (this.host.movesAllowed()) this.travelTimer = window.setTimeout(travel, delay);
     else travel();
   }
 

@@ -6,7 +6,6 @@ import type { World } from '../world';
 
 type Loadable = ShotProvider | StationModule;
 
-/** Swaps the loaded module for `next`: disposes the old one, loads the new one into the scene, returns what is now loaded. */
 async function swapModule<T extends Loadable>(current: T | null, next: T | null, world: World, context: () => StationContext, label: string): Promise<T | null> {
   if (next === current) return current;
   if (current) {
@@ -37,7 +36,6 @@ export interface ModulesHost {
   invalidate(): void;
 }
 
-/** The registered desk set (or legacy hero module) and FX pipeline, swapped in as they register. */
 export class StageModules {
   fx: FxPipeline | null = null;
   private provider: ShotProvider | null = null;
@@ -78,7 +76,6 @@ export class StageModules {
   }
 
   async precompile(object?: Object3D): Promise<void> {
-    /* A model can finish loading while the desk set is still loading, before the pipeline is attached. */
     if (!this.fx) this.attachFx();
     const renderer = this.host.renderer();
     const { scene } = this.host.world();
@@ -90,7 +87,6 @@ export class StageModules {
     await (object ? renderer.compileAsync(object, camera, scene) : renderer.compileAsync(scene, camera));
   }
 
-  /** Draws the scene through the FX pipeline when there is one; returns whether the pipeline still moves. */
   render(dt: number): boolean {
     const renderer = this.host.renderer();
     const { scene } = this.host.world();

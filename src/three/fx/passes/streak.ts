@@ -13,7 +13,6 @@ export class StreakPass {
     uKeep: { value: 0 }
   });
 
-  /** Two horizontal passes over the bloom's bright pass: contiguous taps, then a stride inside their footprint. */
   render(renderer: WebGLRenderer, quad: FullScreenQuad, targets: Targets, threshold: number, timer: GpuTimer | null): void {
     const pair = targets.streak;
     const source = targets.down[0];

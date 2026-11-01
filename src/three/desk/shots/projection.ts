@@ -10,7 +10,6 @@ interface ScreenBox {
   bottom: number;
 }
 
-/** Camera target that puts `framing.aim` (else `focus`) at (sx, sy) on screen, with roll 0. */
 export function toShot(framing: Framing, view: Viewport): Shot {
   const tan = Math.tan((view.fov * DEG) / 2);
   const aspect = view.width / view.height;
@@ -35,7 +34,6 @@ function shotCamera(shot: Shot, view: Viewport, near: number): PerspectiveCamera
   return camera;
 }
 
-/** Screen position (fractions, y down) of world points for a framing; null behind the camera. */
 export function projector(framing: Framing, view: Viewport): (point: Vector3) => ScreenPoint | null {
   const camera = shotCamera(toShot(framing, view), view, 0.02);
   const projected = new Vector3();
@@ -66,7 +64,6 @@ function fitsInside(framing: Framing, points: Vector3[], region: Region, view: V
   return points.every(point => inside(project(point), region));
 }
 
-/** Shortest distance (from `nearest`) at which every point lands inside `region`. */
 export function fitDistance(aim: Vector3, setup: Omit<Setup, 'distance'>, place: Place, points: Vector3[], region: Region, view: Viewport, nearest: number): number {
   const at = (distance: number): Framing => ({ eye: eyeFor(aim, setup.heading, setup.pitch, distance), focus: aim, ...place });
   if (fitsInside(at(nearest), points, region, view)) return nearest;
@@ -85,7 +82,6 @@ export function fitDistance(aim: Vector3, setup: Omit<Setup, 'distance'>, place:
   return far;
 }
 
-/** World point that projects to the panel position of a framing (at the subject's depth, or on its plane). */
 export function panelAnchor(framing: Framing, view: Viewport): Vector3 | null {
   if (!framing.panel) return null;
   const shot = toShot(framing, view);

@@ -35,10 +35,6 @@ function modelUrl(id: MascotId, tier: Tier): string | undefined {
   return file ? `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}models/${file}` : undefined;
 }
 
-/**
- * Creates a mascot. When `bun run assets` has produced a GLB for it, the tier variant is
- * chosen before the fetch; otherwise the procedural placeholder is built. Same interface either way.
- */
 export async function createMascot(id: MascotId, tier: Tier, options: MascotOptions = {}): Promise<Mascot> {
   const url = modelUrl(id, tier);
   if (url) {

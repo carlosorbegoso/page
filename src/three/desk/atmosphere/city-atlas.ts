@@ -2,7 +2,6 @@ import { CanvasTexture, NoColorSpace, Vector3 } from 'three';
 import { seeded } from '../math';
 
 export const SKY_Z = -55;
-/** City layers: depth, half width, top of the tallest building (y), haze. Kept inside the camera far plane (60 m). */
 export const CITY_LAYERS = [
   { z: -50, halfWidth: 70, bottom: -24, top: 9, haze: 0.55 },
   { z: -38, halfWidth: 52, bottom: -22, top: 6.5, haze: 0.3 },
@@ -15,13 +14,11 @@ export const AVIATION_LIGHTS = 6;
 
 export interface CityAtlas {
   texture: CanvasTexture;
-  /** Rooftop aviation lights: (u, v) inside the layer quad and the layer index (1..3). */
   aviation: Vector3[];
 }
 
 type Roof = { layer: number; u: number; v: number };
 
-/** Lit (r) and random (g) window cells over a building face; `glass` darkens the facade tone where a window sits. */
 function drawWindows(ctx: CanvasRenderingContext2D, random: () => number, building: { x: number; width: number; roof: number; bottom: number }, cell: number, glass: number): void {
   for (let wy = building.roof + cell; wy < building.bottom - cell; wy += Math.round(cell * 1.8)) {
     for (let wx = building.x + cell; wx < building.x + building.width - cell; wx += Math.round(cell * 1.6)) {
@@ -32,7 +29,6 @@ function drawWindows(ctx: CanvasRenderingContext2D, random: () => number, buildi
   }
 }
 
-/** One 256 px row of buildings for a layer; collects the roofs of the far layers for aviation lights. */
 function drawLayer(ctx: CanvasRenderingContext2D, layer: number, roofs: Roof[]): void {
   const random = seeded(17 + layer * 31);
   const top = layer * ROW;
@@ -56,7 +52,6 @@ function drawLayer(ctx: CanvasRenderingContext2D, layer: number, roofs: Roof[]):
   }
 }
 
-/** The tallest central roofs get a blinking red light; unused slots park below the frame. */
 function aviationLights(roofs: Roof[]): Vector3[] {
   const aviation = roofs
     .filter(roof => Math.abs(roof.u - 0.5) < 0.2)
@@ -67,11 +62,6 @@ function aviationLights(roofs: Roof[]): Vector3[] {
   return aviation;
 }
 
-/**
- * Skyline atlas, one 1024 × 256 row per layer. Every channel is data, not colour:
- * a = building silhouette, r = window lit at night (~9 % of the cells), g = per-window random
- * (switch-off order, sodium / LED pick), b = facade tone, darker where a window's glass sits.
- */
 export function cityAtlas(): CityAtlas {
   const canvas = document.createElement('canvas');
   canvas.width = 1024;

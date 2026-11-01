@@ -6,7 +6,6 @@ export const moves = () => motionAllowed(readMotion());
 export interface Scroller {
   cancel(): void;
   scrollToY(y: number, index: number | null, onArrive?: () => void): void;
-  /** Goes to a shot by index; -1 is the top of the page. */
   goToIndex(index: number, onArrive?: () => void): void;
 }
 
@@ -17,7 +16,6 @@ function tweenSeconds(top: number): number {
   return Math.min(1.2, Math.max(0.35, 0.3 + distance * 0.35));
 }
 
-/** Smooth scrolling between shots; `onAutoKill` runs when the visitor takes the scroll over mid-tween. */
 class TweenScroller implements Scroller {
   constructor(
     private readonly host: StoryNavHost,

@@ -17,7 +17,6 @@ import { PLANT, TELESCOPE } from '../layout';
 import { along, rod, seeded, seg, shade, UP } from './geometry';
 import type { Palette, Quality } from './palette';
 
-/** A curved, folded leaf blade (pointing +Y in its own frame). */
 function leaf(length: number, width: number, curl: number, q: Quality): BufferGeometry {
   const shape = new Shape();
   shape.moveTo(0, 0);
@@ -36,10 +35,8 @@ function leaf(length: number, width: number, curl: number, q: Quality): BufferGe
   return doubleSided(geometry);
 }
 
-/** Soil centre: the pivot the foliage sways about. */
 export const PLANT_PIVOT = PLANT.clone().add(new Vector3(0, 0.106, 0));
 
-/** Terracotta pot and soil (static); the foliage is `buildPlantLeaves`. */
 export function buildPlant(b: PartBuilder, p: Palette, q: Quality): void {
   const pot = PLANT.clone();
   const profile = [
@@ -57,7 +54,6 @@ export function buildPlant(b: PartBuilder, p: Palette, q: Quality): void {
   b.add(new CircleGeometry(0.052, seg(20, q, 8)), p.soil, { position: [pot.x, pot.y + 0.108, pot.z], rotation: [-Math.PI / 2, 0, 0] });
 }
 
-/** Stems and leaf blades relative to `PLANT_PIVOT`, dealt round-robin into `builders` so each clump can sway on its own. */
 export function buildPlantLeaves(builders: readonly PartBuilder[], p: Palette, q: Quality): void {
   const random = seeded(11);
   const leaves = Math.round(6 + 2 * q);
@@ -80,8 +76,6 @@ export function buildPlantLeaves(builders: readonly PartBuilder[], p: Palette, q
   }
 }
 
-/** Direction the telescope tube points to (room-local), set by the station from Alfa's position. */
-/** Refractor on a tripod by the window, pointing at the city (pure set dressing). */
 export function buildTelescope(b: PartBuilder, p: Palette, q: Quality): void {
   const foot = TELESCOPE.foot;
   const head = new Vector3(foot.x, TELESCOPE.headHeight, foot.z);

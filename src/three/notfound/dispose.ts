@@ -1,6 +1,5 @@
 import { Texture, type BufferGeometry, type Material, type Mesh, type Scene } from 'three';
 
-/** Frees every geometry, material and map reachable from `scene`. */
 export function disposeSceneGraph(scene: Scene): void {
   const geometries = new Set<BufferGeometry>();
   const materials = new Set<Material>();

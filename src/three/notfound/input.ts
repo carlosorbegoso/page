@@ -34,7 +34,6 @@ function followMotionPreference(loop: FrameLoop): () => void {
   });
 }
 
-/** Wires pointer, tilt, resize, visibility, motion preference and context loss; returns the detacher. */
 export function listenNotFound({ container, canvas, pointer, loop, relayout }: InputHost): () => void {
   const onPointer = (event: PointerEvent) => aimWithMouse(pointer, event);
   const onTilt = (event: DeviceOrientationEvent) => aimWithTilt(pointer, event);

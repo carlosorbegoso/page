@@ -11,7 +11,6 @@ function canvasTexture(width: number, height: number, draw: (ctx: CanvasRenderin
   return texture;
 }
 
-/** Soft blob used by the contact-shadow quads (alpha only, generated once). */
 export function createContactShadowTexture(): CanvasTexture {
   return canvasTexture(128, 128, ctx => {
     const gradient = ctx.createRadialGradient(64, 64, 4, 64, 64, 64);
@@ -28,11 +27,6 @@ function rgb(color: Color): string {
   return `${Math.round(srgb.r * 255)},${Math.round(srgb.g * 255)},${Math.round(srgb.b * 255)}`;
 }
 
-/**
- * The monitor's idle picture: near-black glass with a faint, out-of-focus editor (code lines) and
- * a soft brand-blue glow, so the screen is never a dead slab (fallback captures, between slides).
- * The CSS3D screen content covers it when the plate is mounted.
- */
 export function drawScreen(texture: CanvasTexture, aspect: number, glow: Color): void {
   const canvas = texture.image as HTMLCanvasElement;
   const width = 768;
@@ -51,7 +45,6 @@ export function drawScreen(texture: CanvasTexture, aspect: number, glow: Color):
   texture.needsUpdate = true;
 }
 
-/** Phone lock screen: dark gradient, clock and (optionally) one notification card. */
 export function drawPhone(texture: CanvasTexture, notification: boolean, accent: Color): void {
   const canvas = texture.image as HTMLCanvasElement;
   const width = 260;

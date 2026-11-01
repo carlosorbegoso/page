@@ -74,7 +74,6 @@ const t = useTranslations(locale);
     try {
       localStorage.setItem(STORAGE_KEY, on ? 'on' : 'off');
     } catch {
-      // Storage can be blocked (private mode, disabled cookies); the toggle still works for this visit.
     }
   }
 
@@ -92,7 +91,6 @@ const t = useTranslations(locale);
   }
 
   function loadAmbience(): Promise<Ambience> {
-    // The context must be created inside the gesture handler, before any await, or Safari keeps it suspended.
     context ??= new AudioContextClass({ latencyHint: 'playback' });
     void context.resume();
     const audioContext = context;

@@ -6,7 +6,6 @@ import { BLOOM_DOWN_FRAG, BLOOM_UP_FRAG } from '../shaders';
 import type { Targets } from '../targets';
 import { passMaterial } from './material';
 
-/** Mip-chain bloom: thresholded 13-tap downsample, then tent upsample back to the first level. */
 export class BloomPass {
   readonly down = passMaterial(BLOOM_DOWN_FRAG, {
     tInput: { value: null },

@@ -3,18 +3,13 @@ import { isChapterId, type ChapterId } from '../three/contracts';
 export { isChapterId, type ChapterId } from '../three/contracts';
 
 export interface ChapterPreset {
-  /** MIDI notes of the pad chord, lowest first. */
   chord: readonly number[];
-  /** Lowpass cutoff of the pad in Hz. */
   cutoff: number;
-  /** 0..1 levels of the room tone layers. */
   rain: number;
   hum: number;
   city: number;
-  /** 0..1 wet sends to the short room reverb and the longer dawn reverb. */
   room: number;
   hall: number;
-  /** Seconds the move into this chapter takes. */
   crossfade: number;
 }
 
@@ -44,7 +39,6 @@ export function midiToHz(note: number): number {
   return 440 * 2 ** ((note - 69) / 12);
 }
 
-/** The chapter whose section crosses the middle of the viewport, for a bed started mid-page. */
 export function chapterFromDom(): ChapterId {
   const centre = innerHeight / 2;
   for (const section of document.querySelectorAll<HTMLElement>('[data-station]')) {

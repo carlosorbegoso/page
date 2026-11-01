@@ -33,7 +33,6 @@ function createAtlasUniforms(): AtlasUniforms {
   };
 }
 
-/** Figure turn and lift, folder hinge and the varyings the fragment patch reads. */
 function patchAtlasVertex(vertexShader: string): string {
   return vertexShader
     .replace('#include <common>', `#include <common>\n${VERTEX_DECLARATIONS}`)
@@ -51,7 +50,6 @@ function patchAtlasVertex(vertexShader: string): string {
     );
 }
 
-/** Wood grain, analytic AO, wall spill, grey-out for absent figures, per-object emission and the hover rim. */
 function patchAtlasFragment(fragmentShader: string): string {
   return fragmentShader
     .replace('#include <common>', `#include <common>\n${FRAGMENT_DECLARATIONS}`)
@@ -81,12 +79,6 @@ function patchAtlasFragment(fragmentShader: string): string {
     );
 }
 
-/**
- * The room's single "atlas" material: albedo from vertex colours, and per-vertex
- * roughness / metalness / emission / wood-grain (`pbr` attribute) plus an object id (`oid`)
- * for hover. Ambient occlusion is analytic (distance to floor, walls and desk top), which
- * reads like a baked AO pass without a second UV set.
- */
 export function createAtlasMaterial(
   roomBounds: [number, number, number, number],
   deskBounds: [number, number, number, number],
@@ -122,10 +114,6 @@ export function createAtlasMaterial(
   return { material, uniforms };
 }
 
-/**
- * Shadow depth material for the atlas mesh: applies the same figure lift and turn, so the lamp's
- * shadow follows a lifted or turning figure instead of staying at its rest pose.
- */
 export function createAtlasDepthMaterial(uniforms: AtlasUniforms): MeshDepthMaterial {
   const material = new MeshDepthMaterial({ depthPacking: RGBADepthPacking });
   material.onBeforeCompile = shader => {
@@ -155,7 +143,6 @@ attribute float oid;`
   return material;
 }
 
-/** A material that renders nothing but still lets the raycaster hit its mesh. */
 export function createPickMaterial(): MeshBasicMaterial {
   return new MeshBasicMaterial({ visible: false });
 }

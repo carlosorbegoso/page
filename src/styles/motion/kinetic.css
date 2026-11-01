@@ -1,5 +1,3 @@
-/* Kinetic layer: life inside the plates. Hidden states only exist under html.k-armed, which JS adds and removes, so without JS (or with reduced motion / pause) every text is plainly visible. */
-
 @property --signal-progress {
   syntax: '<number>';
   inherits: true;

@@ -12,7 +12,6 @@ interface Options {
   signal: AbortSignal;
 }
 
-/** Interface foley: a wooden tock on scene hover and select, a mechanical key per typed character. */
 export function listenUiSounds({ context, output, noise, canPlay, signal }: Options): void {
   let lastKey = 0;
   let lastTock = 0;

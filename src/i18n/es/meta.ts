@@ -19,6 +19,8 @@ export const meta = {
   'audio.available': 'Hay sonido disponible',
   'stage.loading': 'Encendiendo el escritorio…',
   'stage.loaded': 'Escritorio encendido',
+  'stage.failed': 'Este navegador no puede mostrar el 3D: abriendo el modo lectura',
+  'stage.unavailable': '503 · Modo lectura',
   'cv.download': 'Descargar CV',
   'cv.format': 'PDF, en español',
   'time.toDay': 'Ver la oficina de día',

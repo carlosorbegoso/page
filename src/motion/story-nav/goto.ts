@@ -7,7 +7,6 @@ export interface Navigator {
   goto(detail: StoryGotoDetail | undefined): void;
 }
 
-/** Shot steps and `story:goto` targets (a chapter / sub-shot, a step, or an edge of the story). */
 export function createNavigator(host: StoryNavHost, state: NavState, scroller: Scroller): Navigator {
   function step(direction: 1 | -1): void {
     const shots = host.shots();

@@ -11,7 +11,6 @@ const GIFT_SEAM_BAND = 0.0428;
 const MUG_REACH = 0.075;
 const MUG_HEIGHT = 0.11;
 
-/** Names the moving part a triangle of the figures geometry belongs to (null = it stays put). */
 export function figureParts(palette: Palette): (info: TriangleInfo) => string | null {
   return ({ oid, centroid, color, emissive, normal }) => {
     if (oid === OBJECT_ID.alfa) {
@@ -32,7 +31,6 @@ export function figureParts(palette: Palette): (info: TriangleInfo) => string | 
   };
 }
 
-/** Picks the coffee mug (body, handle, coffee) out of the workstation geometry. */
 export function mugPart({ oid, centroid }: TriangleInfo): string | null {
   if (oid !== OBJECT_ID.none) return null;
   const h = centroid.y - MUG.y;

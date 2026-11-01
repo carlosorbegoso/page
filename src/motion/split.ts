@@ -10,7 +10,6 @@ const segmenter =
     ? new Intl.Segmenter(undefined, { granularity: 'grapheme' })
     : null;
 
-/** Grapheme-safe so accented letters and emoji are never cut in half. */
 export function graphemes(word: string): string[] {
   if (!segmenter) return Array.from(word);
   return Array.from(segmenter.segment(word), part => part.segment);
@@ -29,7 +28,6 @@ export interface CountPart {
   count?: number;
 }
 
-/** Splits a sentence so every figure followed by a percent sign ("30–40%", "30 % y 40 %") can count up. */
 export function splitCounts(text: string): CountPart[] {
   const parts: CountPart[] = [];
   const pattern = /\d+(?=(?:\s?%)|(?:[–-]\d+\s?%))/g;

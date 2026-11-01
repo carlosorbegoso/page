@@ -16,7 +16,6 @@ export function shade(finish: Finish, factor: number, warmth = 0): Finish {
   return { ...finish, color };
 }
 
-/** Matrix that places a +Y-aligned primitive centred between two points. */
 export function between(from: Vector3, to: Vector3): Matrix4 {
   const direction = to.clone().sub(from);
   const quaternion = new Quaternion().setFromUnitVectors(UP, direction.clone().normalize());

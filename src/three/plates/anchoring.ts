@@ -5,11 +5,9 @@ import type { PlateEntry, Viewport } from './types';
 
 const PANEL_GAP = 32;
 const SAFE_LEFT = 24;
-/** Keeps panels off the right edge (HUD / scrollbar). */
 const SAFE_RIGHT = 120;
 const FALLBACK_SIZE = { width: 480, height: 300 };
 
-/** Where an anchored panel goes and how much of it fits (`shown`); `overflow` > 0 means it must be clipped. */
 export interface PanelPlacement {
   x: number;
   y: number;
@@ -25,7 +23,6 @@ function screenPoint(world: Vector3 | null, camera: PerspectiveCamera, view: Vie
   };
 }
 
-/** Beside the anchor on desktop (on the side with more room), centred below it on touch. */
 export function placePanelBox(entry: PlateEntry, world: Vector3 | null, camera: PerspectiveCamera, view: Viewport, room: PanelRoom): PanelPlacement {
   const width = entry.size?.width || FALLBACK_SIZE.width;
   const height = entry.size?.height || FALLBACK_SIZE.height;
@@ -44,7 +41,6 @@ export function placePanelBox(entry: PlateEntry, world: Vector3 | null, camera: 
   return { x: (view.width - width) / 2, y: Math.max(Math.min(preferred, bottom - shown), top), shown, overflow };
 }
 
-/** Pins a surface plate 1:1 onto the monitor or phone; hides it when that surface is missing. */
 export function placeSurfacePlate(entry: PlateEntry, anchor: PlateAnchor | null, camera: PerspectiveCamera, viewHeight: number): void {
   const object = entry.object!;
   if (!anchor) {

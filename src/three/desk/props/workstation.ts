@@ -17,11 +17,9 @@ import { DESK, KEYBOARD, LAMP, MONITOR, MUG, PHONE } from '../layout';
 import { along, rod, seg, shade, UP } from './geometry';
 import type { Palette, Quality } from './palette';
 
-/** Coffee surface height inside the mug: high enough that the wide shot sees the dark disc and its crema. */
 const COFFEE_LEVEL = 0.085;
 
-/** Monitor stand (static) and the keyboard group in front of it. */
-export function buildWorkstation(b: PartBuilder, p: Palette, q: Quality): void {
+function buildMonitorStand(b: PartBuilder, p: Palette): void {
   const { centre, yaw } = MONITOR;
   const back = new Vector3(Math.sin(yaw), 0, Math.cos(yaw)).multiplyScalar(-0.075);
   const baseCentre = new Vector3(centre.x, DESK.top + 0.005, centre.z).add(back.clone().multiplyScalar(0.3));
@@ -31,7 +29,9 @@ export function buildWorkstation(b: PartBuilder, p: Palette, q: Quality): void {
     position: [columnBase.x, (DESK.top + centre.y + 0.04) / 2, columnBase.z],
     rotation: [0, yaw, 0]
   });
+}
 
+function buildKeyboard(b: PartBuilder, p: Palette): void {
   const keyboard = new Vector3(KEYBOARD.x, DESK.top, KEYBOARD.z);
   const kb = new Matrix4().compose(keyboard, new Quaternion(), new Vector3(1, 1, 1));
   b.add(new RoundedBoxGeometry(0.37, 0.009, 0.125, 2, 0.004), p.bezel, new Matrix4().multiplyMatrices(kb, new Matrix4().makeTranslation(0, 0.0045, 0)));
@@ -49,7 +49,9 @@ export function buildWorkstation(b: PartBuilder, p: Palette, q: Quality): void {
   }
   b.add(new BoxGeometry(pitch * 6 - 0.004, 0.004, keyW * 0.92), p.keys, new Matrix4().multiplyMatrices(kb, new Matrix4().makeTranslation(0, 0.011, 2 * pitch)));
   b.add(new RoundedBoxGeometry(0.13, 0.005, 0.105, 2, 0.003), p.trackpad, { position: [KEYBOARD.trackpadX, DESK.top + 0.0025, KEYBOARD.z] });
+}
 
+function buildMug(b: PartBuilder, p: Palette, q: Quality): void {
   const profile = [
     [0.0, 0.0],
     [0.037, 0.0],
@@ -72,7 +74,12 @@ export function buildWorkstation(b: PartBuilder, p: Palette, q: Quality): void {
   });
 }
 
-/** Monitor head (bezel, housing, VESA plate) centred on the screen, facing +Z: a separate mesh that pivots to portrait. */
+export function buildWorkstation(b: PartBuilder, p: Palette, q: Quality): void {
+  buildMonitorStand(b, p);
+  buildKeyboard(b, p);
+  buildMug(b, p, q);
+}
+
 export function buildMonitorHead(b: PartBuilder, p: Palette, q: Quality): void {
   const { width, height } = MONITOR.screen;
   const e = MONITOR.bezel;
@@ -81,7 +88,6 @@ export function buildMonitorHead(b: PartBuilder, p: Palette, q: Quality): void {
   b.add(new RoundedBoxGeometry(0.11, 0.11, 0.012, 1, 0.004), p.metal, { position: [0, 0, -MONITOR.depth / 2 - 0.032] });
 }
 
-/** Phone on a small walnut stand; the glass itself is a separate mesh (the `phone` surface). */
 export function buildPhone(b: PartBuilder, p: Palette): Matrix4 {
   const { base, yaw, lean, size } = PHONE;
   const stand = new Matrix4().compose(base, new Quaternion().setFromAxisAngle(UP, yaw), new Vector3(1, 1, 1));

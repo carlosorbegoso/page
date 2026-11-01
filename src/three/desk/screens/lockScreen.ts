@@ -1,7 +1,6 @@
 const CLOCK_FONT = '600 92px ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif';
 const NAME_FONT = '500 15px ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif';
 
-/** macOS-style lock screen: a dusk wallpaper, the story's hour and the user's avatar. */
 export function drawLockScreen(ctx: CanvasRenderingContext2D, width: number, height: number, clock: string): void {
   const sky = ctx.createLinearGradient(0, 0, 0, height);
   sky.addColorStop(0, '#1b2440');

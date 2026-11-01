@@ -1,7 +1,6 @@
 import { BufferAttribute, BufferGeometry, Matrix4, Mesh, Vector3, type Material, type Object3D } from 'three';
 import type { AtlasUniforms } from '../materials';
 
-/** What a triangle of the merged figures geometry is, to decide which moving part it belongs to. */
 export interface TriangleInfo {
   oid: number;
   centroid: Vector3;
@@ -13,9 +12,7 @@ export interface TriangleInfo {
 export interface RigPart {
   readonly name: string;
   readonly mesh: Mesh;
-  /** Rest-pose centroid of the part's triangles, in room space. */
   readonly centre: Vector3;
-  /** Rest-pose centroids of every triangle, for parts that need to be split further. */
   readonly centroids: Vector3[];
 }
 
@@ -29,7 +26,6 @@ type Bucket = { indices: number[]; centroids: Vector3[] };
 
 const corner = [new Vector3(), new Vector3(), new Vector3()];
 
-/** Classifies triangle `i` (first index of its three) of the indexed figures geometry. */
 function describeTriangle(geometry: BufferGeometry, i: number): { indices: [number, number, number]; info: TriangleInfo } {
   const index = geometry.getIndex()!;
   const position = geometry.getAttribute('position');
@@ -71,11 +67,6 @@ function bucketTriangles(geometry: BufferGeometry, classify: (info: TriangleInfo
   return { buckets, rest };
 }
 
-/**
- * Splits the merged figures geometry into a static remainder plus named moving parts, each its own
- * mesh over the same vertex buffers and atlas material. Every part keeps its object id, so the atlas
- * shader still applies the figure's lift and turn, hover rim and presence to it.
- */
 export function splitFigures(geometry: BufferGeometry, classify: (info: TriangleInfo) => string | null, options: RigOptions): { rest: Mesh; parts: Map<string, RigPart> } {
   const { buckets, rest } = bucketTriangles(geometry, classify);
   const parts = new Map<string, RigPart>();
@@ -105,7 +96,6 @@ function partMesh(source: BufferGeometry, indices: number[], name: string, optio
   return node;
 }
 
-/** Splits a part into `count` sub-parts, `groupOf[i]` naming the group of its i-th triangle. */
 export function splitPart(part: RigPart, groupOf: number[], count: number, options: RigOptions): RigPart[] {
   const index = part.mesh.geometry.getIndex()!;
   const out: RigPart[] = [];
@@ -124,7 +114,6 @@ export function splitPart(part: RigPart, groupOf: number[], count: number, optio
   return out;
 }
 
-/** The atlas shader's figure transform F (turn about the pivot, then lift) for figure slot `slot`. */
 export function figureFrame(uniforms: AtlasUniforms, slot: number, out: Matrix4): Matrix4 {
   const pivot = uniforms.uFigPivot.value[slot]!;
   const lift = uniforms.uFigLift.value[slot] ?? 0;
@@ -136,22 +125,16 @@ export function figureFrame(uniforms: AtlasUniforms, slot: number, out: Matrix4)
 
 const inverse = new Matrix4();
 
-/**
- * Poses a rig part that the shader already moves by F: the mesh matrix becomes F·H·F⁻¹, so the part
- * ends at F(H(p)), its own motion `H` (in rest space) carried by the figure's lift and turn.
- */
 export function poseInFrame(node: Object3D, frame: Matrix4, local: Matrix4): void {
   node.matrix.multiplyMatrices(frame, local).multiply(inverse.copy(frame).invert());
   node.matrixWorldNeedsUpdate = true;
 }
 
-/** Places an overlay the shader does not move at F·H·placement. */
 export function placeInFrame(node: Object3D, frame: Matrix4, local: Matrix4, placement: Matrix4): void {
   node.matrix.multiplyMatrices(frame, local).multiply(placement);
   node.matrixWorldNeedsUpdate = true;
 }
 
-/** Rotation about an axis through `pivot`, then a translation: T(offset)·T(pivot)·R·T(-pivot). */
 export function aroundPivot(out: Matrix4, pivot: Vector3, rotation: Matrix4, offset?: Vector3): Matrix4 {
   out.makeTranslation(pivot.x + (offset?.x ?? 0), pivot.y + (offset?.y ?? 0), pivot.z + (offset?.z ?? 0));
   out.multiply(rotation);

@@ -1,7 +1,6 @@
 import { Plane, Raycaster, Vector2, Vector3, type PerspectiveCamera } from 'three';
 import type { PointerField, PointerSample } from './contracts';
 
-/** Stage-owned implementation of the shared PointerField contract. */
 export class StagePointer implements PointerField {
   readonly ndc = new Vector2();
   readonly screen = new Vector2();
@@ -20,7 +19,6 @@ export class StagePointer implements PointerField {
     return () => this.listeners.delete(listener);
   }
 
-  /** Feeds a pointer position (CSS px relative to the canvas) and notifies listeners. */
   move(x: number, y: number, width: number, height: number, camera: PerspectiveCamera, target: Vector3): void {
     const now = performance.now();
     const dt = Math.max((now - this.lastTime) / 1000, 1 / 240);
@@ -39,7 +37,6 @@ export class StagePointer implements PointerField {
     for (const listener of this.listeners) listener(this);
   }
 
-  /** Decays velocity when no events arrive (called once per rendered frame). */
   settle(dt: number): void {
     const decay = Math.exp(-dt * 6);
     this.velocity.multiplyScalar(decay);

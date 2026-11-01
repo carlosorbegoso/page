@@ -2,7 +2,6 @@ import { reducedMotion } from './dom';
 
 const LIFETIME_MS = 900;
 
-/** Material-style ripple from the touch point; sizes are local CSS px of the scaled CSS3D plate. */
 export function ripple(event: PointerEvent, root: HTMLElement): void {
   if (reducedMotion() || event.button !== 0) return;
   const target = (event.target as Element).closest<HTMLElement>('a[href], button');

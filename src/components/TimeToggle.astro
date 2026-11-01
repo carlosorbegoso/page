@@ -14,8 +14,8 @@ const t = useTranslations(locale);
   data-time-toggle
   data-label-day={t('time.toDay')}
   data-label-night={t('time.toNight')}
-  aria-label={t('time.toDay')}
-  title={t('time.toDay')}
+  aria-label={t('time.toNight')}
+  title={t('time.toNight')}
   class="group hud-control hud-icon"
 >
   <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" class="shrink-0 fill-none stroke-current group-data-[state=day]:hidden" stroke-width="2" stroke-linecap="round">
@@ -48,10 +48,10 @@ const t = useTranslations(locale);
       try {
         localStorage.setItem(STORAGE_KEY, next);
       } catch {
-        /* Private mode: the choice lasts for this page only. */
       }
       render();
       window.dispatchEvent(new CustomEvent('time:toggle', { detail: { day: next === 'day' } }));
+      window.dispatchEvent(new CustomEvent('desk:action', { detail: { action: 'time' } }));
     });
   }
   render();

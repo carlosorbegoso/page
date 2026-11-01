@@ -1,9 +1,3 @@
-/**
- * Anamorphic streak: a short horizontal blur of the bloom's bright pass, run twice at low resolution.
- * `uKeep` is a hard re-threshold so only emitters (filament, antenna, LEDs) streak, not lit surfaces.
- * The second stride must stay within the first pass's footprint: a longer one samples gaps and
- * stamps discrete copies of the source along the line.
- */
 export const STREAK_FRAG = /* glsl */ `
 uniform sampler2D tInput;
 uniform vec2 uTexel;

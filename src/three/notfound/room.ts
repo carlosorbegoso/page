@@ -58,7 +58,6 @@ function addMug(scene: Scene, ceramic: RoomMaterials['ceramic']): void {
   scene.add(mug);
 }
 
-/** Desk, back wall, rainy window and mug; returns the rain's animated uniforms. */
 export function buildRoom(scene: Scene, materials: RoomMaterials): TimedUniform {
   addDeskAndWall(scene, materials);
   const rain = addRainyWindow(scene, materials.frame);

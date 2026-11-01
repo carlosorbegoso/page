@@ -6,7 +6,9 @@ import { CLOCK_POSITION } from '../clock';
 import { LAMP_SWITCH } from '../lamp';
 import { CHARIZARD, FIGURE_HEIGHT, FIGURES, FOLDERS, GLASS_Z, LAMP, LAPTOP, MUG, OPEN_FOLDER, PIKACHU, PLANT, PRODUCT_FIGURES, WINDOW, folderCentre, type FigureId } from '../layout';
 import { createPickMaterial, type AtlasUniforms } from '../materials';
+import { PORTRAIT } from '../portrait';
 import { damp } from '../math';
+import { BOARD_LAYOUT, boardFaceMatrix, boardPoint, type ProductId } from '../notes/layout';
 import { EXPERIENCE_ORDER, type SurfaceFrame } from '../shots';
 import { EXPERIENCE_IDS } from './story';
 
@@ -21,12 +23,13 @@ const LABELS: Record<string, { es: string; en: string }> = {
   sysarp: { es: 'SYSARP · Experiencia', en: 'SYSARP · Experience' },
   phone: { es: 'Teléfono · Contacto', en: 'Phone · Contact' },
   lamp: { es: 'Lámpara', en: 'Lamp' },
-  window: { es: 'Ventana', en: 'Window' },
+  window: { es: 'Persiana · subir o bajar', en: 'Blind · raise or lower' },
   plant: { es: 'Planta', en: 'Plant' },
   mug: { es: 'Taza de café', en: 'Coffee mug' },
   laptop: { es: 'Laptop', en: 'Laptop' },
   clock: { es: 'Reloj · clic para que suene', en: 'Clock · click to ring it' },
-  pokemon: { es: 'Pikachu vs. Charizard · clic para la batalla', en: 'Pikachu vs. Charizard · click to battle' }
+  pokemon: { es: 'Pikachu vs. Charizard · clic para la batalla', en: 'Pikachu vs. Charizard · click to battle' },
+  portrait: { es: 'Foto de Carlos Orbegoso', en: 'Photo of Carlos Orbegoso' }
 };
 
 const HOVER_ACCENT: Partial<Record<keyof typeof OBJECT_ID, string>> = {
@@ -39,16 +42,17 @@ const HOVER_ACCENT: Partial<Record<keyof typeof OBJECT_ID, string>> = {
 
 type PickProxy = (key: string, size: [number, number, number], position: Vector3, quaternion?: Quaternion) => Mesh;
 
-/** Invisible click proxies for the navigable props, and the hover highlight they drive. */
 export class DeskPicks {
   readonly picks: StationPick[] = [];
   readonly proxies = new Map<string, Mesh>();
   hoverId = -1;
   private hoverMix = 0;
 
-  build(room: Group, phone: SurfaceFrame, disposables: Array<{ dispose(): void }>): void {
+  build(room: Group, phone: SurfaceFrame, disposables: Array<{ dispose(): void }>, cards?: ReadonlyMap<ProductId, Object3D>): void {
     const proxy = this.proxyFactory(room, disposables);
     this.addFigures(proxy);
+    this.addPostits(proxy);
+    if (cards) this.addVisits(cards);
     this.addFolders(proxy);
     const lampHead = LAMP.head.clone().addScaledVector(LAMP.aim.clone().sub(LAMP.head).normalize(), 0.06);
     this.picks.push({ object3D: proxy('lamp', [0.16, 0.12, 0.16], lampHead), key: 'desk:lamp', label: LABELS.lamp!, target: '#company', action: 'lamp' });
@@ -63,10 +67,11 @@ export class DeskPicks {
     ] as const) {
       this.picks.push({ object3D: proxy(key, [...size], base.clone().add(new Vector3(0, size[1] / 2, 0))), key: 'desk:pokemon', label: LABELS.pokemon!, target: '#hero', action: 'battle' });
     }
+    const portrait = proxy('portrait', [PORTRAIT.width + 0.02, PORTRAIT.height + 0.02, 0.04], PORTRAIT.centre);
+    this.picks.push({ object3D: portrait, key: 'desk:portrait', label: LABELS.portrait!, target: '#about', action: 'portrait' });
     this.picks.push({ object3D: proxy('clock', [0.12, 0.14, 0.08], CLOCK_POSITION.clone().add(new Vector3(0, 0.07, 0))), key: 'desk:clock', label: LABELS.clock!, target: '#hero' });
   }
 
-  /** Invisible boxes that share one non-rendering material; each is registered under its key. */
   private proxyFactory(room: Group, disposables: Array<{ dispose(): void }>): PickProxy {
     const material = createPickMaterial();
     disposables.push(material);
@@ -92,7 +97,25 @@ export class DeskPicks {
     }
   }
 
-  /** The four archive box files and the open TCS folder on the desk. */
+  private addPostits(proxy: PickProxy): void {
+    const board = new Quaternion().setFromRotationMatrix(boardFaceMatrix());
+    PRODUCT_FIGURES.forEach((id, sub) => {
+      const rect = BOARD_LAYOUT.postits[id];
+      const turn = board.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), rect.rotation));
+      const centre = boardPoint(rect.x + rect.width / 2, rect.y + rect.height / 2, 0.004);
+      const name = LABELS[id]!.es;
+      const label = { es: `${name} · ver producto`, en: `${name} · see product` };
+      this.picks.push({ object3D: proxy(`postit-${id}`, [rect.width, rect.height, 0.004], centre, turn), key: `desk:postit-${id}`, label, target: '#products', product: id, sub });
+    });
+  }
+
+  private addVisits(cards: ReadonlyMap<ProductId, Object3D>): void {
+    for (const [id, object3D] of cards) {
+      const name = LABELS[id]!.es;
+      this.picks.push({ object3D, key: `desk:visit-${id}`, label: { es: `Visitar ${name} ↗`, en: `Visit ${name} ↗` }, target: '#products', action: 'visit' });
+    }
+  }
+
   private addFolders(proxy: PickProxy): void {
     for (const id of FOLDERS) {
       const experience = { target: '#experience', experience: EXPERIENCE_IDS[id], sub: EXPERIENCE_ORDER.indexOf(id) + 1 };
@@ -104,7 +127,6 @@ export class DeskPicks {
   }
 
 
-  /** The window (its panes clear of the monitor) lowers the blind; the plant rustles. Neither moves the camera. */
   private addRoomToys(proxy: PickProxy): void {
     const left = WINDOW.x - WINDOW.width / 2;
     const right = WINDOW.x + WINDOW.width / 2;
@@ -118,14 +140,12 @@ export class DeskPicks {
     this.picks.push({ object3D: plant, key: 'desk:plant', label: LABELS.plant!, target: '#hero', action: 'plant' });
   }
 
-  /** The MacBook: a click shuts or opens its lid; it never moves the camera. */
   private addLaptop(proxy: PickProxy): void {
     const turn = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), LAPTOP.yaw);
     const centre = LAPTOP.centre.clone().add(new Vector3(0, 0.07, -0.02).applyQuaternion(turn));
     this.picks.push({ object3D: proxy('laptop', [LAPTOP.width, 0.15, LAPTOP.depth + 0.04], centre, turn), key: 'desk:laptop', label: LABELS.laptop!, target: '#hero', action: 'laptop' });
   }
 
-  /** Finds the pick an object belongs to (walking up the parents). */
   resolve(object: Object3D): StationPick | null {
     let node: Object3D | null = object;
     while (node) {
@@ -136,7 +156,6 @@ export class DeskPicks {
     return null;
   }
 
-  /** Points the highlight at a pick (or clears it); returns the hovered object's name and whether the id changed. */
   hover(object: Object3D | null, uniforms: AtlasUniforms): { name: keyof typeof OBJECT_ID | undefined; changed: boolean } {
     const pick = object ? this.resolve(object) : null;
     const name = pick?.key.slice(5) as keyof typeof OBJECT_ID | undefined;

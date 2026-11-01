@@ -1,13 +1,14 @@
 import { Plane, Vector3 } from 'three';
-import { HERO_EYE, LAPTOP, MONITOR, ROOM } from '../layout';
+import { HERO_EYE, ROOM } from '../layout';
+import { aboutPairShot, HERO_PLACE, heroFitDistance, stackedBioShot } from './about-shots';
 import type { ShotContext } from './context';
-import { clamp, eyeFor, heightFit, lerp, widthFit } from './math';
+import { clamp, DEG, heightFit, lerp, widthFit } from './math';
 import type { Framing } from './types';
 
 export function heroDistance(ctx: ShotContext): number {
   const { view, screenSpan, screenRise, t } = ctx;
   return lerp(
-    clamp(widthFit(screenSpan, 0.5, view), 1.05, HERO_EYE.distanceTo(ctx.monitor.centre)),
+    heroFitDistance(ctx, clamp(widthFit(screenSpan, 0.5, view), 1.05, HERO_EYE.distanceTo(ctx.monitor.centre))),
     clamp(Math.max(widthFit(screenSpan, 0.8, view), heightFit(screenRise, 0.78, view)), 1.0, 2.3),
     t
   );
@@ -18,8 +19,8 @@ export function heroShot(ctx: ShotContext, distance: number): Framing {
   return {
     eye: screen.clone().addScaledVector(ctx.monitor.normal, distance),
     focus: screen,
-    sx: lerp(0.42, 0.5, ctx.t),
-    sy: lerp(0.47, 0.5, ctx.t)
+    sx: lerp(HERO_PLACE.sx, 0.5, ctx.t),
+    sy: lerp(HERO_PLACE.sy, 0.5, ctx.t)
   };
 }
 
@@ -29,12 +30,8 @@ export function aboutShot(ctx: ShotContext, heroDistance: number): Framing {
   const aboutDistance = portrait
     ? clamp(Math.max(widthFit(screenSpan, 0.86, view), heightFit(screenRise, 0.86, view)), 0.7, heroDistance - 0.05)
     : clamp(widthFit(screenSpan, 0.7, view), 0.7, heroDistance - 0.25);
-  return {
-    eye: screen.clone().addScaledVector(ctx.monitor.normal, aboutDistance),
-    focus: screen,
-    sx: 0.5,
-    sy: portrait ? 0.48 : 0.5
-  };
+  const monitorOnly = { eye: screen.clone().addScaledVector(ctx.monitor.normal, aboutDistance), focus: screen, sx: 0.5, sy: portrait ? 0.48 : 0.5 };
+  return aboutPairShot(ctx, monitorOnly);
 }
 
 export function contactShot(ctx: ShotContext): Framing {
@@ -66,24 +63,17 @@ export function outroShot(ctx: ShotContext, hero: Framing, heroDistance: number)
   };
 }
 
-function stackedShot(ctx: ShotContext, focus: Vector3, heading: number, pitch: number, span: number, name: string, sy = ctx.subjectY): Framing {
-  return { eye: eyeFor(focus, heading, pitch, ctx.topHalf(span)), focus, sx: 0.5, sy, panel: { name, ...ctx.panelDocked } };
+const SCREEN_FILL = 0.97;
+const OUTRO = { turn: 8 * DEG, fill: 0.95 };
+const UP = new Vector3(0, 1, 0);
+
+function monitorFill(ctx: ShotContext, name: string, turn = 0, fill = SCREEN_FILL): Framing {
+  const screen = ctx.monitor.centre;
+  const distance = widthFit(ctx.screenSpan * Math.cos(turn), fill, ctx.view);
+  const facing = ctx.monitor.normal.clone().applyAxisAngle(UP, turn);
+  return { eye: screen.clone().addScaledVector(facing, distance), focus: screen, sx: 0.5, sy: 0.5, panel: { name, ...ctx.panelDocked } };
 }
 
-/**
- * Monitor chapters on a stacked phone are establishing shots, not screen reads: the hero holds the
- * whole night desk (laptop, monitor, lamp, window), about pushes onto the monitor and then turns to
- * the laptop on the way to the shelf, and the outro pulls back up to the window.
- */
 export function stackedMonitorShots(ctx: ShotContext): { hero: Framing; about: Framing[]; outro: Framing } {
-  const room = MONITOR.centre.clone().add(new Vector3(0.12, 0.06, -0.04));
-  /** The opening caption is short, so the desk can sit lower and meet it. */
-  const hero = stackedShot(ctx, room, 4, -7, 1.45, 'hero', ctx.subjectY + 0.04);
-  const monitor = MONITOR.centre.clone().add(new Vector3(0.12, -0.02, 0));
-  const bio = stackedShot(ctx, monitor, 8, -10, 0.85, 'about-bio');
-  const laptop = LAPTOP.centre.clone().add(new Vector3(0.02, 0.1, 0));
-  const stack = stackedShot(ctx, laptop, -14, -14, 0.5, 'about-stack');
-  const sky = MONITOR.centre.clone().add(new Vector3(0.3, 0.22, -0.1));
-  const outro = stackedShot(ctx, sky, 6, 2, 0.88, 'outro');
-  return { hero, about: [bio, stack], outro };
+  return { hero: monitorFill(ctx, 'hero'), about: [stackedBioShot(ctx), monitorFill(ctx, 'about-stack')], outro: monitorFill(ctx, 'outro', OUTRO.turn, OUTRO.fill) };
 }

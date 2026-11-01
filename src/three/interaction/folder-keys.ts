@@ -3,10 +3,6 @@ import { es } from '../../i18n/ui.es';
 
 const EXPERIENCE_PLATE = '[data-plate][data-experience]';
 
-/**
- * The experience panel of the folder on screen takes focus, and Enter takes that folder off the
- * shelf (`desk:action` `folder`), the keyboard twin of clicking the folder you are looking at.
- */
 export function setupFolderKeys(): () => void {
   const hint = document.documentElement.lang.startsWith('en') ? en['folderDetail.hint'] : es['folderDetail.hint'];
   let focusable: HTMLElement | null = null;

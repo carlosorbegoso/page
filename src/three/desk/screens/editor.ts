@@ -5,7 +5,6 @@ const HOLD_SECONDS = 4;
 const LINE_HEIGHT = 15;
 const TAB_HEIGHT = 22;
 const GUTTER = 34;
-/** The visitor's text stays on screen this long after their last key before the editor plays again. */
 const USER_SECONDS = 14;
 const USER_LINES = 4;
 const USER_LINE_CHARS = 44;
@@ -20,14 +19,9 @@ export interface PaneRect {
   height: number;
 }
 
-/**
- * The Quarkus resource in the laptop's editor: it types itself character by character in a slow
- * loop. Keys from the real keyboard (`type`) append below it and pause the loop for a while.
- */
 export class LaptopEditor {
   private readonly user: string[] = [];
   private typedAt = -100;
-  /** Starts most of the way through the snippet, so the first look already finds code on screen. */
   private origin = -CYCLE * 0.6;
 
   type(key: string, time: number): void {
@@ -76,7 +70,6 @@ export class LaptopEditor {
     if (Math.floor(time * 2) % 2 === 0 || !typing) drawCursor(ctx, cursorX, cursorY);
   }
 
-  /** Draws the visitor's lines below the snippet; returns the baseline of the last one. */
   private drawUser(ctx: CanvasRenderingContext2D, pane: PaneRect, left: number, top: number): number {
     let y = top;
     for (let i = 0; i < this.user.length; i++) {

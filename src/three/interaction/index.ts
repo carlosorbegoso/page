@@ -8,7 +8,6 @@ export type { InteractionOptions, PickSource } from './types';
 
 type Picker = ReturnType<typeof createPicker>;
 
-/** Hover state: pointer cursor, the object's own highlight and a `scene:hover` label for the live region. */
 function createHover(source: PickSource, invalidate: () => void): (next: StationPick | null) => void {
   let hovered: StationPick | null = null;
   return next => {
@@ -22,7 +21,6 @@ function createHover(source: PickSource, invalidate: () => void): (next: Station
   };
 }
 
-/** Mouse and pen moves are coalesced to one raycast per animation frame. */
 function coalescedMove(pick: Picker, setHover: (next: StationPick | null) => void): (event: PointerEvent) => void {
   let pending: PointerEvent | null = null;
   return event => {
@@ -37,11 +35,6 @@ function coalescedMove(pick: Picker, setHover: (next: StationPick | null) => voi
   };
 }
 
-/**
- * Scene interaction by raycasting the desk's picks: hover shows a pointer cursor, lights the object
- * itself and emits `scene:hover` with its name for the polite live region (fine pointers only; no
- * floating label); click or tap hands the pick to `navigate`, which plays with it and/or moves on.
- */
 export function setupInteraction(options: InteractionOptions): () => void {
   const pick = createPicker(options.source, options.camera, options.canvas);
   const setHover = createHover(options.source, options.invalidate);

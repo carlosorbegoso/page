@@ -281,7 +281,10 @@
 }
 
 /* Day mode on the stage: the walls stay dim, so loose panels keep light ink on their dark pool; only the HUD scrim turns lighter. */
+/* Muted and subtle ink lift with it: over the lighter day backdrop the 0.78 pool alone left them at 3.2–4.5:1. */
 :root[data-time='day'].is-3d {
+  --color-text-muted: #b4bfcf;
+  --color-text-subtle: #aab6c8;
   --color-plate-pool: rgb(4 6 11 / 0.78);
   --color-plate-pool-edge: rgb(4 6 11 / 0.6);
 }

@@ -14,8 +14,8 @@ export default defineConfig({
   },
   integrations: [
     sitemap({
-      i18n: { defaultLocale: 'es', locales: { es: 'es-PE', en: 'en-US' } },
-      filter: page => !['/404', '/lectura/', '/en/reading/'].some(path => page.includes(path))
+      i18n: { defaultLocale: 'es', locales: { es: 'es', en: 'en' } },
+      filter: page => !page.includes('/404')
     })
   ],
   build: {

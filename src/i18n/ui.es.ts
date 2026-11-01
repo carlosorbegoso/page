@@ -107,10 +107,12 @@ export const es = {
   'hud.label': 'Menú del sitio',
   'reading.enter': 'Modo lectura',
   'reading.exit': 'Volver a la experiencia 3D',
-  'reading.metaTitle': 'Modo lectura · Carlos Orbegoso',
+  'reading.metaTitle': 'CV de Carlos Orbegoso · Backend Developer Java y Quarkus',
   'reading.description':
-    'Experiencia, productos y contacto de Carlos Orbegoso, Backend Developer en Java y Quarkus, en una sola página sin animaciones.',
-  'reading.intro': 'Todo el contenido en una página limpia, sin 3D ni animaciones.',
+    'CV de Carlos Orbegoso: más de 5 años como Backend Developer en Java y Quarkus, hoy en TCS para el BCP. Experiencia, productos, formación y contacto.',
+  'reading.intro': 'Mi CV en una sola página: sin 3D, sin animaciones y lista para imprimir.',
+  'reading.profile': 'Perfil',
+  'reading.print': 'Imprimir o guardar en PDF',
   'outro.label': 'Créditos',
   'outro.title': 'Se apaga la lámpara. Mañana, más código.',
   'outro.body':

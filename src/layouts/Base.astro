@@ -18,9 +18,15 @@ interface Props {
   title?: string;
   description?: string;
   indexable?: boolean;
+  /** Root-relative URL of this same page in every locale; defaults to the home pages. */
+  alternates?: Record<Locale, string>;
+  colorScheme?: 'dark' | 'dark light';
+  pageType?: 'ProfilePage' | 'WebPage';
 }
 
-const { locale, indexable = true } = Astro.props;
+const { locale, indexable = true, colorScheme = 'dark', pageType = 'ProfilePage' } = Astro.props;
+const localizedPaths: Record<Locale, string> =
+  Astro.props.alternates ?? { es: localeUrl('es'), en: localeUrl('en') };
 const t = useTranslations(locale);
 const title = Astro.props.title ?? t('meta.title');
 const description = Astro.props.description ?? t('meta.description');
@@ -31,19 +37,37 @@ const themeColor = tokensCss.match(/--color-bg:\s*(#[0-9a-f]{3,8})/i)?.[1] ?? '#
 const site = Astro.site!;
 const absolute = (path: string) => new URL(path, site).href;
 const canonical = absolute(Astro.url.pathname.replace(/\/?$/, '/'));
-const alternates = LOCALES.map(l => ({
-  hreflang: LOCALE_TAGS[l].bcp47,
-  href: absolute(localeUrl(l))
-}));
-const xDefault = absolute(localeUrl(DEFAULT_LOCALE));
+/* Language-only hreflang: es-PE/en-US would leave Spanish speakers outside Peru and English speakers outside the US unmatched. */
+const alternates = LOCALES.map(l => ({ hreflang: l, href: absolute(localizedPaths[l]) }));
+const xDefault = absolute(localizedPaths[DEFAULT_LOCALE]);
+const siteHome = absolute(localeUrl(DEFAULT_LOCALE));
 const ogImage = absolute(withBase(t('meta.ogImage')));
 const homeUrl = absolute(localeUrl(locale));
 
-const personId = `${xDefault}#person`;
-const organizationId = `${xDefault}#organization`;
+const personId = `${siteHome}#person`;
+const organizationId = `${siteHome}#organization`;
+const websiteId = `${siteHome}#website`;
 const jsonLd = {
   '@context': 'https://schema.org',
   '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': websiteId,
+      url: siteHome,
+      name: SITE.name,
+      inLanguage: LOCALES,
+      publisher: { '@id': personId }
+    },
+    {
+      '@type': pageType,
+      '@id': `${canonical}#webpage`,
+      url: canonical,
+      name: title,
+      description,
+      inLanguage: locale,
+      isPartOf: { '@id': websiteId },
+      mainEntity: { '@id': personId }
+    },
     {
       '@type': 'Person',
       '@id': personId,
@@ -53,11 +77,19 @@ const jsonLd = {
       jobTitle: 'Backend Developer',
       email: `mailto:${SITE.email}`,
       address: { '@type': 'PostalAddress', addressLocality: 'Lima', addressCountry: 'PE' },
+      description: t('meta.description'),
       alumniOf: {
         '@type': 'CollegeOrUniversity',
-        name: 'Universidad Peruana de Ciencias Aplicadas (UPC)'
+        name: 'Universidad Peruana de Ciencias Aplicadas',
+        alternateName: 'UPC',
+        url: 'https://www.upc.edu.pe'
       },
-      worksFor: { '@type': 'Organization', name: 'Tata Consultancy Services' },
+      worksFor: {
+        '@type': 'Organization',
+        name: 'Tata Consultancy Services',
+        alternateName: 'TCS',
+        url: 'https://www.tcs.com'
+      },
       sameAs: [SITE.social.linkedin, SITE.social.github, SITE.social.x],
       knowsAbout: [
         'Java',
@@ -65,9 +97,11 @@ const jsonLd = {
         'Spring Boot',
         'Microservices',
         'PostgreSQL',
+        'REST APIs',
+        'Kafka',
         'Docker',
-        'Kubernetes',
-        'AWS'
+        'Azure Functions',
+        'Grafana'
       ]
     },
     {
@@ -75,6 +109,7 @@ const jsonLd = {
       '@id': organizationId,
       name: 'TUSOCIO IA',
       legalName: 'TUSOCIO IA S.A.C.',
+      foundingLocation: { '@type': 'Place', name: 'Lima, Perú' },
       founder: { '@id': personId },
       makesOffer: [
         { name: 'SkyMek', url: 'https://skymek.app' },
@@ -98,7 +133,7 @@ const jsonLd = {
     <meta name="description" content={description} />
     <meta name="author" content={SITE.name} />
     <meta name="theme-color" content={themeColor} />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content={colorScheme} />
     <link
       rel="preload"
       href={withBase('fonts/geist-latin-wght.woff2')}
@@ -129,6 +164,7 @@ const jsonLd = {
     </script>
     <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
     <link rel="manifest" href={withBase('manifest.json')} />
+    <link rel="sitemap" type="application/xml" href={withBase('sitemap-index.xml')} />
     {indexable ? (
       <>
         <link rel="canonical" href={canonical} />

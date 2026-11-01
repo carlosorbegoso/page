@@ -16,6 +16,12 @@ const SKY_FILL = '#dfe8f2';
 const GROUND_FILL = '#a08c72';
 /** Hemisphere gain by day: overcast light fills the whole room. */
 const DAY_FILL_GAIN = 14;
+/** Share of the window light (moon or sun, its wall spill, the shelf rake) a lowered blind holds back. */
+const BLIND_SHADE = 0.85;
+/** Share of the daylight fill that came through the window. */
+const BLIND_FILL_SHADE = 0.6;
+/** With the window covered the lamp reads brighter against the room. */
+const BLIND_LAMP_GAIN = 0.2;
 
 /** Lamp, monitor glow, moon (the sun by day), hemisphere fill and the shelf rake. */
 export class LightRig {
@@ -68,14 +74,16 @@ export class LightRig {
   }
 
   apply(level: LightLevels): void {
-    this.lamp.intensity = level.lamp * LIGHT_CALIBRATION.lamp;
+    const opening = 1 - BLIND_SHADE * level.blind;
+    this.lamp.intensity = level.lamp * LIGHT_CALIBRATION.lamp * (1 + BLIND_LAMP_GAIN * level.blind);
     this.monitorLight.intensity = level.monitor * LIGHT_CALIBRATION.monitor * (1 - 0.8 * level.day);
-    this.moon.intensity = level.moon * LIGHT_CALIBRATION.moon;
-    this.shelfLight.intensity = level.shelf * LIGHT_CALIBRATION.shelf;
+    this.moon.intensity = level.moon * LIGHT_CALIBRATION.moon * opening;
+    this.shelfLight.intensity = level.shelf * LIGHT_CALIBRATION.shelf * opening;
     this.moon.color.copy(this.moonNight).lerp(this.sunColor, level.day).lerp(this.moonDawn, level.dawn * 0.7);
     this.moon.position.copy(this.moonAt).lerp(this.sunAt, level.day);
     this.fill.color.copy(this.nightSky).lerp(this.daySky, level.day);
     this.fill.groundColor.copy(this.nightGround).lerp(this.dayGround, level.day);
-    this.fill.intensity = this.ambientIntensity * LIGHT_CALIBRATION.fill * (1 + level.dawn * 1.5 + level.day * DAY_FILL_GAIN);
+    const daylight = level.day * DAY_FILL_GAIN * (1 - BLIND_FILL_SHADE * level.blind);
+    this.fill.intensity = this.ambientIntensity * LIGHT_CALIBRATION.fill * (1 + level.dawn * 1.5 * opening + daylight);
   }
 }

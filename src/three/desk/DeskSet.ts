@@ -19,6 +19,7 @@ import { addContactShadows, buildRoomMeshes, type RoomMeshes } from './set/room'
 import { DeskScreens } from './set/screens';
 import { focusedFigure, shotObject, storyRank } from './set/story';
 import { DeskWeather } from './set/weather';
+import { RoomLife } from './room-life';
 
 const LIFE_TOYS: readonly string[] = ['alfa', 'skymek', 'parati', 'ventixs', 'mug'];
 /** Chapters where Alfa is on screen and its head follows the pointer. */
@@ -49,6 +50,7 @@ export class DeskSet implements ShotProvider {
   private clockWiring: ClockWiring | null = null;
   private framing!: DeskFraming;
   private life: DeskLife | null = null;
+  private roomLife: RoomLife | null = null;
   private triangles = 0;
   private chapter: ChapterId = 'intro';
   private subIndex = 0;
@@ -65,6 +67,10 @@ export class DeskSet implements ShotProvider {
     }
     if (detail?.action === 'folder' || detail?.action === 'folder-close') {
       this.onFolderAction(detail.action, detail.id);
+      return;
+    }
+    if (this.roomLife?.action(detail?.action)) {
+      this.context?.invalidate();
       return;
     }
     if (detail?.action !== 'lamp') return;
@@ -99,6 +105,9 @@ export class DeskSet implements ShotProvider {
     this.phoneMatrix = meshes.phoneMatrix;
     this.triangles = meshes.triangles;
     this.addLife(meshes, palette, high);
+    this.roomLife = new RoomLife(context, this.levels);
+    this.roomLife.build(this.room, { material: meshes.material, depthMaterial: meshes.depthMaterial, palette });
+    this.disposables.push(this.roomLife);
     this.addFolderDetail(meshes, palette, high);
     this.screens = new DeskScreens(this.room, this.phoneSurface(), this.disposables);
     this.weather.addWindow(this.room, this.disposables);
@@ -189,6 +198,7 @@ export class DeskSet implements ShotProvider {
   setHover(object: Object3D | null): void {
     const { name, changed } = this.pickSet.hover(object, this.uniforms);
     this.life?.setHover(name ?? null);
+    this.roomLife?.setHover(object ? (this.resolvePick(object)?.key.slice(5) ?? null) : null);
     if (changed) this.context?.invalidate();
   }
 
@@ -219,6 +229,8 @@ export class DeskSet implements ShotProvider {
     this.screens.update(this.levels.level);
     const hovering = this.pickSet.update(frame.step);
     settling ||= hovering;
+    const toys = this.roomLife?.update(frame) ?? false;
+    settling ||= toys;
     if (frame.motion) {
       this.weather.setTime(time);
       settling = true;
@@ -274,6 +286,7 @@ export class DeskSet implements ShotProvider {
   private applyLevels(): void {
     const level = this.levels.level;
     this.lights.apply(level);
+    this.roomLife?.apply(level);
     this.screens.apply(level);
     this.weather.apply(level, this.chapter, this.life, this.context.renderer.domElement.height, this.framing.viewport().fov);
     this.figures.apply(this.uniforms, level, this.life);

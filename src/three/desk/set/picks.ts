@@ -3,7 +3,8 @@ import type { StationPick } from '../../contracts';
 import { tokenColor } from '../../tokens';
 import { OBJECT_ID } from '../builder';
 import { CLOCK_POSITION } from '../clock';
-import { FIGURE_HEIGHT, FIGURES, FOLDERS, LAMP, MUG, OPEN_FOLDER, PRODUCT_FIGURES, folderCentre, type FigureId } from '../layout';
+import { LAMP_SWITCH } from '../lamp';
+import { FIGURE_HEIGHT, FIGURES, FOLDERS, GLASS_Z, LAMP, MUG, OPEN_FOLDER, PLANT, PRODUCT_FIGURES, WINDOW, folderCentre, type FigureId } from '../layout';
 import { createPickMaterial, type AtlasUniforms } from '../materials';
 import { damp } from '../math';
 import { EXPERIENCE_ORDER, type SurfaceFrame } from '../shots';
@@ -19,7 +20,9 @@ const LABELS: Record<string, { es: string; en: string }> = {
   baufest: { es: 'Baufest · Experiencia', en: 'Baufest · Experience' },
   sysarp: { es: 'SYSARP · Experiencia', en: 'SYSARP · Experience' },
   phone: { es: 'Teléfono · Contacto', en: 'Phone · Contact' },
-  lamp: { es: 'Lámpara · clic para apagarla o encenderla', en: 'Lamp · click to switch it' },
+  lamp: { es: 'Lámpara', en: 'Lamp' },
+  window: { es: 'Ventana', en: 'Window' },
+  plant: { es: 'Planta', en: 'Plant' },
   mug: { es: 'Taza de café', en: 'Coffee mug' },
   clock: { es: 'Reloj · clic para que suene', en: 'Clock · click to ring it' }
 };
@@ -80,9 +83,25 @@ export class DeskPicks {
     });
     const lampHead = LAMP.head.clone().addScaledVector(LAMP.aim.clone().sub(LAMP.head).normalize(), 0.06);
     this.picks.push({ object3D: proxy('lamp', [0.16, 0.12, 0.16], lampHead), key: 'desk:lamp', label: LABELS.lamp!, target: '#company', action: 'lamp' });
+    this.picks.push({ object3D: proxy('lampSwitch', [0.045, 0.03, 0.045], LAMP_SWITCH), key: 'desk:lamp', label: LABELS.lamp!, target: '#company', action: 'lamp' });
+    this.addRoomToys(proxy);
     this.picks.push({ object3D: proxy('phone', [0.08, 0.16, 0.03], phone.centre, phone.quaternion), key: 'desk:phone', label: LABELS.phone!, target: '#contact' });
     this.picks.push({ object3D: proxy('mug', [0.1, 0.1, 0.09], MUG.clone().add(new Vector3(0.01, 0.05, 0))), key: 'desk:mug', label: LABELS.mug!, target: '#contact' });
     this.picks.push({ object3D: proxy('clock', [0.12, 0.14, 0.08], CLOCK_POSITION.clone().add(new Vector3(0, 0.07, 0))), key: 'desk:clock', label: LABELS.clock!, target: '#hero' });
+  }
+
+  /** The window (its panes clear of the monitor) lowers the blind; the plant rustles. Neither moves the camera. */
+  private addRoomToys(proxy: (key: string, size: [number, number, number], position: Vector3) => Mesh): void {
+    const left = WINDOW.x - WINDOW.width / 2;
+    const right = WINDOW.x + WINDOW.width / 2;
+    const top = WINDOW.y + WINDOW.height / 2;
+    const clear = 0.3;
+    const z = GLASS_Z + 0.06;
+    const pane = proxy('window', [right - clear, WINDOW.height, 0.02], new Vector3((clear + right) / 2, WINDOW.y, z));
+    const lintel = proxy('windowTop', [clear - left, 0.3, 0.02], new Vector3((left + clear) / 2, top - 0.15, z));
+    for (const object3D of [pane, lintel]) this.picks.push({ object3D, key: 'desk:window', label: LABELS.window!, target: '#hero', action: 'blind' });
+    const plant = proxy('plant', [0.24, 0.3, 0.2], PLANT.clone().add(new Vector3(0, 0.2, 0)));
+    this.picks.push({ object3D: plant, key: 'desk:plant', label: LABELS.plant!, target: '#hero', action: 'plant' });
   }
 
   /** Finds the pick an object belongs to (walking up the parents). */

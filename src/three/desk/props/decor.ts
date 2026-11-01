@@ -36,6 +36,10 @@ function leaf(length: number, width: number, curl: number, q: Quality): BufferGe
   return doubleSided(geometry);
 }
 
+/** Soil centre: the pivot the foliage sways about. */
+export const PLANT_PIVOT = PLANT.clone().add(new Vector3(0, 0.106, 0));
+
+/** Terracotta pot and soil (static); the foliage is `buildPlantLeaves`. */
 export function buildPlant(b: PartBuilder, p: Palette, q: Quality): void {
   const pot = PLANT.clone();
   const profile = [
@@ -51,13 +55,18 @@ export function buildPlant(b: PartBuilder, p: Palette, q: Quality): void {
   ].map(([x, y]) => new Vector2(x!, y!));
   b.add(new LatheGeometry(profile, seg(28, q, 10)), p.pot, { position: pot.toArray() });
   b.add(new CircleGeometry(0.052, seg(20, q, 8)), p.soil, { position: [pot.x, pot.y + 0.108, pot.z], rotation: [-Math.PI / 2, 0, 0] });
+}
+
+/** Stems and leaf blades relative to `PLANT_PIVOT`, dealt round-robin into `builders` so each clump can sway on its own. */
+export function buildPlantLeaves(builders: readonly PartBuilder[], p: Palette, q: Quality): void {
   const random = seeded(11);
   const leaves = Math.round(6 + 2 * q);
   for (let i = 0; i < leaves; i++) {
+    const b = builders[i % builders.length]!;
     const angle = (i / leaves) * Math.PI * 2 + random() * 0.5;
     const height = 0.1 + random() * 0.16;
     const lean = 0.25 + random() * 0.3;
-    const stemBase = pot.clone().add(new Vector3(Math.cos(angle) * 0.012, 0.106, Math.sin(angle) * 0.012));
+    const stemBase = new Vector3(Math.cos(angle) * 0.012, 0, Math.sin(angle) * 0.012);
     const outward = new Vector3(Math.cos(angle), 0, Math.sin(angle));
     const stemTop = stemBase.clone().add(new Vector3(0, height, 0)).addScaledVector(outward, height * lean);
     rod(b, stemBase, stemTop, 0.002, shade(p.plant, 0.8), q * 0.5);

@@ -89,6 +89,9 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 ## Escena 3D
 | Para cambiar… | Edita |
 | --- | --- |
+| Cargador previo a three (progreso, filamento, haz de sol, línea de arranque) | `src/components/three/stage-loader/loader.ts` (`stage-loader.ts` solo reexporta) |
+| Cargador: dibujo de día, de noche y línea del monitor | `src/components/three/stage-loader/scene.ts`, primitivas en `paint.ts` |
+| Cargador: marcas del póster, ritmo del progreso, texto de estado | `src/components/three/stage-loader/frame.ts`, `progress.ts`, `status.ts` |
 | Arranque del Stage y cableado de piezas (ensamblador) | `src/three/Stage.ts` |
 | Bucle de render a demanda, ventana de inactividad, DPR adaptativo | `src/three/stage/frame-loop.ts` |
 | Placas, scroll ↔ capítulo, intro que retiene el capítulo | `src/three/stage/chapters.ts`, `stage/plates-mount.ts` |
@@ -102,7 +105,15 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Hover y clic sobre objetos 3D (raycast, cursor, `desk:interact`) | `src/three/interaction/index.ts`, `interaction/picker.ts`, `interaction/events.ts` |
 | Enter sobre el panel de experiencia saca la carpeta | `src/three/interaction/folder-keys.ts` |
 | Tier de calidad por dispositivo | `src/three/tier.ts` |
-| Posición de cámara por capítulo | `src/three/desk/shots.ts` |
+| Encuadres por capítulo (ensamblado, caché por viewport) | `src/three/desk/shots/framings.ts` (`desk/shots.ts` solo reexporta) |
+| Cámara de hero, about, contacto y cierre; planos de teléfono vertical | `src/three/desk/shots/monitor-shots.ts` |
+| Cámara de empresa y productos (rumbo, inclinación, distancia) | `src/three/desk/shots/figure-shots.ts` |
+| Cámara del estante y las carpetas | `src/three/desk/shots/experience-shots.ts` |
+| Encuadre vertical: protagonistas enteros, vecinos fuera, retoques | `src/three/desk/shots/portrait-fit.ts`, puntos en `protagonists.ts` |
+| Mezcla por aspecto, ajuste por ancho o alto | `src/three/desk/shots/math.ts`; zona libre bajo el HUD en `context.ts` |
+| Proyección, `toShot`, ancla de panel | `src/three/desk/shots/projection.ts` |
+| Orden de experiencia, sub-planos, límites entre planos | `src/three/desk/shots/story.ts`, comprobación en `check.ts` |
+| Marco del vidrio del monitor y del teléfono | `src/three/desk/shots/surfaces.ts` |
 | Montaje del escritorio y orden de `update` (ensamblador) | `src/three/desk/DeskSet.ts` |
 | Luz por capítulo, día y noche, encendido de la intro, clic en la lámpara, persiana bajada | `src/three/desk/set/levels.ts` |
 | Bombilla de la lámpara (difusor, halo, luz cálida cercana) e interruptor de la base | `src/three/desk/lamp/bulb.ts`, `src/three/desk/lamp/switch.ts` |

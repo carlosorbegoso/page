@@ -1,5 +1,4 @@
 import { CanvasTexture, Matrix4, Mesh, MeshStandardMaterial, PlaneGeometry, SRGBColorSpace, Vector3 } from 'three';
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { FOLDER, FOLDERS, folderCentre, type FolderId } from './layout';
 
 /** What an archive box says on its paper label: the company and its years, read bottom to top. */
@@ -37,11 +36,12 @@ function drawLabels(canvas: HTMLCanvasElement): void {
 }
 
 export interface SpineLabels {
-  mesh: Mesh;
+  /** One mesh per folder so a label slides out with its box. */
+  meshes: Map<FolderId, Mesh>;
   dispose(): void;
 }
 
-/** One draw call: printed text over the paper labels of the four folders. */
+/** Printed text over the paper labels of the four folders, sharing one texture. */
 export function createSpineLabels(): SpineLabels {
   const canvas = document.createElement('canvas');
   canvas.width = WIDTH;
@@ -55,25 +55,24 @@ export function createSpineLabels(): SpineLabels {
     texture.needsUpdate = true;
   });
   const textUp = new Matrix4().makeBasis(new Vector3(0, 1, 0), new Vector3(0, 0, 1), new Vector3(1, 0, 0));
-  const parts = FOLDERS.map((id, row) => {
+  const material = new MeshStandardMaterial({ map: texture, transparent: true, roughness: 0.85, metalness: 0, depthWrite: false });
+  const meshes = new Map<FolderId, Mesh>();
+  FOLDERS.forEach((id, row) => {
     const plane = new PlaneGeometry(SPINE_LABEL.length, SPINE_LABEL.width);
     const uv = plane.getAttribute('uv');
     for (let i = 0; i < uv.count; i++) uv.setY(i, 1 - (row + 1 - uv.getY(i)) / FOLDERS.length);
     const centre = folderCentre(id);
     const at = new Vector3(centre.x + FOLDER.depth / 2 + 0.0032, centre.y + SPINE_LABEL.lift, centre.z);
     plane.applyMatrix4(new Matrix4().copy(textUp).setPosition(at));
-    return plane;
+    const mesh = new Mesh(plane, material);
+    mesh.name = `desk-spine-label-${id}`;
+    mesh.raycast = () => undefined;
+    meshes.set(id, mesh);
   });
-  const geometry = mergeGeometries(parts, false)!;
-  for (const part of parts) part.dispose();
-  const material = new MeshStandardMaterial({ map: texture, transparent: true, roughness: 0.85, metalness: 0, depthWrite: false });
-  const mesh = new Mesh(geometry, material);
-  mesh.name = 'desk-spine-labels';
-  mesh.raycast = () => undefined;
   return {
-    mesh,
+    meshes,
     dispose: () => {
-      geometry.dispose();
+      for (const mesh of meshes.values()) mesh.geometry.dispose();
       material.dispose();
       texture.dispose();
     }

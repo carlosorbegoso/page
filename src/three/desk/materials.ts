@@ -38,12 +38,15 @@ export interface AtlasUniforms {
   uGlow: { value: number[] };
   /** 1 lit and in colour … 0 dim and grey: a figure waits in the dark until the story introduces it. */
   uPresence: { value: number[] };
+  /** Metres an object slides out along +X (a folder pulled off the shelf). */
+  uPull: { value: number[] };
 }
 
 const VERTEX_DECLARATIONS = /* glsl */ `
 uniform vec3 uFigPivot[${FIGURE_SLOTS}];
 uniform float uFigLift[${FIGURE_SLOTS}];
 uniform float uFigYaw[${FIGURE_SLOTS}];
+uniform float uPull[${OBJECT_SLOTS}];
 attribute vec4 pbr;
 attribute float oid;
 varying vec4 vPbr;
@@ -65,6 +68,7 @@ if (figure >= 0 && figure < ${FIGURE_SLOTS}) {
   vec3 q = transformed - pivot;
   transformed = vec3(yawC * q.x + yawS * q.z, q.y, -yawS * q.x + yawC * q.z) + pivot + vec3(0.0, uFigLift[figure], 0.0);
 }
+transformed.x += uPull[clamp(int(oid + 0.5), 0, ${OBJECT_SLOTS - 1})];
 `;
 
 const FRAGMENT_DECLARATIONS = /* glsl */ `
@@ -131,7 +135,8 @@ export function createAtlasMaterial(
     uFigYaw: { value: new Array<number>(FIGURE_SLOTS).fill(0) },
     uSignal: { value: new Array<number>(OBJECT_SLOTS).fill(1) },
     uGlow: { value: new Array<number>(OBJECT_SLOTS).fill(0) },
-    uPresence: { value: new Array<number>(OBJECT_SLOTS).fill(1) }
+    uPresence: { value: new Array<number>(OBJECT_SLOTS).fill(1) },
+    uPull: { value: new Array<number>(OBJECT_SLOTS).fill(0) }
   };
   material.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, {
@@ -144,6 +149,7 @@ export function createAtlasMaterial(
       uSignal: uniforms.uSignal,
       uGlow: uniforms.uGlow,
       uPresence: uniforms.uPresence,
+      uPull: uniforms.uPull,
       uRoomBounds: { value: roomBounds },
       uDeskBounds: { value: deskBounds },
       uDeskTop: { value: deskTop }
@@ -183,7 +189,7 @@ export function createAtlasMaterial(
         totalEmissiveRadiance += uHoverColor * hovered * uHoverMix * (0.05 + 0.6 * rim);`
       );
   };
-  material.customProgramCacheKey = () => 'desk-atlas-v3';
+  material.customProgramCacheKey = () => 'desk-atlas-v4';
   return { material, uniforms };
 }
 
@@ -194,7 +200,7 @@ export function createAtlasMaterial(
 export function createAtlasDepthMaterial(uniforms: AtlasUniforms): MeshDepthMaterial {
   const material = new MeshDepthMaterial({ depthPacking: RGBADepthPacking });
   material.onBeforeCompile = shader => {
-    Object.assign(shader.uniforms, { uFigPivot: uniforms.uFigPivot, uFigLift: uniforms.uFigLift, uFigYaw: uniforms.uFigYaw });
+    Object.assign(shader.uniforms, { uFigPivot: uniforms.uFigPivot, uFigLift: uniforms.uFigLift, uFigYaw: uniforms.uFigYaw, uPull: uniforms.uPull });
     shader.vertexShader = shader.vertexShader
       .replace(
         '#include <common>',
@@ -202,11 +208,12 @@ export function createAtlasDepthMaterial(uniforms: AtlasUniforms): MeshDepthMate
 uniform vec3 uFigPivot[${FIGURE_SLOTS}];
 uniform float uFigLift[${FIGURE_SLOTS}];
 uniform float uFigYaw[${FIGURE_SLOTS}];
+uniform float uPull[${OBJECT_SLOTS}];
 attribute float oid;`
       )
       .replace('#include <begin_vertex>', `#include <begin_vertex>\n${FIGURE_YAW}\n${FIGURE_TRANSFORM}`);
   };
-  material.customProgramCacheKey = () => 'desk-atlas-depth-v1';
+  material.customProgramCacheKey = () => 'desk-atlas-depth-v2';
   return material;
 }
 

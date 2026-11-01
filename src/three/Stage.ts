@@ -269,6 +269,10 @@ export class Stage {
   }
 
   private navigate(pick: StationPick): void {
+    if (pick.action) {
+      window.dispatchEvent(new CustomEvent('desk:action', { detail: { action: pick.action } }));
+      return;
+    }
     const chapter = pick.target.replace('#', '') as ChapterId;
     const sub = pick.sub ?? (pick.product ? ['skymek', 'parati', 'ventixs'].indexOf(pick.product) : 0);
     if (SECTION_CHAPTERS.includes(chapter)) this.scrollToChapter(chapter, Math.max(0, sub));

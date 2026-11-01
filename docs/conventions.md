@@ -21,5 +21,6 @@ Reglas de organización, trampas conocidas y verificación de cada cambio; léel
 
 ## Verificación de cada cambio
 - `bun run check`, `bun run lint` y `bun run build`.
+- El deploy (`.github/workflows/deploy.yml`, push a `main`) corre los tres en el mismo job: si `check` o `lint` fallan, no se publica.
 - Tamaño gzip de lo que se descarga antes del primer frame del 3D (≤ 260 KB, ver `docs/requirements.md`).
 - Capturas de hero, about, experience, company, products, contact y outro a 1440 y 375 px, de día y de noche.

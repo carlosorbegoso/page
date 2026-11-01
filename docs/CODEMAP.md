@@ -1,6 +1,6 @@
 # Mapa del código
 
-Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máximo y un solo tema (ver `docs/PLAN-arquitectura.md`). Las secciones marcadas con *(pendiente)* todavía no se han partido.
+Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máximo y un solo tema (ver `docs/PLAN-arquitectura.md`).
 
 ## Página y layout
 | Para cambiar… | Edita |

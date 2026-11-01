@@ -21,10 +21,10 @@ interface PlateEntry {
   object?: CSS3DObject;
   anchorName?: string;
   side?: 'left' | 'right';
-  /** Border-box size of an anchored wrapper, kept by a ResizeObserver so placement never reads layout. */
+  /** Natural border-box size of an anchored plate, kept by a ResizeObserver so placement never reads layout. */
   size?: { width: number; height: number };
   /** Last values written, so a settled frame touches no style. */
-  written: { opacity?: string; pointer?: string; transform?: string; surface?: string };
+  written: { opacity?: string; pointer?: string; transform?: string; surface?: string; clip?: string };
 }
 
 export interface PlateHost {
@@ -46,6 +46,9 @@ const SAFE_Y = 24;
 /** Clear of the HUD row and the top letterbox bar: a panel never starts under the story clock. */
 const SAFE_TOP_MIN = 84;
 const SAFE_TOP_SHARE = 0.11;
+/** Touch HUD: tap-sized row at max(0.5rem, safe-area-inset-top), plus a breathing gap below it. */
+const HUD_TOP_TOUCH = 8;
+const HUD_CLEARANCE_TOUCH = 62;
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
 
@@ -73,8 +76,9 @@ export class Plates {
   private width = 1;
   private height = 1;
   private safeBottom = 0;
+  private safeTop = 0;
   private readonly sizes = new ResizeObserver(records => this.resized(records));
-  private readonly byWrapper = new Map<Element, PlateEntry>();
+  private readonly byPlate = new Map<Element, PlateEntry>();
   private readonly onFocusIn = (event: FocusEvent) => this.focusIn(event);
   private readonly onKeyDown = (event: KeyboardEvent) => this.tabInStoryOrder(event);
 
@@ -82,7 +86,7 @@ export class Plates {
 
   /** Moves every moded plate into its layer. Returns false when the page has none. */
   mount(): boolean {
-    this.safeBottom = this.measureSafeBottom();
+    this.measureSafeArea();
     const surfaceRoot = this.css3d.domElement;
     surfaceRoot.classList.add('stage-surfaces');
     surfaceRoot.dataset.stageSurfaces = '';
@@ -119,8 +123,9 @@ export class Plates {
           const side = el.dataset.plateSide;
           entry.side = side === 'left' || side === 'right' ? side : undefined;
           this.panels.append(wrapper);
-          this.byWrapper.set(wrapper, entry);
-          this.sizes.observe(wrapper);
+          this.byPlate.set(el, entry);
+          this.sizes.observe(el);
+          wrapper.addEventListener('scroll', () => this.markScrollEdge(wrapper), { passive: true });
         } else {
           wrapper.className = 'stage-surfaces__plate';
           entry.object = new CSS3DObject(wrapper);
@@ -148,7 +153,7 @@ export class Plates {
   /** Puts every plate back where it was (degradation to the static page). */
   unmount(): void {
     this.sizes.disconnect();
-    this.byWrapper.clear();
+    this.byPlate.clear();
     for (const { plate, parent, next } of [...this.origins].reverse()) {
       plate.removeAttribute('data-active');
       plate.removeAttribute('data-dormant');
@@ -179,27 +184,28 @@ export class Plates {
     const first = this.width === 1 && this.height === 1;
     this.width = width;
     this.height = height;
-    if (!first) this.safeBottom = this.measureSafeBottom();
+    if (!first) this.measureSafeArea();
     this.css3d.setSize(width, height);
   }
 
   private resized(records: ResizeObserverEntry[]): void {
     for (const record of records) {
-      const entry = this.byWrapper.get(record.target);
+      const entry = this.byPlate.get(record.target);
       if (!entry) continue;
       const box = record.borderBoxSize?.[0];
       entry.size = box
         ? { width: Math.round(box.inlineSize), height: Math.round(box.blockSize) }
-        : { width: entry.wrapper.offsetWidth, height: entry.wrapper.offsetHeight };
+        : { width: entry.el.offsetWidth, height: entry.el.offsetHeight };
     }
     this.host.invalidate();
   }
 
   /** Visibility, flags and placement for the current chapter state. */
-  update(camera: PerspectiveCamera, state: ChapterState, progress: number): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Stage still passes the chapter progress; panels no longer scroll with it.
+  update(camera: PerspectiveCamera, state: ChapterState, _progress?: number): void {
     const currentIndex = SECTION_CHAPTERS.indexOf(state.id);
     for (const entry of this.entries) {
-      if (entry.mode === 'anchored' && !entry.size) entry.size = { width: entry.wrapper.offsetWidth, height: entry.wrapper.offsetHeight };
+      if (entry.mode === 'anchored' && !entry.size) entry.size = { width: entry.el.offsetWidth, height: entry.el.offsetHeight };
     }
     for (const entry of this.entries) {
       const current = entry.chapter === state.id && (entry.sub === null || entry.sub === state.subIndex);
@@ -212,7 +218,7 @@ export class Plates {
       if (written.opacity !== opacity) entry.wrapper.style.opacity = written.opacity = opacity;
       const pointer = active ? 'auto' : 'none';
       if (written.pointer !== pointer) entry.wrapper.style.pointerEvents = written.pointer = pointer;
-      if (entry.mode === 'anchored') this.placePanel(entry, camera, current, progress);
+      if (entry.mode === 'anchored') this.placePanel(entry, camera, current);
       else this.placeSurface(entry, camera);
     }
   }
@@ -243,7 +249,7 @@ export class Plates {
     }
   }
 
-  private placePanel(entry: PlateEntry, camera: PerspectiveCamera, current: boolean, progress: number): void {
+  private placePanel(entry: PlateEntry, camera: PerspectiveCamera, current: boolean): void {
     if (!current) return;
     const world = entry.anchorName ? this.host.anchor(entry.anchorName) : null;
     const width = entry.size?.width || 480;
@@ -253,36 +259,70 @@ export class Plates {
     const projected = world ? world.clone().project(camera) : null;
     const ax = projected ? ((projected.x + 1) / 2) * this.width : this.width / 2;
     const ay = projected ? ((1 - projected.y) / 2) * this.height : this.height / 2;
-    if (layoutKind(this.width) === 'desktop') {
+    const desktop = layoutKind(this.width) === 'desktop';
+    const top = desktop
+      ? Math.max(SAFE_TOP_MIN, this.height * SAFE_TOP_SHARE)
+      : Math.max(HUD_TOP_TOUCH, this.safeTop) + HUD_CLEARANCE_TOUCH;
+    const bottom = desktop
+      ? this.height - Math.max(SAFE_Y * 2, this.height * 0.06, SAFE_Y + this.safeBottom)
+      : this.height - SAFE_Y - this.safeBottom;
+    const room = Math.max(bottom - top, 0);
+    const shown = Math.min(height, room);
+    const overflow = height - shown;
+    if (desktop) {
       const side = entry.side ?? (ax > this.width / 2 ? 'left' : 'right');
       x = side === 'left' ? ax - PANEL_GAP - width : ax + PANEL_GAP;
-      y = ay - height / 2;
       x = Math.min(Math.max(x, SAFE_LEFT), this.width - SAFE_RIGHT - width);
-      const safeTop = Math.max(SAFE_TOP_MIN, this.height * SAFE_TOP_SHARE);
-      const safeBottom = Math.max(SAFE_Y * 2, this.height * 0.06);
-      const overflow = Math.max(height - (this.height - safeTop - safeBottom), 0);
-      y = Math.min(Math.max(y, safeTop), this.height - safeBottom - height + overflow) - overflow * progress;
+      y = Math.min(Math.max(ay - height / 2, top), bottom - shown);
     } else {
       x = (this.width - width) / 2;
-      const bottom = this.height - SAFE_Y - this.safeBottom;
       const preferred = Math.max(ay + this.height * 0.1, this.height * 0.42);
-      const lifted = Math.min(preferred, bottom - height);
-      const top = Math.max(lifted, SAFE_Y);
-      const overflow = Math.max(top + height - bottom, 0);
-      y = top - overflow * progress;
+      y = Math.max(Math.min(preferred, bottom - shown), top);
     }
-    const transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`;
+    const inset = overflow > 0 ? Math.round(x) : 0;
+    const transform = `translate3d(${Math.round(x) - inset}px, ${Math.round(y)}px, 0)`;
     if (entry.written.transform !== transform) entry.wrapper.style.transform = entry.written.transform = transform;
+    this.clipPanel(entry, overflow > 0 ? Math.floor(shown) : 0, inset);
   }
 
-  /** `env(safe-area-inset-bottom)` in px (home indicator on iOS), resolved by style alone: no layout pass. */
-  private measureSafeBottom(): number {
+  /**
+   * A panel taller than the room between the HUD and the bottom edge is clipped to that room and
+   * scrolls inside it (the page snaps from shot to shot, so page scroll can never reveal it), so it
+   * never slides under the HUD. The clipped wrapper spans the full width (plate kept in place by
+   * `inset`) so the side edges of the text pool are not cut.
+   */
+  private clipPanel(entry: PlateEntry, maxHeight: number, inset: number): void {
+    const { wrapper, written } = entry;
+    const clip = maxHeight ? `${maxHeight}px ${inset}px` : '';
+    if (written.clip !== clip) {
+      written.clip = clip;
+      Object.assign(wrapper.style, {
+        maxHeight: maxHeight ? `${maxHeight}px` : '',
+        width: maxHeight ? `${this.width}px` : 'var(--plate-width)',
+        paddingLeft: maxHeight ? `${inset}px` : ''
+      });
+      if (clip) this.markScrollEdge(wrapper);
+      else delete wrapper.dataset.plateOverflow;
+    }
+  }
+
+  private markScrollEdge(wrapper: HTMLElement): void {
+    if (!wrapper.style.maxHeight) return;
+    const end = wrapper.scrollHeight - wrapper.clientHeight;
+    const edge = wrapper.scrollTop <= 1 ? 'start' : wrapper.scrollTop >= end - 1 ? 'end' : 'middle';
+    if (wrapper.dataset.plateOverflow !== edge) wrapper.dataset.plateOverflow = edge;
+  }
+
+  /** `env(safe-area-inset-top/bottom)` in px (notch, home indicator on iOS), resolved by style alone: no layout pass. */
+  private measureSafeArea(): void {
     const probe = document.createElement('div');
-    probe.style.cssText = 'position:fixed;bottom:0;padding-bottom:env(safe-area-inset-bottom, 0px);visibility:hidden;pointer-events:none';
+    probe.style.cssText =
+      'position:fixed;top:0;padding-top:env(safe-area-inset-top, 0px);padding-bottom:env(safe-area-inset-bottom, 0px);visibility:hidden;pointer-events:none';
     document.body.append(probe);
-    const value = Number.parseFloat(getComputedStyle(probe).paddingBottom) || 0;
+    const style = getComputedStyle(probe);
+    this.safeTop = Number.parseFloat(style.paddingTop) || 0;
+    this.safeBottom = Number.parseFloat(style.paddingBottom) || 0;
     probe.remove();
-    return value;
   }
 
   /**

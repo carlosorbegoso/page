@@ -785,7 +785,8 @@ export class DeskSet implements ShotProvider {
     const detail = this.folderDetail;
     if (detail) {
       if (detail.active && detail.active !== folder) detail.close();
-      settling ||= detail.update(dt, motion);
+      const moving = detail.update(dt, motion);
+      settling ||= moving;
       const pose = detail.poseKey();
       if (pose !== this.detailShadowPose) {
         this.detailShadowPose = pose;

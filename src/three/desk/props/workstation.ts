@@ -16,7 +16,7 @@ import {
 } from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { doubleSided, OBJECT_ID, PartBuilder, type Finish, type Placement } from '../builder';
-import { DESK, KEYBOARD, LAMP, LAPTOP, MONITOR, MUG, OPEN_FOLDER, PHONE } from '../layout';
+import { DESK, KEYBOARD, LAMP, LAPTOP, MONITOR, MUG, PHONE } from '../layout';
 import { along, rod, seg, shade, UP } from './geometry';
 import type { Palette, Quality } from './palette';
 
@@ -217,25 +217,6 @@ function buildLaptopCable(b: PartBuilder, laptop: Matrix4, finish: Finish): void
   b.add(new RoundedBoxGeometry(0.013, 0.0042, 0.0085, 1, 0.0015), plug, new Matrix4().multiplyMatrices(laptop, new Matrix4().makeTranslation(width / 2 + 0.0055, portY, portZ)));
   const monitorPlug = new Matrix4().compose(nearMonitor(0, 0.0815, 0.085), new Quaternion().setFromAxisAngle(UP, yaw), new Vector3(1, 1, 1));
   b.add(new RoundedBoxGeometry(0.0085, 0.0042, 0.013, 1, 0.0015), plug, monitorPlug);
-}
-
-/** Open TCS folder (linen boards, a few sheets) left of the keyboard. */
-export function buildOpenFolder(b: PartBuilder, p: Palette): void {
-  const { centre, width, depth, yaw } = OPEN_FOLDER;
-  const frame = new Matrix4().compose(centre, new Quaternion().setFromAxisAngle(UP, yaw), new Vector3(1, 1, 1));
-  const at = (x: number, y: number, z: number, rz = 0) =>
-    new Matrix4().multiplyMatrices(frame, new Matrix4().compose(new Vector3(x, y, z), new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), rz), new Vector3(1, 1, 1)));
-  const half = width / 2;
-  const id = OBJECT_ID.openFolder;
-  b.add(new RoundedBoxGeometry(half - 0.004, 0.004, depth, 1, 0.0015), p.folders.tcs, at(-half / 2, 0.002, 0, 0.02), OBJECT_ID.openFolderCover);
-  b.add(new RoundedBoxGeometry(half - 0.004, 0.004, depth, 1, 0.0015), p.folders.tcs, at(half / 2, 0.002, 0, -0.02), id);
-  b.add(new BoxGeometry(0.012, 0.006, depth), shade(p.folders.tcs, 0.7), at(0, 0.003, 0), id);
-  b.add(new BoxGeometry(half - 0.03, 0.002, depth - 0.03), p.paper, at(half / 2, 0.006, 0, -0.02), id);
-  b.add(new BoxGeometry(half - 0.034, 0.002, depth - 0.036), shade(p.paper, 0.93), at(half / 2 + 0.004, 0.0075, 0.004, -0.02), id);
-  for (let line = 0; line < 7; line++) {
-    b.add(new BoxGeometry(0.11 + (line % 3) * 0.02, 0.0004, 0.004), shade(p.bookDark, 0.8), at(half / 2 - 0.02, 0.0086, -0.09 + line * 0.022), id);
-  }
-  b.add(new BoxGeometry(half - 0.04, 0.002, depth - 0.04), shade(p.paper, 0.85), at(-half / 2, 0.005, 0, 0.02), OBJECT_ID.openFolderCover);
 }
 
 /** Phone on a small walnut stand; the glass itself is a separate mesh (the `phone` surface). */

@@ -15,6 +15,7 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Placas: márgenes del HUD y `safe-area-inset` | `src/three/plates/safe-area.ts` |
 | Placas: panel más alto que la pantalla (recorte y scroll interno) | `src/three/plates/overflow.ts` |
 | Placas: orden de Tab por capítulos | `src/three/plates/tab-order.ts` |
+| Escritorio Mac del monitor: barra de menús en todas sus pantallas, ventana con los tres botones y fondo en hero y outro (pisa el `::after` de `motion/kinetic.css` y `plates/finish.css` en esos dos) | `src/styles/plates/monitor-chrome.css` |
 
 ## Tokens de diseño
 | Para cambiar… | Edita |

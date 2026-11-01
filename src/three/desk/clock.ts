@@ -1,6 +1,7 @@
 import { Group, Quaternion, Vector3, type Mesh, type MeshStandardMaterial, type Object3D } from 'three';
 import { acquireGltf, release } from '../assets';
 import type { ChapterId } from '../contracts';
+import { createClockParts, type ClockParts } from './clock/parts';
 import { DESK, HERO_EYE } from './layout';
 
 /** CC0 "Alarm Clock 01" from Poly Haven (public/models/alarm-clock/CREDITS.txt). */
@@ -10,6 +11,12 @@ const DIAL_GLOW = 0.22;
 /** Back right, between the monitor and the lamp: in the wide shots, below the frame in the close ones. */
 export const CLOCK_POSITION = new Vector3(0.57, DESK.top, -0.41);
 const CLOCK_SCALE = 0.8;
+/** Window event that rings the alarm (dispatched when the clock is clicked). */
+export const CLOCK_RING_EVENT = 'desk:clock';
+const RING_SECONDS = 1.2;
+/** The winding crown turns about one revolution every half minute. */
+const CROWN_SPEED = 0.21;
+const SECOND_STEP = Math.PI / 30;
 
 /** The story clock, in minutes after 22:00, per chapter and sub-shot (matches the HUD beats). */
 const STORY_MINUTES: Record<ChapterId, number[]> = {
@@ -54,10 +61,30 @@ export class StoryClock {
   private hands: Hand[] = [];
   private faceNormal = new Vector3(1, 0, 0);
   private disposed = false;
+  private readonly body = new Group();
+  private parts: ClockParts | null = null;
+  private secondHand: { node: Object3D; rest: Quaternion; restDirection: Vector3 } | null = null;
+  private secondShown = Number.NaN;
+  private ringRequested = false;
+  private ringStart = -1;
+  private nudgeFrames = 0;
+  private readonly turn = new Quaternion();
+  private readonly target = new Vector3();
+  private readonly onRing = () => {
+    this.ringRequested = true;
+    this.wake?.();
+  };
 
   /** `prepare` compiles the model's shaders before it joins the scene (no first-frame link stall). */
-  constructor(onReady: () => void, prepare?: (model: Object3D) => Promise<void>) {
+  /** `wake` asks the on-demand loop for a frame when the alarm is rung while nothing else animates. */
+  constructor(
+    onReady: () => void,
+    prepare?: (model: Object3D) => Promise<void>,
+    private readonly wake?: () => void
+  ) {
     this.group.name = 'desk-clock';
+    this.group.add(this.body);
+    window.addEventListener(CLOCK_RING_EVENT, this.onRing);
     this.group.position.copy(CLOCK_POSITION);
     this.group.scale.setScalar(CLOCK_SCALE);
     acquireGltf(URL)
@@ -74,6 +101,12 @@ export class StoryClock {
           return { node, rest: node.quaternion.clone(), restDirection, turnsPerHour };
         };
         this.hands = [handOf('houd_hand', 1 / 12), handOf('minute_hand', 1)].filter((hand): hand is Hand => hand !== null);
+        const second = gltf.scene.getObjectByName('second_hand');
+        if (second) {
+          /* Unlike the other two hands, the second hand's mesh is modelled along its local +Y. */
+          const restDirection = new Vector3(0, 1, 0).applyQuaternion(second.quaternion).normalize();
+          this.secondHand = { node: second, rest: second.quaternion.clone(), restDirection };
+        }
         gltf.scene.traverse(object => {
           object.castShadow = true;
           object.receiveShadow = true;
@@ -99,7 +132,9 @@ export class StoryClock {
         });
         const show = () => {
           if (this.disposed) return;
-          this.group.add(gltf.scene);
+          this.parts = createClockParts();
+          this.body.add(gltf.scene, this.parts.crown, this.parts.hammer);
+          this.tickSeconds(Date.now() / 1000, false);
           onReady();
         };
         void (prepare?.(gltf.scene) ?? Promise.resolve()).catch(() => undefined).then(show);
@@ -119,8 +154,83 @@ export class StoryClock {
     }
   }
 
+  /**
+   * Advances the living parts: the second hand ticks with real seconds, the crown winds and a
+   * pending ring plays. Returns true while the case itself moves (ring or reduced-motion nudge):
+   * keep rendering and refresh the shadow map on those frames.
+   */
+  update(time: number, motion: boolean): boolean {
+    if (!this.parts) return false;
+    this.tickSeconds(Date.now() / 1000, motion);
+    if (motion) this.parts.crownSpin.rotation.y = -time * CROWN_SPEED;
+    if (this.ringRequested) {
+      this.ringRequested = false;
+      if (motion && !reducedMotion()) {
+        this.ringStart = time;
+      } else {
+        this.ringStart = -1;
+        this.nudgeFrames = 2;
+      }
+    }
+    if (this.nudgeFrames > 0) {
+      this.nudgeFrames--;
+      this.pose(this.nudgeFrames === 1 ? 0.0012 : 0, this.nudgeFrames === 1 ? 0.02 : 0, 0, 0);
+      return true;
+    }
+    if (this.ringStart < 0) return false;
+    const t = time - this.ringStart;
+    if (t >= RING_SECONDS || t < 0) {
+      this.ringStart = -1;
+      this.pose(0, 0, 0, 0);
+      return true;
+    }
+    const envelope = Math.min(1, t / 0.06) * (t < 0.85 ? 1 : 1 - smooth((t - 0.85) / (RING_SECONDS - 0.85)));
+    const hop = Math.abs(Math.sin(t * Math.PI * 9)) * 0.0035 * envelope;
+    const roll = (Math.sin(t * 71) * 0.6 + Math.sin(t * 113) * 0.4) * 0.035 * envelope;
+    const pitch = Math.sin(t * 89 + 1.3) * 0.02 * envelope;
+    this.pose(hop, roll, pitch, Math.sin(t * Math.PI * 2 * 17) * 0.38 * envelope);
+    return true;
+  }
+
   dispose(): void {
     this.disposed = true;
+    window.removeEventListener(CLOCK_RING_EVENT, this.onRing);
+    this.parts?.dispose();
     release(URL);
   }
+
+  private pose(hop: number, roll: number, pitch: number, hammer: number): void {
+    this.body.position.y = hop;
+    this.body.rotation.set(pitch, 0, roll);
+    if (this.parts) this.parts.hammer.rotation.z = hammer;
+  }
+
+  /** Quartz step: the hand jumps on the second, overshoots by a sixth of a step and settles. */
+  private tickSeconds(now: number, motion: boolean): void {
+    const hand = this.secondHand;
+    if (!hand) return;
+    const whole = Math.floor(now);
+    const since = now - whole;
+    const step = motion ? whole - 1 + quartzStep(since) : whole;
+    if (step === this.secondShown) return;
+    this.secondShown = step;
+    const up = this.target.set(0, 1, 0).projectOnPlane(this.faceNormal).normalize();
+    up.applyAxisAngle(this.faceNormal, -(step % 60) * SECOND_STEP);
+    hand.node.quaternion.copy(this.turn.setFromUnitVectors(hand.restDirection, up)).multiply(hand.rest);
+  }
+}
+
+function quartzStep(since: number): number {
+  if (since > 0.18) return 1;
+  return 1 - Math.exp(-since * 35) * Math.cos(since * 60);
+}
+
+function smooth(x: number): number {
+  const t = Math.min(Math.max(x, 0), 1);
+  return t * t * (3 - 2 * t);
+}
+
+function reducedMotion(): boolean {
+  if (document.documentElement.dataset.motion === 'paused') return true;
+  return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 }

@@ -16,7 +16,7 @@ export default defineConfig(
     rules: {
       'no-empty': ['error', { allowEmptyCatch: true }],
       'max-lines':['error', { max: 300, skipBlankLines: true, skipComments: true }],
-      'max-lines-per-function': ['warn', { max: 40, skipBlankLines: true, skipComments: true, IIFEs: true }]
+      'max-lines-per-function': ['error', { max: 40, skipBlankLines: true, skipComments: true, IIFEs: true }]
     }
   },
   {

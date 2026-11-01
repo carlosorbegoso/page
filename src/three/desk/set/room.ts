@@ -37,20 +37,18 @@ export interface RoomMeshes {
   triangles: number;
 }
 
-export function buildRoomMeshes(room: Group, context: StationContext, palette: Palette, disposables: Array<{ dispose(): void }>): RoomMeshes {
-  const high = context.tier === 'high';
-  const q = high ? 1 : 0.6;
-  const { material, uniforms } = createAtlasMaterial([ROOM.left, ROOM.right, ROOM.back, 0], [0, DESK.z, DESK.width / 2, DESK.depth / 2], DESK.top);
-  const environment = bakeNightEnvironment(context.renderer);
-  material.envMap = environment;
-  material.envMapIntensity = 0.8;
-  disposables.push(material, environment);
+type Disposables = Array<{ dispose(): void }>;
 
-  const statics = new PartBuilder();
-  buildRoom(statics, palette);
-  buildDesk(statics, palette, q);
-  const workstation = new PartBuilder();
-  buildWorkstation(workstation, palette, q);
+function createRoomMaterial(context: StationContext, disposables: Disposables): ReturnType<typeof createAtlasMaterial> {
+  const atlas = createAtlasMaterial([ROOM.left, ROOM.right, ROOM.back, 0], [0, DESK.z, DESK.width / 2, DESK.depth / 2], DESK.top);
+  const environment = bakeNightEnvironment(context.renderer);
+  atlas.material.envMap = environment;
+  atlas.material.envMapIntensity = 0.8;
+  disposables.push(atlas.material, environment);
+  return atlas;
+}
+
+function addMonitorHead(room: Group, material: Material, palette: Palette, q: number, high: boolean, disposables: Disposables): void {
   const head = new PartBuilder();
   buildMonitorHead(head, palette, q);
   const headGeometry = head.build();
@@ -62,6 +60,9 @@ export function buildRoomMeshes(room: Group, context: StationContext, palette: P
   monitorHead.quaternion.copy(monitorFrame().quaternion);
   room.add(monitorHead);
   disposables.push(headGeometry);
+}
+
+function buildStaticProps(statics: PartBuilder, workstation: PartBuilder, palette: Palette, q: number): Matrix4 {
   buildLamp(statics, palette, q);
   buildPlant(statics, palette, q);
   buildShelves(statics, palette, q);
@@ -73,25 +74,43 @@ export function buildRoomMeshes(room: Group, context: StationContext, palette: P
   buildCharizard(workstation, q);
   buildSucculent(statics, palette, q);
   buildCorkboard(statics, palette, q);
-  const corkboardPrint = createCorkboardPrint();
-  room.add(corkboardPrint.object3D);
-  disposables.push(corkboardPrint);
-  const phoneMatrix = buildPhone(statics, palette);
-  const figures = new PartBuilder();
-  buildFigures(figures, palette, q);
+  return buildPhone(statics, palette);
+}
+
+function addRoomMesh(room: Group, statics: PartBuilder, atlas: ReturnType<typeof createAtlasMaterial>, high: boolean, disposables: Disposables): Material | undefined {
   const geometry = statics.build();
-  const triangles = statics.triangleCount + figures.triangleCount + workstation.triangleCount;
-  const roomMesh = new Mesh(geometry, material);
+  const roomMesh = new Mesh(geometry, atlas.material);
   roomMesh.name = 'desk-room';
   roomMesh.castShadow = high;
   roomMesh.receiveShadow = high;
   if (high) {
-    roomMesh.customDepthMaterial = createAtlasDepthMaterial(uniforms);
+    roomMesh.customDepthMaterial = createAtlasDepthMaterial(atlas.uniforms);
     disposables.push(roomMesh.customDepthMaterial);
   }
   room.add(roomMesh);
   disposables.push(geometry);
-  return { material, uniforms, depthMaterial: roomMesh.customDepthMaterial, figures, workstation, phoneMatrix, triangles };
+  return roomMesh.customDepthMaterial;
+}
+
+export function buildRoomMeshes(room: Group, context: StationContext, palette: Palette, disposables: Disposables): RoomMeshes {
+  const high = context.tier === 'high';
+  const q = high ? 1 : 0.6;
+  const atlas = createRoomMaterial(context, disposables);
+  const statics = new PartBuilder();
+  buildRoom(statics, palette);
+  buildDesk(statics, palette, q);
+  const workstation = new PartBuilder();
+  buildWorkstation(workstation, palette, q);
+  addMonitorHead(room, atlas.material, palette, q, high, disposables);
+  const phoneMatrix = buildStaticProps(statics, workstation, palette, q);
+  const corkboardPrint = createCorkboardPrint();
+  room.add(corkboardPrint.object3D);
+  disposables.push(corkboardPrint);
+  const figures = new PartBuilder();
+  buildFigures(figures, palette, q);
+  const triangles = statics.triangleCount + figures.triangleCount + workstation.triangleCount;
+  const depthMaterial = addRoomMesh(room, statics, atlas, high, disposables);
+  return { material: atlas.material, uniforms: atlas.uniforms, depthMaterial, figures, workstation, phoneMatrix, triangles };
 }
 
 export function addContactShadows(room: Group, disposables: Array<{ dispose(): void }>): void {

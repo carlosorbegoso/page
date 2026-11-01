@@ -1,5 +1,6 @@
 import {
   BoxGeometry,
+  CapsuleGeometry,
   CircleGeometry,
   CylinderGeometry,
   ExtrudeGeometry,
@@ -62,6 +63,37 @@ function sphereDirection(phi: number, theta: number): Vector3 {
   return new Vector3(-Math.cos(phi) * Math.sin(theta), Math.cos(theta), Math.sin(phi) * Math.sin(theta));
 }
 
+/**
+ * Base ring, waist groove, chest bezel and arms. Everything stays below the neck (6.7 cm) and only the
+ * chest light glows, because `life/classify` turns anything higher with the head and treats glow there as eyes.
+ */
+function buildAlfaBodyDetails(
+  b: PartBuilder,
+  p: Palette,
+  q: Quality,
+  at: (m: Matrix4) => Matrix4,
+  radiusAt: (y: number) => number,
+  chestY: number,
+  chestR: number
+): void {
+  const id = OBJECT_ID.alfa;
+  const flat = (y: number, sx = 1, sz = 0.9) =>
+    at(new Matrix4().compose(new Vector3(0, y, 0), new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2), new Vector3(sx, sz, 1)));
+  const satin: Finish = { ...p.alfaVisor, roughness: 0.35, metalness: 0.2 };
+  b.add(new CylinderGeometry(0.0212, 0.0222, 0.0036, seg(32, q, 16)).scale(1, 1, 0.9), satin, at(new Matrix4().makeTranslation(0, 0.0018, 0)), id);
+  const waistY = 0.021;
+  b.add(new TorusGeometry(radiusAt(waistY) + 0.0001, 0.00055, seg(6, q, 4), seg(48, q, 24)), satin, flat(waistY), id);
+  b.add(new TorusGeometry(0.0058, 0.0008, seg(8, q, 5), seg(24, q, 12)), p.alfaRing, at(new Matrix4().makeTranslation(0, chestY, chestR + 0.0004)), id);
+  const shoulderY = 0.047;
+  const shoulderX = radiusAt(shoulderY) * 0.98;
+  for (const side of [-1, 1]) {
+    b.add(new SphereGeometry(0.0046, seg(12, q, 8), seg(10, q, 6)), p.alfaRing, at(new Matrix4().makeTranslation(side * shoulderX, shoulderY, 0)), id);
+    const tilt = new Quaternion().setFromAxisAngle(FRONT, side * 0.22);
+    const hang = new Vector3(0, -0.0125, 0).applyQuaternion(tilt).add(new Vector3(side * (shoulderX + 0.0042), shoulderY, 0));
+    b.add(new CapsuleGeometry(0.0052, 0.016, seg(6, q, 4), seg(14, q, 8)), p.alfaBody, at(new Matrix4().compose(hang, tilt, new Vector3(1, 1, 0.9))), id);
+  }
+}
+
 /** Alfa, TUSOCIO's partner: a small porcelain robot with a smoked visor, two glowing eyes, an antenna light and a brass collar. */
 function buildAlfa(b: PartBuilder, p: Palette, q: Quality): void {
   const id = OBJECT_ID.alfa;
@@ -82,9 +114,11 @@ function buildAlfa(b: PartBuilder, p: Palette, q: Quality): void {
   body.deleteAttribute('uv');
   b.add(body, p.alfaBody, at(new Matrix4()), id);
 
+  const radiusAt = (y: number) => profile.reduce((best, point) => (Math.abs(point.y - y) < Math.abs(best.y - y) ? point : best)).x;
   const chestY = 0.032;
-  const chestR = profile.reduce((best, point) => (Math.abs(point.y - chestY) < Math.abs(best.y - chestY) ? point : best)).x * 0.9;
+  const chestR = radiusAt(chestY) * 0.9;
   b.add(new SphereGeometry(0.0042, seg(14, q, 8), seg(10, q, 6)).scale(1, 1, 0.35), p.alfaSignal, place(0, chestY, chestR), id);
+  buildAlfaBodyDetails(b, p, q, at, radiusAt, chestY, chestR);
 
   const collar = new TorusGeometry(0.0168, 0.0032, seg(10, q, 6), seg(40, q, 20)).scale(1, 0.9, 1);
   b.add(collar, p.alfaRing, at(new Matrix4().compose(new Vector3(0, 0.0635, 0), new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2), new Vector3(1, 1, 1))), id);

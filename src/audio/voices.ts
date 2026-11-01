@@ -1,21 +1,5 @@
 import { midiToHz } from './chapters';
-
-function envelope(context: BaseAudioContext, destination: AudioNode, at: number): GainNode {
-  const gain = context.createGain();
-  gain.gain.setValueAtTime(0, at);
-  gain.connect(destination);
-  return gain;
-}
-
-function releaseAfter(source: AudioScheduledSourceNode, nodes: AudioNode[]): void {
-  source.addEventListener('ended', () => {
-    for (const node of nodes) node.disconnect();
-  });
-}
-
-function vary(base: number, spread: number): number {
-  return base * (1 + (Math.random() * 2 - 1) * spread);
-}
+import { envelope, releaseAfter, vary } from './synth';
 
 /** Soft mechanical key: a felted thock under a short bandpassed click. */
 export function playKey(

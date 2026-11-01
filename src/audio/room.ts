@@ -1,4 +1,5 @@
 import { createDrop } from './buffers';
+import { CityPasses } from './traffic';
 
 export const ROOM_LEVELS = {
   rainWash: 0.05,
@@ -17,6 +18,7 @@ export class RoomTone {
   private readonly dropBus: GainNode;
   private readonly hum: GainNode;
   private readonly city: GainNode;
+  private readonly passes: CityPasses;
   private readonly drops: AudioBuffer[];
   private readonly sources: AudioScheduledSourceNode[] = [];
   private rainLevel = 0;
@@ -92,21 +94,25 @@ export class RoomTone {
     traffic.connect(trafficLow).connect(trafficBand).connect(trafficGain).connect(this.city);
     this.modulate(trafficGain.gain, 0.023, ROOM_LEVELS.city * 0.35);
 
+    this.passes = new CityPasses(context, noise, this.output);
+
     for (const source of this.sources) source.start();
     this.timer = setInterval(() => this.scheduleDrops(), DROP_TICK_MS);
   }
 
-  set(levels: { rain: number; hum: number; city: number }, seconds: number): void {
+  set(levels: { rain: number; hum: number; city: number; passes?: number }, seconds: number): void {
     const now = this.context.currentTime;
     const tau = seconds / 3;
     this.rainLevel = levels.rain;
     this.rain.gain.setTargetAtTime(levels.rain, now, tau);
     this.hum.gain.setTargetAtTime(levels.hum, now, tau);
     this.city.gain.setTargetAtTime(levels.city, now, tau);
+    this.passes.set(levels.passes ?? 0, seconds);
   }
 
   dispose(): void {
     if (this.timer) clearInterval(this.timer);
+    this.passes.dispose();
     for (const source of this.sources) source.stop();
   }
 

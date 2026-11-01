@@ -33,7 +33,7 @@ const READ_BASE_MS = 1500;
 const READ_MS_PER_CHAR = 45;
 /** Plates get `data-active` on the frame after `chapter:settled`; measure the text once they have it. */
 const PLATE_FLAG_DELAY_MS = 120;
-const TOUR_TOGGLE = '[data-story-tour]';
+const TOUR_TOGGLE = '[data-story-tour], [data-story-tour-quick]';
 const FORM_FIELD = 'input, textarea, select, [contenteditable]:not([contenteditable="false"])';
 const NATIVE_SPACE =
   'button, a[href], summary, [role="button"], [role="checkbox"], [role="switch"]';
@@ -148,11 +148,16 @@ export function setupStoryNav(host: StoryNavHost): () => void {
     const shots = host.shots();
     if (!shots.length) return;
     let next: number;
+    const active = host.activeIndex();
     if (targetIndex !== null) next = targetIndex + direction;
     else if (direction > 0) {
       next = shots.findIndex(shot => shot.top > scrollY + 2);
       if (next < 0) next = shots.length - 1;
-    } else next = shots.findLastIndex(shot => shot.top < scrollY - 2);
+      if (active >= 0) next = Math.max(next, active + 1);
+    } else {
+      next = shots.findLastIndex(shot => shot.top < scrollY - 2);
+      if (active >= 0) next = Math.min(next, active - 1);
+    }
     goToIndex(Math.min(Math.max(next, -1), shots.length - 1));
   }
 
@@ -400,7 +405,22 @@ export function setupStoryNav(host: StoryNavHost): () => void {
     if (document.visibilityState === 'hidden') stopTour('paused');
   };
 
+  /** In-page links to a chapter (#products, the index) travel to its first shot, not to the bare spacer. */
+  const onAnchorClick = (event: MouseEvent) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return;
+    const link = (event.target as Element | null)?.closest?.<HTMLAnchorElement>('a[href*="#"]');
+    const hash = link && link.origin === location.origin && link.pathname === location.pathname ? link.hash.slice(1) : '';
+    if (!hash) return;
+    const shots = host.shots();
+    const index = shots.findIndex(shot => shot.chapter === hash);
+    if (index < 0) return;
+    event.preventDefault();
+    history.replaceState(null, '', `#${hash}`);
+    goToIndex(index);
+  };
+
   const listeners: Array<[EventTarget, string, EventListener, AddEventListenerOptions]> = [
+    [document, 'click', onAnchorClick as EventListener, {}],
     [window, 'keydown', onKeyDown as EventListener, {}],
     [window, 'scroll', onScroll, { passive: true }],
     [window, 'wheel', onWheel as EventListener, { passive: false, capture: true }],

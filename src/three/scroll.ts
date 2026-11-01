@@ -34,6 +34,8 @@ export async function setupChapterScroll(host: ChapterScrollHost): Promise<Chapt
   ]);
   gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
   ScrollTrigger.config({ ignoreMobileResize: true });
+  /* A restored mid-page scroll lands before the pins exist and shows the wrong shot; the story starts at the top. */
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   const touch = matchMedia('(pointer: coarse)').matches || innerWidth < 1024;
   const triggers = new Map<ChapterId, InstanceType<typeof ScrollTrigger>>();
   let current: ChapterId | null = null;
@@ -146,7 +148,10 @@ export async function setupChapterScroll(host: ChapterScrollHost): Promise<Chapt
     if (!trigger) return null;
     const subs = subsOf(chapter);
     const span = trigger.end - trigger.start - edgeOf(chapter);
-    return trigger.start + ((Math.min(sub, subs - 1) + 0.5) / subs) * span;
+    const index = Math.min(sub, subs - 1);
+    /* The final shot rests at the very bottom so nothing scrolls past the credits. */
+    if (chapter === lastChapter && index === subs - 1) return trigger.start + span - 1;
+    return trigger.start + ((index + 0.5) / subs) * span;
   };
 
   /** A shot requested while the power-on held the camera can land after a newer one: ask again for the shot the scroll shows. */

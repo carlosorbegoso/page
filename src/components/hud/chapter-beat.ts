@@ -3,6 +3,25 @@ import type { HudElements } from './elements';
 
 const STATION_SELECTOR = '[data-station]';
 
+/** Without the stage, the station crossing the middle of the viewport is the active chapter. */
+function observeStations(stations: HTMLElement[], activate: (id: string) => void): void {
+  if (!('IntersectionObserver' in window) || stations.length === 0) return;
+  const visible = new Set<HTMLElement>();
+  const observer = new IntersectionObserver(
+    entries => {
+      for (const entry of entries) {
+        const target = entry.target as HTMLElement;
+        if (entry.isIntersecting) visible.add(target);
+        else visible.delete(target);
+      }
+      const current = stations.find(station => visible.has(station));
+      if (current) activate(current.dataset.station ?? current.id);
+    },
+    { rootMargin: '-45% 0px -50% 0px' }
+  );
+  for (const station of stations) observer.observe(station);
+}
+
 /** Tracks the active chapter from stage events or, without the stage, from the visible station; shows its beat and marks its index link. */
 export function initChapterBeat({ chapter, clock }: HudElements): void {
   const indexLinks = [...document.querySelectorAll<HTMLAnchorElement>('[data-index-link]')];
@@ -43,20 +62,6 @@ export function initChapterBeat({ chapter, clock }: HudElements): void {
     });
   }
 
-  if ('IntersectionObserver' in window && stations.length > 0) {
-    const visible = new Set<HTMLElement>();
-    const observer = new IntersectionObserver(
-      entries => {
-        for (const entry of entries) {
-          const target = entry.target as HTMLElement;
-          if (entry.isIntersecting) visible.add(target);
-          else visible.delete(target);
-        }
-        const current = stations.find(station => visible.has(station));
-        if (current) setActive(current.dataset.station ?? current.id);
-      },
-      { rootMargin: '-45% 0px -50% 0px' }
-    );
-    for (const station of stations) observer.observe(station);
-  }
+  observeStations(stations, id => setActive(id));
+
 }

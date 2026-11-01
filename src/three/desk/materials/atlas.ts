@@ -16,6 +16,71 @@ import {
 } from './atlas.glsl';
 import { type AtlasUniforms, FIGURE_SLOTS, OBJECT_SLOTS } from './slots';
 
+function createAtlasUniforms(): AtlasUniforms {
+  return {
+    uHoverId: { value: -1 },
+    uHoverMix: { value: 0 },
+    uHoverColor: { value: new Color(1, 1, 1) },
+    uFigPivot: { value: Array.from({ length: FIGURE_SLOTS }, () => new Vector3()) },
+    uFigLift: { value: new Array<number>(FIGURE_SLOTS).fill(0) },
+    uFigYaw: { value: new Array<number>(FIGURE_SLOTS).fill(0) },
+    uSignal: { value: new Array<number>(OBJECT_SLOTS).fill(1) },
+    uGlow: { value: new Array<number>(OBJECT_SLOTS).fill(0) },
+    uPresence: { value: new Array<number>(OBJECT_SLOTS).fill(1) },
+    uPull: { value: new Array<number>(OBJECT_SLOTS).fill(0) },
+    uHinge: { value: new Matrix3() },
+    uHingeOrigin: { value: new Vector3() }
+  };
+}
+
+/** Figure turn and lift, folder hinge and the varyings the fragment patch reads. */
+function patchAtlasVertex(vertexShader: string): string {
+  return vertexShader
+    .replace('#include <common>', `#include <common>\n${VERTEX_DECLARATIONS}`)
+    .replace(
+      '#include <beginnormal_vertex>',
+      `#include <beginnormal_vertex>
+      ${FIGURE_YAW}
+      objectNormal = vec3(yawC * objectNormal.x + yawS * objectNormal.z, objectNormal.y, -yawS * objectNormal.x + yawC * objectNormal.z);
+      if (abs(oid - 11.0) < 0.5) objectNormal = uHinge * objectNormal;`
+    )
+    .replace('#include <begin_vertex>', `#include <begin_vertex>\n${FIGURE_TRANSFORM}`)
+    .replace(
+      '#include <color_vertex>',
+      '#include <color_vertex>\nvPbr = pbr;\nvOid = oid;\nvRoomPosition = position;\nvRoomNormal = normal;'
+    );
+}
+
+/** Wood grain, analytic AO, wall spill, grey-out for absent figures, per-object emission and the hover rim. */
+function patchAtlasFragment(fragmentShader: string): string {
+  return fragmentShader
+    .replace('#include <common>', `#include <common>\n${FRAGMENT_DECLARATIONS}`)
+    .replace(
+      '#include <color_fragment>',
+      `#include <color_fragment>
+      if (vPbr.w > 0.0) diffuseColor.rgb *= mix(1.0, woodGrain(vRoomPosition), vPbr.w);
+      diffuseColor.rgb *= roomOcclusion(vRoomPosition, normalize(vRoomNormal));
+      ${WALL_SPILL_ALBEDO}
+      float presence = uPresence[clamp(int(vOid + 0.5), 0, ${OBJECT_SLOTS - 1})];
+      diffuseColor.rgb = mix(vec3(dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722))), diffuseColor.rgb, presence) * (0.3 + 0.7 * presence);`
+    )
+    .replace(
+      '#include <lights_fragment_end>',
+      `#include <lights_fragment_end>\n${WALL_SPILL_LIGHT}`
+    )
+    .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = vPbr.x;')
+    .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\nmetalnessFactor = vPbr.y;')
+    .replace(
+      '#include <emissivemap_fragment>',
+      `#include <emissivemap_fragment>
+      int objectId = clamp(int(vOid + 0.5), 0, ${OBJECT_SLOTS - 1});
+      totalEmissiveRadiance += diffuseColor.rgb * (vPbr.z * uSignal[objectId] * uPresence[objectId] + uGlow[objectId]);
+      float hovered = (1.0 - step(0.5, abs(vOid - uHoverId))) * step(0.5, vOid);
+      float rim = pow(clamp(1.0 - abs(dot(normalize(normal), normalize(vViewPosition))), 0.0, 1.0), 2.5);
+      totalEmissiveRadiance += uHoverColor * hovered * uHoverMix * (0.05 + 0.6 * rim);`
+    );
+}
+
 /**
  * The room's single "atlas" material: albedo from vertex colours, and per-vertex
  * roughness / metalness / emission / wood-grain (`pbr` attribute) plus an object id (`oid`)
@@ -31,20 +96,7 @@ export function createAtlasMaterial(
   uniforms: AtlasUniforms;
 } {
   const material = new MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 0 });
-  const uniforms: AtlasUniforms = {
-    uHoverId: { value: -1 },
-    uHoverMix: { value: 0 },
-    uHoverColor: { value: new Color(1, 1, 1) },
-    uFigPivot: { value: Array.from({ length: FIGURE_SLOTS }, () => new Vector3()) },
-    uFigLift: { value: new Array<number>(FIGURE_SLOTS).fill(0) },
-    uFigYaw: { value: new Array<number>(FIGURE_SLOTS).fill(0) },
-    uSignal: { value: new Array<number>(OBJECT_SLOTS).fill(1) },
-    uGlow: { value: new Array<number>(OBJECT_SLOTS).fill(0) },
-    uPresence: { value: new Array<number>(OBJECT_SLOTS).fill(1) },
-    uPull: { value: new Array<number>(OBJECT_SLOTS).fill(0) },
-    uHinge: { value: new Matrix3() },
-    uHingeOrigin: { value: new Vector3() }
-  };
+  const uniforms = createAtlasUniforms();
   material.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, {
       uHoverId: uniforms.uHoverId,
@@ -63,46 +115,8 @@ export function createAtlasMaterial(
       uDeskBounds: { value: deskBounds },
       uDeskTop: { value: deskTop }
     });
-    shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', `#include <common>\n${VERTEX_DECLARATIONS}`)
-      .replace(
-        '#include <beginnormal_vertex>',
-        `#include <beginnormal_vertex>
-        ${FIGURE_YAW}
-        objectNormal = vec3(yawC * objectNormal.x + yawS * objectNormal.z, objectNormal.y, -yawS * objectNormal.x + yawC * objectNormal.z);
-        if (abs(oid - 11.0) < 0.5) objectNormal = uHinge * objectNormal;`
-      )
-      .replace('#include <begin_vertex>', `#include <begin_vertex>\n${FIGURE_TRANSFORM}`)
-      .replace(
-        '#include <color_vertex>',
-        '#include <color_vertex>\nvPbr = pbr;\nvOid = oid;\nvRoomPosition = position;\nvRoomNormal = normal;'
-      );
-    shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', `#include <common>\n${FRAGMENT_DECLARATIONS}`)
-      .replace(
-        '#include <color_fragment>',
-        `#include <color_fragment>
-        if (vPbr.w > 0.0) diffuseColor.rgb *= mix(1.0, woodGrain(vRoomPosition), vPbr.w);
-        diffuseColor.rgb *= roomOcclusion(vRoomPosition, normalize(vRoomNormal));
-        ${WALL_SPILL_ALBEDO}
-        float presence = uPresence[clamp(int(vOid + 0.5), 0, ${OBJECT_SLOTS - 1})];
-        diffuseColor.rgb = mix(vec3(dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722))), diffuseColor.rgb, presence) * (0.3 + 0.7 * presence);`
-      )
-      .replace(
-        '#include <lights_fragment_end>',
-        `#include <lights_fragment_end>\n${WALL_SPILL_LIGHT}`
-      )
-      .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = vPbr.x;')
-      .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\nmetalnessFactor = vPbr.y;')
-      .replace(
-        '#include <emissivemap_fragment>',
-        `#include <emissivemap_fragment>
-        int objectId = clamp(int(vOid + 0.5), 0, ${OBJECT_SLOTS - 1});
-        totalEmissiveRadiance += diffuseColor.rgb * (vPbr.z * uSignal[objectId] * uPresence[objectId] + uGlow[objectId]);
-        float hovered = (1.0 - step(0.5, abs(vOid - uHoverId))) * step(0.5, vOid);
-        float rim = pow(clamp(1.0 - abs(dot(normalize(normal), normalize(vViewPosition))), 0.0, 1.0), 2.5);
-        totalEmissiveRadiance += uHoverColor * hovered * uHoverMix * (0.05 + 0.6 * rim);`
-      );
+    shader.vertexShader = patchAtlasVertex(shader.vertexShader);
+    shader.fragmentShader = patchAtlasFragment(shader.fragmentShader);
   };
   material.customProgramCacheKey = () => 'desk-atlas-v6';
   return { material, uniforms };

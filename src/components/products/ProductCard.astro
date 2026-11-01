@@ -5,6 +5,8 @@ import type { CollectionEntry } from 'astro:content';
 import Button from '../ui/Button.astro';
 import Tag from '../ui/Tag.astro';
 import KineticText from '../ui/KineticText.astro';
+import '../../styles/sections/products/stage.css';
+import '../../styles/sections/products/paper-card.css';
 import { useTranslations, withBase, type Locale } from '../../i18n/utils';
 
 type Product = CollectionEntry<'products'>['data']['entries'][number];
@@ -57,23 +59,23 @@ const screenshot =
     <slot />
 
     <header class="flex flex-col gap-2">
-      <Tag tone={status.tone} class="self-start">{status.label}</Tag>
+      <Tag tone={status.tone} class="product-status self-start">{status.label}</Tag>
       <h3
         id={titleId}
         class:list={[
-          'flex items-center gap-3 font-display font-semibold tracking-display text-text',
+          'product-name flex items-center gap-3 font-display font-semibold tracking-display text-text',
           featured ? 'plate-display text-4xl' : 'text-2xl'
         ]}
       >
         <span class:list={['size-2.5 shrink-0 rounded-full', dot]} aria-hidden="true"></span>
         <KineticText text={product.name} split="chars" />
       </h3>
-      <p class:list={['font-medium text-text', featured ? 'text-lg' : 'text-base']}>{product.tagline}</p>
+      <p class:list={['product-tagline font-medium text-text', featured ? 'text-lg' : 'text-base']}>{product.tagline}</p>
     </header>
 
     {
       screenshot && (
-        <picture>
+        <picture class="product-shot">
           <source srcset={screenshot} type="image/webp" />
           <img
             src={screenshot}
@@ -88,7 +90,7 @@ const screenshot =
       )
     }
 
-    <p class:list={['wide-only text-pretty text-text-muted', featured ? 'text-base' : 'text-sm']}>
+    <p class:list={['product-description text-pretty text-text-muted', featured ? 'text-base' : 'text-sm']}>
       {product.description}
     </p>
 
@@ -109,15 +111,15 @@ const screenshot =
       )
     }
 
-    <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6">
+    <div class="product-actions flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6">
       <Button
         href={product.url}
         external
         variant={featured ? 'primary' : 'secondary'}
-        class="w-full sm:w-auto"
+        class="product-visit w-full sm:w-auto"
       >
         <span>{t('products.visit')}</span>
-        <span class="text-text-muted">{hostname}</span>
+        <span class="product-host text-text-muted">{hostname}</span>
         <svg
           class="size-4 shrink-0"
           viewBox="0 0 16 16"
@@ -131,7 +133,7 @@ const screenshot =
           <path d="M6 3.5h6.5V10M12.5 3.5 4 12"></path>
         </svg>
       </Button>
-      <dl class="wide-only flex flex-wrap items-baseline gap-x-2 text-sm">
+      <dl class="product-role flex flex-wrap items-baseline gap-x-2 text-sm">
         <dt class="text-sm text-text-subtle">{t('products.role')}</dt>
         <dd class="text-text">{product.role}</dd>
       </dl>
@@ -139,19 +141,3 @@ const screenshot =
   </div>
 </article>
 
-<style>
-  /* On the stage each product is a museum label: status, name, what it is and the link. Features live in reading mode. */
-  :global(.is-3d) .product-features {
-    display: none;
-  }
-
-  @media (width < 48rem) {
-    :global(.is-3d) .wide-only {
-      display: none;
-    }
-
-    :global(.is-3d) .product-body {
-      gap: 0.75rem;
-    }
-  }
-</style>

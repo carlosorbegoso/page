@@ -1,0 +1,106 @@
+/* Upright phones: the cork board is too small to read, so the panel becomes the index card pinned to it. */
+@media (width < 48rem) {
+  .is-3d .plate[data-plate-id='company'] {
+    --color-text: #1c2230;
+    --color-text-muted: #485063;
+
+    padding: 1.25rem 1.25rem 1.125rem;
+    border-top: 4px solid #c8463c;
+    border-radius: 3px;
+    background: #ece5d3;
+    box-shadow:
+      0 14px 28px -10px rgb(0 0 0 / 0.55),
+      0 2px 4px rgb(0 0 0 / 0.28);
+    color: var(--color-text);
+    text-shadow: none;
+    rotate: -1.2deg;
+  }
+
+  .is-3d .plate[data-plate-id='company']::before {
+    display: none;
+  }
+
+  .is-3d .plate[data-plate-id='company'] > div {
+    gap: 0.875rem;
+  }
+
+  .is-3d .plate[data-plate-id='company'] header {
+    gap: 0.375rem;
+  }
+
+  .is-3d .plate[data-plate-id='company'] .section-act {
+    display: none;
+  }
+
+  .is-3d .plate[data-plate-id='company'] header > p:first-child {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+  }
+
+  .is-3d .plate[data-plate-id='company'] #company-title {
+    font-family: 'Bradley Hand', 'Segoe Print', 'Marker Felt', cursive;
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: 0;
+    color: var(--color-text);
+  }
+
+  .is-3d .plate[data-plate-id='company'] header > p:last-of-type,
+  .is-3d .plate[data-plate-id='company'] [data-signal] {
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: var(--color-text);
+  }
+
+  .is-3d .plate[data-plate-id='company'] [data-signal] {
+    font-weight: 600;
+  }
+
+  .is-3d .plate[data-plate-id='company'] .company-postits {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.625rem;
+    margin-top: 0.25rem;
+  }
+
+  .is-3d .plate[data-plate-id='company'] .company-postits a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.25rem;
+    padding: 0.5rem 0.375rem;
+    background: var(--postit);
+    box-shadow:
+      0 6px 10px -6px rgb(0 0 0 / 0.5),
+      inset 0 -10px 12px -12px rgb(0 0 0 / 0.35);
+    font-family: 'Bradley Hand', 'Segoe Print', 'Marker Felt', cursive;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #1c2230;
+    text-align: center;
+    text-decoration: none;
+    rotate: var(--postit-tilt);
+  }
+
+  .is-3d .plate[data-plate-id='company'] .company-postits a:focus-visible {
+    outline: 2px solid #1c2230;
+    outline-offset: 3px;
+  }
+
+  .is-3d .plate[data-plate-id='company'] [data-postit='skymek'] {
+    --postit: #f5a14a;
+    --postit-tilt: -2deg;
+  }
+
+  .is-3d .plate[data-plate-id='company'] [data-postit='parati'] {
+    --postit: #f28ba0;
+    --postit-tilt: 1.5deg;
+  }
+
+  .is-3d .plate[data-plate-id='company'] [data-postit='ventixs'] {
+    --postit: #5fcf96;
+    --postit-tilt: -1deg;
+  }
+}

@@ -22,6 +22,24 @@ export interface InteractionOptions {
   invalidate: () => void;
 }
 
+/**
+ * Id of a pick in `desk:interact` events: its key without the `desk:` prefix (alfa, skymek, parati,
+ * ventixs, mug, clock, phone, lamp), folders as `folder-<id>` (folder-tcs, folder-openFolder…).
+ */
+function interactId(pick: StationPick): string {
+  const id = pick.key.startsWith('desk:') ? pick.key.slice(5) : pick.key;
+  return pick.experience ? `folder-${id}` : id;
+}
+
+/**
+ * Tells listeners (sound, analytics) that an object was hovered, pressed or activated. The lamp only
+ * reports hover: its click already sounds through `desk:switch`.
+ */
+function emitInteract(pick: StationPick, phase: 'hover' | 'press' | 'activate'): void {
+  if (pick.action === 'lamp' && phase !== 'hover') return;
+  window.dispatchEvent(new CustomEvent('desk:interact', { detail: { id: interactId(pick), phase } }));
+}
+
 function labelOf(pick: StationPick): string {
   if (typeof pick.label === 'string') return pick.label;
   return document.documentElement.lang.startsWith('en') ? pick.label.en : pick.label.es;
@@ -69,8 +87,9 @@ function setupFolderKeys(): () => void {
 }
 
 /**
- * Scene navigation by raycasting the desk's picks: hover shows a pointer cursor and emits
- * `scene:hover` (fine pointers only); click or tap navigates to the pick's chapter.
+ * Scene interaction by raycasting the desk's picks: hover shows a pointer cursor, lights the object
+ * itself and emits `scene:hover` with its name for the polite live region (fine pointers only; no
+ * floating label); click or tap hands the pick to `navigate`, which plays with it and/or moves on.
  */
 export function setupInteraction(options: InteractionOptions): () => void {
   const { source, camera, canvas } = options;
@@ -101,6 +120,7 @@ export function setupInteraction(options: InteractionOptions): () => void {
     document.body.style.cursor = next ? 'pointer' : '';
     source.setHover(next?.object3D ?? null);
     window.dispatchEvent(new CustomEvent('scene:hover', { detail: { label: next ? labelOf(next) : null } }));
+    if (next) emitInteract(next, 'hover');
     options.invalidate();
   };
 
@@ -117,10 +137,17 @@ export function setupInteraction(options: InteractionOptions): () => void {
 
   const onLeave = () => setHover(null);
 
+  const onDown = (event: PointerEvent) => {
+    if (!event.isPrimary || event.button !== 0) return;
+    const hit = pick(event);
+    if (hit) emitInteract(hit, 'press');
+  };
+
   const onClick = (event: MouseEvent) => {
     if (event.defaultPrevented || event.button !== 0 || getSelection()?.toString()) return;
     const hit = pick(event);
     if (!hit) return;
+    emitInteract(hit, 'activate');
     options.navigate(hit);
     options.invalidate();
   };
@@ -132,6 +159,7 @@ export function setupInteraction(options: InteractionOptions): () => void {
   window.addEventListener('chapter:enter', onLeave);
   window.addEventListener('blur', onLeave);
   window.addEventListener('click', onClick);
+  window.addEventListener('pointerdown', onDown, { passive: true });
   const releaseFolderKeys = setupFolderKeys();
   return () => {
     releaseFolderKeys();
@@ -140,6 +168,7 @@ export function setupInteraction(options: InteractionOptions): () => void {
     window.removeEventListener('chapter:enter', onLeave);
     window.removeEventListener('blur', onLeave);
     window.removeEventListener('click', onClick);
+    window.removeEventListener('pointerdown', onDown);
     document.body.style.cursor = '';
   };
 }

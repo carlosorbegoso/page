@@ -67,6 +67,11 @@ function progress(value: number): void {
   window.dispatchEvent(new CustomEvent('stage:progress', { detail: { value } }));
 }
 
+/** How long a clicked figure reacts on its own before the camera travels (two-step click). */
+const FIGURE_REACTION_MS = 550;
+/** Same for objects that only answer with a press pulse (folders, phone). */
+const PRESS_REACTION_MS = 300;
+
 declare global {
   interface Window {
     __captureReady?: boolean;
@@ -84,6 +89,7 @@ export class Stage {
   private renderer!: WebGLRenderer;
   private canvas!: HTMLCanvasElement;
   private world!: World;
+  private travelTimer = 0;
   private plates: Plates | undefined;
   private scroll: ChapterScroll | undefined;
   private fx: FxPipeline | null = null;
@@ -316,9 +322,20 @@ export class Stage {
     chapterElement(chapter)?.scrollIntoView({ behavior });
   }
 
+  /**
+   * Two-step click: the object reacts first (`desk:action` play, or the press pulse DeskSet runs on
+   * `desk:interact`), then — only if the click leads somewhere new — the camera travels once that
+   * reaction has read. Toys (lamp, clock, mug) and the shot already on screen stay put.
+   */
   private navigate(pick: StationPick): void {
-    const figure = pick.key.startsWith('desk:') ? pick.key.slice(5) : '';
-    if (pick.product || figure === 'alfa') window.dispatchEvent(new CustomEvent('desk:action', { detail: { action: 'play', id: figure } }));
+    const id = pick.key.startsWith('desk:') ? pick.key.slice(5) : '';
+    if (id === 'clock') {
+      window.dispatchEvent(new CustomEvent('desk:clock'));
+      return;
+    }
+    const figure = Boolean(pick.product) || id === 'alfa';
+    if (figure || id === 'mug') window.dispatchEvent(new CustomEvent('desk:action', { detail: { action: 'play', id } }));
+    if (id === 'mug') return;
     if (pick.action) {
       window.dispatchEvent(new CustomEvent('desk:action', { detail: { action: pick.action } }));
       return;
@@ -330,10 +347,17 @@ export class Stage {
       window.dispatchEvent(new CustomEvent('desk:action', { detail: { action: 'folder', id: pick.experience } }));
       return;
     }
-    if (SECTION_CHAPTERS.includes(chapter)) this.scrollToChapter(chapter, Math.max(0, sub));
-    else document.querySelector(pick.target)?.scrollIntoView({ behavior: this.movesAllowed ? 'smooth' : 'auto' });
-    if (pick.product) window.dispatchEvent(new CustomEvent('product:focus', { detail: { id: pick.product, source: 'scene' } }));
-    if (pick.experience) window.dispatchEvent(new CustomEvent('experience:focus', { detail: { id: pick.experience, source: 'scene' } }));
+    const subMatters = Boolean(pick.product) || pick.sub !== undefined;
+    if (state.id === chapter && (!subMatters || state.subIndex === sub)) return;
+    const travel = () => {
+      if (SECTION_CHAPTERS.includes(chapter)) this.scrollToChapter(chapter, Math.max(0, sub));
+      else document.querySelector(pick.target)?.scrollIntoView({ behavior: this.movesAllowed ? 'smooth' : 'auto' });
+      if (pick.product) window.dispatchEvent(new CustomEvent('product:focus', { detail: { id: pick.product, source: 'scene' } }));
+      if (pick.experience) window.dispatchEvent(new CustomEvent('experience:focus', { detail: { id: pick.experience, source: 'scene' } }));
+    };
+    window.clearTimeout(this.travelTimer);
+    if (this.movesAllowed) this.travelTimer = window.setTimeout(travel, figure ? FIGURE_REACTION_MS : PRESS_REACTION_MS);
+    else travel();
   }
 
   /** Imports the optional desk / FX entry points (they register through contracts.ts). */

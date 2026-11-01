@@ -23,9 +23,10 @@ import { createBackdrop, createRainGlass, createSteam, type Backdrop, type RainG
 import { createLampBeam, type LampBeam } from './beam';
 import { createSpineLabels } from './spines';
 import { FOLDER_PARK, FolderDetail, follow } from './folderDetail';
-import { StoryClock, storyMinutes } from './clock';
+import { CLOCK_POSITION, StoryClock, storyMinutes } from './clock';
+import { DeskLife, type LifeToy } from './life';
 import { OBJECT_ID, PartBuilder } from './builder';
-import { DESK, FIGURE_HEIGHT, FIGURES, FOLDER, FOLDERS, GLASS_Z, LAMP, LAPTOP, MONITOR, OPEN_FOLDER, PHONE, PRODUCT_FIGURES, ROOM, WINDOW, folderCentre, type FigureId, type FolderId } from './layout';
+import { DESK, FIGURE_HEIGHT, FIGURES, FOLDER, FOLDERS, GLASS_Z, LAMP, LAPTOP, MONITOR, MUG, OPEN_FOLDER, PHONE, PRODUCT_FIGURES, ROOM, WINDOW, folderCentre, type FigureId, type FolderId } from './layout';
 import {
   bakeNightEnvironment,
   createAtlasDepthMaterial,
@@ -159,8 +160,18 @@ const FIGURE_ORDER: readonly FigureId[] = ['alfa', 'ventixs', 'parati', 'skymek'
 const ALFA_TURN = 20 * (Math.PI / 180);
 const MAX_TURN_SPEED = 0.05;
 const FIGURE_LIFT = 0.012;
-const PLAY_SECONDS = 0.9;
-const PLAY_HOP = 0.02;
+/** Hover answers with a few millimetres of lift, eased in ~180 ms (the focus lift stays slow). */
+const HOVER_LIFT = 0.003;
+/** The object the shot introduces, pulsed once on touch screens in place of a hover. */
+function shotObject(chapter: ChapterId, subIndex: number): string | null {
+  if (chapter === 'company') return 'alfa';
+  if (chapter === 'products') return PRODUCT_FIGURES[Math.min(subIndex, PRODUCT_FIGURES.length - 1)] ?? null;
+  if (chapter === 'experience') return experienceFolder(subIndex);
+  return chapter === 'contact' ? 'phone' : null;
+}
+const LIFE_TOYS: readonly string[] = ['alfa', 'skymek', 'parati', 'ventixs', 'mug'];
+/** Chapters where Alfa is on screen and its head follows the pointer. */
+const ALFA_LOOKS: readonly ChapterId[] = ['company', 'products'];
 /** Warm bounce on the focused figure (desk.md §5: +10 %), as self-illumination of its albedo. */
 const FOCUS_BOUNCE = 0.03;
 
@@ -174,7 +185,9 @@ const LABELS: Record<string, { es: string; en: string }> = {
   baufest: { es: 'Baufest · Experiencia', en: 'Baufest · Experience' },
   sysarp: { es: 'SYSARP · Experiencia', en: 'SYSARP · Experience' },
   phone: { es: 'Teléfono · Contacto', en: 'Phone · Contact' },
-  lamp: { es: 'Lámpara · clic para apagarla o encenderla', en: 'Lamp · click to switch it' }
+  lamp: { es: 'Lámpara · clic para apagarla o encenderla', en: 'Lamp · click to switch it' },
+  mug: { es: 'Taza de café', en: 'Coffee mug' },
+  clock: { es: 'Reloj · clic para que suene', en: 'Clock · click to ring it' }
 };
 
 const EXPERIENCE_IDS: Record<string, string> = { tcs: 'tcs', intercorp: 'intercorp-retail', baufest: 'baufest', sysarp: 'sysarp' };
@@ -287,11 +300,11 @@ export class DeskSet implements ShotProvider {
   private folderOpen = 0;
   private readonly hingeMatrix = new Matrix4();
   private clock = 0;
-  private readonly playStart = new Map<FigureId, number>();
+  private life: DeskLife | null = null;
   private readonly onAction = (event: Event) => {
     const detail = (event as CustomEvent<{ action?: string; id?: string }>).detail;
-    if (detail?.action === 'play' && detail.id && (FIGURE_ORDER as readonly string[]).includes(detail.id)) {
-      if (this.context?.motion()) this.playStart.set(detail.id as FigureId, this.clock);
+    if (detail?.action === 'play' && detail.id && LIFE_TOYS.includes(detail.id)) {
+      this.life?.play(detail.id as LifeToy, this.clock, Boolean(this.context?.motion()) && !this.context?.capture);
       this.context?.invalidate();
       return;
     }
@@ -305,6 +318,13 @@ export class DeskSet implements ShotProvider {
     window.dispatchEvent(new CustomEvent('desk:switch', { detail: { on: !this.lampOff } }));
     this.context?.invalidate();
   };
+  private readonly onInteract = (event: Event) => {
+    const detail = (event as CustomEvent<{ id?: string; phase?: string }>).detail;
+    if (detail?.phase !== 'activate' || !detail.id) return;
+    this.life?.press.pulse(detail.id.replace(/^folder-/, ''), this.clock);
+    this.context?.invalidate();
+  };
+  private readonly coarsePointer = matchMedia('(pointer: coarse)');
   private readonly onFolderKey = (event: KeyboardEvent) => {
     if (event.key !== 'Escape' || !this.folderDetail?.active) return;
     this.onFolderAction('folder-close');
@@ -336,7 +356,8 @@ export class DeskSet implements ShotProvider {
     const statics = new PartBuilder();
     buildRoom(statics, palette);
     buildDesk(statics, palette, q);
-    buildWorkstation(statics, palette, q);
+    const workstation = new PartBuilder();
+    buildWorkstation(workstation, palette, q);
     const head = new PartBuilder();
     buildMonitorHead(head, palette, q);
     const headGeometry = head.build();
@@ -356,9 +377,10 @@ export class DeskSet implements ShotProvider {
     buildOpenFolder(statics, palette);
     buildLaptop(statics, palette);
     this.phoneMatrix = buildPhone(statics, palette);
-    buildFigures(statics, palette, q);
+    const figures = new PartBuilder();
+    buildFigures(figures, palette, q);
     const geometry = statics.build();
-    this.triangles = statics.triangleCount;
+    this.triangles = statics.triangleCount + figures.triangleCount + workstation.triangleCount;
     const roomMesh = new Mesh(geometry, material);
     roomMesh.name = 'desk-room';
     roomMesh.castShadow = high;
@@ -369,6 +391,9 @@ export class DeskSet implements ShotProvider {
     }
     this.room.add(roomMesh);
     this.disposables.push(geometry);
+    this.life = new DeskLife({ geometry: figures.build(), workstation: workstation.build(), material, depthMaterial: roomMesh.customDepthMaterial, shadows: high, palette });
+    this.room.add(this.life.object3D);
+    this.disposables.push(this.life);
     this.folderDetail = new FolderDetail({
       material,
       depthMaterial: roomMesh.customDepthMaterial,
@@ -393,13 +418,15 @@ export class DeskSet implements ShotProvider {
     this.archiveCover = spines.cover;
     this.disposables.push(spines);
     window.addEventListener('desk:action', this.onAction);
+    window.addEventListener('desk:interact', this.onInteract);
     this.clockModel = new StoryClock(
       () => {
         this.clockModel?.show(this.clockMinutes);
         if (this.context) this.context.renderer.shadowMap.needsUpdate = true;
         this.context?.invalidate();
       },
-      model => this.context?.precompile?.(model) ?? Promise.resolve()
+      model => this.context?.precompile?.(model) ?? Promise.resolve(),
+      () => this.context?.invalidate()
     );
     this.room.add(this.clockModel.group);
     if (high || context.tier === 'mid') {
@@ -533,6 +560,8 @@ export class DeskSet implements ShotProvider {
     this.picks.push({ object3D: proxy('lamp', [0.16, 0.12, 0.16], lampHead), key: 'desk:lamp', label: LABELS.lamp!, target: '#company', action: 'lamp' });
     const phone = this.phoneSurface();
     this.picks.push({ object3D: proxy('phone', [0.08, 0.16, 0.03], phone.centre, phone.quaternion), key: 'desk:phone', label: LABELS.phone!, target: '#contact' });
+    this.picks.push({ object3D: proxy('mug', [0.1, 0.1, 0.09], MUG.clone().add(new Vector3(0.01, 0.05, 0))), key: 'desk:mug', label: LABELS.mug!, target: '#contact' });
+    this.picks.push({ object3D: proxy('clock', [0.12, 0.14, 0.08], CLOCK_POSITION.clone().add(new Vector3(0, 0.07, 0))), key: 'desk:clock', label: LABELS.clock!, target: '#hero' });
   }
 
   private buildLights(high: boolean): void {
@@ -648,6 +677,7 @@ export class DeskSet implements ShotProvider {
     const pick = object ? this.resolvePick(object) : null;
     const name = pick?.key.slice(5) as keyof typeof OBJECT_ID | undefined;
     const id = name && name in OBJECT_ID ? OBJECT_ID[name] : -1;
+    this.life?.setHover(name ?? null);
     if (id === this.hoverId) return;
     this.hoverId = id;
     if (pick && name) {
@@ -687,6 +717,8 @@ export class DeskSet implements ShotProvider {
       this.settledAt = -1;
       this.lampToggledAt = -1;
       this.storySwitched = false;
+      const introduced = this.coarsePointer.matches ? shotObject(state.id, state.subIndex) : null;
+      if (introduced) this.life?.press.introduce(introduced, time);
     }
     this.clock = time;
     if (state.settled && this.settledAt < 0) this.settledAt = time;
@@ -766,15 +798,24 @@ export class DeskSet implements ShotProvider {
     }
 
     const focused = this.chapter === 'products' ? PRODUCT_FIGURES[Math.min(this.subIndex, PRODUCT_FIGURES.length - 1)] : null;
-    if (this.playStart.size) settling = true;
+    const look = motion && ALFA_LOOKS.includes(this.chapter) && this.context.pointer.active && this.context.pointer.enabled ? { ndc: this.context.pointer.ndc, camera: this.context.camera } : null;
+    const pixelScale = this.context.renderer.domElement.height / (2 * Math.tan((this.context.camera.fov * Math.PI) / 360));
+    const living = this.life?.update(dt, time, { motion, look, pixelScale, focused }) ?? false;
+    settling ||= living;
     for (const id of PRODUCT_FIGURES) {
-      const goal = id === focused || OBJECT_ID[id] === this.hoverId ? FIGURE_LIFT : 0;
-      const lift = damp(this.figureLift.get(id)!, goal, 5, step);
+      const hovered = OBJECT_ID[id] === this.hoverId;
+      const goal = id === focused ? FIGURE_LIFT : hovered ? HOVER_LIFT : 0;
+      const lift = damp(this.figureLift.get(id)!, goal, id !== focused && (hovered || this.figureLift.get(id)! <= HOVER_LIFT) ? 14 : 5, step);
       this.figureLift.set(id, lift);
       settling ||= Math.abs(lift - goal) > 1e-4;
       const yaw = this.figureYaw.get(id)!;
       this.figureYaw.set(id, id === focused && motion ? yaw + MAX_TURN_SPEED * dt : towards(yaw, 0, MAX_TURN_SPEED * step));
       if (id === focused && motion) settling = true;
+    }
+    const ringing = this.clockModel?.update(time, motion) ?? false;
+    if (ringing) {
+      settling = true;
+      if (this.context.tier === 'high') this.context.renderer.shadowMap.needsUpdate = true;
     }
     if (this.context.tier === 'high') {
       const posed = this.figurePose();
@@ -827,24 +868,14 @@ export class DeskSet implements ShotProvider {
     return settling;
   }
 
-  /** Rounded lift and turn of the figures: the lamp shadow is re-rendered only when it changes. */
-  /** A clicked figure hops and turns once around, like picking up a desk toy. */
-  private playOffset(id: FigureId): { lift: number; yaw: number } {
-    const started = this.playStart.get(id);
-    if (started === undefined) return { lift: 0, yaw: 0 };
-    const t = (this.clock - started) / PLAY_SECONDS;
-    if (t >= 1) {
-      this.playStart.delete(id);
-      return { lift: 0, yaw: 0 };
-    }
-    const eased = 1 - Math.pow(1 - t, 3);
-    return { lift: Math.sin(Math.PI * t) * PLAY_HOP, yaw: eased * Math.PI * 2 };
-  }
-
+  /** Rounded lift and turn of the figures and their moving parts: the lamp shadow is re-rendered only when it changes. */
   private figurePose(): string {
     const parts = [Math.round(this.level.alfaYaw * 200)];
-    for (const id of PRODUCT_FIGURES) parts.push(Math.round((this.figureLift.get(id) ?? 0) * 2000), Math.round((this.figureYaw.get(id) ?? 0) * 200));
-    return parts.join(',');
+    for (const id of FIGURE_ORDER) {
+      const play = this.life?.offset(id);
+      parts.push(Math.round(((this.figureLift.get(id) ?? 0) + (play?.lift ?? 0)) * 2000), Math.round(((this.figureYaw.get(id) ?? 0) + (play?.yaw ?? 0)) * 200));
+    }
+    return `${parts.join(',')}|${this.life?.poseKey() ?? ''}`;
   }
 
   private applyLevels(): void {
@@ -868,16 +899,19 @@ export class DeskSet implements ShotProvider {
     this.glass.setLampReflection(Math.min(level.lamp / 28, 1));
     this.beam.setLevel(Math.min(level.lamp / 28, 1.2));
     this.beam.setPixelScale(this.context.renderer.domElement.height, this.viewport().fov);
-    this.steam?.setStrength(this.chapter === 'contact' ? 0.9 : this.chapter === 'hero' || this.chapter === 'about' || this.chapter === 'intro' ? 0.7 : 0.45, this.level.day);
+    const steam = this.chapter === 'contact' ? 0.9 : this.chapter === 'hero' || this.chapter === 'about' || this.chapter === 'intro' ? 0.7 : 0.45;
+    this.steam?.setStrength(steam * (this.life?.steamGain() ?? 1), this.level.day);
     const uniforms = this.uniforms;
     FIGURE_ORDER.forEach((id, index) => {
-      const play = this.playOffset(id);
+      const play = this.life?.offset(id) ?? { lift: 0, yaw: 0 };
       uniforms.uFigLift.value[index] = (this.figureLift.get(id) ?? 0) + play.lift;
       uniforms.uFigYaw.value[index] = (id === 'alfa' ? level.alfaYaw : (this.figureYaw.get(id) ?? 0)) + play.yaw;
     });
-    uniforms.uSignal.value[OBJECT_ID.alfa] = level.alfaSignal;
-    for (const id of FOLDERS) uniforms.uGlow.value[OBJECT_ID[id]] = (this.folderGlow.get(id) ?? 0) * 0.32;
-    for (const id of PRODUCT_FIGURES) uniforms.uGlow.value[OBJECT_ID[id]] = ((this.figureLift.get(id) ?? 0) / FIGURE_LIFT) * FOCUS_BOUNCE;
+    uniforms.uSignal.value[OBJECT_ID.alfa] = level.alfaSignal * (this.life?.signalGain() ?? 1);
+    for (const id of FOLDERS) uniforms.uGlow.value[OBJECT_ID[id]] = (this.folderGlow.get(id) ?? 0) * 0.32 + (this.life?.glow(id) ?? 0);
+    uniforms.uGlow.value[OBJECT_ID.alfa] = this.life?.glow('alfa') ?? 0;
+    uniforms.uGlow.value[OBJECT_ID.phone] = this.life?.glow('phone') ?? 0;
+    for (const id of PRODUCT_FIGURES) uniforms.uGlow.value[OBJECT_ID[id]] = ((this.figureLift.get(id) ?? 0) / FIGURE_LIFT) * FOCUS_BOUNCE + (this.life?.glow(id) ?? 0);
     for (const id of FIGURE_ORDER) uniforms.uPresence.value[OBJECT_ID[id]] = this.presence.get(id) ?? 1;
     const closed = 1 - this.folderOpen;
     uniforms.uHinge.value.setFromMatrix4(this.hingeMatrix.makeRotationAxis(FOLDER_HINGE_AXIS, -Math.PI * 0.985 * (closed * closed * (3 - 2 * closed))));
@@ -899,8 +933,9 @@ export class DeskSet implements ShotProvider {
       const proxy = this.proxies.get(id);
       if (proxy) follow(proxy, held, proxy.position);
     }
-    uniforms.uGlow.value[OBJECT_ID.openFolder] = (this.folderGlow.get('tcs') ?? 0) * 0.25;
+    uniforms.uGlow.value[OBJECT_ID.openFolder] = (this.folderGlow.get('tcs') ?? 0) * 0.25 + (this.life?.glow('openFolder') ?? 0);
     uniforms.uHoverMix.value = this.hoverMix;
+    this.life?.pose(uniforms);
     for (const id of PRODUCT_FIGURES) {
       const proxy = this.proxies.get(id);
       if (proxy) proxy.position.y = FIGURES[id].y + FIGURE_HEIGHT[id] / 2 + (this.figureLift.get(id) ?? 0);
@@ -933,6 +968,7 @@ export class DeskSet implements ShotProvider {
 
   dispose(): void {
     window.removeEventListener('desk:action', this.onAction);
+    window.removeEventListener('desk:interact', this.onInteract);
     window.removeEventListener('keydown', this.onFolderKey);
     this.viewportObserver?.disconnect();
     this.viewportObserver = null;

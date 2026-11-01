@@ -4,6 +4,7 @@ export interface BeatPose {
   offset: Vector3;
   scale: number;
   tip: number;
+  unfold: number;
 }
 
 export type BeatPlace = (age: number, gentle: boolean, pose: BeatPose) => void;
@@ -20,6 +21,10 @@ function easeOutBack(t: number): number {
   return 1 + 2.4 * x * x * x + 1.4 * x * x;
 }
 
+export function unfoldAngle(age: number, gentle: boolean): number {
+  return gentle ? 0 : 1.35 * (1 - easeOutBack(age / 0.46));
+}
+
 function popScale(age: number, gentle: boolean): number {
   return gentle ? 1 : Math.max(0.001, easeOutBack(age / 0.32));
 }
@@ -32,9 +37,11 @@ export function floatUp(from: Vector3, to: Vector3, seconds: number): BeatPlace 
   };
 }
 
+const EMERGE_FROM = new Vector3(0, -0.008, 0);
+
 export function popIn(at: Vector3): BeatPlace {
   return (age, gentle, pose) => {
-    pose.offset.copy(at);
+    pose.offset.lerpVectors(EMERGE_FROM, at, gentle ? 1 : easeOut(age / 0.38));
     pose.scale = popScale(age, gentle);
     pose.tip = 0;
   };

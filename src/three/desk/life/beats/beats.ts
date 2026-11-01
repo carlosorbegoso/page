@@ -8,7 +8,7 @@ import {
   type WebGLRenderer
 } from 'three';
 import { BeatPlane } from './plane';
-import type { BeatPose } from './paths';
+import { unfoldAngle, type BeatPose } from './paths';
 import { scriptFor, type BeatSpec, type BeatToy } from './scripts';
 
 const FADE_IN = 0.18;
@@ -20,6 +20,9 @@ const AXIS_X = new Vector3(1, 0, 0);
 const MIN_WIDTH_SHARE = { wide: 0.2, tall: 0.62 } as const;
 const MAX_GROWTH = { camera: 4, yaw: 1.8 } as const;
 const EDGE = { side: 0.05, top: 0.16, bottom: 0.06 } as const;
+const LEAN = 0.16;
+const PITCH = 0.07;
+const AXIS_Y = new Vector3(0, 1, 0);
 
 interface LiveBeat {
   toy: BeatToy;
@@ -49,6 +52,7 @@ export class StoryBeats {
   private readonly tip = new Quaternion();
   private readonly size = new Vector3();
   private readonly viewport = new Vector2();
+  private readonly hinge = new Vector3();
 
   constructor() {
     this.object3D.name = 'desk-beats';
@@ -88,7 +92,7 @@ export class StoryBeats {
       gentle,
       spawned: false,
       endsAt: time + spec.until,
-      pose: { offset: new Vector3(), scale: 1, tip: 0 }
+      pose: { offset: new Vector3(), scale: 1, tip: 0, unfold: 0 }
     };
     plane.opacity = 0;
     plane.mesh.frustumCulled = false;
@@ -129,6 +133,19 @@ export class StoryBeats {
     this.world.applyMatrix4(camera.matrixWorld);
   }
 
+  private standUp(beat: LiveBeat, scale: number): void {
+    const lean = -Math.sign(beat.pose.offset.x) * LEAN;
+    this.facing.multiply(this.tip.setFromAxisAngle(AXIS_Y, lean));
+    this.facing.multiply(this.tip.setFromAxisAngle(AXIS_X, -PITCH));
+    const half = (beat.spec.size.height * scale) / 2;
+    const angle = beat.pose.unfold;
+    this.hinge
+      .set(0, -half + half * Math.cos(angle), -half * Math.sin(angle))
+      .applyQuaternion(this.facing);
+    this.world.add(this.hinge);
+    this.facing.multiply(this.tip.setFromAxisAngle(AXIS_X, -angle));
+  }
+
   private compose(beat: LiveBeat, camera: Camera, renderer: WebGLRenderer): void {
     const { pose, plane } = beat;
     this.world.copy(beat.anchor);
@@ -138,6 +155,7 @@ export class StoryBeats {
       camera.getWorldQuaternion(this.facing);
       if (camera instanceof PerspectiveCamera)
         this.keepOnScreen(beat.spec, pose.scale * grow, camera);
+      this.standUp(beat, pose.scale * grow);
     } else {
       camera.getWorldPosition(this.towards).sub(this.world);
       this.facing.setFromAxisAngle(UP, Math.atan2(this.towards.x, this.towards.z));
@@ -182,6 +200,7 @@ export class StoryBeats {
         window.dispatchEvent(new CustomEvent('desk:beat', { detail: { sound: beat.spec.sound } }));
     }
     beat.spec.place(age, beat.gentle, beat.pose);
+    beat.pose.unfold = beat.spec.face === 'camera' ? unfoldAngle(age, beat.gentle) : 0;
     const left = beat.endsAt - time;
     beat.plane.opacity = fadeIn(age, beat.gentle) * Math.min(1, left / FADE_OUT);
   }

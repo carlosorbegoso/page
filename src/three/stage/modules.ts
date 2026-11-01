@@ -1,12 +1,10 @@
 import type { Object3D, PerspectiveCamera, WebGLRenderer } from 'three';
-import { registeredFx, registeredShotProvider, registeredStations, type FxPipeline, type ShotProvider, type StationContext, type StationModule } from '../contracts';
+import { registeredFx, registeredShotProvider, type FxPipeline, type ShotProvider, type StationContext } from '../contracts';
 import type { StagePointer } from '../pointer';
 import type { Tier } from '../tier';
 import type { World } from '../world';
 
-type Loadable = ShotProvider | StationModule;
-
-async function swapModule<T extends Loadable>(current: T | null, next: T | null, world: World, context: () => StationContext, label: string): Promise<T | null> {
+async function swapProvider(current: ShotProvider | null, next: ShotProvider | null, world: World, context: () => StationContext): Promise<ShotProvider | null> {
   if (next === current) return current;
   if (current) {
     current.object3D.removeFromParent();
@@ -18,7 +16,7 @@ async function swapModule<T extends Loadable>(current: T | null, next: T | null,
     world.scene.add(next.object3D);
     return next;
   } catch (error) {
-    console.error(`[stage] ${label} failed`, error);
+    console.error('[stage] shot provider failed', error);
     return null;
   }
 }
@@ -39,7 +37,6 @@ export interface ModulesHost {
 export class StageModules {
   fx: FxPipeline | null = null;
   private provider: ShotProvider | null = null;
-  private legacy: StationModule | null = null;
 
   constructor(private readonly host: ModulesHost) {}
 
@@ -49,15 +46,8 @@ export class StageModules {
     if (provider !== this.provider) {
       const previous = this.provider;
       this.provider = null;
-      this.provider = await swapModule(previous, provider, world, () => this.host.context(), 'shot provider');
+      this.provider = await swapProvider(previous, provider, world, () => this.host.context());
       world.setProvider(this.provider);
-    }
-    const legacy = this.provider ? null : (registeredStations().get('hero') ?? null);
-    if (legacy !== this.legacy) {
-      const previous = this.legacy;
-      this.legacy = null;
-      this.legacy = await swapModule(previous, legacy, world, () => this.host.context(), 'legacy station');
-      world.setLegacy(this.legacy);
     }
     this.attachFx();
     if (this.host.ready()) this.host.refreshShot();
@@ -100,7 +90,6 @@ export class StageModules {
 
   dispose(): void {
     this.provider?.dispose();
-    this.legacy?.dispose();
     this.fx?.dispose();
   }
 }

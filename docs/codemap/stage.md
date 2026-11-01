@@ -26,7 +26,7 @@ Qué archivo editar en el motor 3D: arranque, Stage, director, scroll, placas, i
 | Desvío de cámara (acercarse a un objeto y volver) | `src/three/stage/detour.ts` |
 | Director de cámara: límites, duración y easing de cada transición, parallax | `src/three/director.ts` |
 | Scroll ↔ capítulo (ScrollTrigger) | `src/three/scroll.ts`; capítulo de cada sección en `src/three/sections.ts` |
-| Escena base: cielo mínimo y adaptador del módulo heredado | `src/three/world.ts`, `src/three/scenes/Sky.ts` |
+| Escena base: cielo mínimo y luces de respaldo sin escritorio | `src/three/world.ts`, `src/three/scenes/Sky.ts` |
 | `damp`, `smoothstep`, tipo de layout (`layoutKind`, `stackedLayout`) | `src/three/scenes/common.ts` |
 | Placas HTML sobre la escena 3D (montaje, visibilidad por capítulo) | `src/three/plates/Plates.ts` (`three/plates.ts` solo reexporta); estilos en `src/styles/plates/` |
 | Placas: envolver y devolver las placas, capas CSS3D y 2D | `src/three/plates/mount.ts` |
@@ -37,6 +37,6 @@ Qué archivo editar en el motor 3D: arranque, Stage, director, scroll, placas, i
 | Puntero normalizado de la escena | `src/three/pointer.ts` |
 | Movimiento permitido (reduced, pausado) | `src/three/motion.ts` |
 | Trabajo en tiempo libre del hilo (`onIdle`, `yieldToMain`) | `src/three/idle.ts` |
-| Caché de GLB y texturas (refcount), loaders | `src/three/assets.ts`, variantes de modelo en `models.generated.ts` (lo escribe `bun run assets`) |
+| Caché de GLB y texturas (refcount), loaders | `src/three/assets.ts`; GLB optimizados con `bun run assets` (`scripts/optimize-assets.ts`) |
 | Overlay `?debug` (FPS p75, DPR, draw calls, memoria) | `src/three/debug.ts` |
 | Tokens CSS leídos desde three (`tokenColor`, `tokenNumber`) | `src/three/tokens.ts` |

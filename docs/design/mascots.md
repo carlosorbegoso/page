@@ -24,7 +24,7 @@ Se fusionan en un solo mesh por figura con id de objeto; no hay nodos con nombre
 | Burbu | Ventixs | `figures/burbu.ts` | Burbuja de diálogo con tres puntos, sobre un disco oscuro con línea de señal | Cerámica tintada de verde; puntos de papel; señal `--color-burbu-signal` |
 | Caja | Parati | `figures/gift.ts` | Caja con tapa algo más ancha, cinta con lazo y etiqueta | Cerámica tintada de rosa; cinta crema; ranura rosa emisiva |
 
-Alfa tiene ojos: es la excepción a "sin caras". Los tokens `--color-burbu-body`, `--color-gift-body`, `--color-tool-body` y `--alfa-roughness`/`--*-metalness` describen el registro de Tripo; las figuras procedurales no los leen.
+Alfa tiene ojos: es la excepción a "sin caras".
 
 ## Disposición en la peana (`PLINTH`, `FIGURES`)
 

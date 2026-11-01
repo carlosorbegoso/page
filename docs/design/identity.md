@@ -35,9 +35,9 @@ Tokens en código: `src/styles/tokens/` (`fonts.css`, `colors.css`, `scale.css`,
 
 ## Tokens que lee el 3D (`--color-scene-bg`, `--scene-tone-exposure`, `--alfa-*`, `--fx-*`)
 
-- El motor lee los tokens con `tokenNumber` / `getComputedStyle` (`src/three/tokens.ts`): colores hex de `colors.css` y números sin unidad de `stage.css` (rugosidad, metalness, intensidades, FX).
+- El motor lee los tokens con `tokenNumber` / `getComputedStyle` (`src/three/tokens.ts`): colores hex de `colors.css` y números sin unidad de `stage.css` (intensidades, FX).
 - Renderer: fondo `--color-scene-bg`, ACES, exposición base `--scene-tone-exposure` (1; 0.9 en claro) en `src/three/stage/renderer.ts`. La exposición y el color por capítulo los pone `src/three/fx/grading.ts`.
-- Definidos pero sin lector en `src/three`: `--lamp-intensity`, `--monitor-intensity`, `--moonlight-intensity`, `--fx-chromatic-offset`. Las intensidades reales están en `src/three/desk/set/levels.ts`.
+- Las intensidades de las luces del escritorio están en `src/three/desk/set/levels.ts`, no en tokens.
 - Set, luces y FX: `desk.md`. Materiales de las figuras: `mascots.md`.
 
 ## Monograma y favicon (`public/favicon.svg`)

@@ -30,7 +30,7 @@ Clic en un objeto (`src/three/stage/navigate.ts`): `desk:action` para juguetes y
 Lo registra el escritorio con `registerShotProvider` (`src/three/desk/index.ts`). Miembros: `object3D`, `load(context)`, `update(dt, t, state)` (true mientras se mueve), `getShot(chapter, sub)`, `subShotCount`, `getSurface('monitor'|'phone')`, `getAnchor(name)`, `getFocus(chapter, sub)`, `picks`, `resolvePick`, `setHover`, `dispose`. Detalle del escritorio: `docs/3d/desk.md`.
 
 - Sub-planos de un capítulo: `ShotProvider.subShotCount`; si no hay, el número de placas; mínimo `products` = 3.
-- `StationModule`, `registerStation` y `StationContext.readingPose` son `@deprecated`. `World` todavía adapta un `StationModule` registrado en `hero` cuando no hay `ShotProvider`, pero nada llama a `registerStation`.
+- `StationContext.readingPose` es heredado: devuelve el plano 0 del capítulo (`World.shot`) y el escritorio no lo usa.
 
 ## `CameraDirector` (`CAMERA_LIMITS`)
 

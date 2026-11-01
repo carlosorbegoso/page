@@ -147,7 +147,7 @@ Principio: el post-procesado solo debe notarse si se quita. Un único composer; 
 | DoF | `--fx-dof-bokeh-scale` 2.5 × bokeh del capítulo (1–1.4) | `full` en `high`, `lite` en `mid` |
 | Grano | `--fx-grain` 0.035 | Estático en pausa |
 | Viñeta | `--fx-vignette-darkness` 0.5 · offset 0.32; por capítulo en `grading.ts` (0.35 en `outro`) | |
-| Aberración cromática | 0.005 de noche, 0 de día | Casi invisible; `--fx-chromatic-offset` no se lee |
+| Aberración cromática | 0.005 de noche, 0 de día | Casi invisible |
 | Fluido | Lluvia del vidrio y vapor de la taza; 256 en `high`, 128 en `mid` | Nunca en texto ni en la cámara |
 | Tone mapping | ACES, exposición por capítulo (tabla de capítulos) | |
 

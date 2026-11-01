@@ -11,13 +11,6 @@ Lo que falta hacer y las preguntas abiertas para Carlos; cuando algo se termina,
 - Reflejo falso en la ventana desde los ángulos oblicuos.
 - Decidir el look de las figuras antes de generarlas en Tripo: el Alfa de hoy es un robot de cerámica blanca con ojos, no el monolito de obsidiana del prompt (`docs/design/mascots.md`).
 
-## Código muerto (sin borrar)
-- `src/three/mascots/**` y `src/three/models.generated.ts`: nadie los importa; la parte `MASCOTS` de `scripts/optimize-assets.ts` solo los alimenta a ellos.
-- Ruta heredada de estaciones: `registerStation`, `StationModule`, `LegacyDeskShots` y `World.setLegacy` (`src/three/world.ts`, `src/three/stage/modules.ts`).
-- `scripts/capture-fallbacks.ts` manda `&progress=1&w=`, que `src/three/index.ts` ignora.
-- Tokens que nadie lee: `--lamp-intensity`, `--monitor-intensity`, `--moonlight-intensity`, `--fx-chromatic-offset`, `--color-{burbu,gift,tool}-body` y los `--*-roughness` / `--*-metalness` de las figuras.
-- Prop `shine` de `KineticText`: no la usa nadie.
-
 ## Marca
 - El CV en PDF (`public/cv/Carlos-Orbegoso-CV.pdf`) no lleva el monograma «C»: no hay fuente editable en el repo.
 

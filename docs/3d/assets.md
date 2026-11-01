@@ -19,8 +19,8 @@ El resto del escritorio (figuras, cuarto, laptop, Pokémon) es geometría proced
 
 ## Pipeline `bun run assets`
 
-- `scripts/optimize-assets.ts`: lee `assets-src/models/<id>.glb|gltf` con `<id>` ∈ `alfa`, `burbu`, `gift`, `tool` y escribe `public/models/<id>.high.<hash>.glb` (≤ 25 k tris, texturas ≤ 1024 px) y `<id>.mid.<hash>.glb` (≤ 8 k tris, ≤ 512 px), con Meshopt y KTX2 (ETC1S color/emisivo, UASTC normal/ORM) si está `ktx` (`brew install ktx`); sin `ktx`, las texturas quedan en su formato. Reescribe `src/three/models.generated.ts` y copia el transcoder.
-- Hoy no hay fuentes en `assets-src/models/` y lo único que consumía `models.generated.ts` era `src/three/mascots/`, que nada importa. Un GLB nuevo para el escritorio tendría que cargarse desde `src/three/desk/**` con `acquireGltf`.
+- `scripts/optimize-assets.ts`: lee cada `assets-src/models/<id>.glb|gltf` y escribe `public/models/<id>.high.<hash>.glb` (≤ 25 k tris, texturas ≤ 1024 px) y `<id>.mid.<hash>.glb` (≤ 8 k tris, ≤ 512 px), con Meshopt y KTX2 (ETC1S color/emisivo, UASTC normal/ORM) si está `ktx` (`brew install ktx`); sin `ktx`, las texturas quedan en su formato. Imprime cada nombre con hash y copia el transcoder.
+- Hoy no hay fuentes en `assets-src/models/`. Nada lee los nombres con hash por sí solo: el módulo de `src/three/desk/**` que use el GLB lo carga con `acquireGltf` y el nombre que imprimió el script.
 
 ## Checklist de intake (Tripo u otro)
 

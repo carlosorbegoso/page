@@ -123,24 +123,9 @@ export interface StationCameraPose {
   roll?: number;
 }
 
-export interface StationModule {
-  readonly object3D: Object3D;
-  load(context: StationContext): Promise<void>;
-  enter(): void;
-  leave(): void;
-  update(dt: number, time: number, progress: number): boolean | void;
-  getPlateAnchor?(plateId: string): PlateAnchor | null;
-  getCameraPose?(progress: number): StationCameraPose | null;
-  readonly picks?: readonly StationPick[];
-  resolvePick?(object: Object3D): StationPick | null;
-  setHover?(object: Object3D | null): void;
-  dispose(): void;
-}
-
 type Listener = () => void;
 let shotProvider: ShotProvider | null = null;
 let fx: FxPipeline | null = null;
-const stations = new Map<ChapterId, StationModule>();
 const listeners = new Set<Listener>();
 
 function notify(): void {
@@ -165,25 +150,12 @@ export function registerFx(pipeline: FxPipeline): () => void {
   };
 }
 
-export function registerStation(id: ChapterId, module: StationModule): () => void {
-  stations.set(id, module);
-  notify();
-  return () => {
-    if (stations.get(id) === module) stations.delete(id);
-    notify();
-  };
-}
-
 export function registeredShotProvider(): ShotProvider | null {
   return shotProvider;
 }
 
 export function registeredFx(): FxPipeline | null {
   return fx;
-}
-
-export function registeredStations(): ReadonlyMap<ChapterId, StationModule> {
-  return stations;
 }
 
 export function onRegistryChange(listener: Listener): () => void {

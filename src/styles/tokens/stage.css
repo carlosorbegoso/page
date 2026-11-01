@@ -17,22 +17,8 @@
   --z-skip: 60;
 
   --scene-tone-exposure: 1;
-  --alfa-roughness: 0.15;
-  --alfa-metalness: 0;
   --alfa-signal-intensity: 1;
-  --burbu-roughness: 0.75;
-  --burbu-metalness: 0;
   --burbu-signal-intensity: 0.8;
-  --gift-roughness: 0.4;
-  --gift-metalness: 0;
-  --gift-ribbon-roughness: 0.35;
-  --gift-ribbon-metalness: 0.05;
-  --tool-roughness: 0.38;
-  --tool-metalness: 1;
-  --tool-band-roughness: 0.4;
-  --tool-band-metalness: 0.6;
-  --alfa-ring-roughness: 0.3;
-  --alfa-ring-metalness: 1;
 
   --plate-width: 36rem;
   --plate-padding: clamp(1.25rem, 0.9rem + 1.6vw, 2rem);
@@ -44,11 +30,8 @@
   --plate-text-halo:
     0 0 1px rgb(4 6 11 / 0.9), 0 0 6px rgb(4 6 11 / 0.85), 0 0 18px rgb(4 6 11 / 0.7);
 
-  --lamp-intensity: 28;
   --lamp-angle: 0.62;
   --lamp-penumbra: 0.75;
-  --monitor-intensity: 5;
-  --moonlight-intensity: 0.45;
   --desk-ambient-intensity: 0.08;
   --fx-bloom-strength: 0.32;
   --fx-bloom-radius: 0.45;
@@ -56,7 +39,6 @@
   --fx-grain: 0.035;
   --fx-vignette-darkness: 0.5;
   --fx-vignette-offset: 0.32;
-  --fx-chromatic-offset: 0;
   --fx-dof-bokeh-scale: 2.5;
   --fx-pointer-damping: 0.06;
 }

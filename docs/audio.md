@@ -1,6 +1,6 @@
 # Sonido ambiente: "Una noche en el escritorio"
 
-Audio generativo con Web Audio API. **Cero archivos de audio**: osciladores, ruido, gotas e impulsos de reverb se sintetizan en el navegador. Apagado por defecto.
+Web Audio API. El cuarto (lluvia, zumbido, ciudad, pad, teclas, tocks, chime) se sintetiza en el navegador. Encima va **música CC0 que sigue la historia** (`src/audio/music.ts`): lofi esta noche, piano frío en los años de día (`experience`), pad al amanecer (`outro`), con crossfade de 3 s (5 s al amanecer). También hay muestras CC0 del interruptor de la lámpara y de una hoja al sacar cada carpeta. Apagado por defecto: los archivos (`public/audio/`, ~3,2 MB en AAC 96 kbps) solo se descargan al activar el sonido.
 
 ## Diseño sonoro
 
@@ -79,3 +79,16 @@ Fijados por cálculo, no a oído: ajustar escuchando.
 - `src/audio/ambience.ts`: `MASTER_LEVEL` (0.11, no pasar de ~0.15) y `LEVELS` (`pad` 0.32, `room` 1, `key` 0.1, `tockHover` 0.09, `tockClick` 0.18, `chime` 0.16), `SWELL_GAIN`, `SUB_SHOT_SWELL_GAIN`, tiempos y límites de frecuencia.
 - `src/audio/room.ts`: `ROOM_LEVELS` (`rainWash` 0.05, `drops` 0.07, `hum` 0.12, `city` 0.16) y `DROPS_PER_SECOND`.
 - `src/audio/chapters.ts`: por capítulo `chord`, `cutoff`, `rain`, `hum`, `city`, `room`, `hall`, `crossfade`.
+
+
+## Créditos (todo CC0 1.0, sin atribución obligatoria)
+
+| Archivo | Obra | Autor | Fuente |
+|---|---|---|---|
+| `music-night.m4a` | Chill lofi inspired (loop edit) | omfgdude, loop de qubodup | https://opengameart.org/content/chill-lofi-inspired-loop-edit |
+| `music-day.m4a` | First Light Particles | yoiyami | https://opengameart.org/content/first-light-particles-%E2%80%93-cc0-atmospheric-pianoambient-track |
+| `music-dawn.m4a` | Heavenly Loop | isaiah658 | https://opengameart.org/content/heavenly-loop |
+| `switch-on.m4a`, `switch-off.m4a` | Light switch turn on and off | funnydude | https://opengameart.org/content/light-switch-turn-on-and-off-sfx-0 |
+| `page-flip.m4a` | 10 book page flips (n.º 2) | starninjas | https://opengameart.org/content/10-book-page-flips |
+
+Convertidos con `ffmpeg -vn -map_metadata -1 -c:a aac -b:a 96k`.

@@ -1,5 +1,6 @@
 import { createImpulse, createNoise } from './buffers';
 import { isChapterId, midiToHz, PRESETS, type ChapterId, type ChapterPreset } from './chapters';
+import { MusicBed } from './music';
 import { RoomTone } from './room';
 import { playChime, playKey, playTock } from './voices';
 
@@ -7,7 +8,10 @@ import { playChime, playKey, playTock } from './voices';
 export const MASTER_LEVEL = 0.11;
 
 const LEVELS = {
-  pad: 0.32,
+  /** The pad steps back to a colour under the music. */
+  pad: 0.12,
+  music: 2.2,
+  sample: 0.5,
   room: 1,
   key: 0.1,
   tockHover: 0.09,
@@ -107,6 +111,7 @@ export class Ambience {
   private lastHoverLabel: string | null = null;
   private chimeTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly abort = new AbortController();
+  private readonly music: MusicBed;
 
   constructor(private readonly context: AudioContext) {
     const limiter = context.createDynamicsCompressor();
@@ -157,6 +162,10 @@ export class Ambience {
     this.chimeBus = context.createGain();
     this.connectWithSends(this.chimeBus, 0.6, 0.6, 0.5);
 
+    this.music = new MusicBed(context, this.fxBus);
+    this.music.output.gain.value = LEVELS.music;
+    this.connectWithSends(this.music.output, 1, 0.12, 0);
+
     this.paused =
       document.documentElement.dataset.motion === 'paused' ||
       matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -169,6 +178,7 @@ export class Ambience {
     if (this.context.state !== 'running') await this.context.resume();
     if (!this.enabled) return;
     if (!this.layer) this.setChapter(this.chapter ?? this.chapterFromDom(), false);
+    this.music.follow(this.chapter ?? this.chapterFromDom());
     if (document.visibilityState === 'hidden') return;
     this.rampMaster(MASTER_LEVEL, FADE_IN_SECONDS);
   }
@@ -183,6 +193,7 @@ export class Ambience {
 
   dispose(): void {
     this.abort.abort();
+    this.music.stop();
     this.roomTone.dispose();
     this.lfo.stop();
     void this.context.close();
@@ -204,6 +215,9 @@ export class Ambience {
     on<{ source?: string }>('product:focus', detail => this.onSceneSelect(detail?.source));
     on<{ source?: string }>('experience:focus', detail => this.onSceneSelect(detail?.source));
     on<unknown>('desk:key', () => this.onKey());
+    on<{ on?: boolean }>('desk:switch', detail => {
+      if (this.enabled) void this.music.playSample(detail?.on === false ? 'switchOff' : 'switchOn', LEVELS.sample);
+    });
     on<{ paused?: boolean }>('motion:toggle', detail => {
       this.paused = Boolean(detail?.paused);
     });
@@ -223,6 +237,7 @@ export class Ambience {
       if (subIndex !== this.subIndex) {
         this.subIndex = subIndex;
         this.swellBy(SUB_SHOT_SWELL_GAIN);
+        if (id === 'experience' && subIndex > 0 && this.canPlayDetail()) void this.music.playSample('pageFlip', LEVELS.sample * 0.7);
       }
       return;
     }
@@ -245,6 +260,7 @@ export class Ambience {
 
   private setChapter(id: ChapterId, withSwell: boolean): void {
     this.chapter = id;
+    if (this.enabled) this.music.follow(id);
     if (id !== 'contact') this.clearChimeTimer();
     const preset = PRESETS[id];
     const now = this.context.currentTime;

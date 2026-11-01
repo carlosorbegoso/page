@@ -233,6 +233,7 @@ export class DeskSet implements ShotProvider {
   /** The visitor switched the lamp off by clicking it; the story switches it back on at the next chapter. */
   private lampOff = false;
   private lampToggledAt = -1;
+  private storySwitched = false;
   private clock = 0;
   private readonly onAction = (event: Event) => {
     if ((event as CustomEvent<{ action?: string }>).detail?.action !== 'lamp') return;
@@ -557,6 +558,7 @@ export class DeskSet implements ShotProvider {
       this.subIndex = state.subIndex;
       this.settledAt = -1;
       this.lampToggledAt = -1;
+      this.storySwitched = false;
     }
     this.clock = time;
     if (state.settled && this.settledAt < 0) this.settledAt = time;
@@ -578,6 +580,10 @@ export class DeskSet implements ShotProvider {
       } else if (switchDelay === undefined || !motion) {
         level.lamp = damp(level.lamp, light.lamp, 4, step);
       } else if (this.settledAt >= 0 && time - this.settledAt >= switchDelay) {
+        if (!this.storySwitched) {
+          this.storySwitched = true;
+          if (Math.abs(level.lamp - light.lamp) > 2) window.dispatchEvent(new CustomEvent('desk:switch', { detail: { on: light.lamp > level.lamp } }));
+        }
         level.lamp = filamentSwitch(level.lamp, light.lamp, time - this.settledAt - switchDelay, step);
       }
       settling ||= switchDelay !== undefined && Math.abs(level.lamp - light.lamp) > 0.05;

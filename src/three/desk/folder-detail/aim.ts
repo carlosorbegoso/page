@@ -2,6 +2,7 @@ import { Matrix4, Quaternion, Vector3, type PerspectiveCamera } from 'three';
 import { FOLDER, FOLDERS, ROOM, folderCentre, type FolderId } from '../layout';
 import { CLEAR_X, SLIDE_END, TURN_START } from './constants';
 import { ease } from './ease';
+import { FLAP_OPEN } from './flap';
 
 const scratch = new Matrix4();
 const scratchQuaternion = new Quaternion();
@@ -12,50 +13,99 @@ const UP = new Vector3(0, 1, 0);
 const scratchEye = new Vector3();
 const scratchForward = new Vector3();
 const scratchRay = new Vector3();
-/** Width of the box plus its cover opened past square, in box widths. */
-const COVER_SPREAD = 1.45;
 /** Slight turn that keeps the spine label in view while the cover opens on the other edge. */
 const HOLD_YAW = 0.12;
-/** Nearer than this share of the focus distance the depth of field blurs the sheet. */
-const FOCUS_SHARE = 0.8;
-const SPOT_MAX_X = 0.8;
+/** The held box never comes nearer than this share of the shelf distance (the depth of field racks onto it). */
+const FOCUS_SHARE = 0.6;
 const SPOT_STEP = 0.04;
+const SCREEN_EDGE = 0.94;
+const PUSH_STEP = 1.08;
+const MAX_PUSH = 1.8;
+const MIN_PULL = 0.75;
+/** Screen width of the opened cover, in box widths. */
+const COVER_WIDTH = Math.cos(Math.PI - FLAP_OPEN);
 
 /** Beyond the near end of the stack a held box only has to clear the wall. */
 const STACK_FRONT_Z = folderCentre(FOLDERS[0]).z + FOLDER.spine / 2 + FOLDER.depth / 2 + 0.02;
 const WALL_X = ROOM.left + FOLDER.depth / 2 + 0.03;
 
+interface HoldSpot {
+  /** NDC centre of the box and the part of its cover kept on screen. */
+  x: number;
+  y: number;
+  /** Share of the screen height and width they may fill. */
+  height: number;
+  width: number;
+  /** Box widths of opened cover kept on screen; a tall screen lets the cover run off its left edge. */
+  cover: number;
+}
+
 function clearOfShelf(at: Vector3): boolean {
   return at.x >= CLEAR_X || (at.z >= STACK_FRONT_Z && at.x >= WALL_X);
 }
 
-/** First screen spot (NDC) tried for the held box's centre: right of the panel on wide screens, above it on tall ones. */
-function holdSpot(aspect: number): { x: number; y: number; height: number; width: number } {
-  return aspect >= 1 ? { x: 0.34, y: 0.04, height: 0.62, width: 0.5 } : { x: -0.2, y: 0.4, height: 0.42, width: 0.86 };
+/** The open box is the shot's subject (the experience panel is hidden in 3D): centred and large. */
+function holdSpot(aspect: number): HoldSpot {
+  return aspect >= 1
+    ? { x: 0.06, y: -0.02, height: 0.64, width: 0.78, cover: COVER_WIDTH }
+    : { x: 0, y: 0.04, height: 0.5, width: 0.96, cover: COVER_WIDTH * 0.08 };
+}
+
+function placeOnRay(camera: PerspectiveCamera, x: number, y: number, depth: number, out: Vector3): Vector3 {
+  const eye = camera.getWorldPosition(scratchEye);
+  const forward = camera.getWorldDirection(scratchForward);
+  const ray = scratchRay.set(x, y, 0.5).unproject(camera).sub(eye).normalize();
+  return out.copy(eye).addScaledVector(ray, depth / ray.dot(forward));
+}
+
+/** Back from the fitting distance first; a shot too close to the shelf then lets the box come nearer, a little larger. */
+function depthsToTry(nearest: number): number[] {
+  const depths: number[] = [];
+  for (let depth = nearest; depth <= nearest * MAX_PUSH; depth *= PUSH_STEP) depths.push(depth);
+  for (let depth = nearest / PUSH_STEP; depth >= nearest * MIN_PULL; depth /= PUSH_STEP) depths.push(depth);
+  return depths;
+}
+
+/** Screen x positions for the box centre within [lo, hi], nearest to `preferred` first. */
+function* candidatesAround(preferred: number, lo: number, hi: number): Generator<number> {
+  const start = Math.min(Math.max(preferred, lo), hi);
+  for (let offset = 0; start + offset <= hi || start - offset >= lo; offset += SPOT_STEP) {
+    if (start + offset <= hi) yield start + offset;
+    if (offset > 0 && start - offset >= lo) yield start - offset;
+  }
+}
+
+/** Searches outwards from the spot, then further back, for a box centre clear of the shelf with the box and its kept cover on screen. */
+function findClearSpot(camera: PerspectiveCamera, spot: HoldSpot, nearest: number, tan: number, targetAt: Vector3): boolean {
+  for (const depth of depthsToTry(nearest)) {
+    const halfBox = FOLDER.depth / 2 / (depth * tan * camera.aspect);
+    const lo = -SCREEN_EDGE + halfBox * (1 + 2 * spot.cover);
+    const hi = SCREEN_EDGE - halfBox;
+    for (const x of candidatesAround(spot.x + spot.cover * halfBox, lo, hi)) {
+      if (clearOfShelf(placeOnRay(camera, x, spot.y, depth, targetAt))) return true;
+    }
+  }
+  return false;
 }
 
 /**
  * Where the visitor holds a shelf box: near the shot's focus distance (the shelf), so depth of field
  * keeps the sheet sharp, pushed back only when the box and its opened cover would not fit. It sits on
- * the ray through `holdSpot`, moved right across the screen until it clears the stack and the wall.
+ * the ray through `holdSpot`, moved sideways (and back) until it clears the stack and the wall.
  */
 export function aimShelfFolder(id: FolderId, camera: PerspectiveCamera, targetAt: Vector3, targetTurn: Quaternion): void {
   camera.updateMatrixWorld();
-  const eye = camera.getWorldPosition(scratchEye);
   const forward = camera.getWorldDirection(scratchForward);
   const spot = holdSpot(camera.aspect);
   const tan = Math.tan((camera.fov * Math.PI) / 360);
-  const focus = scratchPosition.copy(folderCentre(id)).sub(eye).dot(forward) * FOCUS_SHARE;
+  const focus = scratchPosition.copy(folderCentre(id)).sub(camera.getWorldPosition(scratchEye)).dot(forward) * FOCUS_SHARE;
   const fitHeight = FOLDER.height / (spot.height * 2 * tan);
-  const fitWidth = (FOLDER.depth * COVER_SPREAD) / (spot.width * 2 * tan * camera.aspect);
-  const depth = Math.max(focus, fitHeight, fitWidth);
-  for (let x = spot.x; x <= SPOT_MAX_X; x += SPOT_STEP) {
-    const ray = scratchRay.set(x, spot.y, 0.5).unproject(camera).sub(eye).normalize();
-    targetAt.copy(eye).addScaledVector(ray, depth / ray.dot(forward));
-    if (clearOfShelf(targetAt)) break;
+  const fitWidth = (FOLDER.depth * (1 + spot.cover)) / (spot.width * 2 * tan * camera.aspect);
+  const nearest = Math.max(focus, fitHeight, fitWidth);
+  if (!findClearSpot(camera, spot, nearest, tan, targetAt)) {
+    placeOnRay(camera, spot.x, spot.y, nearest, targetAt);
   }
-  if (!clearOfShelf(targetAt)) targetAt.x = Math.max(targetAt.x, CLEAR_X);
-  scratch.lookAt(eye, targetAt, UP);
+  scratch.lookAt(camera.getWorldPosition(scratchEye), targetAt, UP);
   targetTurn.setFromRotationMatrix(scratch).multiply(scratchQuaternion.setFromAxisAngle(UP, -HOLD_YAW));
 }
 

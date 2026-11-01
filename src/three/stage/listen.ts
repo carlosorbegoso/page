@@ -20,6 +20,7 @@ export interface ListenHost {
   setMotion(state: MotionState): void;
   navigate(pick: StationPick): void;
   themeChanged(): void;
+  refocus(point: Vector3 | null): void;
 }
 
 type Cleanups = Array<() => void>;
@@ -74,4 +75,5 @@ export function listenStage(host: ListenHost, cleanups: Cleanups): void {
     cleanups.push(setupInteraction({ source: host.source, camera: host.camera, canvas: host.canvas, navigate: pick => host.navigate(pick), invalidate: () => host.bump() }));
   }
   listenTheme(host, cleanups);
+  onWindow(cleanups, 'desk:focus' as keyof WindowEventMap, event => host.refocus((event as CustomEvent<{ point: Vector3 | null }>).detail.point));
 }

@@ -6,8 +6,8 @@ import { ease } from './ease';
 import type { TwinLook } from './mesh';
 
 export const FLAP_THICKNESS = 0.003;
-/** The flap swings past square, so from the camera it reads as an opened cover, not a door. */
-const FLAP_OPEN = 1.75;
+/** Opened almost flat beside the box, like the left page of a book, so it never stands between the camera and the sheet. */
+export const FLAP_OPEN = 2.8;
 /** Share of the take-out after which the box, already facing the camera, opens. */
 const FLAP_START = 0.62;
 

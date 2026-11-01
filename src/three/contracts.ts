@@ -180,6 +180,8 @@ export interface StageEventMap {
   'chapter:enter': CustomEvent<{ id: ChapterId; subIndex: number; duration: number }>;
   /** The camera has settled on the chapter's shot: text may enter now. */
   'chapter:settled': CustomEvent<{ id: ChapterId; subIndex: number }>;
+  /** The scene asks the depth of field to focus on `point` (a folder held up to read), or back on the shot's subject when null. */
+  'desk:focus': CustomEvent<{ point: Vector3 | null }>;
   /** Scroll progress inside the chapter (0..1), at most once per frame. */
   'chapter:progress': CustomEvent<{ id: ChapterId; progress: number }>;
   /** Label of the scene object under the pointer, or null. */

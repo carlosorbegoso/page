@@ -5,7 +5,9 @@ import {
   Vector3,
   type CanvasTexture,
   type Mesh,
+  type MeshBasicMaterial,
   type Material,
+  type PlaneGeometry,
   type PerspectiveCamera,
   type WebGLRenderer
 } from 'three';
@@ -23,6 +25,7 @@ import {
 import { aimOpenSheet, aimShelfFolder, shelfHoldPose } from './aim';
 import { ease } from './ease';
 import { createFlapMesh, FLAP_THICKNESS, flapPose, placeFlap } from './flap';
+import { createFlapInside } from './flap-inside';
 import { createSheetMesh, createSheetTexture, createTwinMesh, type SheetMesh } from './mesh';
 import { listenOutsideClick } from './outside-click';
 import { drawSheet } from './sheet-canvas';
@@ -43,6 +46,14 @@ const scratch = new Matrix4();
 const scratchQuaternion = new Quaternion();
 const scratchPosition = new Vector3();
 const ONE = new Vector3(1, 1, 1);
+
+function disposeInside(flap: Mesh): void {
+  for (const child of flap.children as Mesh<PlaneGeometry, MeshBasicMaterial>[]) {
+    child.geometry.dispose();
+    child.material.map?.dispose();
+    child.material.dispose();
+  }
+}
 
 /**
  * Taking the folder you are looking at off the shelf: it slides out, turns its face to the camera,
@@ -80,6 +91,7 @@ export class FolderDetail {
       if (id === 'tcs') continue;
       const twin = createTwinMesh(id, options);
       const flap = createFlapMesh(id, options);
+      flap.add(createFlapInside(id, options.palette));
       this.twins.set(id, twin);
       this.flaps.set(id, flap);
       this.object3D.add(twin, flap);
@@ -110,6 +122,11 @@ export class FolderDetail {
   /** The folder out of the shelf (or on its way back), else null. */
   get active(): FolderId | null {
     return this.shown;
+  }
+
+  /** Where a shelf box is held while it is out (or coming out), for the depth of field; null otherwise. */
+  get heldFocus(): Vector3 | null {
+    return this.shown && this.shown !== 'tcs' && this.goal === 1 ? this.targetAt : null;
   }
 
   /** Takes the folder out, or puts it back when it is already out. `eye` (the shot's camera position) aims the TCS sheet. */
@@ -208,6 +225,7 @@ export class FolderDetail {
   dispose(): void {
     this.stopOutsideClick();
     for (const mesh of [...this.twins.values(), ...this.flaps.values()]) mesh.geometry.dispose();
+    for (const flap of this.flaps.values()) disposeInside(flap);
     for (const sheet of [this.shelfSheet, this.openSheet]) {
       sheet.geometry.dispose();
       sheet.material.dispose();

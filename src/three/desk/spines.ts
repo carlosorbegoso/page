@@ -1,4 +1,5 @@
 import { CanvasTexture, Color, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMaterial, PlaneGeometry, SRGBColorSpace, Vector3 } from 'three';
+import { drawArchiveCover } from './archive-cover';
 import { FOLDER, FOLDERS, folderCentre, type FolderId } from './layout';
 
 /** What an archive box says on its paper label: the company and its years, read bottom to top. */
@@ -13,6 +14,8 @@ export const SPINE_TEXT: Record<FolderId, [string, string]> = {
 export const SPINE_LABEL = { length: 0.15, width: FOLDER.spine * 0.62, lift: 0.055 } as const;
 
 const ROW = 256;
+const COVER_LEVEL = 0.34;
+const COVER_ROWS = FOLDERS.map(id => SPINE_TEXT[id]);
 const WIDTH = 1024;
 
 function drawLabels(canvas: HTMLCanvasElement): void {
@@ -33,36 +36,6 @@ function drawLabels(canvas: HTMLCanvasElement): void {
     context.font = `500 54px ${mono}`;
     context.textAlign = 'right';
     context.fillText(years, WIDTH - 48, y + 6);
-    context.textAlign = 'left';
-  });
-}
-
-const COVER_LEVEL = 0.34;
-
-/** The archive cover sheet glued on the outer face of the first box: the only face the room sees. */
-function drawCover(canvas: HTMLCanvasElement): void {
-  const context = canvas.getContext('2d')!;
-  const root = getComputedStyle(document.documentElement);
-  const display = root.getPropertyValue('--font-display').trim() || 'system-ui, sans-serif';
-  const mono = root.getPropertyValue('--font-mono').trim() || 'ui-monospace, monospace';
-  const { width, height } = canvas;
-  context.fillStyle = '#e4ddcc';
-  context.fillRect(0, 0, width, height);
-  context.fillStyle = '#1c2230';
-  context.font = `500 34px ${mono}`;
-  context.fillText('ARCHIVO · EXPERIENCIA', 48, 84);
-  context.fillRect(48, 108, width - 96, 3);
-  context.font = `600 92px ${display}`;
-  context.fillText('2020 →', 48, 230);
-  context.font = `500 44px ${display}`;
-  context.fillText('Carlos Orbegoso', 48, 300);
-  context.font = `500 38px ${mono}`;
-  FOLDERS.forEach((id, row) => {
-    const [name, years] = SPINE_TEXT[id];
-    const y = 400 + row * 70;
-    context.fillText(name, 48, y);
-    context.textAlign = 'right';
-    context.fillText(years, width - 48, y);
     context.textAlign = 'left';
   });
 }
@@ -106,12 +79,12 @@ export function createSpineLabels(): SpineLabels {
   const coverCanvas = document.createElement('canvas');
   coverCanvas.width = 640;
   coverCanvas.height = 720;
-  drawCover(coverCanvas);
+  drawArchiveCover(coverCanvas, COVER_ROWS);
   const coverTexture = new CanvasTexture(coverCanvas);
   coverTexture.colorSpace = SRGBColorSpace;
   coverTexture.anisotropy = 4;
   void document.fonts?.ready.then(() => {
-    drawCover(coverCanvas);
+    drawArchiveCover(coverCanvas, COVER_ROWS);
     coverTexture.needsUpdate = true;
   });
   /* Unlit on purpose: the side face only catches grazing light, so a lit sheet read as a black hole. */

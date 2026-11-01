@@ -276,6 +276,7 @@ export class Stage {
         setPointer: pointer => (this.pointer = pointer),
         setMotion: state => (this.motion = state),
         navigate: pick => this.chapters.navigate(pick),
+        refocus: point => this.modules.fx?.setFocus(point ?? (this.director.chapter ? this.world.focus(this.director.chapter, this.director.subIndex) : null)),
         themeChanged: () => {
           applyStageTokens(this.renderer, this.world);
           this.invalidate();

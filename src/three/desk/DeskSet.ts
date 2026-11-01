@@ -66,11 +66,12 @@ export class DeskSet implements ShotProvider {
     levels: this.levels,
     folderAction: (action, id) => this.onFolderAction(action, id)
   });
+  private readonly shotEye = () => this.framing.framing(this.chapter, this.subIndex)?.eye ?? this.context.camera.position;
   private readonly onInteract = (event: Event) => {
     const detail = (event as CustomEvent<{ id?: string; phase?: string }>).detail;
     if (detail?.phase !== 'activate' || !detail.id) return;
     this.life?.press.pulse(detail.id.replace(/^folder-/, ''), this.clock);
-    this.folders.requestFolder(detail.id, () => this.framing.framing(this.chapter, this.subIndex)?.eye ?? this.context.camera.position);
+    this.folders.requestFolder(detail.id, this.shotEye);
     this.context?.invalidate();
   };
   private readonly onFolderKey = (event: KeyboardEvent) => {
@@ -238,7 +239,7 @@ export class DeskSet implements ShotProvider {
         redraw = true;
       }
     }
-    const shelf = this.folders.updateShelf(frame, this.pickSet.hoverId);
+    const shelf = this.folders.updateShelf(frame, this.pickSet.hoverId, this.shotEye);
     if (shelf.posed && high) redraw = true;
     if (redraw) this.context.renderer.shadowMap.needsUpdate = true;
     return ringing || shelf.settling;
@@ -259,8 +260,7 @@ export class DeskSet implements ShotProvider {
 
   private onFolderAction(action: 'folder' | 'folder-close', id?: string): void {
     if (!this.context) return;
-    const eye = () => this.framing.framing(this.chapter, this.subIndex)?.eye ?? this.context.camera.position;
-    if (this.folders.action(action, id, this.chapter, this.subIndex, eye)) this.context.invalidate();
+    if (this.folders.action(action, id, this.chapter, this.subIndex, this.shotEye)) this.context.invalidate();
   }
 
   /** Room triangle count and visible meshes (debug overlay, docs). */

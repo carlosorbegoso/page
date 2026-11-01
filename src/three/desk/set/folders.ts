@@ -10,6 +10,7 @@ import type { AtlasUniforms } from '../materials';
 import { damp } from '../math';
 import { experienceFolder } from '../shots';
 import type { DeskFrame } from './frame';
+import { FolderAutoOpen } from './folder-auto-open';
 import { EXPERIENCE_IDS, FOLDER_OPENS_AT } from './story';
 
 const FOLDER_OPEN_DELAY = 0.3;
@@ -40,6 +41,8 @@ export class DeskFolders {
   /** TCS's job printed over the open folder's baked sheets. */
   readonly print = new OpenFolderPrint();
   private request: FolderRequest | null = null;
+  private readonly autoOpen = new FolderAutoOpen();
+  private focusKey = '';
   /** 0 closed … 1 open: the TCS folder stays shut until the story reaches today. */
   private open = 0;
   private readonly pull = new Map<FolderId, number>(FOLDERS.map(id => [id, 0]));
@@ -68,7 +71,7 @@ export class DeskFolders {
   }
 
   /** Returns whether anything still moves and whether the held folder's pose changed (the lamp shadow must be redrawn). */
-  updateShelf(frame: DeskFrame, hoverId: number): { settling: boolean; posed: boolean } {
+  updateShelf(frame: DeskFrame, hoverId: number, eye: () => Vector3): { settling: boolean; posed: boolean } {
     const { chapter, subIndex, dt, motion, step } = frame;
     let settling = false;
     let posed = false;
@@ -76,9 +79,12 @@ export class DeskFolders {
     const detail = this.detail;
     this.serveRequest(frame, folder);
     if (detail) {
+      const waiting = this.autoOpen.update(frame, folder, detail, eye);
+      settling ||= waiting;
       if (detail.active && detail.active !== folder) detail.close();
       const moving = detail.update(dt, motion);
       settling ||= moving;
+      this.announceFocus(detail);
       const pose = detail.poseKey();
       if (pose !== this.detailShadowPose) {
         this.detailShadowPose = pose;
@@ -97,6 +103,15 @@ export class DeskFolders {
       settling ||= Math.abs(glow - goal) > 0.002;
     }
     return { settling, posed };
+  }
+
+  /** Racks the depth of field onto the held box while it is out, and back to the shot when it goes back. */
+  private announceFocus(detail: FolderDetail): void {
+    const point = detail.heldFocus;
+    const key = point ? `${detail.active}:${point.toArray().join(',')}` : '';
+    if (key === this.focusKey) return;
+    this.focusKey = key;
+    window.dispatchEvent(new CustomEvent('desk:focus', { detail: { point: point?.clone() ?? null } }));
   }
 
   /**

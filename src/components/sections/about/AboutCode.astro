@@ -18,7 +18,7 @@ const codeLines: CodeLine[] = [
   { indent: 1, key: 'school', value: institution },
   { indent: 1, key: 'status', value: status },
   { indent: 1, key: 'extra', list: t('about.code.extra').split(', ') },
-  { indent: 0, key: 'stack', brief: true },
+  { indent: 0, key: 'stack' },
   ...profile.stack.map((group, index) => ({
     indent: 1,
     key: group.category.toLowerCase(),

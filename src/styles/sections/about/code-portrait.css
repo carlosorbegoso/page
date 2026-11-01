@@ -10,14 +10,14 @@
 
     .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code__lines {
       justify-content: flex-start;
-      gap: 0.6cqw;
-      padding: 2cqw 3cqw 0 0;
-      font-size: 3.6cqw;
-      line-height: 1.25;
+      gap: 0;
+      padding: 1.2cqw 2.4cqw 0 0;
+      font-size: 4.6cqw;
+      line-height: 1.16;
     }
 
     .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code__lines li {
-      padding-left: calc(8cqw + var(--indent) * 3cqw);
+      padding-left: 6cqw;
       overflow-wrap: anywhere;
     }
 

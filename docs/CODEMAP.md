@@ -50,7 +50,19 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Contratos entre Stage, escritorio, fx | `src/three/contracts.ts` |
 | Tier de calidad por dispositivo | `src/three/tier.ts` |
 | Posición de cámara por capítulo | `src/three/desk/shots.ts` |
-| Montaje del escritorio, luces por capítulo | `src/three/desk/DeskSet.ts` |
+| Montaje del escritorio y orden de `update` (ensamblador) | `src/three/desk/DeskSet.ts` |
+| Luz por capítulo, día y noche, encendido de la intro, clic en la lámpara | `src/three/desk/set/levels.ts` |
+| Luces (lámpara, monitor, luna/sol, relleno, estante) | `src/three/desk/set/lighting.ts` |
+| Presencia, neón, elevación y giro de las figuras | `src/three/desk/set/figures.ts` |
+| Carpetas del estante, carpeta abierta (bisagra), carpeta en mano | `src/three/desk/set/folders.ts` |
+| Pantallas de monitor, teléfono y laptop | `src/three/desk/set/screens.ts` |
+| Zonas de clic, etiquetas y hover | `src/three/desk/set/picks.ts` |
+| Reloj (hora de la historia, timbre) | `src/three/desk/set/clock-wiring.ts` |
+| Ciudad, lluvia, vapor y haz de la lámpara cada frame | `src/three/desk/set/weather.ts` |
+| Malla estática de la habitación y sombras de contacto | `src/three/desk/set/room.ts` |
+| Planos de cámara, superficies CSS3D, anclas de paneles | `src/three/desk/set/framing.ts` |
+| Orden de la historia (`storyRank`), qué presenta cada plano | `src/three/desk/set/story.ts` |
+| `damp`, `towards`, `seeded` | `src/three/desk/math.ts` |
 | Colores y acabados de la habitación (`readPalette`) | `src/three/desk/props/palette.ts` |
 | Paredes, suelo, ventana, escritorio, estantes, silla | `src/three/desk/props/room.ts` |
 | Monitor, teclado, taza, laptop, carpeta abierta, teléfono, lámpara | `src/three/desk/props/workstation.ts` |

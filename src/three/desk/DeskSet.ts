@@ -1,306 +1,61 @@
-import {
-  BoxGeometry,
-  DirectionalLight,
-  Group,
-  HemisphereLight,
-  Mesh,
-  MeshBasicMaterial,
-  Object3D,
-  PCFShadowMap,
-  PlaneGeometry,
-  PointLight,
-  Quaternion,
-  SpotLight,
-  Vector3,
-  type CanvasTexture,
-  Color,
-  Matrix4,
-  type Texture
-} from 'three';
-import { CHAPTERS, type ChapterId, type ChapterState, type PlateAnchor, type Shot, type ShotProvider, type StationContext, type StationPick, type SurfaceName } from '../contracts';
-import { tokenColor, tokenNumber } from '../tokens';
-import { createBackdrop, createRainGlass, createSteam, type Backdrop, type RainGlass, type Steam } from './atmosphere';
-import { createLampBeam, type LampBeam } from './beam';
+import { Group, PCFShadowMap, Vector3, type Matrix4, type Mesh, type MeshBasicMaterial, type Object3D } from 'three';
+import type { ChapterId, ChapterState, PlateAnchor, Shot, ShotProvider, StationContext, StationPick, SurfaceName } from '../contracts';
 import { createSpineLabels } from './spines';
-import { FOLDER_PARK, FolderDetail, follow } from './folderDetail';
-import { CLOCK_POSITION, StoryClock, storyMinutes } from './clock';
+import { FolderDetail } from './folderDetail';
 import { DeskLife, type LifeToy } from './life';
-import { OBJECT_ID, PartBuilder } from './builder';
-import { DESK, FIGURE_HEIGHT, FIGURES, FOLDER, FOLDERS, GLASS_Z, LAMP, LAPTOP, MONITOR, MUG, OPEN_FOLDER, PHONE, PRODUCT_FIGURES, ROOM, WINDOW, folderCentre, type FigureId, type FolderId } from './layout';
-import {
-  bakeNightEnvironment,
-  createAtlasDepthMaterial,
-  createAtlasMaterial,
-  createContactShadowTexture,
-  createPhoneTexture,
-  createPickMaterial,
-  createScreenTexture,
-  drawPhone,
-  drawScreen,
-  type AtlasUniforms
-} from './materials';
-import {
-  buildChair,
-  buildContactShadows,
-  buildDesk,
-  buildFigures,
-  buildLamp,
-  buildMonitorHead,
-  buildOpenFolder,
-  buildLaptop,
-  laptopScreenFrame,
-  buildPhone,
-  buildPlant,
-  buildRoom,
-  buildShelves,
-  buildTelescope,
-  buildWorkstation,
-  readPalette
-} from './props';
-import {
-  EXPERIENCE_ORDER,
-  experienceFolder,
-  SUB_SHOTS,
-  framings,
-  monitorFrame,
-  panelAnchor,
-  phoneFrame,
-  toShot,
-  type Framing,
-  type SurfaceFrame,
-  type Viewport
-} from './shots';
+import { PHONE } from './layout';
+import type { AtlasUniforms } from './materials';
+import { readPalette, type Palette } from './props';
+import { SUB_SHOTS, phoneFrame, type SurfaceFrame } from './shots';
+import { ClockWiring } from './set/clock-wiring';
+import { DeskFigures } from './set/figures';
+import { DeskFolders } from './set/folders';
+import type { DeskFrame } from './set/frame';
+import { DeskFraming } from './set/framing';
+import { DeskLevels } from './set/levels';
+import { LightRig } from './set/lighting';
+import { DeskPicks } from './set/picks';
+import { addContactShadows, buildRoomMeshes, type RoomMeshes } from './set/room';
+import { DeskScreens } from './set/screens';
+import { focusedFigure, shotObject, storyRank } from './set/story';
+import { DeskWeather } from './set/weather';
 
-/**
- * The light tokens are physical values (cd, nits, lux); the renderer's ACES exposure is tuned
- * high, so the room scales them to keep desk.md's balance: a warm pool that does not clip, a
- * readable moon rim and a fill that keeps the walls off pure black. The monitor is a soft cold
- * point light in front of the glass (a RectAreaLight's LTC tables would triple the chunk).
- */
-const LIGHT_CALIBRATION = { lamp: 0.4, monitor: 0.16, moon: 3, fill: 2.5, shelf: 9 } as const;
-/** HDR gain of the screen pictures so they stay luminous through ACES / the FX composer. */
-const SCREEN_HDR = 1.8;
-/** The MacBook never goes fully dark: at dawn it keeps a dim standby glow so it reads as a screen, not a black slab. */
-const LAPTOP_STANDBY = 0.32;
-
-interface ChapterLight {
-  lamp: number;
-  monitor: number;
-  moon: number;
-  /** Moonlight through the window raking the shelf spines (experience only). */
-  shelf: number;
-}
-
-/** Light per chapter (desk.md §5): lamp in cd, monitor in nits, window light in lux. */
-const CHAPTER_LIGHT: Record<ChapterId, ChapterLight> = {
-  intro: { lamp: 28, monitor: 5, moon: 0.7, shelf: 0 },
-  hero: { lamp: 28, monitor: 5, moon: 0.7, shelf: 0 },
-  about: { lamp: 18, monitor: 6, moon: 0.6, shelf: 0 },
-  company: { lamp: 30, monitor: 1.5, moon: 0.6, shelf: 0 },
-  products: { lamp: 26, monitor: 1.5, moon: 0.55, shelf: 0 },
-  experience: { lamp: 5, monitor: 6, moon: 1.1, shelf: 1.25 },
-  contact: { lamp: 20, monitor: 1, moon: 0.5, shelf: 0 },
-  outro: { lamp: 0, monitor: 0.6, moon: 1.2, shelf: 0 }
-};
-
-/**
- * Day mode (`html[data-time="day"]`): the same office under Lima's overcast daylight. The window
- * light becomes the key (the `moon` light turns into a soft sun), the lamp stays off until nightfall
- * at the end, and the monitor no longer lights the room.
- */
-const CHAPTER_LIGHT_DAY: Record<ChapterId, ChapterLight> = {
-  intro: { lamp: 0, monitor: 5, moon: 2.2, shelf: 0 },
-  hero: { lamp: 0, monitor: 5, moon: 2.2, shelf: 0 },
-  about: { lamp: 0, monitor: 5, moon: 2.2, shelf: 0 },
-  experience: { lamp: 0, monitor: 5, moon: 2.6, shelf: 1.6 },
-  company: { lamp: 0, monitor: 1.5, moon: 1.7, shelf: 0 },
-  products: { lamp: 0, monitor: 1.5, moon: 1.6, shelf: 0 },
-  contact: { lamp: 0, monitor: 1, moon: 1.3, shelf: 0 },
-  outro: { lamp: 22, monitor: 0.6, moon: 0.6, shelf: 0 }
-};
-const LAMP_SWITCH_DAY: Partial<Record<ChapterId, number>> = { outro: 0.4 };
-const DIM_PRESENCE_DAY = 0.5;
-const SUN_COLOR = '#fff1dc';
-const SKY_FILL = '#dfe8f2';
-const GROUND_FILL = '#a08c72';
-/** Hemisphere gain by day: overcast light fills the whole room. */
-const DAY_FILL_GAIN = 14;
-
-/**
- * The day years are a memory lit by the monitor and the window; the night starts with the lamp
- * clicking on once the camera has landed on TUSOCIO IA, and ends with it clicking off at dawn.
- * Light never changes while the camera moves towards these chapters (one motion at a time).
- */
-const LAMP_SWITCH: Partial<Record<ChapterId, number>> = { company: 0.3, outro: 0.4 };
-/** How late the night is per chapter: city windows go dark as the story advances. */
-const LATENESS: Record<ChapterId, number> = { intro: 0, hero: 0, about: 0.05, experience: 0.1, company: 0.25, products: 0.35, contact: 0.5, outro: 0.6 };
-
-/** Where the story introduces each figure; before that it waits dim and grey on the plinth. */
-const FIGURE_INTRO: Record<FigureId, [ChapterId, number]> = {
-  alfa: ['company', 0],
-  skymek: ['products', 0],
-  parati: ['products', 1],
-  ventixs: ['products', 2]
-};
-const DIM_PRESENCE = 0.18;
-const FOLDER_OPENS_AT = storyRank('experience', EXPERIENCE_ORDER.length);
-const FOLDER_OPEN_DELAY = 0.3;
-const FOLDER_HINGE_AXIS = new Vector3(Math.sin(OPEN_FOLDER.yaw), 0, Math.cos(OPEN_FOLDER.yaw));
-const FOLDER_HINGE_ORIGIN = OPEN_FOLDER.centre.clone().add(new Vector3(0, 0.009, 0));
-/** Metres a folder slides off the shelf when its year is told (or under the pointer). */
-const FOLDER_PULL = 0.03;
-/** Seconds after the camera lands before a figure lights up, like a neon tube starting. */
-const PRESENCE_DELAY = 0.2;
-
-function storyRank(chapter: ChapterId, subIndex: number): number {
-  return CHAPTERS.indexOf(chapter) * 10 + subIndex;
-}
-
-const FIGURE_ORDER: readonly FigureId[] = ['alfa', 'ventixs', 'parati', 'skymek'];
-const ALFA_TURN = 20 * (Math.PI / 180);
-const MAX_TURN_SPEED = 0.05;
-const FIGURE_LIFT = 0.012;
-/** Hover answers with a few millimetres of lift, eased in ~180 ms (the focus lift stays slow). */
-const HOVER_LIFT = 0.003;
-/** The object the shot introduces, pulsed once on touch screens in place of a hover. */
-function shotObject(chapter: ChapterId, subIndex: number): string | null {
-  if (chapter === 'company') return 'alfa';
-  if (chapter === 'products') return PRODUCT_FIGURES[Math.min(subIndex, PRODUCT_FIGURES.length - 1)] ?? null;
-  if (chapter === 'experience') return experienceFolder(subIndex);
-  return chapter === 'contact' ? 'phone' : null;
-}
 const LIFE_TOYS: readonly string[] = ['alfa', 'skymek', 'parati', 'ventixs', 'mug'];
 /** Chapters where Alfa is on screen and its head follows the pointer. */
 const ALFA_LOOKS: readonly ChapterId[] = ['company', 'products'];
-/** Warm bounce on the focused figure (desk.md §5: +10 %), as self-illumination of its albedo. */
-const FOCUS_BOUNCE = 0.03;
-
-const LABELS: Record<string, { es: string; en: string }> = {
-  alfa: { es: 'Alfa · TUSOCIO IA', en: 'Alfa · TUSOCIO IA' },
-  skymek: { es: 'SkyMek', en: 'SkyMek' },
-  parati: { es: 'Parati', en: 'Parati' },
-  ventixs: { es: 'Ventixs', en: 'Ventixs' },
-  tcs: { es: 'TCS · Experiencia', en: 'TCS · Experience' },
-  intercorp: { es: 'Intercorp · Experiencia', en: 'Intercorp · Experience' },
-  baufest: { es: 'Baufest · Experiencia', en: 'Baufest · Experience' },
-  sysarp: { es: 'SYSARP · Experiencia', en: 'SYSARP · Experience' },
-  phone: { es: 'Teléfono · Contacto', en: 'Phone · Contact' },
-  lamp: { es: 'Lámpara · clic para apagarla o encenderla', en: 'Lamp · click to switch it' },
-  mug: { es: 'Taza de café', en: 'Coffee mug' },
-  clock: { es: 'Reloj · clic para que suene', en: 'Clock · click to ring it' }
-};
-
-const EXPERIENCE_IDS: Record<string, string> = { tcs: 'tcs', intercorp: 'intercorp-retail', baufest: 'baufest', sysarp: 'sysarp' };
-
-function damp(current: number, goal: number, rate: number, dt: number): number {
-  return current + (goal - current) * (1 - Math.exp(-rate * dt));
-}
-
-/** A neon tube starting: one flash, a beat of dark, then a fast ramp to full. */
-function neonStart(current: number, since: number, dt: number): number {
-  if (since < 0.06) return 1;
-  if (since < 0.18) return DIM_PRESENCE;
-  return damp(current, 1, 9, dt);
-}
-
-/** A tungsten lamp switching: a short flicker, then the filament settles fast (no smooth fade). */
-function filamentSwitch(current: number, goal: number, since: number, dt: number): number {
-  if (goal > current && since < 0.14) return goal * (since < 0.06 ? 0.55 : 0.12);
-  return damp(current, goal, 16, dt);
-}
-
-function towards(current: number, goal: number, maxStep: number): number {
-  return current + Math.max(-maxStep, Math.min(maxStep, goal - current));
-}
-
-/** Intro power-on: two 60 ms flashes, the lamp ramps 0 → 1 in 0.5 s, then the monitor in 0.3 s. */
-function introLevels(t: number): { lamp: number; monitor: number } {
-  const flash = (start: number) => (t >= start && t < start + 0.06 ? 0.7 : 0);
-  const ramp = Math.min(Math.max((t - 0.45) / 0.5, 0), 1);
-  const lamp = Math.max(flash(0.15), flash(0.33), ramp * ramp * (3 - 2 * ramp));
-  const monitor = Math.min(Math.max((t - 0.95) / 0.3, 0), 1);
-  return { lamp, monitor };
-}
 
 /**
  * "Una noche en el escritorio": the whole set (room, props, collectibles, city and rain, lights)
  * plus the director's data — one fixed shot per chapter / sub-shot, the CSS3D surfaces and the
- * anchors of the 2D panels. Chapter actions (intro power-on, Alfa turning, figures lifting,
- * folders lighting, phone waking, dawn) run in `update` from the director's state.
+ * anchors of the 2D panels. Chapter actions run in `update` from the director's state; each
+ * concern lives in `set/*` and reports whether it still moves.
  */
 export class DeskSet implements ShotProvider {
   readonly object3D = new Group();
-  readonly picks: StationPick[] = [];
+  private readonly pickSet = new DeskPicks();
+  readonly picks: StationPick[] = this.pickSet.picks;
   private context!: StationContext;
   private readonly room = new Group();
   private readonly lightRig = new Group();
   private uniforms!: AtlasUniforms;
-  private screen!: Mesh<PlaneGeometry, MeshBasicMaterial>;
-  private screenTexture!: CanvasTexture;
-  private phoneScreen!: Mesh<PlaneGeometry, MeshBasicMaterial>;
-  private phoneTexture!: CanvasTexture;
   private phoneMatrix!: Matrix4;
-  private backdrop!: Backdrop;
-  private glass!: RainGlass;
-  private steam: Steam | null = null;
-  private beam!: LampBeam;
-  private environment: Texture | null = null;
   private readonly disposables: Array<{ dispose(): void }> = [];
-  private readonly proxies = new Map<string, Mesh>();
-  private lamp!: SpotLight;
-  private monitorLight!: PointLight;
-  private moon!: DirectionalLight;
-  private fill!: HemisphereLight;
-  private ambientIntensity = 0.08;
-  /** Canvas CSS size, read once per resize instead of forcing a layout from every frame. */
-  private viewportSize: { width: number; height: number } | null = null;
-  private viewportObserver: ResizeObserver | null = null;
-  private readonly onViewportChange = () => {
-    this.viewportSize = null;
-  };
-  private shelfLight!: SpotLight;
-  private moonNight!: Color;
-  private moonDawn!: Color;
-  private readonly sunColor = new Color(SUN_COLOR);
-  private readonly nightSky = new Color(0x1b2436);
-  private readonly nightGround = new Color(0x0a0806);
-  private readonly daySky = new Color(SKY_FILL);
-  private readonly dayGround = new Color(GROUND_FILL);
-  private moonAt = new Vector3();
-  private readonly sunAt = new Vector3();
+  private readonly levels = new DeskLevels();
+  private readonly figures = new DeskFigures();
+  private readonly folders = new DeskFolders();
+  private readonly weather = new DeskWeather();
+  private lights!: LightRig;
+  private screens!: DeskScreens;
+  private clockWiring: ClockWiring | null = null;
+  private framing!: DeskFraming;
+  private life: DeskLife | null = null;
   private triangles = 0;
   private chapter: ChapterId = 'intro';
   private subIndex = 0;
-  private introStart = -1;
-  private readonly level = { lamp: 0, monitor: 0, moon: 0.45, shelf: 0, dawn: 0, phone: 0, alfaSignal: 1, alfaYaw: 0, late: 0, day: 0 };
   private settledAt = -1;
-  private readonly presence = new Map<FigureId, number>(FIGURE_ORDER.map(id => [id, 1]));
-  private readonly neonSince = new Map<FigureId, number>();
-  private readonly figureLift = new Map<FigureId, number>(FIGURE_ORDER.map(id => [id, 0]));
-  private readonly figureYaw = new Map<FigureId, number>(FIGURE_ORDER.map(id => [id, 0]));
-  private readonly folderGlow = new Map<string, number>(FOLDERS.map(id => [id, 0]));
-  private phoneNotified = false;
   private shadowPose = '';
-  private hoverId = -1;
-  private spineLabels = new Map<FolderId, Mesh>();
-  private archiveCover: Mesh | null = null;
-  private readonly folderPull = new Map<FolderId, number>(FOLDERS.map(id => [id, 0]));
-  private folderDetail: FolderDetail | null = null;
-  private detailShadowPose = '';
-  private readonly origin = new Vector3();
-  private readonly coverRest = new Vector3();
-  /** The visitor switched the lamp off by clicking it; the story switches it back on at the next chapter. */
-  private lampOff = false;
-  private lampToggledAt = -1;
-  private storySwitched = false;
-  private clockModel: StoryClock | null = null;
-  private laptopScreen: Mesh<PlaneGeometry, MeshBasicMaterial> | null = null;
-  private clockMinutes = 60;
-  /** 0 closed … 1 open: the TCS folder stays shut until the story reaches today. */
-  private folderOpen = 0;
-  private readonly hingeMatrix = new Matrix4();
   private clock = 0;
-  private life: DeskLife | null = null;
+  private readonly coarsePointer = matchMedia('(pointer: coarse)');
   private readonly onAction = (event: Event) => {
     const detail = (event as CustomEvent<{ action?: string; id?: string }>).detail;
     if (detail?.action === 'play' && detail.id && LIFE_TOYS.includes(detail.id)) {
@@ -313,9 +68,8 @@ export class DeskSet implements ShotProvider {
       return;
     }
     if (detail?.action !== 'lamp') return;
-    this.lampOff = !this.lampOff;
-    this.lampToggledAt = this.clock;
-    window.dispatchEvent(new CustomEvent('desk:switch', { detail: { on: !this.lampOff } }));
+    const on = this.levels.toggleLamp(this.clock);
+    window.dispatchEvent(new CustomEvent('desk:switch', { detail: { on } }));
     this.context?.invalidate();
   };
   private readonly onInteract = (event: Event) => {
@@ -324,12 +78,10 @@ export class DeskSet implements ShotProvider {
     this.life?.press.pulse(detail.id.replace(/^folder-/, ''), this.clock);
     this.context?.invalidate();
   };
-  private readonly coarsePointer = matchMedia('(pointer: coarse)');
   private readonly onFolderKey = (event: KeyboardEvent) => {
-    if (event.key !== 'Escape' || !this.folderDetail?.active) return;
+    if (event.key !== 'Escape' || !this.folders.detail?.active) return;
     this.onFolderAction('folder-close');
   };
-  private hoverMix = 0;
 
   constructor() {
     this.object3D.name = 'desk';
@@ -338,622 +90,203 @@ export class DeskSet implements ShotProvider {
 
   async load(context: StationContext): Promise<void> {
     this.context = context;
+    this.framing = new DeskFraming(context, () => this.phoneSurface());
     const high = context.tier === 'high';
-    const q = high ? 1 : 0.6;
     const palette = readPalette();
-    const { material, uniforms } = createAtlasMaterial(
-      [ROOM.left, ROOM.right, ROOM.back, 0],
-      [0, DESK.z, DESK.width / 2, DESK.depth / 2],
-      DESK.top
-    );
-    this.uniforms = uniforms;
-    FIGURE_ORDER.forEach((id, index) => uniforms.uFigPivot.value[index]!.copy(FIGURES[id]));
-    this.environment = bakeNightEnvironment(context.renderer);
-    material.envMap = this.environment;
-    material.envMapIntensity = 0.8;
-    this.disposables.push(material, this.environment);
+    const meshes = buildRoomMeshes(this.room, context, palette, this.disposables);
+    this.uniforms = meshes.uniforms;
+    this.figures.setPivots(meshes.uniforms);
+    this.phoneMatrix = meshes.phoneMatrix;
+    this.triangles = meshes.triangles;
+    this.addLife(meshes, palette, high);
+    this.addFolderDetail(meshes, palette, high);
+    this.screens = new DeskScreens(this.room, this.phoneSurface(), this.disposables);
+    this.weather.addWindow(this.room, this.disposables);
+    this.addSpines();
+    window.addEventListener('desk:action', this.onAction);
+    window.addEventListener('desk:interact', this.onInteract);
+    this.clockWiring = new ClockWiring(context);
+    this.room.add(this.clockWiring.group);
+    this.weather.addSteam(this.room, context.tier, this.disposables);
+    addContactShadows(this.room, this.disposables);
+    this.pickSet.build(this.room, this.phoneSurface(), this.disposables);
+    this.lights = new LightRig(this.lightRig, high);
+    this.weather.addBeam(this.room, this.lights.lamp.position, high, this.disposables);
+    if (high) this.enableShadows();
+    this.applyLevels();
+    context.invalidate();
+  }
 
-    const statics = new PartBuilder();
-    buildRoom(statics, palette);
-    buildDesk(statics, palette, q);
-    const workstation = new PartBuilder();
-    buildWorkstation(workstation, palette, q);
-    const head = new PartBuilder();
-    buildMonitorHead(head, palette, q);
-    const headGeometry = head.build();
-    const monitorHead = new Mesh(headGeometry, material);
-    monitorHead.name = 'desk-monitor';
-    monitorHead.castShadow = high;
-    monitorHead.receiveShadow = high;
-    monitorHead.position.copy(MONITOR.centre);
-    monitorHead.quaternion.copy(monitorFrame().quaternion);
-    this.room.add(monitorHead);
-    this.disposables.push(headGeometry);
-    buildLamp(statics, palette, q);
-    buildPlant(statics, palette, q);
-    buildShelves(statics, palette, q);
-    buildChair(statics, palette, q);
-    buildTelescope(statics, palette, q);
-    buildOpenFolder(statics, palette);
-    buildLaptop(statics, palette);
-    this.phoneMatrix = buildPhone(statics, palette);
-    const figures = new PartBuilder();
-    buildFigures(figures, palette, q);
-    const geometry = statics.build();
-    this.triangles = statics.triangleCount + figures.triangleCount + workstation.triangleCount;
-    const roomMesh = new Mesh(geometry, material);
-    roomMesh.name = 'desk-room';
-    roomMesh.castShadow = high;
-    roomMesh.receiveShadow = high;
-    if (high) {
-      roomMesh.customDepthMaterial = createAtlasDepthMaterial(uniforms);
-      this.disposables.push(roomMesh.customDepthMaterial);
-    }
-    this.room.add(roomMesh);
-    this.disposables.push(geometry);
-    this.life = new DeskLife({ geometry: figures.build(), workstation: workstation.build(), material, depthMaterial: roomMesh.customDepthMaterial, shadows: high, palette });
+  private addLife(meshes: RoomMeshes, palette: Palette, high: boolean): void {
+    const { material, depthMaterial } = meshes;
+    this.life = new DeskLife({ geometry: meshes.figures.build(), workstation: meshes.workstation.build(), material, depthMaterial, shadows: high, palette });
     this.room.add(this.life.object3D);
     this.disposables.push(this.life);
-    this.folderDetail = new FolderDetail({
-      material,
-      depthMaterial: roomMesh.customDepthMaterial,
+  }
+
+  private addFolderDetail(meshes: RoomMeshes, palette: Palette, high: boolean): void {
+    const context = this.context;
+    const detail = new FolderDetail({
+      material: meshes.material,
+      depthMaterial: meshes.depthMaterial,
       shadows: high,
       palette,
       renderer: context.renderer,
       onRedraw: () => context.invalidate()
     });
-    void context.precompile?.(this.folderDetail.object3D);
-    this.room.add(this.folderDetail.object3D);
-    this.disposables.push(this.folderDetail);
+    this.folders.detail = detail;
+    void context.precompile?.(detail.object3D);
+    this.room.add(detail.object3D);
+    this.disposables.push(detail);
     window.addEventListener('keydown', this.onFolderKey);
-
-    this.buildScreens();
-    this.backdrop = createBackdrop();
-    this.glass = createRainGlass();
-    this.room.add(this.backdrop.mesh, this.glass.mesh);
-    this.disposables.push(this.backdrop, this.glass);
-    const spines = createSpineLabels();
-    this.spineLabels = spines.meshes;
-    this.room.add(...spines.meshes.values(), spines.cover);
-    this.archiveCover = spines.cover;
-    this.disposables.push(spines);
-    window.addEventListener('desk:action', this.onAction);
-    window.addEventListener('desk:interact', this.onInteract);
-    this.clockModel = new StoryClock(
-      () => {
-        this.clockModel?.show(this.clockMinutes);
-        if (this.context) this.context.renderer.shadowMap.needsUpdate = true;
-        this.context?.invalidate();
-      },
-      model => this.context?.precompile?.(model) ?? Promise.resolve(),
-      () => this.context?.invalidate()
-    );
-    this.room.add(this.clockModel.group);
-    if (high || context.tier === 'mid') {
-      this.steam = createSteam(high ? { wisps: 6, octaves: 3 } : { wisps: 4, octaves: 2 });
-      this.room.add(this.steam.mesh);
-      this.disposables.push(this.steam);
-    }
-    this.buildContactShadows();
-    this.buildPicks();
-    this.buildLights(high);
-    this.beam = createLampBeam({
-      apex: this.lamp.position.clone(),
-      aim: LAMP.aim.clone(),
-      angle: tokenNumber('--lamp-angle', 0.62) * 0.55,
-      color: tokenColor('--color-lamp', '#ffb566'),
-      motes: high ? 160 : 0
-    });
-    this.room.add(this.beam.group);
-    this.disposables.push(this.beam);
-    if (high) {
-      const renderer = context.renderer;
-      renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = PCFShadowMap;
-      renderer.shadowMap.autoUpdate = false;
-      renderer.shadowMap.needsUpdate = true;
-    }
-    this.applyLevels();
-    context.invalidate();
   }
 
-  private buildScreens(): void {
-    const monitor = monitorFrame();
-    this.screenTexture = createScreenTexture();
-    drawScreen(this.screenTexture, MONITOR.screen.width / MONITOR.screen.height, tokenColor('--color-monitor-glow', '#7fb8ff'));
-    const screenMaterial = new MeshBasicMaterial({ map: this.screenTexture });
-    this.screen = new Mesh(new PlaneGeometry(MONITOR.screen.width, MONITOR.screen.height), screenMaterial);
-    this.screen.name = 'desk-screen';
-    this.screen.position.copy(monitor.centre);
-    this.screen.quaternion.copy(monitor.quaternion);
-    this.room.add(this.screen);
+  private addSpines(): void {
+    const spines = createSpineLabels();
+    this.room.add(...spines.meshes.values(), spines.cover);
+    this.folders.attachSpines(spines.meshes, spines.cover);
+    this.disposables.push(spines);
+  }
 
-    this.phoneTexture = createPhoneTexture();
-    drawPhone(this.phoneTexture, false, tokenColor('--color-accent', '#5aa9ff'));
-    const phoneMaterial = new MeshBasicMaterial({ map: this.phoneTexture });
-    const phone = this.phoneSurface();
-    this.phoneScreen = new Mesh(new PlaneGeometry(phone.width, phone.height), phoneMaterial);
-    this.phoneScreen.name = 'desk-phone-screen';
-    this.phoneScreen.position.copy(phone.centre);
-    this.phoneScreen.quaternion.copy(phone.quaternion);
-    this.room.add(this.phoneScreen);
-    this.disposables.push(screenMaterial, this.screenTexture, this.screen.geometry, phoneMaterial, this.phoneTexture, this.phoneScreen.geometry);
-
-    const laptopTexture = createScreenTexture();
-    drawScreen(laptopTexture, LAPTOP.screen.width / LAPTOP.screen.height, tokenColor('--color-monitor-glow', '#7fb8ff'));
-    const laptopMaterial = new MeshBasicMaterial({ map: laptopTexture });
-    const laptopGlass = new Mesh(new PlaneGeometry(LAPTOP.screen.width, LAPTOP.screen.height), laptopMaterial);
-    const glassFrame = laptopScreenFrame();
-    laptopGlass.name = 'desk-laptop-screen';
-    laptopGlass.position.copy(glassFrame.centre);
-    laptopGlass.quaternion.copy(glassFrame.quaternion);
-    laptopGlass.raycast = () => undefined;
-    this.laptopScreen = laptopGlass;
-    this.room.add(laptopGlass);
-    this.disposables.push(laptopTexture, laptopMaterial, laptopGlass.geometry);
+  private enableShadows(): void {
+    const renderer = this.context.renderer;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = PCFShadowMap;
+    renderer.shadowMap.autoUpdate = false;
+    renderer.shadowMap.needsUpdate = true;
   }
 
   private phoneSurface(): SurfaceFrame {
     return phoneFrame(this.phoneMatrix, PHONE.screen.width, PHONE.screen.height);
   }
 
-  private buildContactShadows(): void {
-    const texture = createContactShadowTexture();
-    const geometry = buildContactShadows();
-    const material = new MeshBasicMaterial({
-      color: 0x000000,
-      map: texture,
-      transparent: true,
-      opacity: 0.75,
-      depthWrite: false,
-      polygonOffset: true,
-      polygonOffsetFactor: -2
-    });
-    const mesh = new Mesh(geometry, material);
-    mesh.name = 'desk-contact-shadows';
-    mesh.renderOrder = -1;
-    mesh.raycast = () => undefined;
-    this.room.add(mesh);
-    this.disposables.push(texture, geometry, material);
-  }
-
-  private buildPicks(): void {
-    const material = createPickMaterial();
-    this.disposables.push(material);
-    const proxy = (key: string, size: [number, number, number], position: Vector3, quaternion?: Quaternion) => {
-      const geometry = new BoxGeometry(...size);
-      const mesh = new Mesh(geometry, material);
-      mesh.name = `desk-pick-${key}`;
-      mesh.position.copy(position);
-      if (quaternion) mesh.quaternion.copy(quaternion);
-      this.room.add(mesh);
-      this.proxies.set(key, mesh);
-      this.disposables.push(geometry);
-      return mesh;
-    };
-    const figure = (id: FigureId, size: [number, number, number]) =>
-      proxy(id, size, FIGURES[id].clone().add(new Vector3(0, FIGURE_HEIGHT[id] / 2, 0)));
-    this.picks.push({ object3D: figure('alfa', [0.08, 0.13, 0.07]), key: 'desk:alfa', label: LABELS.alfa!, target: '#company' });
-    for (const id of PRODUCT_FIGURES) {
-      this.picks.push({ object3D: figure(id, [0.08, 0.08, 0.07]), key: `desk:${id}`, label: LABELS[id]!, target: '#products', product: id });
-    }
-    for (const id of FOLDERS) {
-      this.picks.push({
-        object3D: proxy(id, [0.29, 0.33, 0.085], folderCentre(id)),
-        key: `desk:${id}`,
-        label: LABELS[id]!,
-        target: '#experience',
-        experience: EXPERIENCE_IDS[id],
-        sub: EXPERIENCE_ORDER.indexOf(id) + 1
-      });
-    }
-    const openFolderTurn = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), OPEN_FOLDER.yaw);
-    this.picks.push({
-      object3D: proxy('openFolder', [OPEN_FOLDER.width, 0.03, OPEN_FOLDER.depth], OPEN_FOLDER.centre.clone().add(new Vector3(0, 0.015, 0)), openFolderTurn),
-      key: 'desk:openFolder',
-      label: LABELS.tcs!,
-      target: '#experience',
-      experience: EXPERIENCE_IDS.tcs,
-      sub: EXPERIENCE_ORDER.indexOf('tcs') + 1
-    });
-    const lampHead = LAMP.head.clone().addScaledVector(LAMP.aim.clone().sub(LAMP.head).normalize(), 0.06);
-    this.picks.push({ object3D: proxy('lamp', [0.16, 0.12, 0.16], lampHead), key: 'desk:lamp', label: LABELS.lamp!, target: '#company', action: 'lamp' });
-    const phone = this.phoneSurface();
-    this.picks.push({ object3D: proxy('phone', [0.08, 0.16, 0.03], phone.centre, phone.quaternion), key: 'desk:phone', label: LABELS.phone!, target: '#contact' });
-    this.picks.push({ object3D: proxy('mug', [0.1, 0.1, 0.09], MUG.clone().add(new Vector3(0.01, 0.05, 0))), key: 'desk:mug', label: LABELS.mug!, target: '#contact' });
-    this.picks.push({ object3D: proxy('clock', [0.12, 0.14, 0.08], CLOCK_POSITION.clone().add(new Vector3(0, 0.07, 0))), key: 'desk:clock', label: LABELS.clock!, target: '#hero' });
-  }
-
-  private buildLights(high: boolean): void {
-    this.lamp = new SpotLight(tokenColor('--color-lamp', '#ffb566'), 0, 0, tokenNumber('--lamp-angle', 0.62), tokenNumber('--lamp-penumbra', 0.75), 2);
-    const aim = LAMP.aim.clone().sub(LAMP.head).normalize();
-    this.lamp.position.copy(LAMP.head).addScaledVector(aim, 0.125);
-    this.lamp.target.position.copy(LAMP.aim);
-    if (high) {
-      this.lamp.castShadow = true;
-      this.lamp.shadow.mapSize.set(1024, 1024);
-      this.lamp.shadow.radius = 4;
-      this.lamp.shadow.bias = -0.0005;
-      this.lamp.shadow.normalBias = 0.01;
-      this.lamp.shadow.camera.near = 0.05;
-      this.lamp.shadow.camera.far = 3;
-    }
-    const monitor = monitorFrame();
-    this.monitorLight = new PointLight(tokenColor('--color-monitor-glow', '#7fb8ff'), 0, 0, 2);
-    this.monitorLight.position.copy(monitor.centre).addScaledVector(monitor.normal, 0.3);
-    this.moonNight = tokenColor('--color-moonlight', '#9db8e8');
-    this.moonDawn = tokenColor('--color-dawn-low', '#e9a47a');
-    this.moon = new DirectionalLight(this.moonNight.clone(), 0);
-    this.moon.position.set(WINDOW.x + 1.2, WINDOW.y + 1.6, ROOM.back - 3);
-    this.moonAt = this.moon.position.clone();
-    this.sunAt.set(WINDOW.x - 1.6, WINDOW.y + 3.4, ROOM.back - 3);
-    this.moon.target.position.set(0, 0.6, 0.8);
-    this.ambientIntensity = tokenNumber('--desk-ambient-intensity', 0.08);
-    this.fill = new HemisphereLight(0x1b2436, 0x0a0806, this.ambientIntensity * LIGHT_CALIBRATION.fill);
-    this.shelfLight = new SpotLight(this.moonNight.clone(), 0, 0, 0.42, 0.85, 2);
-    this.shelfLight.position.set(WINDOW.x - 0.3, WINDOW.y + 0.35, GLASS_Z + 0.08);
-    this.shelfLight.target.position.copy(folderCentre('intercorp')).add(new Vector3(FOLDER.depth / 2, 0, 0));
-    this.lightRig.add(this.lamp, this.lamp.target, this.monitorLight, this.moon, this.moon.target, this.fill, this.shelfLight, this.shelfLight.target);
-  }
-
-  private viewport(): Viewport {
-    const canvas = this.context.renderer.domElement;
-    if (!this.viewportObserver) {
-      /* Layout is clean inside a ResizeObserver callback, so reading the size there costs nothing. */
-      this.viewportObserver = new ResizeObserver(() => {
-        this.viewportSize = this.readViewport(canvas);
-      });
-      this.viewportObserver.observe(canvas);
-      /* Capture so the cache is cleared before the Stage's own resize listener asks for a new shot. */
-      window.addEventListener('resize', this.onViewportChange, { capture: true, passive: true });
-      window.addEventListener('orientationchange', this.onViewportChange, { capture: true, passive: true });
-    }
-    this.viewportSize ??= this.readViewport(canvas);
-    const { width, height } = this.viewportSize;
-    return { width, height, fov: this.context.fov?.() ?? (width < 1024 ? 40 : 30) };
-  }
-
-  private readViewport(canvas: HTMLCanvasElement): { width: number; height: number } {
-    return { width: canvas.clientWidth || innerWidth, height: canvas.clientHeight || innerHeight };
-  }
-
-  private framing(chapter: ChapterId, subIndex = 0): Framing | null {
-    const list = framings(this.viewport(), this.phoneSurface())[chapter];
-    return list[Math.min(Math.max(subIndex, 0), list.length - 1)] ?? null;
-  }
-
   getShot(chapter: ChapterId, subIndex = 0): Shot | null {
     if (!this.context) return null;
-    const framing = this.framing(chapter, subIndex);
-    return framing ? toShot(framing, this.viewport()) : null;
+    return this.framing.shot(chapter, subIndex);
   }
 
   subShotCount(chapter: ChapterId): number {
     return SUB_SHOTS[chapter] ?? 1;
   }
 
-  /**
-   * CSS3D surface with a fixed `scale` (1 CSS px = 1 screen px from the shot that reads it:
-   * `hero`/`about` for the monitor, `contact` for the phone) and its physical `size`, so the
-   * engine can size the plate to the glass.
-   */
   getSurface(name: SurfaceName): PlateAnchor | null {
     if (!this.context) return null;
-    const frame = name === 'monitor' ? monitorFrame() : this.phoneSurface();
-    const reader: ChapterId = name === 'phone' ? 'contact' : this.chapter === 'about' ? 'about' : 'hero';
-    const shot = this.getShot(reader, 0);
-    const view = this.viewport();
-    if (!shot || view.height <= 0) return null;
-    const distance = shot.position.distanceTo(frame.centre);
-    const scale = (2 * distance * Math.tan((view.fov * Math.PI) / 360)) / view.height;
-    return {
-      position: frame.centre.clone().addScaledVector(frame.normal, 0.0015),
-      quaternion: frame.quaternion.clone(),
-      scale,
-      size: { width: frame.width, height: frame.height }
-    };
+    return this.framing.surface(name, this.chapter);
   }
 
   getAnchor(name: string): Vector3 | null {
     if (!this.context) return null;
-    if (name === 'lamp') return this.lamp.getWorldPosition(new Vector3());
-    const view = this.viewport();
-    const all = framings(view, this.phoneSurface());
-    for (const list of Object.values(all)) {
-      for (const framing of list) {
-        if (framing.panel?.name === name) return panelAnchor(framing, view);
-      }
-    }
-    return null;
+    if (name === 'lamp') return this.lights.lamp.getWorldPosition(new Vector3());
+    return this.framing.panel(name);
   }
 
   getFocus(chapter: ChapterId, subIndex: number): Vector3 | null {
     if (chapter === 'outro' || !this.context) return null;
-    return this.framing(chapter, subIndex)?.focus.clone() ?? null;
+    return this.framing.framing(chapter, subIndex)?.focus.clone() ?? null;
   }
 
   /** Highlights a navigable prop (or clears with null). Accepts the pick's object or a descendant. */
   setHover(object: Object3D | null): void {
-    const pick = object ? this.resolvePick(object) : null;
-    const name = pick?.key.slice(5) as keyof typeof OBJECT_ID | undefined;
-    const id = name && name in OBJECT_ID ? OBJECT_ID[name] : -1;
+    const { name, changed } = this.pickSet.hover(object, this.uniforms);
     this.life?.setHover(name ?? null);
-    if (id === this.hoverId) return;
-    this.hoverId = id;
-    if (pick && name) {
-      this.uniforms.uHoverId.value = id;
-      const accent: Partial<Record<keyof typeof OBJECT_ID, string>> = {
-        alfa: '--color-alfa-signal',
-        ventixs: '--color-burbu-signal',
-        parati: '--color-gift-ribbon',
-        skymek: '--color-tool-band',
-        phone: '--color-accent'
-      };
-      this.uniforms.uHoverColor.value.copy(tokenColor(accent[name] ?? '--color-desk-paper'));
-    }
-    this.context?.invalidate();
+    if (changed) this.context?.invalidate();
   }
 
   /** Finds the pick an object belongs to (walking up the parents). */
   resolvePick(object: Object3D): StationPick | null {
-    let node: Object3D | null = object;
-    while (node) {
-      const pick = this.picks.find(item => item.object3D === node);
-      if (pick) return pick;
-      node = node.parent;
-    }
-    return null;
+    return this.pickSet.resolve(object);
   }
 
   update(dt: number, time: number, state: ChapterState): boolean {
     if (!this.context) return false;
-    const motion = this.context.motion() && !this.context.capture;
-    const step = motion ? dt : 10;
-    if (state.id !== this.chapter || state.subIndex !== this.subIndex) {
-      if (state.id === 'intro' && this.chapter !== 'intro') this.introStart = -1;
-      if (state.id !== this.chapter) this.lampOff = false;
-      this.chapter = state.id;
-      this.subIndex = state.subIndex;
-      this.settledAt = -1;
-      this.lampToggledAt = -1;
-      this.storySwitched = false;
-      const introduced = this.coarsePointer.matches ? shotObject(state.id, state.subIndex) : null;
-      if (introduced) this.life?.press.introduce(introduced, time);
-    }
-    this.clock = time;
-    if (state.settled && this.settledAt < 0) this.settledAt = time;
+    const frame = this.beginFrame(dt, time, state);
     let settling = false;
-    const day = document.documentElement.dataset.time === 'day';
-    const light = (day ? CHAPTER_LIGHT_DAY : CHAPTER_LIGHT)[this.chapter];
-    const level = this.level;
-    if (this.chapter === 'intro' && motion) {
-      if (this.introStart < 0) this.introStart = time;
-      const intro = introLevels(time - this.introStart);
-      level.lamp = intro.lamp * light.lamp;
-      level.monitor = intro.monitor * light.monitor;
-      settling = time - this.introStart < 1.4;
-    } else {
-      const switchDelay = (day ? LAMP_SWITCH_DAY : LAMP_SWITCH)[this.chapter];
-      if (this.lampToggledAt >= 0) {
-        level.lamp = motion ? filamentSwitch(level.lamp, this.lampOff ? 0 : light.lamp, time - this.lampToggledAt, step) : this.lampOff ? 0 : light.lamp;
-        settling ||= Math.abs(level.lamp - (this.lampOff ? 0 : light.lamp)) > 0.05;
-      } else if (switchDelay === undefined || !motion) {
-        level.lamp = damp(level.lamp, light.lamp, 4, step);
-      } else if (this.settledAt >= 0 && time - this.settledAt >= switchDelay) {
-        if (!this.storySwitched) {
-          this.storySwitched = true;
-          if (light.lamp > level.lamp ? level.lamp < light.lamp * 0.4 : light.lamp === 0 && level.lamp > 2) window.dispatchEvent(new CustomEvent('desk:switch', { detail: { on: light.lamp > level.lamp } }));
-        }
-        level.lamp = filamentSwitch(level.lamp, light.lamp, time - this.settledAt - switchDelay, step);
-      }
-      settling ||= switchDelay !== undefined && Math.abs(level.lamp - light.lamp) > 0.05;
-      level.monitor = damp(level.monitor, light.monitor, 5, step);
-    }
-    level.late = damp(level.late, LATENESS[this.chapter], 1.2, step);
-    const dayGoal = day ? 1 : 0;
-    level.day = damp(level.day, dayGoal, 1.6, step);
-    if (Math.abs(level.day - dayGoal) < 0.002) level.day = dayGoal;
-    settling ||= level.day !== dayGoal;
-    const rank = storyRank(this.chapter, this.subIndex);
-    const openGoal = rank >= FOLDER_OPENS_AT ? 1 : 0;
-    const opening = motion && rank === FOLDER_OPENS_AT && openGoal > this.folderOpen;
-    if (!opening || (this.settledAt >= 0 && time - this.settledAt >= FOLDER_OPEN_DELAY)) {
-      this.folderOpen = damp(this.folderOpen, openGoal, opening ? 3.2 : motion ? 5 : 10, step);
-      if (Math.abs(this.folderOpen - openGoal) < 0.001) this.folderOpen = openGoal;
-    }
-    settling ||= this.folderOpen !== openGoal;
-    const minutesGoal = storyMinutes(this.chapter, this.subIndex, day);
-    const minutes = damp(this.clockMinutes, minutesGoal, 1.6, step);
-    if (Math.abs(minutes - this.clockMinutes) > 0.01 || Math.abs(minutes - minutesGoal) < 0.01) {
-      this.clockMinutes = Math.abs(minutes - minutesGoal) < 0.05 ? minutesGoal : minutes;
-      this.clockModel?.show(this.clockMinutes);
-    }
-    settling ||= this.clockMinutes !== minutesGoal;
-    settling ||= Math.abs(level.late - LATENESS[this.chapter]) > 0.002;
-    level.moon = damp(level.moon, light.moon, 1.6, step);
-    level.shelf = damp(level.shelf, light.shelf, 3, step);
-    settling ||= Math.abs(level.shelf - light.shelf) > 0.005;
-    level.dawn = damp(level.dawn, this.chapter === 'outro' ? 1 : 0, 1.6, step);
-    level.phone = damp(level.phone, this.chapter === 'contact' ? 1 : 0, 6, step);
-    level.alfaSignal = damp(level.alfaSignal, this.chapter === 'company' ? 1.6 : 1, 2, step);
-    const alfaGoal = this.chapter === 'company' || this.chapter === 'products' ? ALFA_TURN : 0;
-    level.alfaYaw = motion ? towards(level.alfaYaw, alfaGoal, MAX_TURN_SPEED * dt * 2) : alfaGoal;
-    settling ||= Math.abs(level.lamp - light.lamp) > 0.05 || Math.abs(level.dawn - (this.chapter === 'outro' ? 1 : 0)) > 0.002;
-    settling ||= Math.abs(level.alfaYaw - alfaGoal) > 1e-3 || Math.abs(level.phone - (this.chapter === 'contact' ? 1 : 0)) > 0.002;
-
-    for (const id of FIGURE_ORDER) {
-      const [introChapter, introSub] = FIGURE_INTRO[id];
-      const introRank = storyRank(introChapter, introSub);
-      const goal = this.chapter === 'outro' || rank >= introRank ? 1 : day ? DIM_PRESENCE_DAY : DIM_PRESENCE;
-      const current = this.presence.get(id)!;
-      const ready = this.settledAt >= 0 && time - this.settledAt >= PRESENCE_DELAY;
-      if (motion && rank === introRank && ready && current < 0.5 && !this.neonSince.has(id)) this.neonSince.set(id, time);
-      if (rank !== introRank) this.neonSince.delete(id);
-      const started = this.neonSince.get(id);
-      let next = current;
-      if (started !== undefined) next = neonStart(current, time - started, step);
-      else if (!motion || rank !== introRank || goal < current) next = damp(current, goal, motion ? 4 : 10, step);
-      this.presence.set(id, next);
-      settling ||= Math.abs(next - goal) > 0.003;
-    }
-
-    const focused = this.chapter === 'products' ? PRODUCT_FIGURES[Math.min(this.subIndex, PRODUCT_FIGURES.length - 1)] : null;
-    const look = motion && ALFA_LOOKS.includes(this.chapter) && this.context.pointer.active && this.context.pointer.enabled ? { ndc: this.context.pointer.ndc, camera: this.context.camera } : null;
-    const pixelScale = this.context.renderer.domElement.height / (2 * Math.tan((this.context.camera.fov * Math.PI) / 360));
-    const living = this.life?.update(dt, time, { motion, look, pixelScale, focused }) ?? false;
+    const lighting = this.levels.update(frame);
+    settling ||= lighting;
+    const hinge = this.folders.updateHinge(frame);
+    settling ||= hinge;
+    const hands = this.clockWiring?.update(frame) ?? false;
+    settling ||= hands;
+    const presence = this.figures.update(frame);
+    settling ||= presence;
+    const focused = focusedFigure(this.chapter, this.subIndex);
+    const living = this.updateLife(frame, focused);
     settling ||= living;
-    for (const id of PRODUCT_FIGURES) {
-      const hovered = OBJECT_ID[id] === this.hoverId;
-      const goal = id === focused ? FIGURE_LIFT : hovered ? HOVER_LIFT : 0;
-      const lift = damp(this.figureLift.get(id)!, goal, id !== focused && (hovered || this.figureLift.get(id)! <= HOVER_LIFT) ? 14 : 5, step);
-      this.figureLift.set(id, lift);
-      settling ||= Math.abs(lift - goal) > 1e-4;
-      const yaw = this.figureYaw.get(id)!;
-      this.figureYaw.set(id, id === focused && motion ? yaw + MAX_TURN_SPEED * dt : towards(yaw, 0, MAX_TURN_SPEED * step));
-      if (id === focused && motion) settling = true;
-    }
-    const ringing = this.clockModel?.update(time, motion) ?? false;
-    if (ringing) {
-      settling = true;
-      if (this.context.tier === 'high') this.context.renderer.shadowMap.needsUpdate = true;
-    }
-    if (this.context.tier === 'high') {
-      const posed = this.figurePose();
-      if (posed !== this.shadowPose) {
-        this.shadowPose = posed;
-        this.context.renderer.shadowMap.needsUpdate = true;
-      }
-    }
-    const folder = this.chapter === 'experience' ? experienceFolder(this.subIndex) : null;
-    const detail = this.folderDetail;
-    if (detail) {
-      if (detail.active && detail.active !== folder) detail.close();
-      const moving = detail.update(dt, motion);
-      settling ||= moving;
-      const pose = detail.poseKey();
-      if (pose !== this.detailShadowPose) {
-        this.detailShadowPose = pose;
-        if (this.context.tier === 'high') this.context.renderer.shadowMap.needsUpdate = true;
-      }
-    }
-    for (const id of FOLDERS) {
-      const held = detail?.active === id;
-      const pullGoal = id === folder ? FOLDER_PULL : OBJECT_ID[id] === this.hoverId && !held ? FOLDER_PULL * 0.6 : 0;
-      const pull = damp(this.folderPull.get(id)!, pullGoal, 7, step);
-      this.folderPull.set(id, pull);
-      settling ||= Math.abs(pull - pullGoal) > 1e-4;
-      const goal = id === folder ? 1 : 0;
-      const glow = damp(this.folderGlow.get(id)!, goal, 6, step);
-      this.folderGlow.set(id, glow);
-      settling ||= Math.abs(glow - goal) > 0.002;
-    }
-    const notify = level.phone > 0.5;
-    if (notify !== this.phoneNotified) {
-      this.phoneNotified = notify;
-      drawPhone(this.phoneTexture, notify, tokenColor('--color-accent', '#5aa9ff'));
-    }
-
-    const hoverGoal = this.hoverId > 0 ? 1 : 0;
-    this.hoverMix = damp(this.hoverMix, hoverGoal, 10, step);
-    settling ||= Math.abs(hoverGoal - this.hoverMix) > 0.01;
-
-    if (motion) {
-      this.glass.setTime(time);
-      this.backdrop.setTime(time);
-      this.steam?.setTime(time);
-      this.beam.setTime(time);
+    const lifting = this.figures.updateLift(frame, focused, this.pickSet.hoverId);
+    settling ||= lifting;
+    const posing = this.updateShadows(frame);
+    settling ||= posing;
+    this.screens.update(this.levels.level);
+    const hovering = this.pickSet.update(frame.step);
+    settling ||= hovering;
+    if (frame.motion) {
+      this.weather.setTime(time);
       settling = true;
     }
     this.applyLevels();
     return settling;
   }
 
-  /** Rounded lift and turn of the figures and their moving parts: the lamp shadow is re-rendered only when it changes. */
-  private figurePose(): string {
-    const parts = [Math.round(this.level.alfaYaw * 200)];
-    for (const id of FIGURE_ORDER) {
-      const play = this.life?.offset(id);
-      parts.push(Math.round(((this.figureLift.get(id) ?? 0) + (play?.lift ?? 0)) * 2000), Math.round(((this.figureYaw.get(id) ?? 0) + (play?.yaw ?? 0)) * 200));
+  private beginFrame(dt: number, time: number, state: ChapterState): DeskFrame {
+    const motion = this.context.motion() && !this.context.capture;
+    if (state.id !== this.chapter || state.subIndex !== this.subIndex) this.enterShot(state, time);
+    this.clock = time;
+    if (state.settled && this.settledAt < 0) this.settledAt = time;
+    const day = document.documentElement.dataset.time === 'day';
+    const { chapter, subIndex, settledAt } = this;
+    return { dt, step: motion ? dt : 10, time, motion, day, chapter, subIndex, rank: storyRank(chapter, subIndex), settledAt };
+  }
+
+  private enterShot(state: ChapterState, time: number): void {
+    this.levels.enterShot(state.id, this.chapter);
+    this.chapter = state.id;
+    this.subIndex = state.subIndex;
+    this.settledAt = -1;
+    const introduced = this.coarsePointer.matches ? shotObject(state.id, state.subIndex) : null;
+    if (introduced) this.life?.press.introduce(introduced, time);
+  }
+
+  private updateLife(frame: DeskFrame, focused: ReturnType<typeof focusedFigure>): boolean {
+    const { pointer, camera, renderer } = this.context;
+    const look = frame.motion && ALFA_LOOKS.includes(this.chapter) && pointer.active && pointer.enabled ? { ndc: pointer.ndc, camera } : null;
+    const pixelScale = renderer.domElement.height / (2 * Math.tan((camera.fov * Math.PI) / 360));
+    return this.life?.update(frame.dt, frame.time, { motion: frame.motion, look, pixelScale, focused }) ?? false;
+  }
+
+  /** Clock ringing, figure poses and the held folder: the lamp shadow map is re-rendered only when one of them changes. Returns whether anything still moves. */
+  private updateShadows(frame: DeskFrame): boolean {
+    const high = this.context.tier === 'high';
+    const ringing = this.clockWiring?.ring(frame) ?? false;
+    let redraw = ringing && high;
+    if (high) {
+      const posed = this.figures.poseKey(this.levels.level, this.life);
+      if (posed !== this.shadowPose) {
+        this.shadowPose = posed;
+        redraw = true;
+      }
     }
-    return `${parts.join(',')}|${this.life?.poseKey() ?? ''}`;
+    const shelf = this.folders.updateShelf(frame, this.pickSet.hoverId);
+    if (shelf.posed && high) redraw = true;
+    if (redraw) this.context.renderer.shadowMap.needsUpdate = true;
+    return ringing || shelf.settling;
   }
 
   private applyLevels(): void {
-    const level = this.level;
-    this.lamp.intensity = level.lamp * LIGHT_CALIBRATION.lamp;
-    this.monitorLight.intensity = level.monitor * LIGHT_CALIBRATION.monitor * (1 - 0.8 * level.day);
-    this.moon.intensity = level.moon * LIGHT_CALIBRATION.moon;
-    this.shelfLight.intensity = level.shelf * LIGHT_CALIBRATION.shelf;
-    this.moon.color.copy(this.moonNight).lerp(this.sunColor, level.day).lerp(this.moonDawn, level.dawn * 0.7);
-    this.moon.position.copy(this.moonAt).lerp(this.sunAt, level.day);
-    this.fill.color.copy(this.nightSky).lerp(this.daySky, level.day);
-    this.fill.groundColor.copy(this.nightGround).lerp(this.dayGround, level.day);
-    this.fill.intensity = this.ambientIntensity * LIGHT_CALIBRATION.fill * (1 + level.dawn * 1.5 + level.day * DAY_FILL_GAIN);
-    this.screen.material.color.setScalar(SCREEN_HDR * Math.min(level.monitor / 5, 1.2));
-    this.phoneScreen.material.color.setScalar(0.06 + level.phone * SCREEN_HDR * 0.9);
-    this.laptopScreen?.material.color.setScalar(SCREEN_HDR * 0.55 * Math.max(Math.min(level.monitor / 5, 1), LAPTOP_STANDBY));
-    this.backdrop.setDawn(level.dawn);
-    this.backdrop.setLateness(level.late);
-    this.backdrop.setDay(level.day);
-    this.glass.setDay(level.day);
-    this.glass.setLampReflection(Math.min(level.lamp / 28, 1));
-    this.beam.setLevel(Math.min(level.lamp / 28, 1.2));
-    this.beam.setPixelScale(this.context.renderer.domElement.height, this.viewport().fov);
-    const steam = this.chapter === 'contact' ? 0.9 : this.chapter === 'hero' || this.chapter === 'about' || this.chapter === 'intro' ? 0.7 : 0.45;
-    this.steam?.setStrength(steam * (this.life?.steamGain() ?? 1), this.level.day);
-    const uniforms = this.uniforms;
-    FIGURE_ORDER.forEach((id, index) => {
-      const play = this.life?.offset(id) ?? { lift: 0, yaw: 0 };
-      uniforms.uFigLift.value[index] = (this.figureLift.get(id) ?? 0) + play.lift;
-      uniforms.uFigYaw.value[index] = (id === 'alfa' ? level.alfaYaw : (this.figureYaw.get(id) ?? 0)) + play.yaw;
-    });
-    uniforms.uSignal.value[OBJECT_ID.alfa] = level.alfaSignal * (this.life?.signalGain() ?? 1);
-    for (const id of FOLDERS) uniforms.uGlow.value[OBJECT_ID[id]] = (this.folderGlow.get(id) ?? 0) * 0.32 + (this.life?.glow(id) ?? 0);
-    uniforms.uGlow.value[OBJECT_ID.alfa] = this.life?.glow('alfa') ?? 0;
-    uniforms.uGlow.value[OBJECT_ID.phone] = this.life?.glow('phone') ?? 0;
-    for (const id of PRODUCT_FIGURES) uniforms.uGlow.value[OBJECT_ID[id]] = ((this.figureLift.get(id) ?? 0) / FIGURE_LIFT) * FOCUS_BOUNCE + (this.life?.glow(id) ?? 0);
-    for (const id of FIGURE_ORDER) uniforms.uPresence.value[OBJECT_ID[id]] = this.presence.get(id) ?? 1;
-    const closed = 1 - this.folderOpen;
-    uniforms.uHinge.value.setFromMatrix4(this.hingeMatrix.makeRotationAxis(FOLDER_HINGE_AXIS, -Math.PI * 0.985 * (closed * closed * (3 - 2 * closed))));
-    uniforms.uHingeOrigin.value.copy(FOLDER_HINGE_ORIGIN);
-    for (const id of FOLDERS) {
-      const pull = this.folderPull.get(id) ?? 0;
-      const held = this.folderDetail?.shelfPose(id, pull) ?? null;
-      uniforms.uPull.value[OBJECT_ID[id]] = held ? FOLDER_PARK : pull;
-      const label = this.spineLabels.get(id);
-      if (label) {
-        label.position.x = pull;
-        follow(label, held, this.origin);
-      }
-      const cover = id === FOLDERS[0] ? this.archiveCover : null;
-      if (cover) {
-        cover.position.x = (cover.userData.restX as number) + pull;
-        follow(cover, held, this.coverRest.set(cover.userData.restX as number, cover.position.y, cover.position.z));
-      }
-      const proxy = this.proxies.get(id);
-      if (proxy) follow(proxy, held, proxy.position);
-    }
-    uniforms.uGlow.value[OBJECT_ID.openFolder] = (this.folderGlow.get('tcs') ?? 0) * 0.25 + (this.life?.glow('openFolder') ?? 0);
-    uniforms.uHoverMix.value = this.hoverMix;
-    this.life?.pose(uniforms);
-    for (const id of PRODUCT_FIGURES) {
-      const proxy = this.proxies.get(id);
-      if (proxy) proxy.position.y = FIGURES[id].y + FIGURE_HEIGHT[id] / 2 + (this.figureLift.get(id) ?? 0);
-    }
+    const level = this.levels.level;
+    this.lights.apply(level);
+    this.screens.apply(level);
+    this.weather.apply(level, this.chapter, this.life, this.context.renderer.domElement.height, this.framing.viewport().fov);
+    this.figures.apply(this.uniforms, level, this.life);
+    this.folders.apply(this.uniforms, this.life, this.pickSet.proxies);
+    this.pickSet.apply(this.uniforms);
+    this.life?.pose(this.uniforms);
+    this.figures.applyProxies(this.pickSet.proxies);
   }
 
-  /** Takes the folder of the current sub-shot off the shelf, or puts it back (`folder-close` only puts it back). */
   private onFolderAction(action: 'folder' | 'folder-close', id?: string): void {
-    const detail = this.folderDetail;
-    if (!detail || !this.context) return;
-    if (action === 'folder-close') detail.close();
-    else {
-      const folder = this.chapter === 'experience' ? experienceFolder(this.subIndex) : null;
-      if (!folder || (id !== folder && id !== EXPERIENCE_IDS[folder])) return;
-      const eye = this.framing(this.chapter, this.subIndex)?.eye ?? this.context.camera.position;
-      detail.toggle(folder, EXPERIENCE_IDS[folder]!, eye);
-    }
-    this.context.invalidate();
+    if (!this.context) return;
+    const eye = () => this.framing.framing(this.chapter, this.subIndex)?.eye ?? this.context.camera.position;
+    if (this.folders.action(action, id, this.chapter, this.subIndex, eye)) this.context.invalidate();
   }
 
   /** Room triangle count and visible meshes (debug overlay, docs). */
@@ -970,16 +303,11 @@ export class DeskSet implements ShotProvider {
     window.removeEventListener('desk:action', this.onAction);
     window.removeEventListener('desk:interact', this.onInteract);
     window.removeEventListener('keydown', this.onFolderKey);
-    this.viewportObserver?.disconnect();
-    this.viewportObserver = null;
-    this.viewportSize = null;
-    window.removeEventListener('resize', this.onViewportChange, { capture: true });
-    window.removeEventListener('orientationchange', this.onViewportChange, { capture: true });
-    this.clockModel?.dispose();
-    this.screen?.geometry.dispose();
+    this.framing?.dispose();
+    this.clockWiring?.dispose();
+    this.screens?.screen.geometry.dispose();
     for (const item of this.disposables) item.dispose();
     this.disposables.length = 0;
     this.object3D.removeFromParent();
   }
 }
-

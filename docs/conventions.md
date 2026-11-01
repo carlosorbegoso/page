@@ -16,6 +16,7 @@ Reglas de organización, trampas conocidas y verificación de cada cambio; léel
 - **Tokens**: si un `@theme static` de `src/styles/tokens/` queda fuera de orden, `src/three/tokens.ts` lee valores vacíos. Compruébalo en el build de producción.
 - **CSS de secciones**: al sacar CSS del `<style>` de un componente pierde especificidad; si una regla se rompe, antepón el id de la sección.
 - **HMR**: los listeners de `hud/*` no deben duplicarse al recargar.
+- **CSS3D en Safari/iOS**: WebKit coloca mal las placas de superficie si las matrices CSS3D llevan escalas diminutas (el mundo está en metros: escala ≈ 0.0016). `Plates` renderiza el mundo CSS3D ×1000 (`CSS_WORLD_SCALE`, grupo `surfaces` y cámara copiada con la posición ×1000); la imagen es la misma y WebKit deja de desplazar la placa. No añadas objetos CSS3D fuera de ese grupo.
 - **Imports circulares**: compruébalos con `bunx madge --circular src`.
 
 ## Verificación de cada cambio

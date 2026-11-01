@@ -1,4 +1,4 @@
-import { Scene, type PerspectiveCamera } from 'three';
+import { Group, PerspectiveCamera, Scene } from 'three';
 import { CSS3DRenderer } from 'three/addons/renderers/CSS3DRenderer.js';
 import type { ChapterId, ChapterState, SurfaceName } from '../contracts';
 import { chapterElement, isChapterId, SECTION_CHAPTERS } from '../sections';
@@ -9,9 +9,13 @@ import { measureSafeArea, panelRoom } from './safe-area';
 import { tabInStoryOrder } from './tab-order';
 import type { Origin, PlateEntry, PlateHost, SafeInsets } from './types';
 
+const CSS_WORLD_SCALE = 1000;
+
 export class Plates {
   readonly css3d = new CSS3DRenderer();
   readonly scene = new Scene();
+  private readonly surfaces = new Group();
+  private readonly cssCamera = new PerspectiveCamera();
   readonly panels = document.createElement('div');
   private readonly entries: PlateEntry[] = [];
   private readonly origins: Origin[] = [];
@@ -23,7 +27,10 @@ export class Plates {
   private readonly onFocusIn = (event: FocusEvent) => this.focusIn(event);
   private readonly onKeyDown = (event: KeyboardEvent) => tabInStoryOrder(event, this.entries, (chapter, sub) => this.host.scrollTo(chapter, sub));
 
-  constructor(private readonly host: PlateHost) {}
+  constructor(private readonly host: PlateHost) {
+    this.surfaces.scale.setScalar(CSS_WORLD_SCALE);
+    this.scene.add(this.surfaces);
+  }
 
   mount(): boolean {
     this.safe = measureSafeArea();
@@ -46,7 +53,7 @@ export class Plates {
       this.sizes.observe(entry.el);
       entry.wrapper.addEventListener('scroll', () => markScrollEdge(entry.wrapper), { passive: true });
     } else {
-      this.scene.add(prepareSurfacePlate(entry, this.css3d));
+      this.surfaces.add(prepareSurfacePlate(entry, this.css3d));
     }
     this.entries.push(entry);
   }
@@ -149,7 +156,10 @@ export class Plates {
   }
 
   render(camera: PerspectiveCamera): void {
-    this.css3d.render(this.scene, camera);
+    this.cssCamera.copy(camera, false);
+    this.cssCamera.position.multiplyScalar(CSS_WORLD_SCALE);
+    this.cssCamera.updateMatrixWorld(true);
+    this.css3d.render(this.scene, this.cssCamera);
   }
 
   dispose(): void {

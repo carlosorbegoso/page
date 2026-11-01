@@ -2,6 +2,7 @@ import { Plane, Vector3 } from 'three';
 import { HERO_EYE, ROOM } from '../layout';
 import { aboutPairShot, HERO_PLACE, heroFitDistance, stackedBioShot } from './about-shots';
 import type { ShotContext } from './context';
+import { centreMonitorGroup } from './stacked-monitor-place';
 import { clamp, DEG, heightFit, lerp, widthFit } from './math';
 import type { Framing } from './types';
 
@@ -70,7 +71,8 @@ function monitorFill(ctx: ShotContext, name: string, turn = 0, fill = SCREEN_FIL
   const screen = ctx.monitor.centre;
   const distance = widthFit(ctx.screenSpan * Math.cos(turn), fill, ctx.view);
   const facing = ctx.monitor.normal.clone().applyAxisAngle(UP, turn);
-  return { eye: screen.clone().addScaledVector(facing, distance), focus: screen, sx: 0.5, sy: 0.5, panel: { name, ...ctx.panelDocked } };
+  const framing = { eye: screen.clone().addScaledVector(facing, distance), focus: screen, sx: 0.5, sy: 0.5, panel: { name, ...ctx.panelDocked } };
+  return centreMonitorGroup(ctx, framing);
 }
 
 export function stackedMonitorShots(ctx: ShotContext): { hero: Framing; about: Framing[]; outro: Framing } {

@@ -6,6 +6,7 @@ Qué archivo editar en el escritorio 3D: encuadres (shots), luz, props, figuras,
 | --- | --- |
 | Encuadres por capítulo (ensamblado, caché por viewport) | `src/three/desk/shots/framings.ts` (`desk/shots.ts` solo reexporta) |
 | Cámara de hero, about, contacto y cierre; en teléfono vertical, el monitor con marco al 93 % del ancho (hero, stack; cierre 91 %) | `src/three/desk/shots/monitor-shots.ts` |
+| Teléfono vertical: monitor y figuras de su pie centrados en alto entre el HUD y el 90 % del lienzo (el lienzo es 100lvh; las barras del navegador tapan el resto) | `src/three/desk/shots/stacked-monitor-place.ts` |
 | Hero, about y cierre en horizontal (`roomShot`: cuadro, monitor, corcho y mesa); about en tablet vertical; en teléfono vertical, el cuadro y la tarjeta impresa | `src/three/desk/shots/about-shots.ts` |
 | Cámara de empresa | `src/three/desk/shots/figure-shots.ts` |
 | Cámara de productos (rumbo, inclinación, lado del texto) | `src/three/desk/shots/product-shots.ts` |

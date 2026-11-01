@@ -29,7 +29,7 @@ function pictureLamp(): Vector3[] {
   return [-1, 1].map(x => hood.clone().add(new Vector3((x * hoodLength) / 2, hoodRadius, 0)));
 }
 
-function monitorCorners(ctx: ShotContext): Vector3[] {
+export function monitorCorners(ctx: ShotContext): Vector3[] {
   const { centre, quaternion } = ctx.monitor;
   const right = new Vector3(1, 0, 0).applyQuaternion(quaternion).multiplyScalar(ctx.screenSpan / 2);
   const up = new Vector3(0, 1, 0).applyQuaternion(quaternion).multiplyScalar(ctx.screenRise / 2);

@@ -52,6 +52,9 @@ export const MAX_TURN_SPEED = 0.05;
 /** Night level the visitor's switch lights the lamp to where the story keeps it dark (day, outro). */
 const USER_LAMP_FLOOR = 22;
 const BLIND_RATE = 2.6;
+/** Day ↔ night when the visitor flips the mode: about a second to settle. */
+const MODE_RATE = 4.5;
+const CHAPTER_AMBIENT_RATE = 1.6;
 
 /** Share of the lamp's level while the filament warms: two quick sputters, then a 120 ms rise with a faint shimmer. */
 function filamentRamp(since: number): number {
@@ -104,6 +107,8 @@ export class DeskLevels {
   private storySwitched = false;
   /** The visitor lowered the blind; it rolls back up at the next chapter. */
   private blindDown = false;
+  /** The visitor flipped day/night: the lamp clicks to the new mode's level once the frame sees it. */
+  private modeSwitchPending = false;
 
   enterShot(next: ChapterId, previous: ChapterId): void {
     if (next === 'intro' && previous !== 'intro') this.introStart = -1;
@@ -127,6 +132,21 @@ export class DeskLevels {
     return this.lampUser === 'on';
   }
 
+  /** The visitor flipped day/night: the lamp follows the new mode's story level, with its click. */
+  followMode(time: number): void {
+    this.lampUser = 'story';
+    this.lampToggledAt = time;
+    this.modeSwitchPending = true;
+  }
+
+  private announceModeSwitch(goal: number, motion: boolean): void {
+    if (!this.modeSwitchPending) return;
+    this.modeSwitchPending = false;
+    const lamp = this.level.lamp;
+    const crossing = goal > lamp ? lamp < goal * 0.4 : goal === 0 && lamp > 2;
+    if (motion && crossing) window.dispatchEvent(new CustomEvent('desk:switch', { detail: { on: goal > lamp } }));
+  }
+
   /** Returns whether the blind is now lowered. */
   toggleBlind(): boolean {
     this.blindDown = !this.blindDown;
@@ -146,6 +166,7 @@ export class DeskLevels {
     this.lampGoal = goal;
     const switchDelay = (day ? LAMP_SWITCH_DAY : LAMP_SWITCH)[chapter];
     if (this.lampToggledAt >= 0) {
+      this.announceModeSwitch(goal, motion);
       level.lamp = motion ? filamentSwitch(level.lamp, goal, time - this.lampToggledAt, step) : goal;
       return Math.abs(level.lamp - goal) > 0.05;
     }
@@ -191,9 +212,10 @@ export class DeskLevels {
     const level = this.level;
     level.late = damp(level.late, LATENESS[chapter], 1.2, step);
     const dayGoal = day ? 1 : 0;
-    level.day = damp(level.day, dayGoal, 1.6, step);
+    const modeChanging = level.day !== dayGoal;
+    level.day = damp(level.day, dayGoal, MODE_RATE, step);
     if (Math.abs(level.day - dayGoal) < 0.002) level.day = dayGoal;
-    level.moon = damp(level.moon, light.moon, 1.6, step);
+    level.moon = damp(level.moon, light.moon, modeChanging ? MODE_RATE : CHAPTER_AMBIENT_RATE, step);
     level.shelf = damp(level.shelf, light.shelf, 3, step);
     const blindGoal = this.blindDown ? 1 : 0;
     level.blind = damp(level.blind, blindGoal, BLIND_RATE, step);

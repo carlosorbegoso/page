@@ -14,8 +14,9 @@ const t = useTranslations(locale);
   data-time-toggle
   data-label-day={t('time.toDay')}
   data-label-night={t('time.toNight')}
-  aria-label={t('time.toDay')}
-  title={t('time.toDay')}
+  aria-label={t('time.toNight')}
+  aria-pressed="false"
+  title={t('time.toNight')}
   class="group hud-control hud-icon"
 >
   <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" class="shrink-0 fill-none stroke-current group-data-[state=day]:hidden" stroke-width="2" stroke-linecap="round">
@@ -36,6 +37,7 @@ const t = useTranslations(locale);
     for (const button of document.querySelectorAll<HTMLButtonElement>('[data-time-toggle]')) {
       const label = (day ? button.dataset.labelNight : button.dataset.labelDay) ?? '';
       button.dataset.state = day ? 'day' : 'night';
+      button.setAttribute('aria-pressed', String(!day));
       button.setAttribute('aria-label', label);
       button.title = label;
     }
@@ -52,6 +54,7 @@ const t = useTranslations(locale);
       }
       render();
       window.dispatchEvent(new CustomEvent('time:toggle', { detail: { day: next === 'day' } }));
+      window.dispatchEvent(new CustomEvent('desk:action', { detail: { action: 'time' } }));
     });
   }
   render();

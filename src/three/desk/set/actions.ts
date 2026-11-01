@@ -16,7 +16,7 @@ export interface DeskActionHost {
   folderAction(action: 'folder' | 'folder-close', id?: string): void;
 }
 
-/** `desk:action` router: toys play, Pikachu and Charizard battle, folders open, the laptop lid and room objects toggle, the lamp switches. */
+/** `desk:action` router: toys play, Pikachu and Charizard battle, folders open, the laptop lid and room objects toggle, the lamp switches, day/night flips. */
 export function createActionListener(host: DeskActionHost): (event: Event) => void {
   return event => {
     const detail = (event as CustomEvent<{ action?: string; id?: string }>).detail;
@@ -33,6 +33,11 @@ export function createActionListener(host: DeskActionHost): (event: Event) => vo
     }
     if (detail?.action === 'folder' || detail?.action === 'folder-close') {
       host.folderAction(detail.action, detail.id);
+      return;
+    }
+    if (detail?.action === 'time') {
+      host.levels.followMode(host.clock());
+      context?.invalidate();
       return;
     }
     if (detail?.action === 'laptop') {

@@ -116,6 +116,8 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Laptop (carcasa, teclas, tapa, cable USB-C) | `src/three/desk/props/laptop.ts` |
 | Carpeta abierta de TCS (tapas, bolsillo, hojas, clip, ligas) | `src/three/desk/props/openFolder.ts` |
 | Pikachu de vinilo sobre la base del monitor (posición en `PIKACHU` de `layout.ts`) | `src/three/desk/props/pikachu.ts` |
+| Charizard de vinilo junto a Pikachu, llama de la cola emisiva (`CHARIZARD` en `layout.ts`) | `src/three/desk/props/charizard.ts` |
+| Suculenta viva en maceta entre la laptop y el monitor (`SUCCULENT` en `layout.ts`) | `src/three/desk/props/succulent.ts` |
 | Planta (maceta y hojas) y telescopio | `src/three/desk/props/decor.ts` |
 | Peana y coleccionables: Alfa, Burbu (Ventixs), regalo (Parati), llave (SkyMek), un archivo cada uno | `src/three/desk/props/figures/` |
 | Sombras de contacto | `src/three/desk/props/shadows.ts` |

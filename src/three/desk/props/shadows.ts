@@ -2,6 +2,7 @@ import { PlaneGeometry, type BufferGeometry } from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import {
   CHAIR,
+  CHARIZARD,
   DESK,
   FIGURES,
   KEYBOARD,
@@ -12,6 +13,7 @@ import {
   PHONE,
   PIKACHU,
   PLINTH,
+  SUCCULENT,
   TELESCOPE
 } from '../layout';
 
@@ -27,6 +29,8 @@ export function contactShadowSpots(): Array<{ x: number; y: number; z: number; w
     { x: OPEN_FOLDER.centre.x, y: top, z: OPEN_FOLDER.centre.z, w: OPEN_FOLDER.width + 0.06, d: OPEN_FOLDER.depth + 0.05, yaw: OPEN_FOLDER.yaw },
     { x: MUG.x, y: top, z: MUG.z, w: 0.13, d: 0.13 },
     { x: PIKACHU.base.x, y: PIKACHU.base.y + 0.0012, z: PIKACHU.base.z, w: 0.06, d: 0.06 },
+    { x: CHARIZARD.base.x, y: CHARIZARD.base.y + 0.0012, z: CHARIZARD.base.z - 0.01, w: 0.07, d: 0.075 },
+    { x: SUCCULENT.x, y: top, z: SUCCULENT.z, w: 0.1, d: 0.1 },
     { x: PHONE.base.x, y: top, z: PHONE.base.z, w: 0.14, d: 0.12, yaw: PHONE.yaw },
     { x: LAMP.base.x, y: top, z: LAMP.base.z, w: 0.2, d: 0.2 },
     { x: PLINTH.centre.x, y: top, z: PLINTH.centre.z, w: PLINTH.width + 0.07, d: PLINTH.depth + 0.06 },

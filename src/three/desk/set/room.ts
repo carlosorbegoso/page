@@ -11,6 +11,8 @@ import {
   buildLamp,
   buildLaptop,
   buildPikachu,
+  buildCharizard,
+  buildSucculent,
   buildMonitorHead,
   buildOpenFolder,
   buildPhone,
@@ -68,6 +70,8 @@ export function buildRoomMeshes(room: Group, context: StationContext, palette: P
   buildOpenFolder(statics, palette);
   buildLaptop(statics, palette);
   buildPikachu(statics, q);
+  buildCharizard(statics, q);
+  buildSucculent(statics, palette, q);
   const phoneMatrix = buildPhone(statics, palette);
   const figures = new PartBuilder();
   buildFigures(figures, palette, q);

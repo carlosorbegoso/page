@@ -1,6 +1,27 @@
-import { AdditiveBlending, BufferAttribute, BufferGeometry, Color, Points, ShaderMaterial, Vector3 } from 'three';
+import { AdditiveBlending, BufferAttribute, BufferGeometry, Points, ShaderMaterial, Vector3, type Color } from 'three';
+import { SPARKS_FRAGMENT, SPARKS_VERTEX } from './sparks.glsl';
 
 const LIFE = 1.15;
+
+function tintsFor(count: number, colors: Color[]): Float32Array {
+  const tint = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    const color = colors[i % colors.length]!;
+    tint.set([color.r, color.g, color.b], i * 3);
+  }
+  return tint;
+}
+
+function sparksMaterial(): ShaderMaterial {
+  return new ShaderMaterial({
+    uniforms: { uScale: { value: 600 } },
+    vertexShader: SPARKS_VERTEX,
+    fragmentShader: SPARKS_FRAGMENT,
+    transparent: true,
+    depthWrite: true,
+    blending: AdditiveBlending
+  });
+}
 
 /**
  * A small burst of confetti-like sparks that rise, drift and fade (Parati's gift opening).
@@ -18,49 +39,20 @@ export class Sparks {
   constructor(count: number, colors: Color[]) {
     this.positions = new Float32Array(count * 3);
     this.fades = new Float32Array(count);
-    const tint = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      const color = colors[i % colors.length]!;
-      tint.set([color.r, color.g, color.b], i * 3);
-      this.velocity.push(new Vector3());
-    }
-    const geometry = new BufferGeometry();
-    geometry.setAttribute('position', new BufferAttribute(this.positions, 3));
-    geometry.setAttribute('tint', new BufferAttribute(tint, 3));
-    geometry.setAttribute('fade', new BufferAttribute(this.fades, 1));
-    const material = new ShaderMaterial({
-      uniforms: { uScale: { value: 600 } },
-      vertexShader: `
-        attribute vec3 tint;
-        attribute float fade;
-        uniform float uScale;
-        varying vec3 vTint;
-        varying float vFade;
-        void main() {
-          vTint = tint;
-          vFade = fade;
-          vec4 view = modelViewMatrix * vec4(position, 1.0);
-          gl_Position = projectionMatrix * view;
-          gl_PointSize = max(1.0, 0.0055 * uScale / max(-view.z, 0.01)) * step(0.001, fade);
-        }`,
-      fragmentShader: `
-        varying vec3 vTint;
-        varying float vFade;
-        void main() {
-          float d = length(gl_PointCoord - 0.5) * 2.0;
-          float a = clamp(1.0 - d, 0.0, 1.0);
-          if (a * vFade < 0.04) discard;
-          gl_FragColor = vec4(vTint * 2.2 * a * vFade, a * vFade);
-        }`,
-      transparent: true,
-      depthWrite: true,
-      blending: AdditiveBlending
-    });
-    this.points = new Points(geometry, material);
+    for (let i = 0; i < count; i++) this.velocity.push(new Vector3());
+    this.points = new Points(this.geometry(tintsFor(count, colors)), sparksMaterial());
     this.points.name = 'desk-sparks';
     this.points.frustumCulled = false;
     this.points.visible = false;
     this.points.raycast = () => undefined;
+  }
+
+  private geometry(tint: Float32Array): BufferGeometry {
+    const geometry = new BufferGeometry();
+    geometry.setAttribute('position', new BufferAttribute(this.positions, 3));
+    geometry.setAttribute('tint', new BufferAttribute(tint, 3));
+    geometry.setAttribute('fade', new BufferAttribute(this.fades, 1));
+    return geometry;
   }
 
   burst(origin: Vector3, time: number, spread: number): void {

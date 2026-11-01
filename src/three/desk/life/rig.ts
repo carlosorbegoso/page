@@ -25,46 +25,59 @@ export interface RigOptions {
   shadows: boolean;
 }
 
+type Bucket = { indices: number[]; centroids: Vector3[] };
+
+const corner = [new Vector3(), new Vector3(), new Vector3()];
+
+/** Classifies triangle `i` (first index of its three) of the indexed figures geometry. */
+function describeTriangle(geometry: BufferGeometry, i: number): { indices: [number, number, number]; info: TriangleInfo } {
+  const index = geometry.getIndex()!;
+  const position = geometry.getAttribute('position');
+  const color = geometry.getAttribute('color');
+  const indices: [number, number, number] = [index.getX(i), index.getX(i + 1), index.getX(i + 2)];
+  const [a, b, c] = corner as [Vector3, Vector3, Vector3];
+  a.fromBufferAttribute(position, indices[0]);
+  b.fromBufferAttribute(position, indices[1]);
+  c.fromBufferAttribute(position, indices[2]);
+  const i0 = indices[0];
+  return {
+    indices,
+    info: {
+      oid: Math.round(geometry.getAttribute('oid').getX(i0)),
+      centroid: a.clone().add(b).add(c).multiplyScalar(1 / 3),
+      color: [color.getX(i0), color.getY(i0), color.getZ(i0)],
+      emissive: geometry.getAttribute('pbr').getZ(i0),
+      normal: c.clone().sub(b).cross(a.clone().sub(b)).normalize()
+    }
+  };
+}
+
+function bucketTriangles(geometry: BufferGeometry, classify: (info: TriangleInfo) => string | null): { buckets: Map<string, Bucket>; rest: number[] } {
+  const buckets = new Map<string, Bucket>();
+  const rest: number[] = [];
+  const count = geometry.getIndex()!.count;
+  for (let i = 0; i < count; i += 3) {
+    const { indices, info } = describeTriangle(geometry, i);
+    const name = classify(info);
+    if (!name) {
+      rest.push(...indices);
+      continue;
+    }
+    let bucket = buckets.get(name);
+    if (!bucket) buckets.set(name, (bucket = { indices: [], centroids: [] }));
+    bucket.indices.push(...indices);
+    bucket.centroids.push(info.centroid);
+  }
+  return { buckets, rest };
+}
+
 /**
  * Splits the merged figures geometry into a static remainder plus named moving parts, each its own
  * mesh over the same vertex buffers and atlas material. Every part keeps its object id, so the atlas
  * shader still applies the figure's lift and turn, hover rim and presence to it.
  */
 export function splitFigures(geometry: BufferGeometry, classify: (info: TriangleInfo) => string | null, options: RigOptions): { rest: Mesh; parts: Map<string, RigPart> } {
-  const index = geometry.getIndex()!;
-  const position = geometry.getAttribute('position');
-  const color = geometry.getAttribute('color');
-  const pbr = geometry.getAttribute('pbr');
-  const oid = geometry.getAttribute('oid');
-  const buckets = new Map<string, { indices: number[]; centroids: Vector3[] }>();
-  const rest: number[] = [];
-  const a = new Vector3();
-  const b = new Vector3();
-  const c = new Vector3();
-  for (let i = 0; i < index.count; i += 3) {
-    const i0 = index.getX(i);
-    const i1 = index.getX(i + 1);
-    const i2 = index.getX(i + 2);
-    a.fromBufferAttribute(position, i0);
-    b.fromBufferAttribute(position, i1);
-    c.fromBufferAttribute(position, i2);
-    const centroid = a.clone().add(b).add(c).multiplyScalar(1 / 3);
-    const name = classify({
-      oid: Math.round(oid.getX(i0)),
-      centroid,
-      color: [color.getX(i0), color.getY(i0), color.getZ(i0)],
-      emissive: pbr.getZ(i0),
-      normal: c.clone().sub(b).cross(a.clone().sub(b)).normalize()
-    });
-    if (!name) {
-      rest.push(i0, i1, i2);
-      continue;
-    }
-    let bucket = buckets.get(name);
-    if (!bucket) buckets.set(name, (bucket = { indices: [], centroids: [] }));
-    bucket.indices.push(i0, i1, i2);
-    bucket.centroids.push(centroid);
-  }
+  const { buckets, rest } = bucketTriangles(geometry, classify);
   const parts = new Map<string, RigPart>();
   for (const [name, bucket] of buckets) {
     parts.set(name, { name, mesh: partMesh(geometry, bucket.indices, `desk-figure-${name}`, options), centre: centreOf(bucket.centroids), centroids: bucket.centroids });

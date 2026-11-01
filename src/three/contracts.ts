@@ -7,8 +7,8 @@
  * a `ShotProvider`; FX (`src/three/fx/**`) renders through an `FxPipeline`; audio, motion and UI
  * listen to the `chapter:*` window events.
  *
- * Loading: the Stage imports `src/three/desk/index.ts` and `src/three/fx/index.ts` (if they exist)
- * right after the renderer is created; they register on import or export a default `install()`.
+ * Loading: `src/three/stage/extensions.ts` imports `src/three/desk/index.ts` and `src/three/fx/index.ts`
+ * (if they exist) right after the renderer is created; they register on import or export a default `install()`.
  * This file only holds types and tiny registries: importing it never pulls three into a bundle.
  *
  * Coordinates: 1 unit = 1 metre, +Y up (camera roll is always 0).

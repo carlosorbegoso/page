@@ -29,75 +29,74 @@ export class RoomTone {
     noise: AudioBuffer
   ) {
     this.output = context.createGain();
-
-    this.rain = context.createGain();
-    this.rain.gain.value = 0;
-    this.rain.connect(this.output);
-    const wash = this.loop(noise, 1);
-    const washHigh = context.createBiquadFilter();
-    washHigh.type = 'highpass';
-    washHigh.frequency.value = 450;
-    const washLow = context.createBiquadFilter();
-    washLow.type = 'lowpass';
-    washLow.frequency.value = 4800;
-    const washGain = context.createGain();
-    washGain.gain.value = ROOM_LEVELS.rainWash;
-    wash.connect(washHigh).connect(washLow).connect(washGain).connect(this.rain);
-    this.modulate(washGain.gain, 0.07, ROOM_LEVELS.rainWash * 0.25);
-
-    this.dropBus = context.createGain();
-    this.dropBus.gain.value = ROOM_LEVELS.drops;
-    const glass = context.createBiquadFilter();
-    glass.type = 'peaking';
-    glass.frequency.value = 3200;
-    glass.gain.value = -4;
-    this.dropBus.connect(glass).connect(this.rain);
+    this.rain = this.bus();
+    this.rainWash(noise);
+    this.dropBus = this.glassDropBus();
     this.drops = [2400, 3100, 3800, 4700].map(hz => createDrop(context, hz));
+    this.hum = this.bus();
+    this.roomHum(noise);
+    this.city = this.bus();
+    this.cityTraffic(noise);
+    this.passes = new CityPasses(context, noise, this.output);
+    for (const source of this.sources) source.start();
+    this.timer = setInterval(() => this.scheduleDrops(), DROP_TICK_MS);
+  }
 
-    this.hum = context.createGain();
-    this.hum.gain.value = 0;
-    this.hum.connect(this.output);
+  private bus(): GainNode {
+    const bus = this.context.createGain();
+    bus.gain.value = 0;
+    bus.connect(this.output);
+    return bus;
+  }
+
+  private filter(type: BiquadFilterType, hz: number, gain?: number): BiquadFilterNode {
+    const filter = this.context.createBiquadFilter();
+    filter.type = type;
+    filter.frequency.value = hz;
+    if (gain !== undefined) filter.gain.value = gain;
+    return filter;
+  }
+
+  private gain(value: number): GainNode {
+    const node = this.context.createGain();
+    node.gain.value = value;
+    return node;
+  }
+
+  private rainWash(noise: AudioBuffer): void {
+    const wash = this.loop(noise, 1);
+    const washGain = this.gain(ROOM_LEVELS.rainWash);
+    wash.connect(this.filter('highpass', 450)).connect(this.filter('lowpass', 4800)).connect(washGain).connect(this.rain);
+    this.modulate(washGain.gain, 0.07, ROOM_LEVELS.rainWash * 0.25);
+  }
+
+  private glassDropBus(): GainNode {
+    const dropBus = this.gain(ROOM_LEVELS.drops);
+    dropBus.connect(this.filter('peaking', 3200, -4)).connect(this.rain);
+    return dropBus;
+  }
+
+  private roomHum(noise: AudioBuffer): void {
     const rumble = this.loop(noise, 0.71);
-    const rumbleLow = context.createBiquadFilter();
-    rumbleLow.type = 'lowpass';
-    rumbleLow.frequency.value = 160;
-    const rumbleGain = context.createGain();
-    rumbleGain.gain.value = 0.6;
-    rumble.connect(rumbleLow).connect(rumbleGain).connect(this.hum);
+    const rumbleGain = this.gain(0.6 * ROOM_LEVELS.hum);
+    rumble.connect(this.filter('lowpass', 160)).connect(rumbleGain).connect(this.hum);
     for (const [hz, gain] of [
       [60, 0.12],
       [120, 0.04],
       [180, 0.015]
     ] as const) {
-      const tone = context.createOscillator();
+      const tone = this.context.createOscillator();
       tone.frequency.value = hz;
-      const toneGain = context.createGain();
-      toneGain.gain.value = gain * ROOM_LEVELS.hum;
-      tone.connect(toneGain).connect(this.hum);
+      tone.connect(this.gain(gain * ROOM_LEVELS.hum)).connect(this.hum);
       this.sources.push(tone);
     }
-    rumbleGain.gain.value = 0.6 * ROOM_LEVELS.hum;
+  }
 
-    this.city = context.createGain();
-    this.city.gain.value = 0;
-    this.city.connect(this.output);
+  private cityTraffic(noise: AudioBuffer): void {
     const traffic = this.loop(noise, 0.43);
-    const trafficLow = context.createBiquadFilter();
-    trafficLow.type = 'lowpass';
-    trafficLow.frequency.value = 280;
-    const trafficBand = context.createBiquadFilter();
-    trafficBand.type = 'peaking';
-    trafficBand.frequency.value = 110;
-    trafficBand.gain.value = 5;
-    const trafficGain = context.createGain();
-    trafficGain.gain.value = ROOM_LEVELS.city;
-    traffic.connect(trafficLow).connect(trafficBand).connect(trafficGain).connect(this.city);
+    const trafficGain = this.gain(ROOM_LEVELS.city);
+    traffic.connect(this.filter('lowpass', 280)).connect(this.filter('peaking', 110, 5)).connect(trafficGain).connect(this.city);
     this.modulate(trafficGain.gain, 0.023, ROOM_LEVELS.city * 0.35);
-
-    this.passes = new CityPasses(context, noise, this.output);
-
-    for (const source of this.sources) source.start();
-    this.timer = setInterval(() => this.scheduleDrops(), DROP_TICK_MS);
   }
 
   set(levels: { rain: number; hum: number; city: number; passes?: number }, seconds: number): void {

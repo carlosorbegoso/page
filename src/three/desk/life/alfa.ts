@@ -26,6 +26,15 @@ function happyEyeGeometry(): BufferGeometry {
   return mergeGeometries([stroke(-0.68), stroke(Math.PI + 0.68)], false)!;
 }
 
+/** A posed-by-matrix overlay that starts hidden and ignores the pointer. */
+function overlayMesh<T extends Mesh>(mesh: T, name: string): T {
+  mesh.name = name;
+  mesh.matrixAutoUpdate = false;
+  mesh.visible = false;
+  mesh.raycast = () => undefined;
+  return mesh;
+}
+
 /**
  * Alfa's life: it blinks every few seconds, its head follows the pointer (clamped and damped), and a
  * click makes it happy — "^ ^" eyes, a glow pulse, the antenna light blinking, a hop and a head wave.
@@ -69,40 +78,40 @@ export class AlfaLife {
     this.forward = new Vector3(Math.sin(this.forwardYaw), 0, Math.cos(this.forwardYaw));
     this.side = new Vector3().crossVectors(UP, this.forward).normalize();
     const color = parts.signal.clone().multiplyScalar(2.4);
-    if (eyes) {
-      const sides = [-1, 1].map(sign => {
-        const points = eyes.centroids.filter(point => Math.sign(point.clone().sub(eyes.centre).dot(this.side)) === sign);
-        return points.reduce((sum, point) => sum.add(point), new Vector3()).multiplyScalar(1 / Math.max(points.length, 1));
-      });
-      const geometry = happyEyeGeometry();
-      const material = new MeshBasicMaterial({ color, transparent: true, opacity: 0, depthWrite: false });
-      this.disposables.push(geometry, material);
-      for (const spot of sides) {
-        const out = spot.clone().sub(this.headCentre).normalize();
-        const facing = new Quaternion().setFromUnitVectors(new Vector3(0, 0, 1), out);
-        this.eyeSpots.push(new Matrix4().compose(spot.clone().addScaledVector(out, 0.0012), facing, new Vector3(1, 1, 1)));
-        const mark = new Mesh(geometry, material);
-        mark.name = 'desk-alfa-happy-eye';
-        mark.matrixAutoUpdate = false;
-        mark.visible = false;
-        mark.raycast = () => undefined;
-        this.happyEyes.push(mark);
-        this.overlays.add(mark);
-      }
+    if (eyes) this.addHappyEyes(eyes, color);
+    if (antenna) this.antennaGlow = this.addAntennaGlow(antenna, color);
+  }
+
+  /** Centres of the left and right eye, from the eye mesh's face centroids. */
+  private eyeCentres(eyes: RigPart): Vector3[] {
+    return [-1, 1].map(sign => {
+      const points = eyes.centroids.filter(point => Math.sign(point.clone().sub(eyes.centre).dot(this.side)) === sign);
+      return points.reduce((sum, point) => sum.add(point), new Vector3()).multiplyScalar(1 / Math.max(points.length, 1));
+    });
+  }
+
+  private addHappyEyes(eyes: RigPart, color: Color): void {
+    const geometry = happyEyeGeometry();
+    const material = new MeshBasicMaterial({ color, transparent: true, opacity: 0, depthWrite: false });
+    this.disposables.push(geometry, material);
+    for (const spot of this.eyeCentres(eyes)) {
+      const out = spot.clone().sub(this.headCentre).normalize();
+      const facing = new Quaternion().setFromUnitVectors(new Vector3(0, 0, 1), out);
+      this.eyeSpots.push(new Matrix4().compose(spot.clone().addScaledVector(out, 0.0012), facing, new Vector3(1, 1, 1)));
+      const mark = overlayMesh(new Mesh(geometry, material), 'desk-alfa-happy-eye');
+      this.happyEyes.push(mark);
+      this.overlays.add(mark);
     }
-    if (antenna) {
-      const geometry = new SphereGeometry(0.0068, 12, 8);
-      const material = new MeshBasicMaterial({ color, transparent: true, opacity: 0, depthWrite: false, blending: AdditiveBlending });
-      this.disposables.push(geometry, material);
-      const glow = new Mesh(geometry, material);
-      glow.name = 'desk-alfa-antenna-glow';
-      glow.matrixAutoUpdate = false;
-      glow.visible = false;
-      glow.raycast = () => undefined;
-      this.antennaGlow = glow;
-      this.antennaSpot.makeTranslation(antenna.centre.x, antenna.centre.y, antenna.centre.z);
-      this.overlays.add(glow);
-    }
+  }
+
+  private addAntennaGlow(antenna: RigPart, color: Color): Mesh<SphereGeometry, MeshBasicMaterial> {
+    const geometry = new SphereGeometry(0.0068, 12, 8);
+    const material = new MeshBasicMaterial({ color, transparent: true, opacity: 0, depthWrite: false, blending: AdditiveBlending });
+    this.disposables.push(geometry, material);
+    const glow = overlayMesh(new Mesh(geometry, material), 'desk-alfa-antenna-glow');
+    this.antennaSpot.makeTranslation(antenna.centre.x, antenna.centre.y, antenna.centre.z);
+    this.overlays.add(glow);
+    return glow;
   }
 
   get meshes(): Object3D[] {

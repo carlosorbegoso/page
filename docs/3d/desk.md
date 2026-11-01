@@ -39,7 +39,7 @@ Qué entrega el escritorio al director (planos, superficies, anclas, foco, picks
 
 - Foco: el sujeto del encuadre (pantalla, Alfa, figura activa, carpeta, teléfono); `outro` → `null` (sin DoF).
 - Destinos: Alfa → `#company`; SkyMek, Parati, Ventixs y sus post-its → `#products` (con `product`); las 4 carpetas y la carpeta abierta → `#experience` (con `experience` y `sub`); teléfono → `#contact`.
-- Acciones sin viaje (`action` → `desk:action`): lámpara e interruptor (`lamp`), Pikachu/Charizard (`battle`), cuadro (`portrait`, desvío de cámara), ventana (`blind`), planta, laptop, visitar producto (`visit`); taza y reloj (`desk:clock`) solo reaccionan.
+- Acciones sin viaje (`action` → `desk:action`): lámpara e interruptor (`lamp`), Pikachu/Charizard (`battle`), cuadro (`portrait`, desvío de cámara), ventana o cadena (`blind`: baja o sube en ~1.1 s con un rebote leve y se mece al parar; la luz sigue el valor animado), planta, laptop, visitar producto (`visit`); taza y reloj (`desk:clock`) solo reaccionan.
 - Clic en la carpeta del sub-plano actual la saca del estante (`folder`); Esc o clic fuera la devuelve.
 
 ## `update(dt, time, state)`

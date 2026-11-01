@@ -1,10 +1,12 @@
 import type { Group, Material } from 'three';
 import type { StationContext } from '../../contracts';
+import { motionAllowed, readMotion } from '../../motion';
 import { LampBulb, LampSwitch } from '../lamp';
 import type { Palette } from '../props/palette';
 import type { DeskFrame } from '../set/frame';
 import type { DeskLevels, LightLevels } from '../set/levels';
-import { RollerBlind } from './blind';
+import type { BlindView } from './blind';
+import { loadRollerBlind } from './late';
 import { SwayingPlant } from './plant';
 
 export type RoomToy = 'lamp' | 'window' | 'plant';
@@ -18,9 +20,10 @@ export interface RoomLifeOptions {
 export class RoomLife {
   private readonly bulb = new LampBulb();
   private readonly lampSwitch = new LampSwitch();
-  private readonly blind = new RollerBlind();
+  private blind: BlindView | null = null;
   private plant!: SwayingPlant;
   private hovered: RoomToy | null = null;
+  private disposed = false;
 
   constructor(
     private readonly context: StationContext,
@@ -30,7 +33,19 @@ export class RoomLife {
   build(room: Group, options: RoomLifeOptions): void {
     const high = this.context.tier === 'high';
     this.plant = new SwayingPlant({ ...options, quality: high ? 1 : 0.6, shadows: high });
-    room.add(this.bulb.group, this.lampSwitch.group, this.blind.group, this.plant.group);
+    room.add(this.bulb.group, this.lampSwitch.group, this.plant.group);
+    void loadRollerBlind(this.context).then(blind => this.attachBlind(room, blind));
+  }
+
+  private attachBlind(room: Group, blind: BlindView | null): void {
+    if (!blind) return;
+    if (this.disposed) {
+      blind.dispose();
+      return;
+    }
+    this.blind = blind;
+    room.add(blind.group);
+    this.context.invalidate();
   }
 
   setHover(name: string | null): void {
@@ -38,14 +53,13 @@ export class RoomLife {
     if (toy === this.hovered) return;
     this.hovered = toy;
     this.lampSwitch.setHover(toy === 'lamp');
-    if (toy === 'window') this.blind.nudge(0.35);
+    if (toy === 'window' && this.context.motion()) this.blind?.nudge(0.35);
     if (toy === 'plant') this.plant.nudge(0.5, 0.1);
   }
 
-  action(action: string | undefined): boolean {
+  action(action: string | undefined, time: number): boolean {
     if (action === 'blind') {
-      this.levels.toggleBlind();
-      this.blind.nudge(0.6);
+      this.levels.toggleBlind(time, motionAllowed(readMotion()) && !this.context.capture);
       return true;
     }
     if (action === 'plant') {
@@ -59,7 +73,7 @@ export class RoomLife {
     const { pointer, camera } = this.context;
     const near = frame.motion && pointer.active && pointer.enabled ? { ndc: pointer.ndc, velocity: pointer.velocity, camera } : null;
     const rocking = this.lampSwitch.update(frame, this.levels.lampOn);
-    const swaying = this.blind.update(frame);
+    const swaying = this.blind?.update(frame, this.levels.level.blind) ?? false;
     const rustling = this.plant.update(frame, near);
     if (rustling && this.context.tier === 'high') this.context.renderer.shadowMap.needsUpdate = true;
     return rocking || swaying || rustling;
@@ -67,13 +81,14 @@ export class RoomLife {
 
   apply(level: LightLevels): void {
     this.bulb.apply(level.lamp, level.day);
-    this.blind.apply(level.blind, level.day);
+    this.blind?.apply(level.blind, level.day);
   }
 
   dispose(): void {
     this.bulb.dispose();
     this.lampSwitch.dispose();
-    this.blind.dispose();
+    this.disposed = true;
+    this.blind?.dispose();
     this.plant?.dispose();
   }
 }

@@ -1,5 +1,6 @@
 import type { ChapterId } from '../../contracts';
 import { damp, towards } from '../math';
+import { BlindTravel } from './blind-travel';
 import type { DeskFrame } from './frame';
 import { LATENESS } from './story';
 
@@ -38,7 +39,6 @@ const ALFA_TURN = 20 * (Math.PI / 180);
 export const MAX_TURN_SPEED = 0.05;
 
 const USER_LAMP_FLOOR = 22;
-const BLIND_RATE = 2.6;
 const MODE_RATE = 4.5;
 const CHAPTER_AMBIENT_RATE = 1.6;
 
@@ -80,20 +80,17 @@ type LampOverride = 'story' | 'on' | 'off';
 
 export class DeskLevels {
   readonly level: LightLevels = { lamp: 0, monitor: 0, moon: 0.45, shelf: 0, dawn: 0, phone: 0, alfaSignal: 1, alfaYaw: 0, late: 0, day: 0, blind: 0 };
+  readonly blind = new BlindTravel();
   private introStart = -1;
   private lampUser: LampOverride = 'story';
   private lampToggledAt = -1;
   private lampGoal = 0;
   private storySwitched = false;
-  private blindDown = false;
   private modeSwitchPending = false;
 
   enterShot(next: ChapterId, previous: ChapterId): void {
     if (next === 'intro' && previous !== 'intro') this.introStart = -1;
-    if (next !== previous) {
-      this.lampUser = 'story';
-      this.blindDown = false;
-    }
+    if (next !== previous) this.lampUser = 'story';
     this.lampToggledAt = -1;
     this.storySwitched = false;
   }
@@ -122,9 +119,8 @@ export class DeskLevels {
     if (motion && crossing) window.dispatchEvent(new CustomEvent('desk:switch', { detail: { on: goal > lamp } }));
   }
 
-  toggleBlind(): boolean {
-    this.blindDown = !this.blindDown;
-    return this.blindDown;
+  toggleBlind(time: number, animate: boolean): boolean {
+    return this.blind.toggle(time, animate);
   }
 
   private goalFor(chapter: ChapterId, light: ChapterLight): number {
@@ -191,11 +187,10 @@ export class DeskLevels {
     if (Math.abs(level.day - dayGoal) < 0.002) level.day = dayGoal;
     level.moon = damp(level.moon, light.moon, modeChanging ? MODE_RATE : CHAPTER_AMBIENT_RATE, step);
     level.shelf = damp(level.shelf, light.shelf, 3, step);
-    const blindGoal = this.blindDown ? 1 : 0;
-    level.blind = damp(level.blind, blindGoal, BLIND_RATE, step);
-    if (Math.abs(level.blind - blindGoal) < 0.002) level.blind = blindGoal;
+    const travelling = this.blind.update(frame.time);
+    level.blind = this.blind.value;
     level.dawn = damp(level.dawn, chapter === 'outro' ? 1 : 0, 1.6, step);
-    let settling = level.day !== dayGoal || level.blind !== blindGoal;
+    let settling = level.day !== dayGoal || travelling;
     settling ||= Math.abs(level.late - LATENESS[chapter]) > 0.002 || Math.abs(level.shelf - light.shelf) > 0.005;
     settling ||= Math.abs(level.dawn - (chapter === 'outro' ? 1 : 0)) > 0.002;
     return settling;

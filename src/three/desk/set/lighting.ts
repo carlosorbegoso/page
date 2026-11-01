@@ -8,10 +8,12 @@ const LIGHT_CALIBRATION = { lamp: 0.4, monitor: 0.16, moon: 3, fill: 2.5, shelf:
 const SUN_COLOR = '#fff1dc';
 const SKY_FILL = '#dfe8f2';
 const GROUND_FILL = '#a08c72';
+const CLOTH_GLOW = '#f2cf9c';
 const DAY_FILL_GAIN = 14;
 const BLIND_SHADE = 0.85;
 const BLIND_FILL_SHADE = 0.6;
-const BLIND_LAMP_GAIN = 0.2;
+const BLIND_LAMP_GAIN = 0.3;
+const CLOTH_TINT = 0.45;
 
 export class LightRig {
   readonly lamp: SpotLight;
@@ -27,6 +29,7 @@ export class LightRig {
   private readonly nightGround = new Color(0x0a0806);
   private readonly daySky = new Color(SKY_FILL);
   private readonly dayGround = new Color(GROUND_FILL);
+  private readonly clothGlow = new Color(CLOTH_GLOW);
   private readonly moonAt: Vector3;
   private readonly sunAt = new Vector3();
 
@@ -70,7 +73,7 @@ export class LightRig {
     this.shelfLight.intensity = level.shelf * LIGHT_CALIBRATION.shelf * opening;
     this.moon.color.copy(this.moonNight).lerp(this.sunColor, level.day).lerp(this.moonDawn, level.dawn * 0.7);
     this.moon.position.copy(this.moonAt).lerp(this.sunAt, level.day);
-    this.fill.color.copy(this.nightSky).lerp(this.daySky, level.day);
+    this.fill.color.copy(this.nightSky).lerp(this.daySky, level.day).lerp(this.clothGlow, CLOTH_TINT * level.blind * level.day);
     this.fill.groundColor.copy(this.nightGround).lerp(this.dayGround, level.day);
     const daylight = level.day * DAY_FILL_GAIN * (1 - BLIND_FILL_SHADE * level.blind);
     this.fill.intensity = this.ambientIntensity * LIGHT_CALIBRATION.fill * (1 + level.dawn * 1.5 * opening + daylight);

@@ -10,6 +10,7 @@ import {
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { OBJECT_ID, PartBuilder } from '../builder';
 import {
+  BLIND,
   CHAIR,
   DESK,
   FOLDER,
@@ -81,6 +82,7 @@ function buildWindowFrame(b: PartBuilder, p: Palette): void {
   b.add(new BoxGeometry(f, WINDOW.height, depth), p.frame, { position: [right - f / 2, WINDOW.y, GLASS_Z] });
   b.add(new BoxGeometry(f * 0.8, WINDOW.height, depth * 0.9), p.frame, { position: [WINDOW.mullion, WINDOW.y, GLASS_Z] });
   b.add(new BoxGeometry(0.012, 0.11, 0.02), p.brass, { position: [WINDOW.mullion + 0.03, WINDOW.y - 0.05, GLASS_Z + 0.04] });
+  b.add(new RoundedBoxGeometry(WINDOW.width, BLIND.cassette, BLIND.cassetteDepth, 1, 0.008), shade(p.frame, 1.3), { position: [WINDOW.x, top - BLIND.cassette / 2, BLIND.z] });
 }
 
 export function buildRoom(b: PartBuilder, p: Palette): void {

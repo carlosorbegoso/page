@@ -15,6 +15,8 @@ export const WINDOW = { x: 0.5, y: 1.5, width: 1.6, height: 1.1, frame: 0.04, mu
 
 export const GLASS_Z = ROOM.back - ROOM.wallThickness / 2;
 
+export const BLIND = { z: GLASS_Z + 0.056, cassette: 0.07, cassetteDepth: 0.06 } as const;
+
 export const HERO_EYE = new Vector3(-0.15, 1.22, 1.55);
 
 const MONITOR_CENTRE = new Vector3(-0.15, 1.1, -0.12);

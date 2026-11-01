@@ -23,7 +23,7 @@ const LABELS: Record<string, { es: string; en: string }> = {
   sysarp: { es: 'SYSARP · Experiencia', en: 'SYSARP · Experience' },
   phone: { es: 'Teléfono · Contacto', en: 'Phone · Contact' },
   lamp: { es: 'Lámpara', en: 'Lamp' },
-  window: { es: 'Ventana', en: 'Window' },
+  window: { es: 'Persiana · subir o bajar', en: 'Blind · raise or lower' },
   plant: { es: 'Planta', en: 'Plant' },
   mug: { es: 'Taza de café', en: 'Coffee mug' },
   laptop: { es: 'Laptop', en: 'Laptop' },

@@ -130,11 +130,14 @@ const phone: DeskVoice = (context, out, _noise, level, pitch) => {
 const blind: DeskVoice = (context, out, noise, level, pitch) => {
   const at = start(context);
   let t = at;
-  for (let i = 0; i < 9; i++) {
-    grain(context, out, noise, t, { hz: vary(2300 * pitch, 0.2), q: 6, level: level * vary(0.4, 0.3), decay: 0.025 });
-    t += vary(0.034, 0.25);
+  for (let i = 0; i < 24; i++) {
+    const fade = 1 - i / 30;
+    grain(context, out, noise, t, { hz: vary(2600 * pitch, 0.15), q: 7, level: level * vary(0.22, 0.3) * fade, decay: 0.018 });
+    t += vary(0.038, 0.2);
   }
-  grain(context, out, noise, at, { hz: 700 * pitch, q: 0.9, level: level * 0.2, attack: 0.05, decay: 0.3 });
+  grain(context, out, noise, at, { hz: 900 * pitch, q: 0.7, level: level * 0.16, attack: 0.25, decay: 1 });
+  thump(context, out, at + 1, { from: 170 * pitch, to: 90 * pitch, level: level * 0.35, decay: 0.12 });
+  grain(context, out, noise, at + 1, { hz: 1800 * pitch, q: 2, level: level * 0.12, decay: 0.05 });
 };
 
 export const DESK_VOICES = { clock, laptop, keyboard, folder, chat, gift, mug, wrench, toy, phone, blind } as const;

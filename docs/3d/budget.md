@@ -19,13 +19,15 @@ Cuánto pesa el 3D, qué se descarga antes del primer frame y qué llega despué
 | `late` (capa tardía y parche del fluido) + `BufferGeometryUtils` + `contracts` | 2.7 | arranque |
 | **Antes del primer frame** | **259.4** | |
 | `gsap` 26.5 + `ScrollTrigger` 17.0 + `ScrollToPlugin` 1.6 | 45.1 | después del primer frame (`Stage.start` dibuja antes de `startScroll`) |
-| `deferred` (carpeta para leer, escritorio de la laptop) | 7.5 | evento `stage:reveal` |
+| `deferred` (carpeta para leer, escritorio de la laptop, persiana) | 9.9 | evento `stage:reveal` |
 | `field` (simulación del fluido) | 1.9 | primer movimiento del puntero con el fluido activo |
 | `GLTFLoader` + `KTX2Loader` + `meshopt_decoder` | sin medir | primer glTF (`acquireGltf`; hoy, el reloj) |
 
 ## Gotchas
 
 - Hasta que llega `deferred`, la laptop muestra la pantalla de bloqueo y las carpetas no se pueden sacar: un clic queda en cola 5 s, y la apertura automática de experiencia funciona igual cuando llega. En `?capture` todo se carga antes del primer frame.
+- La persiana (tela, barra, cadena) llega con `deferred`; el cajón es geometría del cuarto y la luz ya sale con la persiana guardada desde el primer frame. Con la persiana bajada en `sessionStorage`, la tela aparece al llegar el chunk.
+- En `deferred` no uses `IcosahedronGeometry` u otras clases de three que el primer frame no usa: Rollup las mete en el chunk `motion` (+0.9 KB al arranque). `SphereGeometry`, `InstancedMesh` y `DataTexture` ya están.
 - `gsap/gsap-core` sin CSSPlugin no sirve: ScrollTrigger llama a `gsap.utils.checkPrefix`, que viene de CSSPlugin.
 - Lo que más pesa en `desk` y se ve en el hero (no se puede diferir sin cambiar el primer frame): props (figuras, Pikachu, Charizard, cuarto) ≈ 66 KB sin comprimir, `life/**` ≈ 49 (incluye `life/pokemon` ≈ 15), `notes/**` ≈ 24 (corcho y tarjetas), `portrait/**` ≈ 15.
 - `RectAreaLight` pesaba unos 100 KB: por eso el monitor ilumina con una `PointLight`.

@@ -17,7 +17,7 @@ export interface LateDeskOptions {
   disposables: Array<{ dispose(): void }>;
 }
 
-function firstFrameShown(context: StationContext): Promise<void> {
+export function firstFrameShown(context: StationContext): Promise<void> {
   if (context.capture || document.querySelector('[data-stage][data-ready="true"]')) return Promise.resolve();
   return new Promise(resolve => window.addEventListener('stage:reveal', () => resolve(), { once: true }));
 }

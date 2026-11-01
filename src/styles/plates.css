@@ -235,7 +235,7 @@
 }
 
 /* A one-line entry sits on the dark wall already; its pool would only read as a smudge. */
-.is-3d .plate:has([data-compact])::before {
+.is-3d .plate[data-compact]::before {
   display: none;
 }
 

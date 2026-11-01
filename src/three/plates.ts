@@ -38,6 +38,8 @@ const SAFE_LEFT = 24;
 const SAFE_RIGHT = 120;
 const SAFE_Y = 24;
 
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
+
 /** Plates without a valid `data-plate-mode` are anchored (same default as plates.css). */
 function plateMode(el: HTMLElement): PlateMode {
   const value = el.dataset.plateMode as PlateMode | undefined;
@@ -63,6 +65,7 @@ export class Plates {
   private height = 1;
   private safeBottom = 0;
   private readonly onFocusIn = (event: FocusEvent) => this.focusIn(event);
+  private readonly onKeyDown = (event: KeyboardEvent) => this.tabInStoryOrder(event);
 
   constructor(private readonly host: PlateHost) {}
 
@@ -123,6 +126,8 @@ export class Plates {
     document.documentElement.style.scrollPaddingTop = '0px';
     surfaceRoot.addEventListener('focusin', this.onFocusIn);
     this.panels.addEventListener('focusin', this.onFocusIn);
+    surfaceRoot.addEventListener('keydown', this.onKeyDown);
+    this.panels.addEventListener('keydown', this.onKeyDown);
     return true;
   }
 
@@ -232,6 +237,23 @@ export class Plates {
     const value = probe.getBoundingClientRect().height;
     probe.remove();
     return value;
+  }
+
+  /**
+   * The monitor and phone plates live in the CSS3D layer and the rest in the panel layer, so the
+   * DOM alone would tab through every surface first. Tab follows the chapters instead (WCAG 2.4.3).
+   */
+  private tabInStoryOrder(event: KeyboardEvent): void {
+    if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey) return;
+    const focusables = this.entries.flatMap(entry =>
+      [...entry.el.querySelectorAll<HTMLElement>(FOCUSABLE)].filter(el => el.checkVisibility({ visibilityProperty: true }))
+    );
+    const index = focusables.indexOf(document.activeElement as HTMLElement);
+    if (index < 0) return;
+    const next = focusables[index + (event.shiftKey ? -1 : 1)];
+    if (!next) return;
+    event.preventDefault();
+    next.focus();
   }
 
   private focusIn(event: FocusEvent): void {

@@ -53,6 +53,7 @@ import {
 } from './props';
 import {
   EXPERIENCE_ORDER,
+  experienceFolder,
   SUB_SHOTS,
   framings,
   monitorFrame,
@@ -350,7 +351,8 @@ export class DeskSet implements ShotProvider {
         key: `desk:${id}`,
         label: LABELS[id]!,
         target: '#experience',
-        experience: EXPERIENCE_IDS[id]
+        experience: EXPERIENCE_IDS[id],
+        sub: EXPERIENCE_ORDER.indexOf(id) + 1
       });
     }
     const phone = this.phoneSurface();
@@ -531,7 +533,7 @@ export class DeskSet implements ShotProvider {
         this.context.renderer.shadowMap.needsUpdate = true;
       }
     }
-    const folder = this.chapter === 'experience' ? EXPERIENCE_ORDER[Math.min(this.subIndex, EXPERIENCE_ORDER.length - 1)] : null;
+    const folder = this.chapter === 'experience' ? experienceFolder(this.subIndex) : null;
     for (const id of FOLDERS) {
       const goal = id === folder ? 1 : 0;
       const glow = damp(this.folderGlow.get(id)!, goal, 6, step);

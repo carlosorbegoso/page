@@ -382,7 +382,7 @@ Un solo entorno: el escritorio de Carlos de noche, con luz horneada. Línea argu
 | `about` | El monitor llena ~70 % | Cambio de "slide" en la pantalla | Foto, bio, formación y stack en la pantalla (CSS3D frontal) | Deslizamiento lateral hacia la lámpara, 1,4 s | Monitor arriba, texto abajo |
 | `company` | Macro bajo la lámpara: peana con Alfa y sus tres figuras | Alfa gira 20°, su señal se enciende | Panel HTML anclado al lado opuesto | Rack focus | Figuras en el tercio superior |
 | `products` | Macro de cada figura, una por vez; las otras desenfocadas | La figura sube 2 cm y gira lento | Una placa por producto; **SkyMek como estrella** (captura real, más peso); Parati y Ventixs "en construcción" | Dolly 15–20 cm, 0,9 s entre productos | Una por pantalla |
-| `experience` | Tilt a la estantería: carpetas; la de TCS abierta en la mesa | Cada carpeta se ilumina al leerse | **Orden cronológico inverso**: TCS, Intercorp, Baufest; SYSARP en una línea | Tilt al teléfono, 1,0 s | Estantería arriba |
+| `experience` | Tilt a la estantería: carpetas; la de TCS abierta en la mesa | Cada carpeta se ilumina al leerse | **Orden de la historia** (docs/PLAN-historia.md): plano de la estantería, luego SYSARP (una línea), Baufest, Intercorp y TCS; el capítulo va antes de `company` | Tilt al teléfono, 1,0 s | Estantería arriba |
 | `contact` | El teléfono junto al teclado se enciende | Notificación + chime | Correo, LinkedIn, GitHub, X, CV en la pantalla del teléfono (CSS3D frontal) | — | Botones al pulgar |
 | `outro` | La lámpara se apaga, amanece en la ventana | Luz | Créditos en la pared (sustituyen al footer HTML) + pie técnico "Hecho con Astro + Three.js" | 2,5 s | Igual |
 
@@ -399,7 +399,7 @@ Un solo entorno: el escritorio de Carlos de noche, con luz horneada. Línea argu
 6. Reduced-motion / pausa: cortes con disolvencia de 300 ms.
 
 ### Contenido (estratega)
-Rol "Backend Developer · Java/Quarkus · Banca" grande desde el primer segundo y 3 cifras (+30–40 % de rendimiento, monolito → CQRS, liderazgo de un equipo de 3 / +20 % de eficiencia); experiencia en orden inverso; SkyMek como estrella; **modo lectura** con un clic (una página limpia con todo el contenido); pie técnico.
+Rol "Backend Developer · Java/Quarkus · Banca" grande desde el primer segundo y 3 cifras (+30–40 % de rendimiento, monolito → CQRS, liderazgo de un equipo de 3 / +20 % de eficiencia); experiencia en orden cronológico en 3D y en orden inverso en el modo lectura (docs/PLAN-historia.md); SkyMek como estrella; **modo lectura** con un clic (una página limpia con todo el contenido); pie técnico.
 
 ### HUD
 Solo el monograma persiste; al hover/tap despliega idioma, sonido, pausa, Índice, modo lectura y CV. Sin riel de progreso sobre el contenido.
@@ -414,7 +414,7 @@ Carlos genera los modelos con Tripo (prompts en `docs/design/mascots.md` y `docs
 | Artista de escenario | `src/three/desk/` | Sets y planos por capítulo (peana macro, estantería y carpetas, teléfono, lluvia, vapor, encendido, amanecer) |
 | FX | `src/three/fx/` | Fluido solo en lluvia/vapor/vidrio, rack focus por capítulo, sin aberración |
 | Diseñador | `docs/design/`, `tokens.css`, `plates.css` | Dirección de arte v2, mascotas re-esculpidas, prompts Tripo, escala tipográfica única |
-| Copywriter | `src/content/`, `src/i18n/`, `docs/copy/` | Rol + cifras, orden inverso, SkyMek estrella, créditos, modo lectura |
+| Copywriter | `src/content/`, `src/i18n/`, `docs/copy/` | Rol + cifras, orden de la historia (inverso en modo lectura), SkyMek estrella, créditos, modo lectura |
 | UI de contenido | `src/components/sections/**`, `products/`, `experience/`, `contact/`, página de modo lectura | Secciones por capítulo, nueva sección `outro`, modo lectura |
 | UI Shell | Header/HUD, Footer, StarMap, Base | HUD de monograma, quitar riel y footer plano, botón modo lectura |
 | Motion | `src/motion/`, `motion.css` | Revelados al `chapter:settled`, quitar deriva y proximidad en cuerpo |

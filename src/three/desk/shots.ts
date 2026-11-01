@@ -1,5 +1,5 @@
 import { Euler, Matrix4, PerspectiveCamera, Plane, Quaternion, Ray, Vector3 } from 'three';
-import type { ChapterId, Shot } from '../contracts';
+import { CHAPTERS, type ChapterId, type Shot } from '../contracts';
 import {
   FIGURE_HEIGHT,
   FIGURES,
@@ -14,17 +14,22 @@ import {
 
 const DEG = Math.PI / 180;
 
-/** Sub-shot order inside `experience` (reverse chronological, PLAN "Contenido"). */
-export const EXPERIENCE_ORDER = ['tcs', 'intercorp', 'baufest', 'sysarp'] as const satisfies readonly FolderId[];
+/** Folders inside `experience` in story order (chronological, docs/PLAN-historia.md). Sub 0 is the whole shelf. */
+export const EXPERIENCE_ORDER = ['sysarp', 'baufest', 'intercorp', 'tcs'] as const satisfies readonly FolderId[];
 
-export const SUB_SHOTS: Partial<Record<ChapterId, number>> = { about: 2, products: PRODUCT_FIGURES.length, experience: EXPERIENCE_ORDER.length };
+/** Folder a sub-shot of `experience` lands on; the opening shelf shot has none. */
+export function experienceFolder(subIndex: number): FolderId | null {
+  return subIndex < 1 ? null : EXPERIENCE_ORDER[Math.min(subIndex - 1, EXPERIENCE_ORDER.length - 1)]!;
+}
+
+export const SUB_SHOTS: Partial<Record<ChapterId, number>> = { about: 2, products: PRODUCT_FIGURES.length, experience: EXPERIENCE_ORDER.length + 1 };
 
 /** `data-plate-anchor` names of the experience panels (content ids). */
 const EXPERIENCE_ANCHOR: Record<(typeof EXPERIENCE_ORDER)[number], string> = {
-  tcs: 'exp-tcs',
-  intercorp: 'exp-intercorp-retail',
+  sysarp: 'exp-sysarp',
   baufest: 'exp-baufest',
-  sysarp: 'exp-sysarp'
+  intercorp: 'exp-intercorp-retail',
+  tcs: 'exp-tcs'
 };
 
 /** Director limits between consecutive shots (src/three/director.ts: 1.4 s at 20°/s and 1 m/s). */
@@ -36,6 +41,7 @@ export const ANCHOR_NAMES = [
   'product-skymek',
   'product-parati',
   'product-ventixs',
+  'exp-intro',
   'exp-tcs',
   'exp-intercorp-retail',
   'exp-baufest',
@@ -188,7 +194,20 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
   });
   const experienceLayout = layoutFor(textLeft);
 
-  const experience = EXPERIENCE_ORDER.map<Framing>(id => {
+  /**
+   * The whole shelf opens the day years. It also bridges the cut from the monitor: about → the first
+   * folder alone turns about 35°, past SHOT_LIMITS; through the shelf each cut stays under 25°.
+   */
+  const shelfFocus = folderSpine('baufest').lerp(folderSpine('intercorp'), 0.5);
+  const shelf: Framing = {
+    eye: eyeFor(shelfFocus, portrait ? -20 : -14, -4, 1.6),
+    focus: shelfFocus,
+    sx: experienceLayout.sx,
+    sy: portrait ? 0.3 : 0.5,
+    panel: { name: 'exp-intro', ...experienceLayout.panel }
+  };
+
+  const folders = EXPERIENCE_ORDER.map<Framing>(id => {
     if (id === 'tcs') {
       const focus = OPEN_FOLDER.centre.clone().add(new Vector3(0, 0.01, 0));
       return {
@@ -208,6 +227,7 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
       panel: { name: EXPERIENCE_ANCHOR[id], ...experienceLayout.panel }
     };
   });
+  const experience = [shelf, ...folders];
 
   const phoneDistance = portrait ? clamp(widthFit(0.075, 0.9, view), 0.36, 0.5) : 0.42;
   const contact: Framing = {
@@ -290,7 +310,7 @@ function angles(shot: Shot): { heading: number; pitch: number } {
 export function checkShots(view: Viewport, phone: SurfaceFrame): ShotCheck[] {
   const all = framings(view, phone);
   const order: Array<[string, Framing]> = [];
-  for (const chapter of ['hero', 'about', 'company', 'products', 'experience', 'contact', 'outro'] as const) {
+  for (const chapter of CHAPTERS.filter(id => id !== 'intro')) {
     all[chapter].forEach((framing, index) => order.push([all[chapter].length > 1 ? `${chapter}:${index}` : chapter, framing]));
   }
   const result: ShotCheck[] = [];

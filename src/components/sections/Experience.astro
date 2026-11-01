@@ -7,13 +7,15 @@ import { getExperience } from '../../lib/content';
 
 interface Props {
   locale: Locale;
+  /** `story` tells the career from the first job (the 3D walk); `newest` leads with today (reading mode). */
+  order?: 'story' | 'newest';
 }
 
-const { locale } = Astro.props;
+const { locale, order = 'story' } = Astro.props;
 const t = useTranslations(locale);
 const entries = await getExperience(locale);
-const newestFirst = entries.toSorted((a, b) => b.start.localeCompare(a.start));
-const firstYear = newestFirst.at(-1)?.start.slice(0, 4);
+const sorted = entries.toSorted((a, b) => (order === 'story' ? a.start.localeCompare(b.start) : b.start.localeCompare(a.start)));
+const firstYear = entries.map(entry => entry.start).toSorted()[0]?.slice(0, 4);
 ---
 
 <section
@@ -23,21 +25,22 @@ const firstYear = newestFirst.at(-1)?.start.slice(0, 4);
   data-experience-station
   class="relative flex min-h-svh flex-col items-center gap-stack px-gutter py-section"
 >
-  {
-    newestFirst.map((entry, index) => (
-      <TimelineItem locale={locale} order={index} {...entry}>
-        {index === 0 && (
-          <SectionHeader
-            id="experience-title"
-            eyebrow={firstYear ? `${firstYear} – ${t('experience.present')}` : undefined}
-            title={t('experience.title')}
-            subtitle={t('experience.subtitle')}
-            class="experience-header mb-6 md:mb-10"
-          />
-        )}
-      </TimelineItem>
-    ))
-  }
+  <div
+    class="plate p-(--plate-padding)"
+    data-plate
+    data-plate-id="exp-intro"
+    data-plate-mode="anchored"
+    data-plate-anchor="exp-intro"
+  >
+    <SectionHeader
+      id="experience-title"
+      eyebrow={firstYear ? `${firstYear} – ${t('experience.present')}` : undefined}
+      title={t('experience.title')}
+      subtitle={t('experience.subtitle')}
+      class="experience-header"
+    />
+  </div>
+  {sorted.map((entry, index) => <TimelineItem locale={locale} order={index} {...entry} />)}
 </section>
 
 <script>
@@ -67,11 +70,3 @@ const firstYear = newestFirst.at(-1)?.start.slice(0, 4);
     for (const plate of plates) plate.toggleAttribute('data-active', plate.dataset.experience === detail.id);
   });
 </script>
-
-<style>
-  @media (width < 48rem) {
-    :global(.is-3d .experience-header > p:last-of-type) {
-      display: none;
-    }
-  }
-</style>

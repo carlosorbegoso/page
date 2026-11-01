@@ -18,8 +18,8 @@ import type { Tier } from './tier';
 
 export type { Tier } from './tier';
 
-/** Chapters in order. `intro` (power-on) has no section; the rest map to `section[data-station="<id>"]`. */
-export const CHAPTERS = ['intro', 'hero', 'about', 'company', 'products', 'experience', 'contact', 'outro'] as const;
+/** Chapters in story order (must match the DOM order of the sections). `intro` (power-on) has no section; the rest map to `section[data-station="<id>"]`. */
+export const CHAPTERS = ['intro', 'hero', 'about', 'experience', 'company', 'products', 'contact', 'outro'] as const;
 export type ChapterId = (typeof CHAPTERS)[number];
 
 /** @deprecated Legacy name kept while the desk migrates to `ShotProvider`. */
@@ -63,7 +63,7 @@ export type PlateMode = 'surface-monitor' | 'surface-phone' | 'anchored';
 /** Live chapter state handed to the shot provider every frame. */
 export interface ChapterState {
   id: ChapterId;
-  /** Sub-shot inside the chapter (products: 0 SkyMek, 1 Parati, 2 Ventixs; experience: folders). */
+  /** Sub-shot inside the chapter (products: 0 SkyMek, 1 Parati, 2 Ventixs; experience: 0 the shelf, then the folders in story order). */
   subIndex: number;
   /** Previous chapter while a transition runs, else null. */
   from: ChapterId | null;
@@ -81,6 +81,8 @@ export interface StationPick {
   readonly target: string;
   readonly product?: 'skymek' | 'parati' | 'ventixs';
   readonly experience?: string;
+  /** Sub-shot to land on inside `target` (defaults to the product index, else 0). */
+  readonly sub?: number;
 }
 
 export interface PointerSample {
@@ -161,7 +163,7 @@ export interface FxPipeline {
 /** Window events. Audio, motion and UI listen to these. */
 export interface StageEventMap {
   /** A chapter (or sub-shot) was requested: the camera starts moving towards its shot. */
-  'chapter:enter': CustomEvent<{ id: ChapterId; subIndex: number }>;
+  'chapter:enter': CustomEvent<{ id: ChapterId; subIndex: number; duration: number }>;
   /** The camera has settled on the chapter's shot: text may enter now. */
   'chapter:settled': CustomEvent<{ id: ChapterId; subIndex: number }>;
   /** Scroll progress inside the chapter (0..1), at most once per frame. */

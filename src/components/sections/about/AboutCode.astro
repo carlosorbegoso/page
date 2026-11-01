@@ -1,0 +1,57 @@
+---
+import { useTranslations, type Locale } from '../../../i18n/utils';
+import { getProfile } from '../../../lib/content';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const profile = await getProfile(locale);
+const { degree, institution, status } = profile.education;
+/** The stack screen as the file Carlos would have open: one YAML document, built from the same content. */
+type CodeLine = { indent: number; key?: string; value?: string; list?: string[]; comment?: string };
+const codeLines: CodeLine[] = [
+  { indent: 0, comment: '# carlos.yml' },
+  { indent: 0, key: 'education' },
+  { indent: 1, key: 'degree', value: degree },
+  { indent: 1, key: 'school', value: institution },
+  { indent: 1, key: 'status', value: status },
+  { indent: 1, key: 'extra', list: t('about.code.extra').split(', ') },
+  { indent: 0, key: 'stack' },
+  ...profile.stack.map(group => ({ indent: 1, key: group.category.toLowerCase(), list: group.items }))
+];
+---
+
+<div class="about-code" aria-hidden="true">
+  <div class="about-code__bar">
+    <span class="about-code__dots"><i></i><i></i><i></i></span>
+    <span class="about-code__tab">carlos.yml</span>
+  </div>
+  <ol class="about-code__lines">
+    {
+      codeLines.map(line => (
+        <li style={`--indent: ${line.indent}`}>
+          {line.comment && <span class="c-comment">{line.comment}</span>}
+          {line.key && <span class="c-key">{line.key}</span>}
+          {line.key && <span class="c-punct">:</span>}
+          {line.value && <span class="c-string"> {line.value}</span>}
+          {line.list && (
+            <span class="c-list">
+              {' '}
+              <span class="c-punct">[</span>
+              {line.list.map((item, index) => (
+                <>
+                  <span class="c-string">{item}</span>
+                  {index < line.list!.length - 1 && <span class="c-punct">, </span>}
+                </>
+              ))}
+              <span class="c-punct">]</span>
+            </span>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+</div>

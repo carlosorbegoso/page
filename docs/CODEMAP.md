@@ -42,7 +42,12 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Para cambiar… | Edita |
 | --- | --- |
 | Hero | `src/components/sections/Hero.astro` |
-| Sobre mí *(pendiente: `about/`)* | `src/components/sections/About.astro` |
+| Sobre mí: placas y orden | `src/components/sections/About.astro` |
+| Sobre mí: foto, bio y datos | `src/components/sections/about/AboutBio.astro` |
+| Sobre mí: estudios y stack | `src/components/sections/about/AboutStack.astro` |
+| Sobre mí: pantalla `carlos.yml` | `src/components/sections/about/AboutCode.astro` |
+| Sobre mí en el monitor (vertical / horizontal) | `src/styles/sections/about/monitor.css`, `monitor-landscape.css`, `code.css` |
+| Sobre mí en teléfonos apilados | `src/styles/sections/about/anchored.css` |
 | Experiencia | `src/components/sections/Experience.astro`, `src/components/experience/` |
 | Empresa | `src/components/sections/Company.astro` |
 | Productos | `src/components/sections/Products.astro`, `src/components/products/` |

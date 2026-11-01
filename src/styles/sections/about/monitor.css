@@ -1,0 +1,112 @@
+/* On the monitor each slide is a fixed-size screen: sizes are shares of its height so nothing clips. */
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] :is(.about-bio, .about-stack) {
+  height: 100%;
+  justify-content: center;
+  gap: 4cqh;
+}
+
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-bio header {
+  gap: 1.2cqh;
+}
+
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-bio header > p:first-child {
+  font-size: 3.2cqh;
+  line-height: 1.3;
+}
+
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-bio h2 {
+  font-size: 9cqh;
+  line-height: 1.05;
+}
+
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-bio header > p:last-child {
+  font-size: 4cqh;
+  line-height: 1.3;
+}
+
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-bio__row {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 4cqw;
+}
+
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-bio__photo {
+  width: 30cqh;
+}
+
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-bio__text {
+  gap: 2cqh;
+  font-size: 3.7cqh;
+  line-height: 1.4;
+}
+
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-stack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  align-content: center;
+  gap: 0 5cqw;
+}
+
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-stack h3 {
+  font-size: 5.6cqh;
+  line-height: 1.2;
+}
+
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-stack ul,
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-stack dl {
+  margin-top: 2.5cqh;
+}
+
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-stack > section:first-child ul {
+  gap: 2.5cqh;
+  font-size: 3.3cqh;
+  line-height: 1.35;
+}
+
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-stack > section:first-child li {
+  gap: 2cqw;
+}
+
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-stack > section:first-child li > span:first-child {
+  width: 1.6cqh;
+  height: 1.6cqh;
+  margin-top: 1.6cqh;
+}
+
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-stack > section + section {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-stack dl {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3cqh 4cqw;
+}
+
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-stack dt {
+  font-size: 2.8cqh;
+  line-height: 1.3;
+}
+
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-stack dd {
+  margin-top: 1cqh;
+}
+
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-stack dd ul {
+  margin-top: 0;
+  gap: 0.6cqh 2.2cqw;
+  font-size: 3.1cqh;
+  line-height: 1.35;
+}
+
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-stack [data-tone] {
+  min-height: 0;
+  gap: 1cqw;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-stack [data-tone] > span[aria-hidden] {
+  width: 1.2cqh;
+  height: 1.2cqh;
+}

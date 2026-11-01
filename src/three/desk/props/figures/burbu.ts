@@ -1,8 +1,8 @@
-import { BoxGeometry, ExtrudeGeometry, Matrix4, Quaternion, Shape, SphereGeometry, Vector2, Vector3 } from 'three';
+import { BoxGeometry, ExtrudeGeometry, Matrix4, Quaternion, Shape, SphereGeometry, TorusGeometry, Vector2, Vector3 } from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { OBJECT_ID, PartBuilder } from '../../builder';
 import { FIGURES } from '../../layout';
-import { seg } from '../geometry';
+import { seg, shade } from '../geometry';
 import type { Palette, Quality } from '../palette';
 import { FRONT, standing } from './frame';
 
@@ -13,6 +13,7 @@ export function buildBurbu(b: PartBuilder, p: Palette, q: Quality): void {
   const baseH = 0.007;
   b.add(new RoundedBoxGeometry(0.058, baseH, 0.026, seg(3, q, 2), 0.0028), p.burbuBase, at(new Matrix4().makeTranslation(0, baseH / 2, 0)), id);
   b.add(new BoxGeometry(0.05, 0.0012, 0.0006), p.burbuSignal, at(new Matrix4().makeTranslation(0, baseH * 0.5, 0.0131)), id);
+  b.add(new BoxGeometry(0.052, 0.0007, 0.0007), p.brass, at(new Matrix4().makeTranslation(0, baseH - 0.0006, 0.0124)), id);
 
   const r = 0.027;
   const bevel = 0.0026;
@@ -49,5 +50,7 @@ export function buildBurbu(b: PartBuilder, p: Palette, q: Quality): void {
   for (let i = 0; i < 3; i++) {
     const dot = new SphereGeometry(0.0039, seg(14, q, 8), seg(10, q, 6)).scale(1, 1, 0.5).translate((i - 1) * 0.0125, 0, face);
     b.add(dot, p.burbuDots, at(lean), id);
+    const socket = new TorusGeometry(0.0044, 0.0007, seg(6, q, 4), seg(20, q, 10)).translate((i - 1) * 0.0125, 0, face - 0.0004);
+    b.add(socket, { ...shade(p.burbuBody, 0.62), roughness: 0.6 }, at(lean), id);
   }
 }

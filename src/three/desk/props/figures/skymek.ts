@@ -2,7 +2,7 @@ import { BoxGeometry, ExtrudeGeometry, Matrix4, Path, Quaternion, Shape, Vector3
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { OBJECT_ID, PartBuilder } from '../../builder';
 import { FIGURES } from '../../layout';
-import { seg, UP } from '../geometry';
+import { seg, shade, UP } from '../geometry';
 import type { Palette, Quality } from '../palette';
 
 /**
@@ -57,5 +57,8 @@ export function buildSkyMek(b: PartBuilder, p: Palette, q: Quality): void {
     new Matrix4().compose(new Vector3(0, 0.026, 0), new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), -0.05).multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -0.28)), new Vector3(1, 1, 1))
   );
   b.add(wrench, p.toolBody, lean, OBJECT_ID.skymek);
+  b.add(new RoundedBoxGeometry(0.012, 0.0165, 0.0084, 2, 0.002), p.toolBand, new Matrix4().multiplyMatrices(lean, new Matrix4().makeTranslation(0.022, 0, 0)), OBJECT_ID.skymek);
+  /** Darker than `toolBand` (also brass): `life/classify` would otherwise lift the plaque with the wrench. */
+  b.add(new BoxGeometry(0.03, 0.005, 0.0008), shade(p.brass, 0.85), new Matrix4().multiplyMatrices(base, new Matrix4().makeTranslation(-0.004, 0.005, 0.0104)), OBJECT_ID.skymek);
   b.add(new BoxGeometry(0.038, 0.0016, 0.0004), p.toolSignal, new Matrix4().multiplyMatrices(lean, new Matrix4().makeTranslation(-0.004, 0, 0.0034)), OBJECT_ID.skymek);
 }

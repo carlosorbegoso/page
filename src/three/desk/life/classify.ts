@@ -27,7 +27,7 @@ export function figureParts(palette: Palette): (info: TriangleInfo) => string | 
       return h > GIFT_LID_Y || normal.y < 0.4 ? 'giftLid' : null;
     }
     if (oid === OBJECT_ID.ventixs) return sameColor(color, palette.burbuDots.color) ? 'bubbleDots' : null;
-    if (oid === OBJECT_ID.skymek) return sameColor(color, palette.toolBody.color) || sameColor(color, palette.toolSignal.color) ? 'wrench' : null;
+    if (oid === OBJECT_ID.skymek) return [palette.toolBody, palette.toolBand, palette.toolSignal].some(finish => sameColor(color, finish.color)) ? 'wrench' : null;
     return null;
   };
 }

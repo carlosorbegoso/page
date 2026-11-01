@@ -1,10 +1,24 @@
-import { BoxGeometry, CircleGeometry, CylinderGeometry, Matrix4, Quaternion, SphereGeometry, TorusGeometry, Vector3, type BufferGeometry } from 'three';
+import { BoxGeometry, CircleGeometry, CylinderGeometry, ExtrudeGeometry, Matrix4, Quaternion, Shape, SphereGeometry, TorusGeometry, Vector3, type BufferGeometry } from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { OBJECT_ID, PartBuilder, type Finish } from '../../builder';
 import { FIGURES } from '../../layout';
-import { between, seg, UP } from '../geometry';
+import { between, seg, shade, UP } from '../geometry';
 import type { Palette, Quality } from '../palette';
 import { FRONT, standing } from './frame';
+
+/** A flat ribbon end with a V cut, lying along +Z from the knot. */
+function ribbonTail(width: number, length: number): ExtrudeGeometry {
+  const notch = width * 0.45;
+  const shape = new Shape();
+  shape.moveTo(-width / 2, 0);
+  shape.lineTo(width / 2, 0);
+  shape.lineTo(width / 2, length);
+  shape.lineTo(0, length - notch);
+  shape.lineTo(-width / 2, length);
+  shape.closePath();
+  const thickness = 0.0011;
+  return new ExtrudeGeometry(shape, { depth: thickness, bevelEnabled: false }).rotateX(Math.PI / 2).translate(0, thickness / 2, 0);
+}
 
 /** Parati: a pink lacquered gift box with a cream satin ribbon, a looped bow, a glowing seam under the lid and a card tag. */
 export function buildGift(b: PartBuilder, p: Palette, q: Quality): void {
@@ -31,8 +45,9 @@ export function buildGift(b: PartBuilder, p: Palette, q: Quality): void {
   for (const side of [-1, 1]) {
     const loop = new TorusGeometry(0.0085, 0.0024, seg(8, q, 5), seg(24, q, 12)).scale(1, 0.72, 1.6);
     b.add(loop, p.giftRibbon, at(new Matrix4().compose(new Vector3(side * 0.0088, top + 0.0055, 0), new Quaternion().setFromAxisAngle(FRONT, side * 0.42), new Vector3(1, 1, 1))), id);
-    const tail = new BoxGeometry(0.0065, 0.0011, 0.019).translate(0, 0, 0.0095);
-    b.add(tail, p.giftRibbon, at(new Matrix4().compose(new Vector3(side * 0.002, top + 0.0007, 0.002), new Quaternion().setFromAxisAngle(UP, side * 0.55), new Vector3(1, 1, 1))), id);
+    const inner = new TorusGeometry(0.0052, 0.0017, seg(8, q, 5), seg(20, q, 10)).scale(1, 0.72, 1.25);
+    b.add(inner, shade(p.giftRibbon, 0.92), at(new Matrix4().compose(new Vector3(side * 0.0058, top + 0.0046, 0.001), new Quaternion().setFromAxisAngle(FRONT, side * 0.75), new Vector3(1, 1, 1))), id);
+    b.add(ribbonTail(0.0065, 0.022), p.giftRibbon, at(new Matrix4().compose(new Vector3(side * 0.002, top + 0.0007, 0.002), new Quaternion().setFromAxisAngle(UP, side * 0.55), new Vector3(1, 1, 1))), id);
   }
   place(new SphereGeometry(0.0046, seg(14, q, 8), seg(10, q, 6)).scale(1, 0.8, 1), p.giftRibbon, 0, top + 0.0035, 0);
 

@@ -21,8 +21,8 @@ const PRODUCT_SETUP: Record<ProductId, { landscape: Setup; portrait: Setup; subj
   /** Alfa stands right behind Ventixs, so it can only be framed whole with it, never cleanly out. */
   ventixs: { landscape: { heading: 6, pitch: -10, distance: 0.4 }, portrait: { heading: 3, pitch: -12, distance: 0.4 }, subjects: ['ventixs', 'alfa'] }
 };
-/** From the centre of the cork board and Alfa; near enough that the board's body text reads at 15 px. */
-const COMPANY_LANDSCAPE: Setup = { heading: -2, pitch: -1, distance: 0.64 };
+/** From the centre of the cork board and Alfa, near enough that the board's body text reads at 15 px; from the right so Alfa hides less of the product post-its. */
+const COMPANY_LANDSCAPE: Setup = { heading: -8, pitch: -1, distance: 0.64 };
 const COMPANY_PORTRAIT: Setup = { heading: -10, pitch: -16, distance: 0.78 };
 /** The text now lives on the objects, so the composition sits centred instead of right of a panel. */
 const CENTRED: Place = { sx: 0.5, sy: 0.5 };

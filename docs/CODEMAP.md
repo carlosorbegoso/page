@@ -54,7 +54,7 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Contacto y teléfono | `src/components/sections/Contact.astro`, `src/components/contact/`, `src/scripts/phone/` |
 | Cierre | `src/components/sections/Outro.astro` |
 | Página de lectura (sin 3D) | `src/components/sections/reading/ReadingPage.astro` |
-| Textos de la UI | `src/i18n/ui.es.ts`, `src/i18n/ui.en.ts` |
+| Textos de la UI | `src/i18n/<es|en>/meta.ts` (meta, 404, idioma, CV, pie, sonido, hora), `nav.ts` (navegación, HUD, recorrido, historia), `sections.ts` (secciones y lectura), `contact.ts` (contacto y teléfono); `ui.<locale>.ts` los une y define `UiKey` |
 | Contenido (perfil, experiencia) | `src/content/` |
 
 ## Navegación y movimiento

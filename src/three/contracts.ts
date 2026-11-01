@@ -184,6 +184,16 @@ export interface StageEventMap {
   'chapter:progress': CustomEvent<{ id: ChapterId; progress: number }>;
   /** Label of the scene object under the pointer, or null. */
   'scene:hover': CustomEvent<{ label: string | null }>;
+  /** Overall story progress (0 at the first sub-shot, 1 at the last) and the active sub-shot index. */
+  'story:progress': CustomEvent<{ value: number; index: number; total: number }>;
+  /** Shot navigation is live (3D mode): keyboard, settle and tour are available. */
+  'story:ready': CustomEvent<{ total: number }>;
+  'story:disposed': CustomEvent<undefined>;
+  /** Request: go to a sub-shot, one step forward / back, or an edge of the story. */
+  'story:goto': CustomEvent<{ chapter: ChapterId; sub?: number } | { step: 1 | -1 } | { edge: 'start' | 'end' }>;
+  /** Request: start, stop or toggle the auto tour. */
+  'story:tour': CustomEvent<{ action?: 'toggle' | 'start' | 'stop' }>;
+  'story:tour-state': CustomEvent<{ state: 'playing' | 'paused' | 'finished' }>;
 }
 
 /** @deprecated Legacy camera pose (desk before the migration). */

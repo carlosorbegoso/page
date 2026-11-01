@@ -88,12 +88,59 @@ const menuItem =
       class="sr-only"
       aria-live="polite"
     ></span>
+    <div class="relative">
+      <button
+        type="button"
+        data-hud-clock
+        hidden
+        aria-haspopup="dialog"
+        aria-controls="section-index"
+        aria-expanded="false"
+        class="group/clock inline-flex min-h-tap items-center rounded-md px-2 focus-visible:shadow-focus focus-visible:outline-none"
+      >
+        <span
+          data-hud-chapter
+          data-story-beats={JSON.stringify(storyBeats)}
+          data-story-beats-day={JSON.stringify(storyBeatsDay)}
+          class="hud-beat font-mono text-xs tracking-caps text-text-muted tabular-nums opacity-0 transition-[opacity,color] duration-(--duration-base) ease-standard group-hover/clock:text-text data-[ready=true]:opacity-100"
+        ></span>
+        <span class="sr-only">· {t('story.openIndex')}</span>
+      </button>
+      <span
+        data-hud-progress
+        hidden
+        role="progressbar"
+        aria-label={t('story.progress')}
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="0"
+        data-value-template={t('story.progressValue')}
+        class="hud-progress pointer-events-none absolute inset-x-2 bottom-2 h-0.5 overflow-hidden rounded-full"
+      >
+        <span data-hud-progress-fill class="hud-progress__fill block h-full bg-accent"></span>
+      </span>
+    </div>
     <span
-      data-hud-chapter
-      data-story-beats={JSON.stringify(storyBeats)}
-      data-story-beats-day={JSON.stringify(storyBeatsDay)}
+      data-hud-tour-badge
+      data-label-playing={t('tour.badgePlaying')}
+      data-label-paused={t('tour.badgePaused')}
       aria-hidden="true"
-      class="hud-beat font-mono text-xs tracking-caps text-text-muted tabular-nums opacity-0 transition-opacity duration-(--duration-base) ease-standard data-[ready=true]:opacity-100"
+      hidden
+      class="hud-beat inline-flex items-center gap-1.5 font-mono text-xs tracking-caps text-text-muted"
+    >
+      <span
+        data-hud-tour-dot
+        class="size-1.5 rounded-full bg-text-muted data-[state=playing]:bg-accent"
+      ></span>
+      <span data-hud-tour-text></span>
+    </span>
+    <span
+      data-story-tour-status
+      data-label-playing={t('tour.playing')}
+      data-label-paused={t('tour.paused')}
+      data-label-finished={t('tour.finished')}
+      class="sr-only"
+      aria-live="polite"
     ></span>
   </div>
 
@@ -129,6 +176,20 @@ const menuItem =
         <path d="M4 7h16M4 12h16M4 17h10"></path>
       </svg>
       {t('nav.index')}
+    </button>
+    <button
+      type="button"
+      data-story-tour
+      hidden
+      aria-pressed="false"
+      class:list={[menuItem, 'group/tour aria-pressed:text-text']}
+    >
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="shrink-0 fill-current">
+        <path d="M8 5.5v13l10.5-6.5z" class="group-aria-pressed/tour:hidden"></path>
+        <path d="M7 6h3.5v12H7zM13.5 6H17v12h-3.5z" class="hidden group-aria-pressed/tour:block"
+        ></path>
+      </svg>
+      {t('tour.start')}
     </button>
     <a href={readingUrl} class={menuItem}>
       <svg
@@ -252,6 +313,25 @@ const menuItem =
     text-shadow: var(--plate-text-halo);
   }
 
+  .hud-progress {
+    background-color: color-mix(in srgb, var(--color-text-muted) 25%, transparent);
+  }
+
+  .hud-progress__fill {
+    transform: scaleX(var(--story-progress, 0));
+    transform-origin: left center;
+  }
+
+  @media (forced-colors: active) {
+    .hud-progress {
+      background-color: GrayText;
+    }
+
+    .hud-progress__fill {
+      background-color: Highlight;
+    }
+  }
+
   .hud-menu {
     transform-origin: top left;
     transition:
@@ -316,6 +396,9 @@ const menuItem =
   const chapter = document.querySelector<HTMLElement>('[data-hud-chapter]');
   const sheet = document.querySelector<HTMLDialogElement>('[data-index]');
   const indexButton = document.querySelector<HTMLButtonElement>('[data-index-open]');
+  const clock = document.querySelector<HTMLButtonElement>('[data-hud-clock]');
+  const tourButton = document.querySelector<HTMLButtonElement>('[data-story-tour]');
+  let indexOpener: HTMLButtonElement | null = null;
   const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
   const HOVER_CLOSE_DELAY_MS = 250;
 
@@ -373,12 +456,76 @@ const menuItem =
       if (isOpen() && event.target instanceof Node && !hud.contains(event.target)) setOpen(false);
     });
 
-    indexButton?.addEventListener('click', () => {
-      setOpen(false);
-      sheet?.showModal();
-      indexButton.setAttribute('aria-expanded', 'true');
+    for (const opener of [indexButton, clock]) {
+      opener?.addEventListener('click', () => {
+        if (!sheet) return;
+        setOpen(false);
+        indexOpener = opener === clock ? clock : null;
+        sheet.showModal();
+        opener.setAttribute('aria-expanded', 'true');
+      });
+    }
+
+    tourButton?.addEventListener('click', () => {
+      const starting = tourButton.getAttribute('aria-pressed') !== 'true';
+      window.dispatchEvent(new CustomEvent('story:tour', { detail: { action: starting ? 'start' : 'stop' } }));
+      if (starting) setOpen(false, { restoreFocus: true });
     });
   }
+
+  const progressBar = document.querySelector<HTMLElement>('[data-hud-progress]');
+  const tourBadge = document.querySelector<HTMLElement>('[data-hud-tour-badge]');
+  const tourStatus = document.querySelector<HTMLElement>('[data-story-tour-status]');
+  const TOUR_BADGE_PAUSED_MS = 4000;
+
+  function setStoryNav(ready: boolean) {
+    if (progressBar) progressBar.hidden = !ready;
+    if (tourButton) tourButton.hidden = !ready;
+  }
+
+  window.addEventListener('story:ready', () => setStoryNav(true));
+  window.addEventListener('story:disposed', () => setStoryNav(false));
+  setStoryNav(document.documentElement.dataset.storyNav === 'ready');
+
+  if (progressBar) {
+    const fill = progressBar.querySelector<HTMLElement>('[data-hud-progress-fill]');
+    const template = progressBar.dataset.valueTemplate ?? '{current} / {total}';
+    let percent = -1;
+    let shot = '';
+    window.addEventListener('story:progress', event => {
+      const { value, index, total } = (event as CustomEvent<{ value: number; index: number; total: number }>).detail;
+      fill?.style.setProperty('--story-progress', value.toFixed(4));
+      const nextPercent = Math.round(value * 100);
+      if (nextPercent !== percent) {
+        percent = nextPercent;
+        progressBar.setAttribute('aria-valuenow', String(percent));
+      }
+      const nextShot = template.replace('{current}', String(index + 1)).replace('{total}', String(total));
+      if (nextShot !== shot) {
+        shot = nextShot;
+        progressBar.setAttribute('aria-valuetext', shot);
+      }
+    });
+  }
+
+  let badgeTimer: number | undefined;
+  window.addEventListener('story:tour-state', event => {
+    const { state } = (event as CustomEvent<{ state: 'playing' | 'paused' | 'finished' }>).detail;
+    const playing = state === 'playing';
+    tourButton?.setAttribute('aria-pressed', String(playing));
+    if (tourStatus) {
+      const key = `label${state[0]!.toUpperCase()}${state.slice(1)}`;
+      tourStatus.textContent = tourStatus.dataset[key] ?? '';
+    }
+    if (!tourBadge) return;
+    window.clearTimeout(badgeTimer);
+    const dot = tourBadge.querySelector<HTMLElement>('[data-hud-tour-dot]');
+    const text = tourBadge.querySelector<HTMLElement>('[data-hud-tour-text]');
+    if (dot) dot.dataset.state = state;
+    if (text) text.textContent = (playing ? tourBadge.dataset.labelPlaying : tourBadge.dataset.labelPaused) ?? '';
+    tourBadge.hidden = state === 'finished';
+    if (!playing) badgeTimer = window.setTimeout(() => (tourBadge.hidden = true), TOUR_BADGE_PAUSED_MS);
+  });
 
   const audioHint = document.querySelector<HTMLElement>('[data-hud-audio-hint]');
   const audioToggle = document.querySelector<HTMLButtonElement>('[data-audio-toggle]');
@@ -419,7 +566,9 @@ const menuItem =
   if (sheet) {
     sheet.addEventListener('close', () => {
       indexButton?.setAttribute('aria-expanded', 'false');
-      toggle?.focus();
+      clock?.setAttribute('aria-expanded', 'false');
+      (indexOpener ?? toggle)?.focus();
+      indexOpener = null;
     });
     sheet.querySelector('[data-index-close]')?.addEventListener('click', () => sheet.close());
     sheet.addEventListener('click', event => {
@@ -443,6 +592,7 @@ const menuItem =
     if (!chapter || !beats?.length) return;
     chapter.textContent = beats[Math.min(Math.max(sub, 0), beats.length - 1)]!;
     chapter.dataset.ready = 'true';
+    if (clock) clock.hidden = false;
   }
 
   function setActive(id: string | null, sub?: number) {

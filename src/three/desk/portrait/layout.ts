@@ -6,7 +6,7 @@ export const PORTRAIT_PHOTO = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}i
 const FRAME_DEPTH = 0.022;
 
 export const PORTRAIT = {
-  centre: new Vector3(-0.645, 1.3, ROOM.back + FRAME_DEPTH / 2 + 0.004),
+  centre: new Vector3(-0.7, 1.3, ROOM.back + FRAME_DEPTH / 2 + 0.004),
   width: 0.27,
   height: 0.34,
   depth: FRAME_DEPTH,

@@ -27,7 +27,7 @@ export const CORKBOARD = {
   width: 0.34,
   height: 0.3,
   /** Lean back from vertical, radians. */
-  lean: 0.02,
+  lean: 0.008,
   /** Width of the wooden frame around the cork. */
   frame: 0.012,
   depth: 0.014

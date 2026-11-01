@@ -124,12 +124,29 @@
   );
 }
 
+/* Anchored panels float over the room: a frosted, edgeless pool hides the out-of-focus props behind the text. */
+.is-3d .plate[data-plate-mode='anchored']:not([data-compact])::before {
+  inset: -50% -38%;
+  background: radial-gradient(
+    closest-side,
+    var(--color-plate-pool) 0,
+    var(--color-plate-pool) 52%,
+    var(--color-plate-pool-edge) 70%,
+    var(--color-plate-pool-fade, rgb(4 6 11 / 0.32)) 86%,
+    transparent 100%
+  );
+  backdrop-filter: blur(16px) saturate(0.6);
+  mask-image: radial-gradient(closest-side, #000 60%, rgb(0 0 0 / 0.5) 82%, transparent 100%);
+}
+
 /*
  * Upright phones dock every panel at the bottom (stackedLayout): the pool becomes a full-bleed
  * gradient from the panel down, like a subtitle band, so the room above stays clean.
  */
 @media (width < 48rem) and (orientation: portrait) {
   .is-3d .plate:not([data-plate-mode^='surface-'])::before {
+    backdrop-filter: none;
+    mask-image: none;
     inset: -6rem calc((100% - 100vw) / 2) -100vh;
     background: linear-gradient(
       180deg,

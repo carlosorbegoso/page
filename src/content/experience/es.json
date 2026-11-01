@@ -60,9 +60,8 @@
       "start": "2020-01",
       "end": "2021-12",
       "summary": "Aplicaciones web usables y rápidas con JavaScript, en una consultora de TI.",
-      "highlights": [],
-      "stack": ["JavaScript", "HTML", "CSS"],
-      "compact": true
+      "highlights": ["Construí aplicaciones web usables y rápidas con JavaScript, HTML y CSS para los clientes de la consultora."],
+      "stack": ["JavaScript", "HTML", "CSS"]
     }
   ]
 }

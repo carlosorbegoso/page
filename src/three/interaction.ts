@@ -129,12 +129,16 @@ export function setupInteraction(options: InteractionOptions): () => void {
     window.addEventListener('pointermove', onMove, { passive: true });
     document.documentElement.addEventListener('pointerleave', onLeave);
   }
+  window.addEventListener('chapter:enter', onLeave);
+  window.addEventListener('blur', onLeave);
   window.addEventListener('click', onClick);
   const releaseFolderKeys = setupFolderKeys();
   return () => {
     releaseFolderKeys();
     window.removeEventListener('pointermove', onMove);
     document.documentElement.removeEventListener('pointerleave', onLeave);
+    window.removeEventListener('chapter:enter', onLeave);
+    window.removeEventListener('blur', onLeave);
     window.removeEventListener('click', onClick);
     document.body.style.cursor = '';
   };

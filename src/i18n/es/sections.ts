@@ -13,6 +13,7 @@ export const sections = {
   'about.title': 'Sobre mí',
   'about.subtitle':
     'Desarrollador backend en Lima, con más de 5 años construyendo sistemas en Java.',
+  'about.portrait': 'Foto de Carlos Orbegoso',
   'about.facts.label': 'En resumen',
   'about.facts.now.label': 'Hoy',
   'about.facts.now.value': 'TCS para el BCP',

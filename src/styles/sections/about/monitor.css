@@ -1,3 +1,14 @@
+/* In 3D the photo hangs framed on the office wall: the figure stays in the page for screen readers only. */
+.is-3d [data-plate-id^='about'] .about-bio__portrait {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* On the monitor each slide is a fixed-size screen: sizes are shares of its height so nothing clips. */
 .is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] :is(.about-bio, .about-stack) {
   height: 100%;
@@ -28,10 +39,6 @@
   flex-direction: row;
   align-items: flex-start;
   gap: 4cqw;
-}
-
-.is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-bio__photo {
-  width: 30cqh;
 }
 
 .is-3d [data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-bio__text {

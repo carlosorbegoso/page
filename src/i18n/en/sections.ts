@@ -12,6 +12,7 @@ export const sections = {
   'hero.metrics.team.label': 'efficiency at Baufest, where I led a team of 3',
   'about.title': 'About me',
   'about.subtitle': 'Backend developer in Lima, building Java systems for more than 5 years.',
+  'about.portrait': 'Photo of Carlos Orbegoso',
   'about.facts.label': 'At a glance',
   'about.facts.now.label': 'Now',
   'about.facts.now.value': 'TCS for BCP',

@@ -6,6 +6,7 @@ import { CLOCK_POSITION } from '../clock';
 import { LAMP_SWITCH } from '../lamp';
 import { CHARIZARD, FIGURE_HEIGHT, FIGURES, FOLDERS, GLASS_Z, LAMP, LAPTOP, MUG, OPEN_FOLDER, PIKACHU, PLANT, PRODUCT_FIGURES, WINDOW, folderCentre, type FigureId } from '../layout';
 import { createPickMaterial, type AtlasUniforms } from '../materials';
+import { PORTRAIT } from '../portrait';
 import { damp } from '../math';
 import { BOARD_LAYOUT, boardFaceMatrix, boardPoint, type ProductId } from '../notes/layout';
 import { EXPERIENCE_ORDER, type SurfaceFrame } from '../shots';
@@ -27,7 +28,8 @@ const LABELS: Record<string, { es: string; en: string }> = {
   mug: { es: 'Taza de café', en: 'Coffee mug' },
   laptop: { es: 'Laptop', en: 'Laptop' },
   clock: { es: 'Reloj · clic para que suene', en: 'Clock · click to ring it' },
-  pokemon: { es: 'Pikachu vs. Charizard · clic para la batalla', en: 'Pikachu vs. Charizard · click to battle' }
+  pokemon: { es: 'Pikachu vs. Charizard · clic para la batalla', en: 'Pikachu vs. Charizard · click to battle' },
+  portrait: { es: 'Foto de Carlos Orbegoso', en: 'Photo of Carlos Orbegoso' }
 };
 
 const HOVER_ACCENT: Partial<Record<keyof typeof OBJECT_ID, string>> = {
@@ -66,6 +68,8 @@ export class DeskPicks {
     ] as const) {
       this.picks.push({ object3D: proxy(key, [...size], base.clone().add(new Vector3(0, size[1] / 2, 0))), key: 'desk:pokemon', label: LABELS.pokemon!, target: '#hero', action: 'battle' });
     }
+    const portrait = proxy('portrait', [PORTRAIT.width + 0.02, PORTRAIT.height + 0.02, 0.04], PORTRAIT.centre);
+    this.picks.push({ object3D: portrait, key: 'desk:portrait', label: LABELS.portrait!, target: '#about', action: 'portrait' });
     this.picks.push({ object3D: proxy('clock', [0.12, 0.14, 0.08], CLOCK_POSITION.clone().add(new Vector3(0, 0.07, 0))), key: 'desk:clock', label: LABELS.clock!, target: '#hero' });
   }
 

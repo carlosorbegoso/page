@@ -5,6 +5,7 @@ import { setupChapterScroll, type ChapterScroll } from '../scroll';
 import { chapterElement } from '../sections';
 import type { World } from '../world';
 import type { StageLoop } from './frame-loop';
+import { listenDetour } from './detour';
 import { PickNavigator } from './navigate';
 import { dissolve, mountPlates } from './plates-mount';
 import { DEFAULT_SUBS, type StageLayout } from './shots';
@@ -26,6 +27,7 @@ export class StageChapters {
   private scroll: ChapterScroll | undefined;
   private pending: { id: ChapterId; sub: number } | null = null;
   private readonly navigator: PickNavigator;
+  private readonly releaseDetour: () => void;
 
   constructor(private readonly host: ChaptersHost) {
     this.navigator = new PickNavigator({
@@ -33,6 +35,7 @@ export class StageChapters {
       movesAllowed: () => host.movesAllowed(),
       scrollToChapter: (chapter, sub) => this.scrollTo(chapter, sub)
     });
+    this.releaseDetour = listenDetour(host.director.detour, () => host.loop.bump());
   }
 
   navigate(pick: StationPick): void {
@@ -123,6 +126,7 @@ export class StageChapters {
   }
 
   dispose(): void {
+    this.releaseDetour();
     this.scroll?.dispose();
     this.plates?.dispose();
   }

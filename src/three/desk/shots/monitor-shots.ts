@@ -1,5 +1,6 @@
 import { Plane, Vector3 } from 'three';
 import { HERO_EYE, LAPTOP, MONITOR, ROOM } from '../layout';
+import { aboutPairShot, stackedAboutFocus } from './about-shots';
 import type { ShotContext } from './context';
 import { clamp, eyeFor, heightFit, lerp, widthFit } from './math';
 import type { Framing } from './types';
@@ -29,12 +30,8 @@ export function aboutShot(ctx: ShotContext, heroDistance: number): Framing {
   const aboutDistance = portrait
     ? clamp(Math.max(widthFit(screenSpan, 0.86, view), heightFit(screenRise, 0.86, view)), 0.7, heroDistance - 0.05)
     : clamp(widthFit(screenSpan, 0.7, view), 0.7, heroDistance - 0.25);
-  return {
-    eye: screen.clone().addScaledVector(ctx.monitor.normal, aboutDistance),
-    focus: screen,
-    sx: 0.5,
-    sy: portrait ? 0.48 : 0.5
-  };
+  const monitorOnly = { eye: screen.clone().addScaledVector(ctx.monitor.normal, aboutDistance), focus: screen, sx: 0.5, sy: portrait ? 0.48 : 0.5 };
+  return aboutPairShot(ctx, monitorOnly);
 }
 
 export function contactShot(ctx: ShotContext): Framing {
@@ -72,15 +69,14 @@ function stackedShot(ctx: ShotContext, focus: Vector3, heading: number, pitch: n
 
 /**
  * Monitor chapters on a stacked phone are establishing shots, not screen reads: the hero holds the
- * whole night desk (laptop, monitor, lamp, window), about pushes onto the monitor and then turns to
- * the laptop on the way to the shelf, and the outro pulls back up to the window.
+ * whole night desk (laptop, monitor, lamp, window), about pushes onto the framed photo beside the
+ * monitor and then turns to the laptop on the way to the shelf, and the outro pulls back up to the window.
  */
 export function stackedMonitorShots(ctx: ShotContext): { hero: Framing; about: Framing[]; outro: Framing } {
   const room = MONITOR.centre.clone().add(new Vector3(0.12, 0.06, -0.04));
   /** The opening caption is short, so the desk can sit lower and meet it. */
   const hero = stackedShot(ctx, room, 4, -7, 1.45, 'hero', ctx.subjectY + 0.04);
-  const monitor = MONITOR.centre.clone().add(new Vector3(0.12, -0.02, 0));
-  const bio = stackedShot(ctx, monitor, 8, -10, 0.85, 'about-bio');
+  const bio = stackedShot(ctx, stackedAboutFocus(), 4, -8, 0.92, 'about-bio');
   const laptop = LAPTOP.centre.clone().add(new Vector3(0.02, 0.1, 0));
   const stack = stackedShot(ctx, laptop, -14, -14, 0.5, 'about-stack');
   const sky = MONITOR.centre.clone().add(new Vector3(0.3, 0.22, -0.1));

@@ -32,16 +32,7 @@
 }
 
 .is-3d [data-plate-mode='anchored'][data-plate-id^='about'] .about-bio__row {
-  display: grid;
-  grid-template-columns: 4rem minmax(0, 1fr);
-  align-items: start;
-  gap: 1rem;
-}
-
-.is-3d [data-plate-mode='anchored'][data-plate-id^='about'] .about-bio__photo {
-  width: 4rem;
-  border-radius: 999px;
-  filter: grayscale(0.4) contrast(1.08);
+  display: block;
 }
 
 .is-3d [data-plate-mode='anchored'][data-plate-id^='about'] .about-bio__text {

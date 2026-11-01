@@ -19,6 +19,7 @@ import { addContactShadows, buildRoomMeshes } from './set/room';
 import { DeskScreens } from './set/screens';
 import { focusedFigure, shotObject, storyRank } from './set/story';
 import { DeskWeather } from './set/weather';
+import { WallPortrait } from './portrait';
 import { RoomLife } from './room-life';
 
 /** Chapters where Alfa is on screen and its head follows the pointer. */
@@ -50,6 +51,7 @@ export class DeskSet implements ShotProvider {
   private framing!: DeskFraming;
   private life: DeskLife | null = null;
   private roomLife: RoomLife | null = null;
+  private portrait: WallPortrait | null = null;
   private triangles = 0;
   private chapter: ChapterId = 'intro';
   private subIndex = 0;
@@ -98,6 +100,9 @@ export class DeskSet implements ShotProvider {
     this.roomLife = new RoomLife(context, this.levels);
     this.roomLife.build(this.room, { material: meshes.material, depthMaterial: meshes.depthMaterial, palette });
     this.disposables.push(this.roomLife);
+    this.portrait = new WallPortrait(context.camera, meshes.material.envMap, () => context.invalidate());
+    this.room.add(this.portrait.group);
+    this.disposables.push(this.portrait);
     this.folders.detail = addFolderDetail(this.room, context, meshes, palette, this.disposables);
     window.addEventListener('keydown', this.onFolderKey);
     this.screens = new DeskScreens(context, { room: this.room, phone: this.phoneSurface(), material: meshes.material, depthMaterial: meshes.depthMaterial, disposables: this.disposables });
@@ -160,6 +165,7 @@ export class DeskSet implements ShotProvider {
     this.life?.setHover(name ?? null);
     this.screens?.setHover(name ?? null);
     this.roomLife?.setHover(object ? (this.resolvePick(object)?.key.slice(5) ?? null) : null);
+    this.portrait?.setHover(object ? this.resolvePick(object)?.key === 'desk:portrait' : false);
     if (changed) this.context?.invalidate();
   }
 
@@ -193,6 +199,8 @@ export class DeskSet implements ShotProvider {
     settling ||= hovering;
     const toys = this.roomLife?.update(frame) ?? false;
     settling ||= toys;
+    const glinting = this.portrait?.update(frame) ?? false;
+    settling ||= glinting;
     if (frame.motion) {
       this.weather.setTime(time);
       settling = true;
@@ -249,6 +257,7 @@ export class DeskSet implements ShotProvider {
     const level = this.levels.level;
     this.lights.apply(level);
     this.roomLife?.apply(level);
+    this.portrait?.apply(level);
     this.screens.apply(level);
     this.weather.apply(level, this.chapter, this.life, this.context.renderer.domElement.height, this.framing.viewport().fov);
     this.figures.apply(this.uniforms, level, this.life);

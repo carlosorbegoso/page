@@ -47,7 +47,7 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | --- | --- |
 | Hero | `src/components/sections/Hero.astro` |
 | Sobre mí: placas y orden | `src/components/sections/About.astro` |
-| Sobre mí: foto, bio y datos | `src/components/sections/about/AboutBio.astro` |
+| Sobre mí: bio y datos; la foto queda solo para lectores de pantalla en 3D (cuelga enmarcada en la pared) | `src/components/sections/about/AboutBio.astro` |
 | Sobre mí: estudios y stack | `src/components/sections/about/AboutStack.astro` |
 | Sobre mí: pantalla `carlos.yml` | `src/components/sections/about/AboutCode.astro` |
 | Sobre mí en el monitor (vertical / horizontal) | `src/styles/sections/about/monitor.css`, `monitor-landscape.css`, `code.css` |
@@ -110,6 +110,7 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Tier de calidad por dispositivo | `src/three/tier.ts` |
 | Encuadres por capítulo (ensamblado, caché por viewport) | `src/three/desk/shots/framings.ts` (`desk/shots.ts` solo reexporta) |
 | Cámara de hero, about, contacto y cierre; planos de teléfono vertical | `src/three/desk/shots/monitor-shots.ts` |
+| Cámara de about: el cuadro de la pared y el monitor juntos (en teléfono vertical, el cuadro y medio monitor) | `src/three/desk/shots/about-shots.ts` |
 | Cámara de empresa y productos (rumbo, inclinación, distancia) | `src/three/desk/shots/figure-shots.ts` |
 | Cámara del estante y las carpetas | `src/three/desk/shots/experience-shots.ts` |
 | Encuadre vertical: protagonistas enteros, vecinos fuera, retoques | `src/three/desk/shots/portrait-fit.ts`, puntos en `protagonists.ts` |
@@ -118,6 +119,9 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Orden de experiencia, sub-planos, límites entre planos | `src/three/desk/shots/story.ts`, comprobación en `check.ts` |
 | Marco del vidrio del monitor y del teléfono | `src/three/desk/shots/surfaces.ts` |
 | Montaje del escritorio y orden de `update` (ensamblador) | `src/three/desk/DeskSet.ts` |
+| Cuadro con la foto en la pared: posición, tamaño y ruta de la foto (`PORTRAIT_PHOTO`) | `src/three/desk/portrait/layout.ts` |
+| Cuadro: marco y sombra en la pared, paspartú y foto en B/N cálido, vidrio (reflejos, brillo al hover), luz de latón que se enciende de noche | `src/three/desk/portrait/{frame,photo,glass,light}.ts`, GLSL en `glass.glsl.ts`, ensamblado en `portrait.ts` |
+| Clic en el cuadro: la cámara se acerca y vuelve con Esc, rueda o cambio de plano | `src/three/desk/portrait/inspect.ts`, desvío de cámara en `src/three/stage/detour.ts` |
 | Luz por capítulo, día y noche, encendido de la intro, clic en la lámpara, persiana bajada | `src/three/desk/set/levels.ts` |
 | Bombilla de la lámpara (difusor, halo, luz cálida cercana) e interruptor de la base | `src/three/desk/lamp/bulb.ts`, `src/three/desk/lamp/switch.ts` |
 | Persiana enrollable de la ventana, planta que se mece | `src/three/desk/room-life/blind.ts`, `src/three/desk/room-life/plant.ts` |

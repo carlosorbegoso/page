@@ -1,6 +1,7 @@
 import { Quaternion, Vector3, type PerspectiveCamera } from 'three';
 import type { ChapterId, ChapterState, Shot } from './contracts';
 import { damp } from './scenes/common';
+import { CameraDetour } from './stage/detour';
 
 /** Anti-motion-sickness limits (PLAN, final section). Enforced here, not by convention. */
 export const CAMERA_LIMITS = {
@@ -79,6 +80,8 @@ export class CameraDirector {
   private readonly breathForward = new Vector3();
   /** Seconds the last transition would have needed at the speed limits (debug: > 1.4 means the shot pair is too far apart). */
   lastRequiredSeconds = 0;
+  /** Close look at a prop on top of the chapter's shot (`desk:detour`). */
+  readonly detour = new CameraDetour();
 
   constructor(private readonly events: DirectorEvents) {}
 
@@ -209,6 +212,8 @@ export class CameraDirector {
       this.position.copy(this.to.position);
       this.target.copy(this.to.target);
     }
+    const detouring = this.detour.apply(this.position, this.target, dt, reduced);
+    moving ||= detouring;
 
     const allowParallax = this.settled && !reduced;
     const goalX = allowParallax ? pointer.x : 0;

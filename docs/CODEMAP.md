@@ -46,7 +46,15 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 ## Escena 3D
 | Para cambiar… | Edita |
 | --- | --- |
-| Arranque del Stage, bucle de frames | `src/three/Stage.ts` |
+| Arranque del Stage y cableado de piezas (ensamblador) | `src/three/Stage.ts` |
+| Bucle de render a demanda, ventana de inactividad, DPR adaptativo | `src/three/stage/frame-loop.ts` |
+| Placas, scroll ↔ capítulo, intro que retiene el capítulo | `src/three/stage/chapters.ts`, `stage/plates-mount.ts` |
+| Clic en un objeto: reacción y viaje de cámara | `src/three/stage/navigate.ts` |
+| Escritorio y FX registrados, precompilado | `src/three/stage/modules.ts`, `stage/extensions.ts` |
+| Tamaño, layout apilado, FOV y plano por layout | `src/three/stage/shots.ts` |
+| Listeners (resize, puntero, visibilidad, tema) | `src/three/stage/listen.ts` |
+| Renderer WebGL y tokens de exposición | `src/three/stage/renderer.ts` |
+| Contexto que reciben las estaciones | `src/three/stage/station-context.ts` |
 | Contratos entre Stage, escritorio, fx | `src/three/contracts.ts` |
 | Tier de calidad por dispositivo | `src/three/tier.ts` |
 | Posición de cámara por capítulo | `src/three/desk/shots.ts` |

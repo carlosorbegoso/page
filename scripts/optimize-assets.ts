@@ -8,8 +8,8 @@
  * Geometry is meshopt-compressed; textures go to KTX2 (ETC1S for colour/emissive, UASTC for
  * normal / metallic-roughness / occlusion) when KTX-Software (`ktx`) is installed, otherwise they
  * keep their source format and a warning is printed. It prints each hashed name for the module
- * that loads it with `acquireGltf`, and copies the Basis transcoder into `public/decoders/basis/`.
- * With no sources it exits cleanly.
+ * that loads it with `acquireGltf`. It always copies the Basis transcoder into
+ * `public/decoders/basis/`, where `src/three/assets.ts` looks for it, even with no sources.
  */
 import { createHash } from 'node:crypto';
 import { copyFile, mkdir, mkdtemp, readdir, readFile, rm, stat } from 'node:fs/promises';
@@ -95,6 +95,7 @@ async function copyDecoders(): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  await copyDecoders();
   await mkdir(SRC_DIR, { recursive: true });
   const sources = (await readdir(SRC_DIR)).filter(file => ['.glb', '.gltf'].includes(extname(file)));
   if (!sources.length) {
@@ -114,7 +115,6 @@ async function main(): Promise<void> {
   } finally {
     await rm(work, { recursive: true, force: true });
   }
-  await copyDecoders();
 }
 
 await main();

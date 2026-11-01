@@ -68,10 +68,12 @@ function ceramic(color: Color, mute: number, value: number): Color {
   return new Color().setHSL(hsl.h, hsl.s * (1 - mute), Math.min(hsl.l * value, 0.85));
 }
 
-/** Room finishes read from the design tokens (desk.md §2–3, mascots.md §2). */
-export function readPalette(): Palette {
-  const c = (token: string, fallback: string) => tokenColor(token, fallback);
-  const brass: Finish = { color: c('--color-desk-brass', '#b08a4a'), roughness: 0.38, metalness: 1 };
+const c = (token: string, fallback: string) => tokenColor(token, fallback);
+
+type CollectibleKey = Extract<keyof Palette, `alfa${string}` | `burbu${string}` | `gift${string}` | `tool${string}`>;
+type DeskKey = Exclude<keyof Palette, CollectibleKey | 'folders' | 'label' | 'phone'>;
+
+function readDeskFinishes(): Pick<Palette, DeskKey> {
   return {
     wall: { color: c('--color-desk-wall', '#121722').multiplyScalar(PERCEIVED_TO_ALBEDO.wall), roughness: 0.95, metalness: 0 },
     floor: { color: c('--color-desk-floor', '#17140f').multiplyScalar(PERCEIVED_TO_ALBEDO.floor), roughness: 0.7, metalness: 0, grain: 0.7 },
@@ -96,7 +98,12 @@ export function readPalette(): Palette {
     diffuser: { color: c('--color-lamp', '#ffb566'), roughness: 0.5, metalness: 0, emissive: 2 },
     telescope: { color: c('--color-telescope', '#c9ced6'), roughness: 0.3, metalness: 0.1 },
     telescopeBrass: { color: c('--color-telescope-brass', '#b08a4a'), roughness: 0.35, metalness: 1 },
-    lens: { color: new Color(0.01, 0.015, 0.03), roughness: 0.05, metalness: 0.4 },
+    lens: { color: new Color(0.01, 0.015, 0.03), roughness: 0.05, metalness: 0.4 }
+  };
+}
+
+function readCollectibleFinishes(brass: Finish): Pick<Palette, CollectibleKey> {
+  return {
     alfaBody: { color: c('--color-desk-ceramic', '#e6e0d4').lerp(new Color('#f4f7fb'), 0.6), roughness: 0.24, metalness: 0 },
     alfaVisor: { color: c('--color-alfa-body', '#10131a'), roughness: 0.1, metalness: 0.35 },
     alfaRing: brass,
@@ -112,7 +119,16 @@ export function readPalette(): Palette {
     toolBody: { color: new Color('#c9ccd1'), roughness: 0.24, metalness: 1 },
     toolBand: brass,
     toolStand: { color: c('--color-alfa-body', '#10131a').multiplyScalar(1.6), roughness: COLLECTIBLE.satin, metalness: 0 },
-    toolSignal: { color: c('--color-tool-band', '#f0a43c'), roughness: 0.4, metalness: 0, emissive: 0.6 },
+    toolSignal: { color: c('--color-tool-band', '#f0a43c'), roughness: 0.4, metalness: 0, emissive: 0.6 }
+  };
+}
+
+/** Room finishes read from the design tokens (desk.md §2–3, mascots.md §2). */
+export function readPalette(): Palette {
+  const brass: Finish = { color: c('--color-desk-brass', '#b08a4a'), roughness: 0.38, metalness: 1 };
+  return {
+    ...readDeskFinishes(),
+    ...readCollectibleFinishes(brass),
     folders: {
       sysarp: { color: c('--color-folder-sysarp', '#7e776a'), roughness: 0.85, metalness: 0 },
       baufest: { color: c('--color-folder-baufest', '#4a5847'), roughness: 0.85, metalness: 0 },

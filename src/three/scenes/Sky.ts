@@ -66,6 +66,72 @@ function gradientTexture(top: Color, bottom: Color): Texture {
   return texture;
 }
 
+const DOME_RADIUS = 48;
+
+interface StarField {
+  positions: number[];
+  sizes: number[];
+  twinkles: number[];
+  brightness: number[];
+  classes: number[];
+}
+
+function pickStarClass(random: () => number): number {
+  let pick = random();
+  let index = 0;
+  while (index < STAR_CLASSES.length - 1 && pick > STAR_CLASSES[index]!.share) pick -= STAR_CLASSES[index++]!.share;
+  return index;
+}
+
+function scatterStars(count: number): StarField {
+  const random = mulberry32(101);
+  const band = new Vector3(1, 0.55, -0.3).normalize();
+  const field: StarField = { positions: [], sizes: [], twinkles: [], brightness: [], classes: [] };
+  for (let i = 0; i < count; i++) {
+    let direction = new Vector3(random() * 2 - 1, random() * 2 - 1, random() * 2 - 1).normalize();
+    if (random() < 0.38) direction = direction.lerp(band.clone().multiplyScalar(random() < 0.5 ? 1 : -1), 0.55).normalize();
+    field.positions.push(direction.x * DOME_RADIUS, direction.y * DOME_RADIUS, direction.z * DOME_RADIUS);
+    const index = pickStarClass(random);
+    const starClass = STAR_CLASSES[index]!;
+    const bias = random() ** 3;
+    field.sizes.push(starClass.size[0] + (starClass.size[1] - starClass.size[0]) * bias);
+    field.brightness.push(starClass.brightness[0] + (starClass.brightness[1] - starClass.brightness[0]) * random());
+    field.classes.push(index);
+    field.twinkles.push(random() < 0.15 ? random() + 0.001 : 0);
+  }
+  return field;
+}
+
+function createStarMaterial(): ShaderMaterial {
+  return new ShaderMaterial({
+    vertexShader: VERTEX,
+    fragmentShader: FRAGMENT,
+    uniforms: {
+      time: { value: 0 },
+      pixelRatio: { value: 1 },
+      period: { value: 7 },
+      amplitude: { value: 0.18 }
+    },
+    transparent: true,
+    depthWrite: false,
+    blending: AdditiveBlending
+  });
+}
+
+function placeNebulae(glow: Texture, nebulaCount: number): Sprite[] {
+  const opacity = 0.14;
+  const placements = [
+    new Vector3(-0.55, 0.45, -0.7),
+    new Vector3(-0.8, 0.1, -0.2),
+    new Vector3(0.6, -0.1, -0.8)
+  ];
+  return placements.slice(0, nebulaCount).map((dir, i) => {
+    const sprite = glowSprite(glow, 32 + i * 6, opacity * 2.2);
+    sprite.position.copy(dir.normalize().multiplyScalar(DOME_RADIUS * 0.9));
+    return sprite;
+  });
+}
+
 /**
  * Minimal night sky seen through the desk window: one Points draw call (per-star size, colour,
  * twinkle) on a dome that follows the camera, optional faint nebulae and a zenith→horizon
@@ -81,57 +147,18 @@ export class Sky {
   private readonly brightness: number[] = [];
 
   constructor(count: number, nebulaCount: number, glow: Texture) {
-    const random = mulberry32(101);
-    const radius = 48;
-    const band = new Vector3(1, 0.55, -0.3).normalize();
-    const positions: number[] = [];
-    const sizes: number[] = [];
-    const twinkles: number[] = [];
-    for (let i = 0; i < count; i++) {
-      let direction = new Vector3(random() * 2 - 1, random() * 2 - 1, random() * 2 - 1).normalize();
-      if (random() < 0.38) direction = direction.lerp(band.clone().multiplyScalar(random() < 0.5 ? 1 : -1), 0.55).normalize();
-      positions.push(direction.x * radius, direction.y * radius, direction.z * radius);
-      let pick = random();
-      let index = 0;
-      while (index < STAR_CLASSES.length - 1 && pick > STAR_CLASSES[index]!.share) pick -= STAR_CLASSES[index++]!.share;
-      const starClass = STAR_CLASSES[index]!;
-      const bias = random() ** 3;
-      sizes.push(starClass.size[0] + (starClass.size[1] - starClass.size[0]) * bias);
-      this.brightness.push(starClass.brightness[0] + (starClass.brightness[1] - starClass.brightness[0]) * random());
-      this.classes.push(index);
-      twinkles.push(random() < 0.15 ? random() + 0.001 : 0);
-    }
-    this.geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
-    this.geometry.setAttribute('size', new Float32BufferAttribute(sizes, 1));
-    this.geometry.setAttribute('twinkle', new Float32BufferAttribute(twinkles, 1));
+    const field = scatterStars(count);
+    this.brightness.push(...field.brightness);
+    this.classes.push(...field.classes);
+    this.geometry.setAttribute('position', new Float32BufferAttribute(field.positions, 3));
+    this.geometry.setAttribute('size', new Float32BufferAttribute(field.sizes, 1));
+    this.geometry.setAttribute('twinkle', new Float32BufferAttribute(field.twinkles, 1));
     this.geometry.setAttribute('color', new Float32BufferAttribute(new Float32Array(count * 3), 3));
-    this.material = new ShaderMaterial({
-      vertexShader: VERTEX,
-      fragmentShader: FRAGMENT,
-      uniforms: {
-        time: { value: 0 },
-        pixelRatio: { value: 1 },
-        period: { value: 7 },
-        amplitude: { value: 0.18 }
-      },
-      transparent: true,
-      depthWrite: false,
-      blending: AdditiveBlending
-    });
+    this.material = createStarMaterial();
     const stars = new Points(this.geometry, this.material);
     stars.frustumCulled = false;
     stars.raycast = () => undefined;
-    const opacity = 0.14;
-    const placements = [
-      new Vector3(-0.55, 0.45, -0.7),
-      new Vector3(-0.8, 0.1, -0.2),
-      new Vector3(0.6, -0.1, -0.8)
-    ];
-    this.nebulae = placements.slice(0, nebulaCount).map((dir, i) => {
-      const sprite = glowSprite(glow, 32 + i * 6, opacity * 2.2);
-      sprite.position.copy(dir.normalize().multiplyScalar(radius * 0.9));
-      return sprite;
-    });
+    this.nebulae = placeNebulae(glow, nebulaCount);
     this.root.add(stars, ...this.nebulae);
     this.root.renderOrder = -10;
     this.applyTokens();

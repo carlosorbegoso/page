@@ -114,20 +114,16 @@ export interface LampBeamOptions {
 }
 
 
-/**
- * The lamp's visible shaft of light: an open additive cone from the bulb to the desk with slow
- * haze, plus dust motes that only glow while they drift inside it. Static without `setTime`
- * (reduced motion, capture).
- */
-export function createLampBeam(options: LampBeamOptions): LampBeam {
-  const { apex, aim, angle, color, motes } = options;
-  const axis = aim.clone().sub(apex);
-  const length = axis.length();
-  axis.normalize();
-  const tan = Math.tan(angle);
-  const group = new Group();
-  group.name = 'desk-lamp-beam';
+interface BeamShape {
+  apex: Vector3;
+  axis: Vector3;
+  length: number;
+  tan: number;
+  color: Color;
+}
 
+function createCone(shape: BeamShape): Mesh<ConeGeometry, ShaderMaterial> {
+  const { apex, axis, length, tan, color } = shape;
   const coneGeometry = new ConeGeometry(length * tan, length, 40, 1, true).translate(0, -length / 2, 0);
   const coneMaterial = new ShaderMaterial({
     vertexShader: CONE_VERTEX,
@@ -142,49 +138,75 @@ export function createLampBeam(options: LampBeamOptions): LampBeam {
   cone.position.copy(apex);
   cone.quaternion.copy(new Quaternion().setFromUnitVectors(new Vector3(0, -1, 0), axis));
   cone.raycast = () => undefined;
-  group.add(cone);
+  return cone;
+}
 
-  let dust: Points<BufferGeometry, ShaderMaterial> | null = null;
-  if (motes > 0) {
-    const random = seeded(29);
-    const positions = new Float32Array(motes * 3);
-    const seeds = new Float32Array(motes * 4);
-    const side = new Vector3(1, 0, 0).cross(axis).normalize();
-    const other = axis.clone().cross(side).normalize();
-    const point = new Vector3();
-    for (let i = 0; i < motes; i++) {
-      const along = (0.08 + 0.9 * random()) * length;
-      const radius = Math.sqrt(random()) * along * tan * 1.1;
-      const theta = random() * Math.PI * 2;
-      point.copy(apex).addScaledVector(axis, along).addScaledVector(side, Math.cos(theta) * radius).addScaledVector(other, Math.sin(theta) * radius);
-      point.toArray(positions, i * 3);
-      seeds.set([random(), random(), random(), random()], i * 4);
-    }
-    const geometry = new BufferGeometry();
-    geometry.setAttribute('position', new BufferAttribute(positions, 3));
-    geometry.setAttribute('seed', new BufferAttribute(seeds, 4));
-    const material = new ShaderMaterial({
-      vertexShader: MOTES_VERTEX,
-      fragmentShader: MOTES_FRAGMENT,
-      uniforms: {
-        uColor: { value: color.clone() },
-        uStrength: { value: 0 },
-        uTime: { value: 0 },
-        uPixelScale: { value: 1000 },
-        uApex: { value: apex.clone() },
-        uAxis: { value: axis.clone() },
-        uLength: { value: length },
-        uTan: { value: tan * 1.1 }
-      },
-      transparent: true,
-      depthWrite: false,
-      blending: AdditiveBlending
-    });
-    dust = new Points(geometry, material);
-    dust.frustumCulled = false;
-    dust.raycast = () => undefined;
-    group.add(dust);
+function scatterMotes(shape: BeamShape, motes: number): BufferGeometry {
+  const { apex, axis, length, tan } = shape;
+  const random = seeded(29);
+  const positions = new Float32Array(motes * 3);
+  const seeds = new Float32Array(motes * 4);
+  const side = new Vector3(1, 0, 0).cross(axis).normalize();
+  const other = axis.clone().cross(side).normalize();
+  const point = new Vector3();
+  for (let i = 0; i < motes; i++) {
+    const along = (0.08 + 0.9 * random()) * length;
+    const radius = Math.sqrt(random()) * along * tan * 1.1;
+    const theta = random() * Math.PI * 2;
+    point.copy(apex).addScaledVector(axis, along).addScaledVector(side, Math.cos(theta) * radius).addScaledVector(other, Math.sin(theta) * radius);
+    point.toArray(positions, i * 3);
+    seeds.set([random(), random(), random(), random()], i * 4);
   }
+  const geometry = new BufferGeometry();
+  geometry.setAttribute('position', new BufferAttribute(positions, 3));
+  geometry.setAttribute('seed', new BufferAttribute(seeds, 4));
+  return geometry;
+}
+
+function createDust(shape: BeamShape, motes: number): Points<BufferGeometry, ShaderMaterial> {
+  const { apex, axis, length, tan, color } = shape;
+  const geometry = scatterMotes(shape, motes);
+  const material = new ShaderMaterial({
+    vertexShader: MOTES_VERTEX,
+    fragmentShader: MOTES_FRAGMENT,
+    uniforms: {
+      uColor: { value: color.clone() },
+      uStrength: { value: 0 },
+      uTime: { value: 0 },
+      uPixelScale: { value: 1000 },
+      uApex: { value: apex.clone() },
+      uAxis: { value: axis.clone() },
+      uLength: { value: length },
+      uTan: { value: tan * 1.1 }
+    },
+    transparent: true,
+    depthWrite: false,
+    blending: AdditiveBlending
+  });
+  const dust = new Points(geometry, material);
+  dust.frustumCulled = false;
+  dust.raycast = () => undefined;
+  return dust;
+}
+
+/**
+ * The lamp's visible shaft of light: an open additive cone from the bulb to the desk with slow
+ * haze, plus dust motes that only glow while they drift inside it. Static without `setTime`
+ * (reduced motion, capture).
+ */
+export function createLampBeam(options: LampBeamOptions): LampBeam {
+  const { apex, aim, angle, color, motes } = options;
+  const axis = aim.clone().sub(apex);
+  const length = axis.length();
+  axis.normalize();
+  const shape: BeamShape = { apex, axis, length, tan: Math.tan(angle), color };
+  const group = new Group();
+  group.name = 'desk-lamp-beam';
+  const cone = createCone(shape);
+  const coneMaterial = cone.material;
+  group.add(cone);
+  const dust = motes > 0 ? createDust(shape, motes) : null;
+  if (dust) group.add(dust);
 
   return {
     group,
@@ -201,7 +223,7 @@ export function createLampBeam(options: LampBeamOptions): LampBeam {
       if (dust) dust.material.uniforms.uPixelScale!.value = height / (2 * Math.tan((fov * Math.PI) / 360));
     },
     dispose: () => {
-      coneGeometry.dispose();
+      cone.geometry.dispose();
       coneMaterial.dispose();
       dust?.geometry.dispose();
       dust?.material.dispose();

@@ -48,21 +48,31 @@ export interface SpineLabels {
   dispose(): void;
 }
 
-/** Printed text over the paper labels of the four folders, sharing one texture. */
-export function createSpineLabels(): SpineLabels {
-  const canvas = document.createElement('canvas');
-  canvas.width = WIDTH;
-  canvas.height = ROW * FOLDERS.length;
-  drawLabels(canvas);
+function redrawWhenFontsLoad(texture: CanvasTexture, draw: () => void): void {
+  void document.fonts?.ready.then(() => {
+    draw();
+    texture.needsUpdate = true;
+  });
+}
+
+function canvasTexture(canvas: HTMLCanvasElement, draw: () => void): CanvasTexture {
+  draw();
   const texture = new CanvasTexture(canvas);
   texture.colorSpace = SRGBColorSpace;
   texture.anisotropy = 4;
-  void document.fonts?.ready.then(() => {
-    drawLabels(canvas);
-    texture.needsUpdate = true;
-  });
+  redrawWhenFontsLoad(texture, draw);
+  return texture;
+}
+
+function labelTexture(): CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = WIDTH;
+  canvas.height = ROW * FOLDERS.length;
+  return canvasTexture(canvas, () => drawLabels(canvas));
+}
+
+function labelMeshes(material: MeshStandardMaterial): Map<FolderId, Mesh> {
   const textUp = new Matrix4().makeBasis(new Vector3(0, 1, 0), new Vector3(0, 0, 1), new Vector3(1, 0, 0));
-  const material = new MeshStandardMaterial({ map: texture, transparent: true, roughness: 0.85, metalness: 0, depthWrite: false });
   const meshes = new Map<FolderId, Mesh>();
   FOLDERS.forEach((id, row) => {
     const plane = new PlaneGeometry(SPINE_LABEL.length, SPINE_LABEL.width);
@@ -76,34 +86,43 @@ export function createSpineLabels(): SpineLabels {
     mesh.raycast = () => undefined;
     meshes.set(id, mesh);
   });
-  const coverCanvas = document.createElement('canvas');
-  coverCanvas.width = 640;
-  coverCanvas.height = 720;
-  drawArchiveCover(coverCanvas, COVER_ROWS);
-  const coverTexture = new CanvasTexture(coverCanvas);
-  coverTexture.colorSpace = SRGBColorSpace;
-  coverTexture.anisotropy = 4;
-  void document.fonts?.ready.then(() => {
-    drawArchiveCover(coverCanvas, COVER_ROWS);
-    coverTexture.needsUpdate = true;
-  });
-  /* Unlit on purpose: the side face only catches grazing light, so a lit sheet read as a black hole. */
-  const coverMaterial = new MeshBasicMaterial({ map: coverTexture, color: new Color(COVER_LEVEL, COVER_LEVEL, COVER_LEVEL) });
+  return meshes;
+}
+
+function coverTexture(): CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 640;
+  canvas.height = 720;
+  return canvasTexture(canvas, () => drawArchiveCover(canvas, COVER_ROWS));
+}
+
+function coverMesh(material: MeshBasicMaterial): Mesh {
   const first = folderCentre(FOLDERS[0]);
-  const cover = new Mesh(new PlaneGeometry(FOLDER.depth * 0.72, FOLDER.height * 0.72), coverMaterial);
+  const cover = new Mesh(new PlaneGeometry(FOLDER.depth * 0.72, FOLDER.height * 0.72), material);
   cover.position.set(first.x, first.y + 0.005, first.z + FOLDER.spine / 2 + 0.0012);
   cover.name = 'desk-archive-cover';
   cover.raycast = () => undefined;
-  const coverRest = cover.position.x;
-  cover.userData.restX = coverRest;
+  cover.userData.restX = cover.position.x;
   cover.userData.restZ = cover.position.z;
+  return cover;
+}
+
+/** Printed text over the paper labels of the four folders, sharing one texture. */
+export function createSpineLabels(): SpineLabels {
+  const texture = labelTexture();
+  const material = new MeshStandardMaterial({ map: texture, transparent: true, roughness: 0.85, metalness: 0, depthWrite: false });
+  const meshes = labelMeshes(material);
+  const coverMap = coverTexture();
+  /* Unlit on purpose: the side face only catches grazing light, so a lit sheet read as a black hole. */
+  const coverMaterial = new MeshBasicMaterial({ map: coverMap, color: new Color(COVER_LEVEL, COVER_LEVEL, COVER_LEVEL) });
+  const cover = coverMesh(coverMaterial);
   return {
     meshes,
     cover,
     dispose: () => {
       cover.geometry.dispose();
       coverMaterial.dispose();
-      coverTexture.dispose();
+      coverMap.dispose();
       for (const mesh of meshes.values()) mesh.geometry.dispose();
       material.dispose();
       texture.dispose();

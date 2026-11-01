@@ -69,8 +69,8 @@ export function buildRoomMeshes(room: Group, context: StationContext, palette: P
   buildTelescope(statics, palette, q);
   buildOpenFolder(statics, palette);
   buildLaptop(statics, palette);
-  buildPikachu(statics, q);
-  buildCharizard(statics, q);
+  buildPikachu(workstation, q);
+  buildCharizard(workstation, q);
   buildSucculent(statics, palette, q);
   const phoneMatrix = buildPhone(statics, palette);
   const figures = new PartBuilder();

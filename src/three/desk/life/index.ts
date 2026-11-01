@@ -8,6 +8,7 @@ import { BubbleLife, splitDots } from './bubble';
 import { figureParts, mugPart } from './classify';
 import { GiftLife } from './gift';
 import { MugLife } from './mug';
+import { PokemonLife, pokemonPart } from './pokemon';
 import { STILL, type FigureOffset } from './motion';
 import { PressPulse } from './press';
 import { figureFrame, splitFigures, splitPart } from './rig';
@@ -57,6 +58,7 @@ export class DeskLife {
   private readonly bubble: BubbleLife;
   private readonly wrench: WrenchLife;
   private readonly mug: MugLife;
+  private readonly pokemon: PokemonLife;
   private readonly frames = new Map<FigureId, Matrix4>((Object.keys(SLOT) as FigureId[]).map(id => [id, new Matrix4()]));
   private readonly disposables: Array<{ dispose(): void }> = [];
   private hovered: string | null = null;
@@ -66,7 +68,7 @@ export class DeskLife {
   constructor(options: DeskLifeOptions) {
     const p = options.palette;
     const figures = splitFigures(options.geometry, figureParts(p), options);
-    const workstation = splitFigures(options.workstation, mugPart, options);
+    const workstation = splitFigures(options.workstation, info => mugPart(info) ?? pokemonPart(info), options);
     this.object3D.name = 'desk-life';
     this.object3D.add(figures.rest, workstation.rest);
     this.disposables.push(options.geometry, options.workstation);
@@ -87,6 +89,9 @@ export class DeskLife {
     this.bubble = new BubbleLife(dotParts, p.burbuDots.color);
     this.wrench = new WrenchLife(parts.get('wrench'));
     this.mug = new MugLife(workstation.parts.get('mug'), MUG);
+    this.pokemon = new PokemonLife(workstation.parts);
+    this.object3D.add(this.pokemon.overlays);
+    this.disposables.push(this.pokemon);
     this.object3D.add(this.gift.sparks.points, this.bubble.message);
     this.disposables.push(this.gift, this.bubble);
   }
@@ -97,6 +102,11 @@ export class DeskLife {
     else if (toy === 'ventixs') this.bubble.play(time, motion);
     else if (toy === 'skymek') this.wrench.play(time, motion);
     else this.mug.play(time, motion);
+  }
+
+  /** Pikachu and Charizard fight (Pikachu only sparks when motion is reduced). */
+  battle(time: number, motion: boolean): void {
+    this.pokemon.battle(time, motion);
   }
 
   /** The pick under the pointer (its key without `desk:`), or null. */
@@ -119,8 +129,9 @@ export class DeskLife {
     const bubble = this.bubble.update(dt, time, motion);
     const wrench = this.wrench.update(dt, time, motion);
     const mug = this.mug.update(dt, time, motion);
+    const pokemon = this.pokemon.update(time, motion);
     const press = this.press.update(time);
-    return alfa || gift || bubble || wrench || mug || press || Math.abs(liftGoal - this.alfaLift) > 1e-5;
+    return alfa || gift || bubble || wrench || mug || pokemon || press || Math.abs(liftGoal - this.alfaLift) > 1e-5;
   }
 
   offset(id: FigureId): FigureOffset {
@@ -155,11 +166,12 @@ export class DeskLife {
     this.bubble.pose(this.time, this.frames.get('ventixs')!);
     this.wrench.pose(this.time, this.frames.get('skymek')!);
     this.mug.pose(this.time);
+    this.pokemon.pose(this.time);
   }
 
   /** Changes whenever a part moves enough for the lamp shadow to need a new render. */
   poseKey(): string {
-    return `${this.alfa?.poseKey() ?? ''}|${this.gift.poseKey(this.time)}|${this.wrench.poseKey(this.time)}|${this.mug.poseKey()}`;
+    return `${this.alfa?.poseKey() ?? ''}|${this.gift.poseKey(this.time)}|${this.wrench.poseKey(this.time)}|${this.mug.poseKey()}|${this.pokemon.poseKey()}`;
   }
 
   dispose(): void {

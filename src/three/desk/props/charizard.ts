@@ -34,6 +34,9 @@ const FINISH = {
   core: { color: CHARIZARD_RIG.core, roughness: 0.5, metalness: 0, emissive: 2.4 }
 } satisfies Record<string, Finish>;
 
+/** Every colour of the figure, so `life/pokemon` can move the whole body in the battle. */
+export const CHARIZARD_COLORS: readonly Color[] = Object.values(FINISH).map(finish => finish.color);
+
 type Place = (position: Vector3, rotation?: Quaternion, scale?: Vector3) => Matrix4;
 
 function ball(q: Quality, r = 1): SphereGeometry {

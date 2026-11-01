@@ -16,13 +16,18 @@ export interface DeskActionHost {
   folderAction(action: 'folder' | 'folder-close', id?: string): void;
 }
 
-/** `desk:action` router: toys play, folders open, the laptop lid and room objects toggle, the lamp switches. */
+/** `desk:action` router: toys play, Pikachu and Charizard battle, folders open, the laptop lid and room objects toggle, the lamp switches. */
 export function createActionListener(host: DeskActionHost): (event: Event) => void {
   return event => {
     const detail = (event as CustomEvent<{ action?: string; id?: string }>).detail;
     const context = host.context();
     if (detail?.action === 'play' && detail.id && LIFE_TOYS.includes(detail.id)) {
       host.life()?.play(detail.id as LifeToy, host.clock(), Boolean(context?.motion()) && !context?.capture);
+      context?.invalidate();
+      return;
+    }
+    if (detail?.action === 'battle') {
+      host.life()?.battle(host.clock(), Boolean(context?.motion()) && !context?.capture);
       context?.invalidate();
       return;
     }

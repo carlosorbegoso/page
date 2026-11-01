@@ -32,6 +32,9 @@ const FINISH = {
   brown: { color: new Color('#7a4a1e'), ...VINYL }
 } satisfies Record<string, Finish>;
 
+/** Every colour of the figure, so `life/pokemon` can lift the whole body when Pikachu walks. */
+export const PIKACHU_COLORS: readonly Color[] = Object.values(FINISH).map(finish => finish.color);
+
 const HEAD = { centre: new Vector3(0, 0.052, 0.002), radii: new Vector3(0.0213, 0.018, 0.018) };
 
 type Place = (position: Vector3, rotation?: Quaternion, scale?: Vector3) => Matrix4;

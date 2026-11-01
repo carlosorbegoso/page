@@ -1,0 +1,153 @@
+---
+import { useTranslations, type Locale } from '../../i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<template data-phone-sheet-template>
+  <dialog
+    class="phone-sheet"
+    aria-labelledby="phone-sheet-title"
+    data-phone-sheet
+    data-open-label={t('contactPhone.open')}
+  >
+    <div class="phone-sheet-stack">
+      <div class="phone-sheet-card">
+        <div class="phone-sheet-head">
+          <p id="phone-sheet-title" class="phone-sheet-title" data-phone-sheet-title></p>
+          <p class="phone-sheet-url" data-phone-sheet-url></p>
+          <p class="phone-sheet-note">{t('contactPhone.leave')}</p>
+        </div>
+        <a
+          class="phone-sheet-action"
+          href="#"
+          target="_blank"
+          rel="noopener noreferrer"
+          data-phone-sheet-open
+        ></a>
+      </div>
+      <button type="button" class="phone-sheet-cancel" data-phone-sheet-cancel>
+        {t('contactPhone.cancel')}
+      </button>
+    </div>
+  </dialog>
+</template>
+
+<style>
+  .phone-sheet {
+    position: absolute;
+    inset: 0;
+    z-index: 9;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0 4cqw 4.5cqh;
+    border: 0;
+    background: rgb(0 0 0 / 0);
+    color: var(--color-text);
+    transition: background-color 260ms ease-out;
+  }
+
+  .phone-sheet[open] {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .phone-sheet[data-shown] {
+    background: rgb(0 0 0 / 0.5);
+  }
+
+  .phone-sheet-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2cqh;
+    transform: translateY(115%);
+    transition: transform 380ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .phone-sheet[data-shown] .phone-sheet-stack {
+    transform: none;
+  }
+
+  .phone-sheet-card,
+  .phone-sheet-cancel {
+    border-radius: 2.6cqh;
+    background: rgb(44 48 58 / 0.94);
+    backdrop-filter: blur(14px) saturate(1.4);
+  }
+
+  .phone-sheet-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .phone-sheet-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5cqh;
+    padding: 2cqh 5cqw;
+    text-align: center;
+  }
+
+  .phone-sheet-title {
+    font-size: 2.5cqh;
+    font-weight: 600;
+  }
+
+  .phone-sheet-url {
+    font-size: 2.1cqh;
+    color: var(--color-text-muted);
+    overflow-wrap: anywhere;
+  }
+
+  .phone-sheet-note {
+    font-size: 1.9cqh;
+    color: var(--color-text-muted);
+  }
+
+  .phone-sheet-action,
+  .phone-sheet-cancel {
+    display: grid;
+    place-items: center;
+    height: 7.6cqh;
+    font-size: 2.7cqh;
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  .phone-sheet-action {
+    border-top: 1px solid rgb(255 255 255 / 0.1);
+  }
+
+  .phone-sheet-cancel {
+    border: 0;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  :is(.phone-sheet-action, .phone-sheet-cancel):focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: -3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .phone-sheet-stack {
+      transform: none !important;
+      transition-property: opacity, background-color !important;
+    }
+  }
+
+  :global(:root[data-motion='paused']) .phone-sheet-stack {
+    transform: none !important;
+    transition-property: opacity, background-color !important;
+  }
+</style>

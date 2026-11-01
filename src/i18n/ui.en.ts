@@ -139,5 +139,25 @@ export const en = {
   'notFound.home': 'Back to home',
   'notFound.paper': 'Not found',
   /* folder-detail */
-  'folderDetail.hint': 'Press Enter to take the folder off the shelf and read its sheet.'
+  'folderDetail.hint': 'Press Enter to take the folder off the shelf and read its sheet.',
+  /* contact-phone */
+  'contactPhone.backTo': 'Back to',
+  'contactPhone.mailTitle': 'New message',
+  'contactPhone.to': 'To:',
+  'contactPhone.subject': 'Subject:',
+  'contactPhone.subjectDefault': 'Hi Carlos',
+  'contactPhone.message': 'Message',
+  'contactPhone.messagePlaceholder': 'Tell me about your role, project or idea…',
+  'contactPhone.send': 'Send',
+  'contactPhone.sendHint': 'Your mail app opens with the message ready.',
+  'contactPhone.sending': 'Opening your mail app…',
+  'contactPhone.open': 'Open {name}',
+  'contactPhone.leave': 'Opens in a new tab.',
+  'contactPhone.cancel': 'Cancel',
+  'contactPhone.downloading': 'Downloading CV…',
+  'contactPhone.downloaded': 'CV downloaded',
+  'contactPhone.notifyApp': 'Messages',
+  'contactPhone.notifyNow': 'now',
+  'contactPhone.notifyTitle': 'New message',
+  'contactPhone.notifyBody': 'Shall we talk?'
 } as const satisfies Record<UiKey, string>;

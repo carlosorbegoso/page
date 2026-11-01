@@ -1,0 +1,277 @@
+---
+import { useTranslations, type Locale } from '../../i18n/utils';
+
+interface Props {
+  locale: Locale;
+  email: string;
+}
+
+const { locale, email } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<template data-phone-mail-template>
+  <section class="phone-mail" aria-labelledby="phone-mail-title" data-phone-mail data-email={email}>
+    <div class="phone-mail-nav">
+      <button type="button" class="phone-mail-back" data-phone-back>
+        <svg
+          viewBox="0 0 12 20"
+          aria-hidden="true"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M10 2 2 10l8 8"></path>
+        </svg>
+        <span>
+          <span class="sr-only">{t('contactPhone.backTo')} </span>
+          {t('contact.title')}
+        </span>
+      </button>
+    </div>
+    <h3 id="phone-mail-title" class="phone-mail-title" tabindex="-1">
+      {t('contactPhone.mailTitle')}
+    </h3>
+    <div class="phone-mail-fields">
+      <p class="phone-mail-row">
+        <span class="phone-mail-key">{t('contactPhone.to')}</span>
+        <span class="phone-mail-to">{email}</span>
+      </p>
+      <label class="phone-mail-row">
+        <span class="phone-mail-key">{t('contactPhone.subject')}</span>
+        <input
+          class="phone-mail-input"
+          type="text"
+          name="subject"
+          autocomplete="off"
+          enterkeyhint="next"
+          value={t('contactPhone.subjectDefault')}
+          data-phone-subject
+        />
+      </label>
+      <label class="phone-mail-body">
+        <span class="sr-only">{t('contactPhone.message')}</span>
+        <textarea
+          class="phone-mail-input"
+          name="message"
+          rows="5"
+          placeholder={t('contactPhone.messagePlaceholder')}
+          data-phone-message
+        ></textarea>
+      </label>
+    </div>
+    <p id="phone-mail-hint" class="phone-mail-hint">
+      {t('contactPhone.sendHint')}
+    </p>
+    <a
+      class="phone-mail-send"
+      href={`mailto:${email}`}
+      aria-describedby="phone-mail-hint"
+      data-phone-send
+    >
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M12 19V5M5 12l7-7 7 7"></path>
+      </svg>
+      {t('contactPhone.send')}
+    </a>
+  </section>
+</template>
+
+<style>
+  .phone-mail {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 1.8cqh;
+    padding: 16cqw 8cqw 8cqh;
+    background: var(--color-screen-bg);
+    color: var(--color-text);
+    touch-action: pan-y;
+    transform: translateX(100%);
+    transition: transform 380ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .phone-mail[data-shown] {
+    transform: none;
+  }
+
+  .phone-mail[data-dragging] {
+    transition: none;
+  }
+
+  .phone-mail-nav {
+    display: flex;
+    margin-inline-start: -2.5cqw;
+  }
+
+  .phone-mail-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.2cqw;
+    height: 5.6cqh;
+    padding-inline: 2cqw 3cqw;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    color: var(--color-accent);
+    font-size: 2.6cqh;
+    cursor: pointer;
+  }
+
+  .phone-mail-back svg {
+    width: 1.4cqh;
+    height: 2.4cqh;
+  }
+
+  .phone-mail-title {
+    font-family: var(--font-display);
+    font-size: 4.6cqh;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+
+  .phone-mail-title:focus {
+    outline: none;
+  }
+
+  .phone-mail-fields {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    flex-direction: column;
+    border-radius: 2.2cqh;
+    background: rgb(255 255 255 / 0.05);
+    overflow: hidden;
+  }
+
+  .phone-mail-row {
+    display: flex;
+    align-items: center;
+    gap: 2cqw;
+    min-height: 6.6cqh;
+    padding-inline: 4cqw;
+    border-bottom: 1px solid rgb(255 255 255 / 0.08);
+    font-size: 2.5cqh;
+  }
+
+  .phone-mail-key {
+    flex-shrink: 0;
+    color: var(--color-text-muted);
+  }
+
+  .phone-mail-to {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .phone-mail-input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    background: none;
+    color: var(--color-text);
+    font: inherit;
+    font-size: 2.6cqh;
+  }
+
+  .phone-mail-input:focus {
+    outline: none;
+  }
+
+  .phone-mail-row:focus-within,
+  .phone-mail-body:focus-within {
+    box-shadow: inset 0 0 0 2px var(--color-focus);
+  }
+
+  .phone-mail-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    padding: 1.6cqh 4cqw;
+  }
+
+  .phone-mail-body textarea {
+    flex: 1;
+    resize: none;
+    line-height: 1.4;
+  }
+
+  .phone-mail-body textarea::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  .phone-mail-hint {
+    font-size: 2cqh;
+    line-height: 1.35;
+    color: var(--color-text-muted);
+  }
+
+  .phone-mail-send {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 2cqw;
+    height: 7.6cqh;
+    border-radius: 999px;
+    background: var(--color-accent);
+    color: var(--color-screen-bg);
+    font-size: 2.7cqh;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .phone-mail-send svg {
+    width: 2.6cqh;
+    height: 2.6cqh;
+  }
+
+  .phone-mail-send:focus-visible,
+  .phone-mail-back:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  @media (pointer: coarse) {
+    .phone-mail-input {
+      font-size: max(16px, 2.6cqh);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .phone-mail {
+      transform: none;
+      opacity: 0;
+      transition: opacity 160ms ease-out;
+    }
+
+    .phone-mail[data-shown] {
+      opacity: 1;
+    }
+  }
+
+  :global(:root[data-motion='paused']) .phone-mail {
+    transform: none;
+    opacity: 0;
+    transition: opacity 160ms ease-out;
+  }
+
+  :global(:root[data-motion='paused']) .phone-mail[data-shown] {
+    opacity: 1;
+  }
+</style>

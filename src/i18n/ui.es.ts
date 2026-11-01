@@ -139,7 +139,27 @@ export const es = {
   'notFound.home': 'Volver al inicio',
   'notFound.paper': 'No encontrado',
   /* folder-detail */
-  'folderDetail.hint': 'Pulsa Enter para sacar la carpeta del estante y leer su hoja.'
+  'folderDetail.hint': 'Pulsa Enter para sacar la carpeta del estante y leer su hoja.',
+  /* contact-phone */
+  'contactPhone.backTo': 'Volver a',
+  'contactPhone.mailTitle': 'Nuevo mensaje',
+  'contactPhone.to': 'Para:',
+  'contactPhone.subject': 'Asunto:',
+  'contactPhone.subjectDefault': 'Hola, Carlos',
+  'contactPhone.message': 'Mensaje',
+  'contactPhone.messagePlaceholder': 'Cuéntame de tu vacante, proyecto o idea…',
+  'contactPhone.send': 'Enviar',
+  'contactPhone.sendHint': 'Se abrirá tu app de correo con el mensaje listo.',
+  'contactPhone.sending': 'Abriendo tu correo…',
+  'contactPhone.open': 'Abrir {name}',
+  'contactPhone.leave': 'Se abrirá en una pestaña nueva.',
+  'contactPhone.cancel': 'Cancelar',
+  'contactPhone.downloading': 'Descargando CV…',
+  'contactPhone.downloaded': 'CV descargado',
+  'contactPhone.notifyApp': 'Mensajes',
+  'contactPhone.notifyNow': 'ahora',
+  'contactPhone.notifyTitle': 'Nuevo mensaje',
+  'contactPhone.notifyBody': '¿Hablamos?'
 } as const;
 
 export type UiKey = keyof typeof es;

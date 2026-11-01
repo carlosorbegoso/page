@@ -37,6 +37,9 @@ const SAFE_LEFT = 24;
 /** Keeps panels off the right edge (HUD / scrollbar). */
 const SAFE_RIGHT = 120;
 const SAFE_Y = 24;
+/** Clear of the HUD row and the top letterbox bar: a panel never starts under the story clock. */
+const SAFE_TOP_MIN = 84;
+const SAFE_TOP_SHARE = 0.11;
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
 
@@ -215,8 +218,10 @@ export class Plates {
       x = side === 'left' ? ax - PANEL_GAP - width : ax + PANEL_GAP;
       y = ay - height / 2;
       x = Math.min(Math.max(x, SAFE_LEFT), this.width - SAFE_RIGHT - width);
-      const overflow = Math.max(height - (this.height - 2 * SAFE_Y), 0);
-      y = Math.min(Math.max(y, SAFE_Y), this.height - SAFE_Y - height + overflow) - overflow * progress;
+      const safeTop = Math.max(SAFE_TOP_MIN, this.height * SAFE_TOP_SHARE);
+      const safeBottom = Math.max(SAFE_Y * 2, this.height * 0.06);
+      const overflow = Math.max(height - (this.height - safeTop - safeBottom), 0);
+      y = Math.min(Math.max(y, safeTop), this.height - safeBottom - height + overflow) - overflow * progress;
     } else {
       x = (this.width - width) / 2;
       const bottom = this.height - SAFE_Y - this.safeBottom;

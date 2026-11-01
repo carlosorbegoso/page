@@ -26,8 +26,10 @@ function drawLabels(canvas: HTMLCanvasElement): void {
   FOLDERS.forEach((id, row) => {
     const [name, years] = SPINE_TEXT[id];
     const y = row * ROW + ROW / 2;
+    context.font = `500 54px ${mono}`;
+    const yearsWidth = context.measureText(years).width;
     context.font = `600 120px ${display}`;
-    context.fillText(name, 48, y + 6, 600);
+    context.fillText(name, 48, y + 6, WIDTH - 144 - yearsWidth);
     context.font = `500 54px ${mono}`;
     context.textAlign = 'right';
     context.fillText(years, WIDTH - 48, y + 6);

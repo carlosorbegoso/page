@@ -246,7 +246,7 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
     panel: {
       name: 'outro',
       sx: portrait ? 0.08 : 0.07,
-      sy: portrait ? 0.12 : 0.22,
+      sy: portrait ? 0.12 : 0.26,
       plane: new Plane(new Vector3(0, 0, 1), -(ROOM.back + 0.005))
     }
   };

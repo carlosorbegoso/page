@@ -306,8 +306,9 @@ const facts = (['now', 'before', 'night'] as const).map(key => ({
       grid-template-columns: 38cqw minmax(0, 1fr);
       grid-template-rows: 1fr auto auto 1fr;
       gap: 0 6cqw;
-      margin: calc(var(--plate-padding) * -1);
-      height: calc(100% + var(--plate-padding) * 2);
+      /* Bleed to the glass: the monitor plate pads 4.5 % / 6 % of its width (plates.css). */
+      margin: -5.12cqw -6.82cqw;
+      height: calc(100% + 10.24cqw);
       padding-right: 7cqw;
     }
 
@@ -328,10 +329,10 @@ const facts = (['now', 'before', 'night'] as const).map(key => ({
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(90deg, transparent 45%, var(--color-screen-bg) 99%),
-        linear-gradient(0deg, rgb(4 8 16 / 0.75), transparent 40%),
-        linear-gradient(160deg, rgb(70 130 255 / 0.18), rgb(255 160 80 / 0.1));
-      mix-blend-mode: normal;
+        linear-gradient(90deg, transparent 40%, var(--color-screen-bg) 98%),
+        linear-gradient(0deg, rgb(4 8 16 / 0.7), transparent 45%),
+        radial-gradient(120% 90% at 30% 25%, transparent 40%, rgb(4 8 16 / 0.55)),
+        linear-gradient(160deg, rgb(60 120 255 / 0.28), rgb(255 150 70 / 0.12));
     }
 
     :global(.is-3d) .about-bio__photo {
@@ -340,7 +341,7 @@ const facts = (['now', 'before', 'night'] as const).map(key => ({
       border: 0;
       border-radius: 0;
       object-position: 50% 30%;
-      filter: saturate(0.55) contrast(1.08) brightness(0.82);
+      filter: grayscale(0.7) contrast(1.18) brightness(0.86);
     }
 
     :global(.is-3d) .about-bio :global(header) {
@@ -396,7 +397,7 @@ const facts = (['now', 'before', 'night'] as const).map(key => ({
     }
 
     :global(.is-3d) .about-facts dt {
-      font-size: 2.4cqh;
+      font-size: 2.6cqh;
       font-weight: 600;
       letter-spacing: 0.14em;
       text-transform: uppercase;
@@ -412,7 +413,7 @@ const facts = (['now', 'before', 'night'] as const).map(key => ({
 
     :global(.is-3d) .about-facts__value {
       font-family: var(--font-display);
-      font-size: 3.8cqh;
+      font-size: 4.2cqh;
       font-weight: 600;
       line-height: 1.15;
       color: var(--color-text);
@@ -420,7 +421,7 @@ const facts = (['now', 'before', 'night'] as const).map(key => ({
     }
 
     :global(.is-3d) .about-facts__detail {
-      font-size: 2.8cqh;
+      font-size: 3.2cqh;
       line-height: 1.4;
       color: var(--color-text-muted);
       text-wrap: pretty;
@@ -534,8 +535,8 @@ const facts = (['now', 'before', 'night'] as const).map(key => ({
       display: flex;
       flex-direction: column;
       height: 100%;
-      margin: calc(var(--plate-padding) * -1);
-      height: calc(100% + var(--plate-padding) * 2);
+      margin: -5.12cqw -6.82cqw;
+      height: calc(100% + 10.24cqw);
       font-family: var(--font-mono);
       background: rgb(6 9 15 / 0.55);
     }

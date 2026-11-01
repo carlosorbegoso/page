@@ -31,7 +31,7 @@ const year = new Date().getFullYear();
         {t('outro.title')}
       </h2>
       <p class="outro-body text-base text-pretty text-text-muted">{t('outro.body')}</p>
-      <p class="mt-2 flex flex-col items-start gap-1.5 border-t border-text/10 pt-4 text-xs text-text-subtle">
+      <p class="outro-credits mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1.5 border-t border-text/10 pt-4 text-xs text-text-subtle">
         <span>{t('outro.tech')}</span>
         <ExternalLink
           href={SITE.social.github}
@@ -40,14 +40,33 @@ const year = new Date().getFullYear();
         >
           {t('outro.source')}
         </ExternalLink>
-        <span>© {year} {SITE.name}</span>
-        <span>TUSOCIO IA S.A.C.</span>
+        <span class="outro-credits__break">© {year} {SITE.name} · TUSOCIO IA S.A.C.</span>
       </p>
     </div>
   </div>
 </section>
 
 <style>
+  /* Credits read as two short lines: how it was made, and who signs it. */
+  .outro-credits > :not(:first-child)::before {
+    content: '·';
+    margin-right: 0.75rem;
+    color: var(--color-border-strong);
+  }
+
+  .outro-credits__break {
+    flex-basis: 100%;
+  }
+
+  .outro-credits > .outro-credits__break::before {
+    content: none;
+  }
+
+  :global(.is-3d) .outro h2 {
+    max-width: 12ch;
+    text-wrap: balance;
+  }
+
   @media (width < 48rem) {
     :global(.is-3d) .outro-body {
       display: none;

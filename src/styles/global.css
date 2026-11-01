@@ -4,8 +4,15 @@
 @import './tokens/scale.css';
 @import './tokens/stage.css';
 @import './tokens/modes.css';
-@import './plates.css';
-@import './motion.css';
+@import './plates/base.css';
+@import './plates/loose.css';
+@import './plates/surfaces.css';
+@import './plates/anchored.css';
+@import './plates/finish.css';
+@import './plates/overflow.css';
+@import './motion/kinetic.css';
+@import './motion/reveal.css';
+@import './motion/keyframes.css';
 
 /* Height reserved by the floating corner controls (Header.astro); sections pad their top by it. */
 :root {

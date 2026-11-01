@@ -1,0 +1,56 @@
+/*
+ * Loose text only plays once the camera has landed: it cuts out while the shot moves so it never
+ * slides across scenery, then the lines rise in one after another like a title sequence.
+ */
+.is-3d .plate[data-plate-mode='anchored'] > * > * {
+  opacity: 0;
+  transform: translateY(0.9rem);
+  filter: blur(6px);
+  transition:
+    opacity 180ms var(--ease-in),
+    transform 180ms var(--ease-in),
+    filter 180ms var(--ease-in);
+}
+
+.is-3d .plate[data-plate-mode='anchored'][data-active] > * > * {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  transition:
+    opacity 700ms var(--ease-out),
+    transform 900ms var(--ease-out),
+    filter 700ms var(--ease-out);
+}
+
+.is-3d .plate[data-plate-mode='anchored'][data-active] > * > :nth-child(2) {
+  transition-delay: 90ms;
+}
+
+.is-3d .plate[data-plate-mode='anchored'][data-active] > * > :nth-child(3) {
+  transition-delay: 180ms;
+}
+
+.is-3d .plate[data-plate-mode='anchored'][data-active] > * > :nth-child(4) {
+  transition-delay: 270ms;
+}
+
+.is-3d .plate[data-plate-mode='anchored'][data-active] > * > :nth-child(n + 5) {
+  transition-delay: 360ms;
+}
+
+:root[data-motion='paused'].is-3d .plate[data-plate-mode='anchored'] > * > * {
+  transform: none;
+  filter: none;
+}
+
+@media (forced-colors: active) {
+  .plate {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    text-shadow: none;
+  }
+
+  .plate::before {
+    display: none;
+  }
+}

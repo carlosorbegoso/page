@@ -1,0 +1,70 @@
+/* Light that runs letter by letter across the settled headline. Flat page only: in 3D the plate's dark text halo would paint over clipped glyphs. */
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  :root.k-armed:not(.is-3d) .kinetic[data-kinetic-shine][data-settled] .k-i {
+    background-image: linear-gradient(
+      100deg,
+      var(--color-text) 0 40%,
+      var(--color-accent-hover) 50%,
+      var(--color-text) 60% 100%
+    );
+    background-size: 300% 100%;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: k-shine 14s linear calc(1.2s + var(--k-c, var(--k-i, 0)) * 35ms) infinite;
+  }
+}
+
+@keyframes k-signal {
+  from {
+    --signal-progress: 0;
+  }
+
+  to {
+    --signal-progress: 1;
+  }
+}
+
+@keyframes k-float {
+  from {
+    translate: 0 -1px;
+  }
+
+  to {
+    translate: 0 1px;
+  }
+}
+
+@keyframes k-cursor {
+  from {
+    opacity: 0.65;
+  }
+
+  to {
+    opacity: 0.12;
+  }
+}
+
+@keyframes k-shine {
+  0% {
+    background-position: 100% 0;
+  }
+
+  9%,
+  100% {
+    background-position: 0% 0;
+  }
+}
+
+@media (forced-colors: active) {
+  .plate::after,
+  [data-magnetic]::after {
+    display: none;
+  }
+
+  :root.k-armed .kinetic[data-kinetic-shine][data-settled] .k-i {
+    background: none;
+    color: inherit;
+  }
+}

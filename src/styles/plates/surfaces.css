@@ -1,0 +1,50 @@
+/*
+ * Screens have a fixed size set by the engine (--surface-width/height) and must never clip, so
+ * each section sizes its screen content in container units (cqh/cqw) of the plate.
+ */
+.is-3d .plate[data-plate-mode^='surface-'] {
+  container: surface / size;
+  width: var(--surface-width, var(--plate-width));
+  height: var(--surface-height, auto);
+  overflow: hidden;
+  background-color: var(--color-screen-bg);
+  text-shadow: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+.is-3d .plate[data-plate-mode='surface-monitor'] {
+  padding: 4.5% 6%;
+}
+
+.is-3d .plate[data-plate-mode='surface-phone'] {
+  padding: 14% 7% 7%;
+  border-radius: 1.75rem;
+}
+
+.is-3d .plate[data-plate-mode^='surface-'] :is(p:has(+ h1, + h2, + h3), [data-signal])::before {
+  width: 9cqw;
+  margin-block-end: 1.5cqh;
+}
+
+.is-3d .plate[data-plate-mode^='surface-'][data-active] :is(p:has(+ h1, + h2, + h3), [data-signal])::before {
+  width: 14cqw;
+}
+
+.is-3d .plate[data-active] :is(p:has(+ h1, + h2, + h3), [data-signal])::before {
+  box-shadow: 0 0 12px 1px var(--plate-accent);
+}
+
+/* Fade the children, not the plate: opacity below 1 on a CSS3D plate flattens its children's depth. */
+.is-3d .plate > * {
+  transition: opacity var(--duration-slow) var(--ease-standard);
+}
+
+.is-3d .plate[data-dormant] {
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s linear var(--duration-slow);
+}
+
+.is-3d .plate[data-dormant] > * {
+  opacity: var(--plate-dormant-opacity);
+}

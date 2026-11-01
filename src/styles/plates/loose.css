@@ -1,0 +1,100 @@
+/* Unlayered on purpose: the 3D type scale must win over the card utilities the sections ship for the flat fallback. */
+.is-3d .plate {
+  max-width: none;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: visibility 0s linear;
+}
+
+.is-3d .plate p:has(+ h1, + h2, + h3) {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--text-meta--line-height);
+  color: var(--color-text-muted);
+}
+
+.is-3d .plate :is(h1, h2) {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-display);
+}
+
+.is-3d .plate:not([data-plate-mode^='surface-']) h3 {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--text-2xl--line-height);
+  letter-spacing: var(--tracking-tight);
+}
+
+.is-3d .plate:not([data-plate-mode^='surface-']) p:not(:has(+ h1, + h2, + h3)) {
+  max-width: var(--container-measure);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}
+
+.is-3d .plate:not([data-plate-mode^='surface-']) {
+  width: var(--plate-width);
+  text-shadow: var(--plate-text-halo);
+}
+
+.is-3d .plate:not([data-plate-mode^='surface-']) :is(h2, .plate-display) {
+  font-size: var(--text-display);
+  line-height: var(--text-display--line-height);
+}
+
+/* An edgeless pool of darkness behind loose text keeps AA over the lit scene; it must never read as a rectangle. */
+.is-3d .plate:not([data-plate-mode^='surface-'])::before {
+  content: '';
+  position: absolute;
+  inset: var(--plate-pool-inset);
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    closest-side,
+    var(--color-plate-pool) 0,
+    var(--color-plate-pool) 40%,
+    var(--color-plate-pool-edge) 62%,
+    var(--color-plate-pool-fade, rgb(4 6 11 / 0.32)) 82%,
+    transparent 100%
+  );
+}
+
+/* Anchored panels float over the room: a frosted, edgeless pool hides the out-of-focus props behind the text. */
+.is-3d .plate[data-plate-mode='anchored']:not([data-compact])::before {
+  inset: -50% -38%;
+  background: radial-gradient(
+    closest-side,
+    var(--color-plate-pool) 0,
+    var(--color-plate-pool) 52%,
+    var(--color-plate-pool-edge) 70%,
+    var(--color-plate-pool-fade, rgb(4 6 11 / 0.32)) 86%,
+    transparent 100%
+  );
+  backdrop-filter: blur(16px) saturate(0.6);
+  mask-image: radial-gradient(closest-side, #000 60%, rgb(0 0 0 / 0.5) 82%, transparent 100%);
+}
+
+/*
+ * Upright phones dock every panel at the bottom (stackedLayout): the pool becomes a full-bleed
+ * gradient from the panel down, like a subtitle band, so the room above stays clean.
+ */
+@media (width < 48rem) and (orientation: portrait) {
+  .is-3d .plate:not([data-plate-mode^='surface-'])::before {
+    backdrop-filter: none;
+    mask-image: none;
+    inset: -6rem calc((100% - 100vw) / 2) -100vh;
+    background: linear-gradient(
+      180deg,
+      transparent 0,
+      var(--color-plate-pool-fade, rgb(4 6 11 / 0.32)) 2.5rem,
+      var(--color-plate-pool-edge) 5rem,
+      var(--color-plate-pool) 8rem
+    );
+  }
+}

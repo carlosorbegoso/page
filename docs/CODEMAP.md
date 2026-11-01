@@ -142,6 +142,7 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | GLSL de cada pasada | `src/three/fx/shaders/*.glsl.ts` (`coc.glsl.ts` lo comparten DoF y composite) |
 | Simulación de fluido | `src/three/fx/fluid/field.ts`, GLSL en `fluid/simulation.glsl.ts` |
 | Entrada de puntero del fluido | `src/three/fx/fluid/pointer.ts` |
+| Paso del fluido por frame y uniforms compartidos | `src/three/fx/fluid/driver.ts` |
 | Desplazar un material con el fluido | `src/three/fx/fluid/patch.ts` (`withFluidDisplacement`, `withFluidFragment`), GLSL en `fluid/displace.glsl.ts` |
 | Uniforms compartidos del fluido | `src/three/fx/fluid/uniforms.ts` |
 | Grading por capítulo | `src/three/fx/grading.ts` |

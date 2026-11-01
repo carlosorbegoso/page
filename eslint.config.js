@@ -14,7 +14,12 @@ export default defineConfig(
       globals: { ...globals.browser, ...globals.node }
     },
     rules: {
-      'max-lines': ['warn', { max: 300, skipBlankLines: true, skipComments: true }]
+      'max-lines': ['error', { max: 300, skipBlankLines: true, skipComments: true }],
+      'max-lines-per-function': ['warn', { max: 40, skipBlankLines: true, skipComments: true, IIFEs: true }]
     }
+  },
+  {
+    files: ['**/*.glsl.ts'],
+    rules: { 'max-lines-per-function': 'off' }
   }
 );

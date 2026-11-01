@@ -97,7 +97,7 @@ function readDeskFinishes(): Pick<Palette, DeskKey> {
 
 function readCollectibleFinishes(brass: Finish): Pick<Palette, CollectibleKey> {
   return {
-    alfaBody: { color: c('--color-desk-ceramic', '#e6e0d4').lerp(new Color('#f4f7fb'), 0.6), roughness: 0.24, metalness: 0 },
+    alfaBody: { color: c('--color-desk-ceramic', '#e6e0d4').lerp(new Color('#f4f7fb'), 0.3).multiplyScalar(0.82), roughness: 0.38, metalness: 0 },
     alfaVisor: { color: c('--color-alfa-body', '#10131a'), roughness: 0.1, metalness: 0.35 },
     alfaRing: brass,
     alfaSignal: { color: c('--color-alfa-signal', '#5aa9ff'), roughness: 0.3, metalness: 0, emissive: 1.4 * tokenNumber('--alfa-signal-intensity', 1) },

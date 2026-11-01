@@ -76,7 +76,7 @@ export function buildAlfa(b: PartBuilder, p: Palette, q: Quality): void {
   const radiusAt = (y: number) => profile.reduce((best, point) => (Math.abs(point.y - y) < Math.abs(best.y - y) ? point : best)).x;
   const chestY = 0.032;
   const chestR = radiusAt(chestY) * 0.9;
-  b.add(new SphereGeometry(0.0042, seg(14, q, 8), seg(10, q, 6)).scale(1, 1, 0.35), p.alfaSignal, place(0, chestY, chestR), id);
+  b.add(new SphereGeometry(0.0042, seg(14, q, 8), seg(10, q, 6)).scale(1, 1, 0.35), p.alfaRing, place(0, chestY, chestR), id);
   buildAlfaBodyDetails(b, p, q, at, radiusAt, chestY, chestR);
 
   const collar = new TorusGeometry(0.0168, 0.0032, seg(10, q, 6), seg(40, q, 20)).scale(1, 0.9, 1);

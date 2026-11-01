@@ -1,8 +1,6 @@
 .is-3d .plate[data-plate-mode='surface-monitor'] {
   --chrome-bar: 3.4cqh;
   --chrome-window-top: calc(var(--chrome-bar) + 2.6cqh);
-  --chrome-title: 5.6cqh;
-  --chrome-light: 2.1cqh;
 }
 
 .is-3d .plate[data-plate-mode='surface-monitor']::before {
@@ -14,7 +12,10 @@
   height: var(--chrome-bar);
   padding-right: calc(var(--chrome-bar) * 6);
   color: #e8edf5;
-  font: 500 calc(var(--chrome-bar) * 0.55) / var(--chrome-bar) -apple-system, system-ui, sans-serif;
+  font:
+    500 calc(var(--chrome-bar) * 0.55) / var(--chrome-bar) -apple-system,
+    system-ui,
+    sans-serif;
   font-variant-numeric: tabular-nums;
   text-align: right;
   white-space: nowrap;
@@ -37,35 +38,13 @@
     linear-gradient(rgb(18 24 36 / 0.82), rgb(14 19 29 / 0.78));
 }
 
-.is-3d .plate[data-plate-mode='surface-monitor']:is([data-plate-id='hero'], [data-plate-id='outro']) {
-  padding-top: calc(4.5% + var(--chrome-title));
-  background:
-    radial-gradient(80% 100% at 10% 115%, rgb(70 120 235 / 0.55), transparent 65%),
-    radial-gradient(70% 90% at 100% -5%, rgb(255 140 80 / 0.32), transparent 62%),
-    linear-gradient(160deg, #1b2440, #101626);
-}
-
-.is-3d .plate[data-plate-mode='surface-monitor']:is([data-plate-id='hero'], [data-plate-id='outro'])::after {
-  content: '';
-  position: absolute;
-  inset: var(--chrome-window-top) 2.6cqw 2.6cqh;
-  z-index: 0;
-  height: auto;
-  opacity: 1;
-  transition: none;
-  pointer-events: none;
-  border: 1px solid rgb(255 255 255 / 0.16);
-  border-radius: 1.4cqh;
-  background:
-    radial-gradient(circle at 2.2cqw 50%, #ff5f57 calc(var(--chrome-light) / 2 - 0.5px), transparent calc(var(--chrome-light) / 2)) 0 0 / 100% var(--chrome-title) no-repeat,
-    radial-gradient(circle at calc(2.2cqw + 3.2cqh) 50%, #febc2e calc(var(--chrome-light) / 2 - 0.5px), transparent calc(var(--chrome-light) / 2)) 0 0 / 100% var(--chrome-title) no-repeat,
-    radial-gradient(circle at calc(2.2cqw + 6.4cqh) 50%, #28c840 calc(var(--chrome-light) / 2 - 0.5px), transparent calc(var(--chrome-light) / 2)) 0 0 / 100% var(--chrome-title) no-repeat,
-    linear-gradient(rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.06)) 0 0 / 100% var(--chrome-title) no-repeat,
-    var(--color-screen-bg);
-  box-shadow: 0 2.5cqh 6cqh rgb(0 0 0 / 0.55);
-}
-
-.is-3d .plate[data-plate-mode='surface-monitor']:is([data-plate-id='hero'], [data-plate-id='outro']) > * {
-  position: relative;
-  z-index: 1;
+@container surface (width < 760px) {
+  .is-3d
+    .plate[data-plate-mode='surface-monitor']:is(
+      [data-plate-id='hero'],
+      [data-plate-id='outro'],
+      [data-plate-id='about-stack']
+    )::before {
+    display: none;
+  }
 }

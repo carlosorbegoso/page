@@ -1,11 +1,24 @@
 @container surface (orientation: landscape) and (width < 760px) {
   .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code__bar {
-    height: 6cqw;
-    padding-inline: 4cqw;
+    flex: none;
+    gap: 10px;
+    height: 24px;
+    padding-inline: 10px 0;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code__dots {
+    gap: 5px;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code__dots i {
+    width: 8px;
+    height: 8px;
   }
 
   .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code__tab {
-    font-size: 3.2cqw;
+    gap: 5px;
+    padding-inline: 10px;
+    font-size: 12px;
   }
 
   .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code__lines {

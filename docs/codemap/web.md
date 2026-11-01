@@ -14,7 +14,9 @@ Qué archivo editar en la web: `<head>`, tokens, HUD, secciones, modo lectura, t
 | Estilos globales, reset | `src/styles/global.css` |
 | Animaciones CSS, `prefers-reduced-motion` | `src/styles/motion/{keyframes,reveal,kinetic}.css` |
 | Estilos de las placas (base, ancladas, sueltas, superficies, desbordes, acabado) | `src/styles/plates/` |
-| Escritorio Mac del monitor: barra de menús en todas sus pantallas, ventana con los tres botones y fondo en hero y outro (pisa el `::after` de `motion/kinetic.css` y `plates/finish.css` en esos dos) | `src/styles/plates/monitor-chrome.css` |
+| Barra de menús Mac del monitor (`::before`, con la hora de la historia); en hero, stack y final solo cuando la pantalla mide ≥ 760 px | `src/styles/plates/monitor-chrome.css` |
+| Navegador en el monitor (hero y final): ventana, barra con semáforo, pestaña y dirección real del sitio, página con rejilla; una sola barra de 26 px en compacto, pestaña + barra de dirección en ≥ 760 px | `src/components/screen/BrowserWindow.astro`, `SiteNav.astro`; estilos en `src/styles/plates/browser.css`, `browser-wide.css` |
+| Brillo, viñeta y borde interior de la pantalla LCD en todas las placas del monitor (`::after`, por encima del contenido) | `src/styles/plates/finish.css` |
 
 
 ## Tokens de diseño
@@ -48,13 +50,13 @@ Qué archivo editar en la web: `<head>`, tokens, HUD, secciones, modo lectura, t
 ## Secciones
 | Para cambiar… | Edita |
 | --- | --- |
-| Hero | `src/components/sections/Hero.astro` |
+| Hero | `src/components/sections/Hero.astro`; en el monitor ≥ 760 px `src/styles/sections/hero/monitor.css` |
 | Sobre mí: placas y orden | `src/components/sections/About.astro` |
 | Sobre mí: bio y datos; la foto queda solo para lectores de pantalla en 3D (cuelga enmarcada en la pared) | `src/components/sections/about/AboutBio.astro` |
 | Sobre mí: estudios y stack | `src/components/sections/about/AboutStack.astro` |
 | Sobre mí: pantalla `carlos.yml` | `src/components/sections/about/AboutCode.astro` |
 | Sobre mí en el monitor (vertical / horizontal) | `src/styles/sections/about/monitor.css`, `monitor-landscape.css`, `code.css` |
-| Hero, Sobre mí, Stack y Final cuando el monitor se ve chico en pantalla (menos de 760 px: teléfono y escritorio con encuadre de habitación); diseño compacto legible por ancho de contenedor | `src/styles/sections/hero/monitor-compact.css`, `sections/outro/monitor-compact.css`, `sections/about/code-compact.css`, `sections/about/bio-compact.css` |
+| Hero, Sobre mí, Stack y Final cuando el monitor se ve chico en pantalla (menos de 760 px: teléfono y escritorio con encuadre de habitación); en px porque la placa se dibuja a escala 1:1 en el plano que la lee (titular 26 px, botones 15 px y 44 px de alto; el CV pasa a «CV» y se oculta bajo 340 px, sigue en el menú del HUD) | `src/styles/sections/hero/monitor-compact.css`, `sections/outro/monitor-compact.css`, `sections/about/code-compact.css`, `sections/about/bio-compact.css` |
 | Sobre mí en teléfonos apilados | `src/styles/sections/about/anchored.css` |
 | Experiencia | `src/components/sections/Experience.astro`, `src/components/experience/` |
 | Empresa | `src/components/sections/Company.astro`; ficha en 3D y tarjeta de papel en teléfonos en `src/styles/sections/company/` |

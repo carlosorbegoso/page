@@ -1,0 +1,35 @@
+.is-3d [data-plate-mode='surface-monitor'] .outro-screen {
+  flex: 1;
+  min-height: 0;
+  max-width: none;
+  justify-content: center;
+  gap: 0;
+}
+
+.is-3d [data-plate-mode='surface-monitor'] .outro-label {
+  font-size: 2.8cqh;
+  font-weight: 500;
+  color: var(--color-accent);
+}
+
+.is-3d [data-plate-mode='surface-monitor'] .outro h2 {
+  max-width: 80%;
+  margin-top: 2.4cqh;
+  font-size: 9.4cqh;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.is-3d [data-plate-mode='surface-monitor'] .outro-body {
+  max-width: 70%;
+  margin-top: 3.4cqh;
+  font-size: 3.4cqh;
+  line-height: 1.45;
+}
+
+.is-3d [data-plate-mode='surface-monitor'] .outro-credits {
+  margin-top: 5cqh;
+  padding-top: 3.4cqh;
+  font-size: 2.9cqh;
+  gap: 1.4cqh 2.2cqw;
+}

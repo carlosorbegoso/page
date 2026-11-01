@@ -1,0 +1,165 @@
+.browser-bar,
+.site-nav {
+  display: none;
+}
+
+.is-3d
+  .plate[data-plate-mode='surface-monitor']:is([data-plate-id='hero'], [data-plate-id='outro']) {
+  padding: 0;
+  background:
+    radial-gradient(80% 100% at 10% 115%, rgb(70 120 235 / 0.55), transparent 65%),
+    radial-gradient(70% 90% at 100% -5%, rgb(255 140 80 / 0.32), transparent 62%),
+    linear-gradient(160deg, #1b2440, #101626);
+}
+
+.is-3d .plate[data-plate-mode='surface-monitor'] > .browser-window {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+:root.is-3d .plate[data-plate-mode='surface-monitor'] > .browser-window {
+  animation: none;
+}
+
+.is-3d [data-plate-mode='surface-monitor'] .browser-window__page {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: 12px 16px;
+  background:
+    radial-gradient(70% 90% at 100% 0%, rgb(90 169 255 / 0.16), transparent 62%),
+    radial-gradient(60% 80% at 0% 100%, rgb(255 150 90 / 0.07), transparent 60%),
+    radial-gradient(120% 100% at 60% 0%, transparent 35%, var(--color-screen-bg) 85%),
+    linear-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, rgb(255 255 255 / 0.035) 1px, transparent 1px) 0 0 / 24px 24px,
+    var(--color-screen-bg);
+}
+
+.is-3d [data-plate-mode='surface-monitor'] .browser-bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+  height: 26px;
+  padding: 0 10px;
+  border-bottom: 1px solid rgb(255 255 255 / 0.07);
+  background: linear-gradient(#1d2331, #171c28);
+  color: var(--color-text-muted);
+  font: 500 12px / 1 var(--font-sans);
+  white-space: nowrap;
+}
+
+.is-3d [data-plate-mode='surface-monitor'] .browser-bar svg {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.is-3d [data-plate-mode='surface-monitor'] .browser-bar__lights {
+  display: flex;
+  flex: none;
+  gap: 5px;
+}
+
+.is-3d [data-plate-mode='surface-monitor'] .browser-bar__lights i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff5f57;
+  box-shadow: inset 0 0 0 0.5px rgb(0 0 0 / 0.25);
+}
+
+.is-3d [data-plate-mode='surface-monitor'] .browser-bar__lights i:nth-child(2) {
+  background: #febc2e;
+}
+
+.is-3d [data-plate-mode='surface-monitor'] .browser-bar__lights i:nth-child(3) {
+  background: #28c840;
+}
+
+.is-3d [data-plate-mode='surface-monitor'] :is(.browser-bar__tab, .browser-bar__arrows) {
+  display: none;
+}
+
+.is-3d [data-plate-mode='surface-monitor'] .browser-bar__address {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 0.07);
+}
+
+.is-3d [data-plate-mode='surface-monitor'] .browser-bar__address > .browser-bar__favicon {
+  width: 11px;
+  height: 11px;
+  margin-left: auto;
+  color: var(--color-text);
+}
+
+.is-3d [data-plate-mode='surface-monitor'] .browser-bar__url {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.is-3d [data-plate-mode='surface-monitor'] .browser-bar__host {
+  color: var(--color-text);
+}
+
+.is-3d [data-plate-mode='surface-monitor'] .browser-bar__reload {
+  width: 10px;
+  height: 10px;
+  margin-left: auto;
+}
+
+.is-3d [data-plate-mode='surface-monitor'] .site-nav {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgb(255 255 255 / 0.07);
+  font: 600 15px / 18px var(--font-sans);
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.is-3d [data-plate-mode='surface-monitor'] .site-nav__brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.is-3d [data-plate-mode='surface-monitor'] .site-nav__brand svg {
+  width: 18px;
+  height: 18px;
+}
+
+.is-3d [data-plate-mode='surface-monitor'] .site-nav__links {
+  display: none;
+}
+
+@container surface (width < 760px) and (height < 214px) {
+  .is-3d [data-plate-mode='surface-monitor'] .site-nav {
+    display: none;
+  }
+}
+
+@container surface (width < 340px) {
+  .is-3d [data-plate-mode='surface-monitor'] .browser-window__page {
+    padding: 10px 14px;
+  }
+}

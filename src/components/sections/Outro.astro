@@ -1,7 +1,9 @@
 ---
 import ExternalLink from '../ui/ExternalLink.astro';
+import BrowserWindow from '../screen/BrowserWindow.astro';
 import { SITE } from '../../config/site';
 import { useTranslations, type Locale } from '../../i18n/utils';
+import '../../styles/sections/outro/monitor.css';
 import '../../styles/sections/outro/monitor-compact.css';
 
 interface Props {
@@ -26,24 +28,32 @@ const year = new Date().getFullYear();
     data-plate-anchor="outro"
     data-plate-mode="surface-monitor"
   >
-    <div class="outro-screen flex max-w-measure flex-col gap-4">
-      <p class="outro-label text-sm font-medium text-text-muted">{t('outro.label')}</p>
-      <h2 id="outro-title" class="font-display text-3xl font-semibold tracking-display text-balance text-text">
-        <span class="when-night">{t('outro.title')}</span><span class="when-day">{t('outro.titleDay')}</span>
-      </h2>
-      <p class="outro-body text-base text-pretty text-text-muted">{t('outro.body')}</p>
-      <p class="outro-credits mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1.5 border-t border-text/10 pt-4 text-sm text-text-subtle">
-        <span>{t('outro.tech')}</span>
-        <ExternalLink
-          href={SITE.social.github}
-          locale={locale}
-          class="underline decoration-accent/50 underline-offset-4 hover:text-text"
+    <BrowserWindow locale={locale} title={`${t('outro.label')} · ${SITE.name}`}>
+      <div class="outro-screen flex max-w-measure flex-col gap-4">
+        <p class="outro-label text-sm font-medium text-text-muted">{t('outro.label')}</p>
+        <h2
+          id="outro-title"
+          class="font-display text-3xl font-semibold tracking-display text-balance text-text"
         >
-          {t('outro.source')}
-        </ExternalLink>
-        <span class="outro-credits__break">© {year} {SITE.name} · TUSOCIO IA S.A.C.</span>
-      </p>
-    </div>
+          <span class="when-night">{t('outro.title')}</span>
+          <span class="when-day">{t('outro.titleDay')}</span>
+        </h2>
+        <p class="outro-body text-base text-pretty text-text-muted">{t('outro.body')}</p>
+        <p class="outro-credits mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1.5 border-t border-text/10 pt-4 text-sm text-text-subtle">
+          <span>{t('outro.tech')}</span>
+          <ExternalLink
+            href={SITE.social.github}
+            locale={locale}
+            class="underline decoration-accent/50 underline-offset-4 hover:text-text"
+          >
+            {t('outro.source')}
+          </ExternalLink>
+          <span class="outro-credits__break">
+            © {year} {SITE.name} · TUSOCIO IA S.A.C.
+          </span>
+        </p>
+      </div>
+    </BrowserWindow>
   </div>
 </section>
 
@@ -60,40 +70,6 @@ const year = new Date().getFullYear();
 
   .outro-credits > .outro-credits__break::before {
     content: none;
-  }
-
-  :global(.is-3d [data-plate-mode='surface-monitor']) .outro-screen {
-    height: 100%;
-    max-width: none;
-    justify-content: center;
-    gap: 0;
-  }
-
-  :global(.is-3d [data-plate-mode='surface-monitor']) .outro-label {
-    font-size: 3cqh;
-    color: var(--color-text-muted);
-  }
-
-  :global(.is-3d [data-plate-mode='surface-monitor']) .outro h2 {
-    max-width: 80%;
-    margin-top: 3cqh;
-    font-size: 11cqh;
-    line-height: 1.02;
-    text-wrap: balance;
-  }
-
-  :global(.is-3d [data-plate-mode='surface-monitor']) .outro-body {
-    max-width: 70%;
-    margin-top: 4cqh;
-    font-size: 3.9cqh;
-    line-height: 1.45;
-  }
-
-  :global(.is-3d [data-plate-mode='surface-monitor']) .outro-credits {
-    margin-top: 6cqh;
-    padding-top: 4cqh;
-    font-size: 3.4cqh;
-    gap: 1.6cqh 2.4cqw;
   }
 
   :global(.is-3d [data-plate-mode='anchored']) .outro-screen {

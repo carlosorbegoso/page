@@ -79,6 +79,8 @@ import {
 const LIGHT_CALIBRATION = { lamp: 0.4, monitor: 0.16, moon: 3, fill: 2.5, shelf: 9 } as const;
 /** HDR gain of the screen pictures so they stay luminous through ACES / the FX composer. */
 const SCREEN_HDR = 1.8;
+/** The MacBook never goes fully dark: at dawn it keeps a dim standby glow so it reads as a screen, not a black slab. */
+const LAPTOP_STANDBY = 0.32;
 
 interface ChapterLight {
   lamp: number;
@@ -858,7 +860,7 @@ export class DeskSet implements ShotProvider {
     this.fill.intensity = this.ambientIntensity * LIGHT_CALIBRATION.fill * (1 + level.dawn * 1.5 + level.day * DAY_FILL_GAIN);
     this.screen.material.color.setScalar(SCREEN_HDR * Math.min(level.monitor / 5, 1.2));
     this.phoneScreen.material.color.setScalar(0.06 + level.phone * SCREEN_HDR * 0.9);
-    this.laptopScreen?.material.color.setScalar(SCREEN_HDR * 0.55 * Math.min(level.monitor / 5, 1));
+    this.laptopScreen?.material.color.setScalar(SCREEN_HDR * 0.55 * Math.max(Math.min(level.monitor / 5, 1), LAPTOP_STANDBY));
     this.backdrop.setDawn(level.dawn);
     this.backdrop.setLateness(level.late);
     this.backdrop.setDay(level.day);

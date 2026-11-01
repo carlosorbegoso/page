@@ -137,7 +137,9 @@ export const es = {
   'notFound.body':
     'Busqué en el archivo del escritorio y esta hoja no está. Puede que nunca haya existido o que cambiara de lugar.',
   'notFound.home': 'Volver al inicio',
-  'notFound.paper': 'No encontrado'
+  'notFound.paper': 'No encontrado',
+  /* folder-detail */
+  'folderDetail.hint': 'Pulsa Enter para sacar la carpeta del estante y leer su hoja.'
 } as const;
 
 export type UiKey = keyof typeof es;

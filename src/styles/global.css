@@ -174,3 +174,8 @@ html.is-3d [data-site-footer] {
     inset: 0.375rem;
   }
 }
+
+/* The poster stands alone until the stage mounts its plates (StageCanvas inline script). */
+html.stage-pending:not(.is-3d) main {
+  visibility: hidden;
+}

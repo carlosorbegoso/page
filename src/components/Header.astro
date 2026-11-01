@@ -96,7 +96,7 @@ const menuItem =
         aria-haspopup="dialog"
         aria-controls="section-index"
         aria-expanded="false"
-        class="group/clock inline-flex min-h-tap items-center rounded-md px-2 focus-visible:shadow-focus focus-visible:outline-none"
+        class="hud-clock group/clock inline-flex min-h-tap items-center rounded-full px-3 focus-visible:shadow-focus focus-visible:outline-none"
       >
         <span
           data-hud-chapter
@@ -120,6 +120,20 @@ const menuItem =
         <span data-hud-progress-fill class="hud-progress__fill block h-full bg-accent"></span>
       </span>
     </div>
+    <button
+      type="button"
+      data-story-tour-quick
+      hidden
+      aria-pressed="false"
+      aria-label={t('tour.start')}
+      title={t('tour.start')}
+      class="group/quick hud-control hud-icon"
+    >
+      <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" class="shrink-0 fill-current">
+        <path d="M8 5.5v13l10.5-6.5z" class="group-aria-pressed/quick:hidden"></path>
+        <path d="M7 6h3.5v12H7zM13.5 6H17v12h-3.5z" class="hidden group-aria-pressed/quick:block"></path>
+      </svg>
+    </button>
     <span
       data-hud-tour-badge
       data-label-playing={t('tour.badgePlaying')}
@@ -313,6 +327,18 @@ const menuItem =
     text-shadow: var(--plate-text-halo);
   }
 
+  /* A soft glass pill keeps the story clock legible over bright windows and warm close-ups. */
+  .hud-clock {
+    background: rgb(8 11 18 / 0.55);
+    backdrop-filter: blur(10px) saturate(1.2);
+    -webkit-backdrop-filter: blur(10px) saturate(1.2);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08);
+  }
+
+  .hud-clock .hud-beat {
+    color: rgb(233 238 245 / 0.86);
+  }
+
   .hud-progress {
     background-color: color-mix(in srgb, var(--color-text-muted) 25%, transparent);
   }
@@ -398,6 +424,16 @@ const menuItem =
   const indexButton = document.querySelector<HTMLButtonElement>('[data-index-open]');
   const clock = document.querySelector<HTMLButtonElement>('[data-hud-clock]');
   const tourButton = document.querySelector<HTMLButtonElement>('[data-story-tour]');
+  const quickTour = document.querySelector<HTMLButtonElement>('[data-story-tour-quick]');
+  quickTour?.addEventListener('click', event => {
+    event.stopPropagation();
+    const starting = quickTour.getAttribute('aria-pressed') !== 'true';
+    window.dispatchEvent(new CustomEvent('story:tour', { detail: { action: starting ? 'start' : 'stop' } }));
+  });
+  window.addEventListener('story:tour-state', event => {
+    const state = (event as CustomEvent<{ state?: string }>).detail?.state;
+    quickTour?.setAttribute('aria-pressed', String(state === 'playing'));
+  });
   let indexOpener: HTMLButtonElement | null = null;
   const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
   const HOVER_CLOSE_DELAY_MS = 250;
@@ -481,6 +517,7 @@ const menuItem =
   function setStoryNav(ready: boolean) {
     if (progressBar) progressBar.hidden = !ready;
     if (tourButton) tourButton.hidden = !ready;
+    if (quickTour) quickTour.hidden = !ready;
   }
 
   window.addEventListener('story:ready', () => setStoryNav(true));

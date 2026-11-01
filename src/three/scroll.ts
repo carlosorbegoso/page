@@ -18,10 +18,11 @@ export interface ChapterScroll {
 }
 
 /**
- * Chapters on scroll (GSAP ScrollTrigger, loaded only inside the 3D chunk). Desktop: each section
- * is pinned for `subs × 100vh` and the camera changes shot only at chapter / sub-shot boundaries.
- * Touch: no pin and no scrub; a chapter fires when its section reaches 50 % of the viewport and
- * its spacer is `subs × 100svh` tall. No `normalizeScroll`.
+ * Chapters on scroll (GSAP ScrollTrigger, loaded only inside the 3D chunk). Every sub-shot owns
+ * exactly one viewport of scroll and nothing else scrolls: the page is `shots × 100vh` plus the
+ * last viewport. Desktop: each section is pinned for `subs × 100vh` and the camera changes shot only
+ * at chapter / sub-shot boundaries. Touch: no pin and no scrub; a chapter fires when its section
+ * reaches 50 % of the viewport and its spacer is `subs × 100svh` tall. No `normalizeScroll`.
  * Also emits `story:progress` (overall 0..1 across every sub-shot) and mounts the shot-by-shot
  * navigation (`src/motion/story-nav.ts`: settle, keyboard, `story:goto`, auto tour).
  */
@@ -33,10 +34,13 @@ export async function setupChapterScroll(host: ChapterScrollHost): Promise<Chapt
   ]);
   gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
   ScrollTrigger.config({ ignoreMobileResize: true });
+  /* A restored mid-page scroll lands before the pins exist and shows the wrong shot; the story starts at the top. */
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   const touch = matchMedia('(pointer: coarse)').matches || innerWidth < 1024;
   const triggers = new Map<ChapterId, InstanceType<typeof ScrollTrigger>>();
   let current: ChapterId | null = null;
   let currentSub = -1;
+  let healed = '';
 
   const subsOf = (chapter: ChapterId) => Math.max(1, host.subCount(chapter));
   const storyChapters = () => SECTION_CHAPTERS.filter(chapter => triggers.has(chapter));
@@ -71,6 +75,7 @@ export async function setupChapterScroll(host: ChapterScrollHost): Promise<Chapt
     if (active) {
       current = chapter;
       currentSub = -1;
+      healed = '';
       report(chapter, progress);
       return;
     }
@@ -82,17 +87,38 @@ export async function setupChapterScroll(host: ChapterScrollHost): Promise<Chapt
     report(other[0], other[1].progress);
   };
 
+  const lastChapter = SECTION_CHAPTERS.filter(chapter => chapterElement(chapter)).at(-1);
+  /** The last trigger runs 2 px past the maximum scroll: ScrollTrigger is inactive at progress 1. */
+  const edgeOf = (chapter: ChapterId) => (chapter === lastChapter ? 2 : 0);
+
+  /**
+   * Sections are bare spacers once the plates live in their layers, so their own box is the only
+   * source of unpinned scroll. Desktop: every box collapses to zero and only the pins add scroll
+   * (subs × innerHeight each), except the last one, which keeps one viewport so its pin ends exactly
+   * at the maximum scroll. Touch: each box is exactly subs × 100svh.
+   */
+  const sizeSpacers = () => {
+    for (const chapter of SECTION_CHAPTERS) {
+      const section = chapterElement(chapter);
+      if (!section) continue;
+      const height = touch ? `${subsOf(chapter) * 100}svh` : chapter === lastChapter ? `${innerHeight}px` : '0px';
+      Object.assign(section.style, { height, minHeight: height, paddingBlock: '0px', boxSizing: 'border-box' });
+    }
+  };
+  sizeSpacers();
+
   for (const chapter of SECTION_CHAPTERS) {
     const section = chapterElement(chapter);
     if (!section) continue;
-    const subs = () => Math.max(1, host.subCount(chapter));
+    const subs = () => subsOf(chapter);
+    const edge = edgeOf(chapter);
     if (!touch) {
       triggers.set(
         chapter,
         ScrollTrigger.create({
           trigger: section,
           start: 'top top+=2',
-          end: () => `+=${subs() * innerHeight}`,
+          end: () => `+=${subs() * innerHeight + edge}`,
           pin: true,
           pinSpacing: true,
           invalidateOnRefresh: true,
@@ -101,13 +127,12 @@ export async function setupChapterScroll(host: ChapterScrollHost): Promise<Chapt
         })
       );
     } else {
-      section.style.minHeight = `${subs() * 100}svh`;
       triggers.set(
         chapter,
         ScrollTrigger.create({
           trigger: section,
           start: 'top 50%',
-          end: 'bottom 50%',
+          end: () => `bottom 50%-=${edge}`,
           onToggle: self => toggle(chapter, self.isActive, self.progress),
           onUpdate: self => report(chapter, self.progress)
         })
@@ -122,8 +147,23 @@ export async function setupChapterScroll(host: ChapterScrollHost): Promise<Chapt
     const trigger = triggers.get(chapter);
     if (!trigger) return null;
     const subs = subsOf(chapter);
-    return trigger.start + ((Math.min(sub, subs - 1) + 0.5) / subs) * (trigger.end - trigger.start);
+    const span = trigger.end - trigger.start - edgeOf(chapter);
+    const index = Math.min(sub, subs - 1);
+    /* The final shot rests at the very bottom so nothing scrolls past the credits. */
+    if (chapter === lastChapter && index === subs - 1) return trigger.start + span - 1;
+    return trigger.start + ((index + 0.5) / subs) * span;
   };
+
+  /** A shot requested while the power-on held the camera can land after a newer one: ask again for the shot the scroll shows. */
+  const onSettled = (event: Event) => {
+    const detail = (event as CustomEvent<{ id: ChapterId; subIndex: number }>).detail;
+    if (!detail || detail.id === 'intro' || !current || currentSub < 0) return;
+    const wanted = `${current}:${currentSub}`;
+    if ((detail.id === current && detail.subIndex === currentSub) || healed === wanted) return;
+    healed = wanted;
+    host.onChapter(current, currentSub);
+  };
+  window.addEventListener('chapter:settled', onSettled);
 
   const shots = (): StoryShot[] =>
     storyChapters().flatMap(chapter =>
@@ -147,18 +187,17 @@ export async function setupChapterScroll(host: ChapterScrollHost): Promise<Chapt
   return {
     positionOf,
     refresh() {
-      if (touch) {
-        for (const chapter of SECTION_CHAPTERS) {
-          const section = chapterElement(chapter);
-          if (section) section.style.minHeight = `${Math.max(1, host.subCount(chapter)) * 100}svh`;
-        }
-      }
+      sizeSpacers();
       ScrollTrigger.refresh();
     },
     dispose() {
+      window.removeEventListener('chapter:settled', onSettled);
       disposeNav();
       for (const trigger of triggers.values()) trigger.kill(true);
-      for (const chapter of SECTION_CHAPTERS) chapterElement(chapter)?.style.removeProperty('min-height');
+      for (const chapter of SECTION_CHAPTERS) {
+        const style = chapterElement(chapter)?.style;
+        for (const property of ['height', 'min-height', 'padding-block', 'box-sizing']) style?.removeProperty(property);
+      }
     }
   };
 }

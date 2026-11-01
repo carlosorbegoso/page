@@ -137,7 +137,9 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Sacar la carpeta del estante: estado, toggle, update | `src/three/desk/folder-detail/FolderDetail.ts` (`desk/folderDetail.ts` solo reexporta) |
 | Dónde se sostiene la carpeta, giro hacia la cámara | `src/three/desk/folder-detail/aim.ts`, tiempos en `constants.ts` |
 | Hoja impresa de la carpeta (dibujo, ajuste de líneas) | `src/three/desk/folder-detail/sheet-canvas.ts`, `wrap.ts` |
-| Qué texto lleva la hoja (se lee de la placa de experiencia) | `src/three/desk/folder-detail/sheet-content.ts` |
+| Qué texto lleva la hoja (se lee de `src/content/experience/<idioma>.json`) | `src/three/desk/folder-detail/sheet-content.ts` |
+| Tapa que se abre al sacar la caja; clic fuera la devuelve | `src/three/desk/folder-detail/flap.ts`, `outside-click.ts` |
+| Texto real de TCS impreso sobre las hojas de la carpeta abierta | `src/three/desk/folders/open-folder-print.ts` |
 | Gemela de la caja y mallas de la hoja | `src/three/desk/folder-detail/twin.ts`, `mesh.ts` |
 | Objetos que viajan con la carpeta (`follow`) | `src/three/desk/folder-detail/follow.ts` |
 | Reloj despertador | `src/three/desk/clock.ts`, `src/three/desk/clock/` |

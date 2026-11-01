@@ -5,7 +5,7 @@ import globals from 'globals';
 import { defineConfig } from 'eslint/config';
 
 export default defineConfig(
-  { ignores: ['dist/', '.astro/', 'node_modules/', 'public/'] },
+  { ignores: ['dist/', '.astro/', 'node_modules/', 'public/', '.claude/'] },
   js.configs.recommended,
   tseslint.configs.recommended,
   astro.configs.recommended,

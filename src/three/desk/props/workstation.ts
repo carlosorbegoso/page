@@ -85,7 +85,7 @@ export function buildMonitorHead(b: PartBuilder, p: Palette, q: Quality): void {
 }
 
 /** Rubber feet lift the case off the desk, so a dark contact line separates it from the wood. */
-const LAPTOP_FOOT = 0.0016;
+const LAPTOP_FOOT = 0.0011;
 const LAPTOP_LID_HEIGHT = LAPTOP.depth - 0.004;
 /** The panel sits above the lid centre: a thin top bezel and a deeper chin, as on a MacBook. */
 const LAPTOP_SCREEN_RISE = 0.0035;
@@ -141,13 +141,15 @@ export function buildLaptop(b: PartBuilder, p: Palette): void {
       b.add(new CylinderGeometry(0.006, 0.006, LAPTOP_FOOT, 12), rubber, at(sx * (width / 2 - 0.026), LAPTOP_FOOT / 2, sz * (depth / 2 - 0.024)));
     }
   }
-  b.add(new RoundedBoxGeometry(width, base, depth, 3, 0.005), shell, at(0, LAPTOP_FOOT + base / 2, 0));
-  b.add(new BoxGeometry(0.052, 0.0022, 0.004), shade(shell, 0.45), at(0, deck - 0.0011, depth / 2 - 0.0012));
+  const body: Finish = { ...shade(shell, 1.2), roughness: 0.45, metalness: 0.35 };
+  b.add(new RoundedBoxGeometry(width, base, depth, 3, 0.005), body, at(0, LAPTOP_FOOT + base / 2, 0));
+  b.add(new BoxGeometry(width - 0.006, 0.0003, depth - 0.006), shell, at(0, deck - 0.0001, 0));
+  b.add(new BoxGeometry(0.04, 0.0012, 0.003), { ...shade(shell, 0.8), roughness: 0.5, metalness: 0.35 }, at(0, deck - 0.0005, depth / 2 - 0.001));
 
   const keyboardWidth = LAPTOP_KEY_UNITS * LAPTOP_KEY_PITCH;
   const keyboardDepth = 5.5 * LAPTOP_KEY_PITCH;
   const keyboardZ = -depth / 2 + 0.017 + keyboardDepth / 2;
-  b.add(new BoxGeometry(keyboardWidth + 0.006, 0.0004, keyboardDepth + 0.006), well, at(0, deck - 0.0001, keyboardZ));
+  b.add(new BoxGeometry(keyboardWidth + 0.006, 0.0004, keyboardDepth + 0.006), well, at(0, deck, keyboardZ));
   const keyTop = deck + 0.0007;
   const addKey = (x: number, z: number, w: number, d: number) =>
     b.add(new RoundedBoxGeometry(w, 0.0012, d, 1, 0.0005), keycap, at(x, keyTop, z));
@@ -174,7 +176,7 @@ export function buildLaptop(b: PartBuilder, p: Palette): void {
 
   const grilleWidth = (width - keyboardWidth) / 2 - 0.009;
   for (const sx of [-1, 1]) {
-    b.add(new BoxGeometry(grilleWidth, 0.0004, keyboardDepth), { color: new Color('#16181c'), roughness: 0.95, metalness: 0 }, at(sx * (keyboardWidth / 2 + 0.003 + grilleWidth / 2 + 0.0015), deck - 0.0001, keyboardZ));
+    b.add(new BoxGeometry(grilleWidth, 0.0004, keyboardDepth), { color: new Color('#16181c'), roughness: 0.95, metalness: 0 }, at(sx * (keyboardWidth / 2 + 0.003 + grilleWidth / 2 + 0.0015), deck, keyboardZ));
   }
 
   const trackpadDepth = 0.066;

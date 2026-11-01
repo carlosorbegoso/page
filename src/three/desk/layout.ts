@@ -89,6 +89,22 @@ export const PHONE = {
 
 export const MUG = new Vector3(0.64, DESK.top, 0.17);
 
+/**
+ * Carlos works on a MacBook next to the external monitor: open on the left of the desk, turned
+ * towards the chair, its lid leaning back past vertical like a real laptop in use.
+ */
+export const LAPTOP = {
+  centre: new Vector3(-0.57, DESK.top, -0.1),
+  yaw: 0.25,
+  width: 0.304,
+  depth: 0.212,
+  base: 0.0155,
+  lid: 0.006,
+  screen: { width: 0.286, height: 0.179 },
+  /** Lid lean back from vertical, radians. */
+  lean: 0.3
+} as const;
+
 /** Floating shelves on the left wall; the middle one holds the four archive box files. */
 export const SHELF = {
   x: ROOM.left,

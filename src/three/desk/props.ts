@@ -33,6 +33,7 @@ import {
   GLASS_Z,
   KEYBOARD,
   LAMP,
+  LAPTOP,
   MONITOR,
   MUG,
   OPEN_FOLDER,
@@ -317,6 +318,43 @@ export function buildMonitorHead(b: PartBuilder, p: Palette, q: Quality): void {
   b.add(new RoundedBoxGeometry(width + 2 * e, height + 2 * e, MONITOR.depth, seg(2, q, 1), 0.003), p.bezel);
   b.add(new RoundedBoxGeometry(width * 0.72, height * 0.75, 0.03, seg(3, q, 2), 0.012), p.bezel, { position: [0, 0, -MONITOR.depth / 2 - 0.012] });
   b.add(new RoundedBoxGeometry(0.11, 0.11, 0.012, 1, 0.004), p.metal, { position: [0, 0, -MONITOR.depth / 2 - 0.032] });
+}
+
+function laptopFrame(): Matrix4 {
+  return new Matrix4().compose(LAPTOP.centre, new Quaternion().setFromAxisAngle(UP, LAPTOP.yaw), new Vector3(1, 1, 1));
+}
+
+function laptopHinge(): Matrix4 {
+  const hinge = new Matrix4().compose(
+    new Vector3(0, LAPTOP.base, -LAPTOP.depth / 2 + 0.004),
+    new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -LAPTOP.lean),
+    new Vector3(1, 1, 1)
+  );
+  return laptopFrame().multiply(hinge);
+}
+
+/** World frame of the laptop glass (centre, orientation, size), facing the user. */
+export function laptopScreenFrame(): { centre: Vector3; quaternion: Quaternion } {
+  const lidHeight = LAPTOP.depth - 0.004;
+  const matrix = laptopHinge().multiply(new Matrix4().makeTranslation(0, lidHeight / 2, LAPTOP.lid / 2 + 0.0008));
+  const centre = new Vector3();
+  const quaternion = new Quaternion();
+  matrix.decompose(centre, quaternion, new Vector3());
+  return { centre, quaternion };
+}
+
+/** MacBook-like laptop in space grey: base, hinge and lid; the glass is a separate lit mesh. */
+export function buildLaptop(b: PartBuilder, p: Palette): void {
+  const frame = laptopFrame();
+  const shell: Finish = { color: new Color('#5d626b'), roughness: 0.32, metalness: 0.9 };
+  const at = (m: Matrix4) => new Matrix4().multiplyMatrices(frame, m);
+  b.add(new RoundedBoxGeometry(LAPTOP.width, LAPTOP.base, LAPTOP.depth, 2, 0.004), shell, at(new Matrix4().makeTranslation(0, LAPTOP.base / 2, 0)));
+  b.add(new BoxGeometry(LAPTOP.width * 0.86, 0.0006, LAPTOP.depth * 0.42), shade(p.bezel, 0.9), at(new Matrix4().makeTranslation(0, LAPTOP.base + 0.0003, -LAPTOP.depth * 0.12)));
+  b.add(new BoxGeometry(LAPTOP.width * 0.36, 0.0005, LAPTOP.depth * 0.3), shade(shell, 0.85), at(new Matrix4().makeTranslation(0, LAPTOP.base + 0.0003, LAPTOP.depth * 0.3)));
+  const lidHeight = LAPTOP.depth - 0.004;
+  const hinge = laptopHinge();
+  b.add(new RoundedBoxGeometry(LAPTOP.width, lidHeight, LAPTOP.lid, 2, 0.003), shell, new Matrix4().multiplyMatrices(hinge, new Matrix4().makeTranslation(0, lidHeight / 2, 0)));
+  b.add(new BoxGeometry(LAPTOP.width - 0.008, lidHeight - 0.008, 0.0008), p.bezel, new Matrix4().multiplyMatrices(hinge, new Matrix4().makeTranslation(0, lidHeight / 2, LAPTOP.lid / 2 + 0.0002)));
 }
 
 /** Open TCS folder (linen boards, a few sheets) left of the keyboard. */

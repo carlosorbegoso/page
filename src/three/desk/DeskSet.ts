@@ -24,7 +24,7 @@ import { createLampBeam, type LampBeam } from './beam';
 import { createSpineLabels } from './spines';
 import { StoryClock, storyMinutes } from './clock';
 import { OBJECT_ID, PartBuilder } from './builder';
-import { DESK, FIGURE_HEIGHT, FIGURES, FOLDER, FOLDERS, GLASS_Z, LAMP, MONITOR, OPEN_FOLDER, PHONE, PRODUCT_FIGURES, ROOM, WINDOW, folderCentre, type FigureId, type FolderId } from './layout';
+import { DESK, FIGURE_HEIGHT, FIGURES, FOLDER, FOLDERS, GLASS_Z, LAMP, LAPTOP, MONITOR, OPEN_FOLDER, PHONE, PRODUCT_FIGURES, ROOM, WINDOW, folderCentre, type FigureId, type FolderId } from './layout';
 import {
   bakeNightEnvironment,
   createAtlasDepthMaterial,
@@ -45,6 +45,8 @@ import {
   buildLamp,
   buildMonitorHead,
   buildOpenFolder,
+  buildLaptop,
+  laptopScreenFrame,
   buildPhone,
   buildPlant,
   buildRoom,
@@ -270,6 +272,7 @@ export class DeskSet implements ShotProvider {
   private lampToggledAt = -1;
   private storySwitched = false;
   private clockModel: StoryClock | null = null;
+  private laptopScreen: Mesh<PlaneGeometry, MeshBasicMaterial> | null = null;
   private clockMinutes = 60;
   /** 0 closed … 1 open: the TCS folder stays shut until the story reaches today. */
   private folderOpen = 0;
@@ -328,6 +331,7 @@ export class DeskSet implements ShotProvider {
     buildChair(statics, palette, q);
     buildTelescope(statics, palette, q);
     buildOpenFolder(statics, palette);
+    buildLaptop(statics, palette);
     this.phoneMatrix = buildPhone(statics, palette);
     buildFigures(statics, palette, q);
     const geometry = statics.build();
@@ -408,6 +412,19 @@ export class DeskSet implements ShotProvider {
     this.phoneScreen.quaternion.copy(phone.quaternion);
     this.room.add(this.phoneScreen);
     this.disposables.push(screenMaterial, this.screenTexture, this.screen.geometry, phoneMaterial, this.phoneTexture, this.phoneScreen.geometry);
+
+    const laptopTexture = createScreenTexture();
+    drawScreen(laptopTexture, LAPTOP.screen.width / LAPTOP.screen.height, tokenColor('--color-monitor-glow', '#7fb8ff'));
+    const laptopMaterial = new MeshBasicMaterial({ map: laptopTexture });
+    const laptopGlass = new Mesh(new PlaneGeometry(LAPTOP.screen.width, LAPTOP.screen.height), laptopMaterial);
+    const glassFrame = laptopScreenFrame();
+    laptopGlass.name = 'desk-laptop-screen';
+    laptopGlass.position.copy(glassFrame.centre);
+    laptopGlass.quaternion.copy(glassFrame.quaternion);
+    laptopGlass.raycast = () => undefined;
+    this.laptopScreen = laptopGlass;
+    this.room.add(laptopGlass);
+    this.disposables.push(laptopTexture, laptopMaterial, laptopGlass.geometry);
   }
 
   private phoneSurface(): SurfaceFrame {
@@ -771,6 +788,7 @@ export class DeskSet implements ShotProvider {
     this.fill.intensity = tokenNumber('--desk-ambient-intensity', 0.08) * LIGHT_CALIBRATION.fill * (1 + level.dawn * 1.5 + level.day * DAY_FILL_GAIN);
     this.screen.material.color.setScalar(SCREEN_HDR * Math.min(level.monitor / 5, 1.2));
     this.phoneScreen.material.color.setScalar(0.06 + level.phone * SCREEN_HDR * 0.9);
+    this.laptopScreen?.material.color.setScalar(SCREEN_HDR * 0.55 * Math.min(level.monitor / 5, 1));
     this.backdrop.setDawn(level.dawn);
     this.backdrop.setLateness(level.late);
     this.backdrop.setDay(level.day);

@@ -12,7 +12,7 @@
 | Arranque del 3D, `Stage.start`, tiers y DPR, render a demanda, `?debug` `?tier` `?chapter` `?capture`, capturas | [`3d/engine.md`](3d/engine.md) |
 | Capítulos, eventos `chapter:*` `story:*` `desk:*`, `ShotProvider`, `CameraDirector`, scroll, placas `data-plate-*` | [`3d/director.md`](3d/director.md) |
 | Escritorio: sub-planos, superficies, anclas, foco, picks, acciones, ids de objeto (`oid`) | [`3d/desk.md`](3d/desk.md) |
-| Peso de los chunks, qué va antes del primer frame (260 KB), `deferred` | [`3d/budget.md`](3d/budget.md) |
+| Peso de los chunks, qué va antes del primer frame (260 KB), `deferred`, caché del navegador (service worker) | [`3d/budget.md`](3d/budget.md) |
 | GLB, KTX2, Meshopt, `bun run assets`, licencias, checklist de intake | [`3d/assets.md`](3d/assets.md) |
 | Bloom, DoF, streak, grading por capítulo, fluido, tiers de FX, NaN de `pow()` | [`3d/fx.md`](3d/fx.md) |
 | Texto cinético, `KineticText`, revelados, proximidad, story-nav (teclas, rueda, snap, tour) | [`motion.md`](motion.md) |

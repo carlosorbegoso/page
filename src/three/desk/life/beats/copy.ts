@@ -1,3 +1,4 @@
+import { currentStoryClock } from '../../../../scripts/story-clock';
 import type { Invitation, WorkOrder } from './draw';
 
 export interface ChatLine {
@@ -108,6 +109,8 @@ export function beatCopy(): BeatCopy {
 }
 
 export function clockTime(offsetMinutes = 0): string {
-  const now = new Date(Date.now() + offsetMinutes * 60_000);
-  return `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+  const match = /(\d{1,2}):(\d{2})/.exec(currentStoryClock());
+  const start = match ? Number(match[1]) * 60 + Number(match[2]) : 22 * 60;
+  const total = (((start + offsetMinutes) % 1440) + 1440) % 1440;
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
 }

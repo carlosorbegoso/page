@@ -1,0 +1,38 @@
+@container surface (orientation: landscape) and (width < 760px) {
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code__bar {
+    height: 6cqw;
+    padding-inline: 4cqw;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code__tab {
+    font-size: 3.2cqw;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code__lines {
+    justify-content: flex-start;
+    gap: 0;
+    padding: 1cqw 4cqw 0;
+    font-size: 4.6cqw;
+    line-height: 1.08;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id^='about'] .about-code__lines li {
+    padding-left: 6.5cqw;
+    overflow-wrap: anywhere;
+  }
+
+  .is-3d
+    .plate[data-plate-mode='surface-monitor'][data-plate-id^='about']
+    .about-code__lines
+    li::before {
+    width: 4cqw;
+    text-align: left;
+  }
+
+  .is-3d
+    .plate[data-plate-mode='surface-monitor'][data-plate-id^='about']
+    .about-code__lines
+    li:not([data-brief]) {
+    display: none;
+  }
+}

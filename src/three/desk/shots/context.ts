@@ -4,7 +4,7 @@ import { DEG, portraitBlend } from './math';
 import { monitorFrame } from './surfaces';
 import type { Place, Region, SurfaceFrame, Viewport } from './types';
 
-const HUD_HEIGHT = 72;
+export const HUD_HEIGHT = 72;
 
 export interface SideLayout {
   panel: Place;

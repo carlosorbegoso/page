@@ -5,13 +5,14 @@ Qué archivo editar en el escritorio 3D: encuadres (shots), luz, props, figuras,
 | Para cambiar… | Edita |
 | --- | --- |
 | Encuadres por capítulo (ensamblado, caché por viewport) | `src/three/desk/shots/framings.ts` (`desk/shots.ts` solo reexporta) |
-| Cámara de hero, about, contacto y cierre; en teléfono vertical, el monitor a ~97 % del ancho (hero, stack, cierre) | `src/three/desk/shots/monitor-shots.ts` |
-| Cámara de about: el cuadro de la pared y el monitor juntos (en teléfono vertical, el cuadro y la tarjeta impresa); distancia del hero para que entre el cuadro | `src/three/desk/shots/about-shots.ts` |
+| Cámara de hero, about, contacto y cierre; en teléfono vertical, el monitor con marco al 93 % del ancho (hero, stack; cierre 91 %) | `src/three/desk/shots/monitor-shots.ts` |
+| Hero, about y cierre en horizontal (`roomShot`: cuadro, monitor, corcho y mesa); about en tablet vertical; en teléfono vertical, el cuadro y la tarjeta impresa | `src/three/desk/shots/about-shots.ts` |
 | Cámara de empresa | `src/three/desk/shots/figure-shots.ts` |
 | Cámara de productos (rumbo, inclinación, lado del texto) | `src/three/desk/shots/product-shots.ts` |
-| Encuadre de escritorio al lado del panel de texto (zona libre, distancia mínima) | `src/three/desk/shots/beside-text.ts` |
+| Encuadre horizontal: caja de encuadre centrada con 7 % de margen bajo el HUD, distancia según el aspecto | `src/three/desk/shots/box-fit.ts` |
 | Cámara del estante y las carpetas | `src/three/desk/shots/experience-shots.ts` |
 | Teléfono vertical: corcho, tarjeta de producto y hoja de TCS de frente al 90 % del ancho, bajo el HUD (texto impreso en vez de tarjeta HTML) | `src/three/desk/shots/printed-shots.ts` |
+| Teléfono vertical, productos: la figura arriba bajo el HUD y su tarjeta parada en el escritorio delante, al 92 % del ancho; busca el picado más suave que deja ver la figura entera sobre la tarjeta (llega con `deferred`, registrado con `useStackedProductShot`) | `src/three/desk/shots/stacked-product-shot.ts` |
 | Encuadre vertical: protagonistas enteros, vecinos fuera, retoques | `src/three/desk/shots/portrait-fit.ts`, puntos en `protagonists.ts` |
 | Mezcla por aspecto, ajuste por ancho o alto | `src/three/desk/shots/math.ts`; zona libre bajo el HUD en `context.ts` |
 | Proyección, `toShot`, ancla de panel | `src/three/desk/shots/projection.ts` |
@@ -54,7 +55,7 @@ Qué archivo editar en el escritorio 3D: encuadres (shots), luz, props, figuras,
 | Pikachu de vinilo sobre la base del monitor (posición en `PIKACHU` de `layout.ts`) | `src/three/desk/props/pikachu.ts` |
 | Charizard de vinilo junto a Pikachu, llama de la cola emisiva (`CHARIZARD` en `layout.ts`) | `src/three/desk/props/charizard.ts` |
 | Corcho de TUSOCIO tras la peana: marco, corcho y chinches (`geometry.ts`), y lo impreso encima (`print.ts`: título a mano, ficha con rol y frase, tarjeta de Alfa, post-its de SkyMek, Parati y Ventixs en `BOARD_LAYOUT`) | `src/three/desk/notes/corkboard/` |
-| Corcho y tarjetas de producto en teléfono vertical: ficha grande del corcho, tarjeta con descripción corta (`product-shorts.json`) y botón «Visitar sitio» de 14 mm; se cambian al girar el teléfono y llegan después del primer frame | `src/three/desk/notes/stacked/` (`board.ts`, `card.ts`, `index.ts`) |
+| Corcho y tarjetas de producto en teléfono vertical: ficha grande del corcho, tarjeta con descripción corta (`product-shorts.json`) y botón «Visitar sitio» de 14 mm; se cambian al girar el teléfono (el mapa y el emisivo a la vez, o la impresión ancha se ve encima como un fantasma) y llegan después del primer frame | `src/three/desk/notes/stacked/` (`board.ts`, `card.ts`, `index.ts`; `places.ts`: cada tarjeta delante de su figura, inclinada 30°, puesta con `stageCards` de `notes/layout.ts`) |
 | Suculenta viva en maceta entre la laptop y el monitor (`SUCCULENT` en `layout.ts`) | `src/three/desk/props/succulent.ts` |
 | Planta (maceta y hojas) y telescopio | `src/three/desk/props/decor.ts` |
 | Peana y coleccionables: Alfa, Burbu (Ventixs), regalo (Parati), llave (SkyMek), un archivo cada uno | `src/three/desk/props/figures/` |
@@ -84,7 +85,11 @@ Qué archivo editar en el escritorio 3D: encuadres (shots), luz, props, figuras,
 | Reloj despertador | `src/three/desk/clock.ts`, `src/three/desk/clock/` |
 | Figuras animadas | `src/three/desk/life/` |
 | Tarjetas impresas de los productos (se acuestan en el escritorio y se paran en su plano) | `src/three/desk/notes/cards/` |
-| Batalla de Pikachu y Charizard al hacer clic (piezas, efectos, línea de tiempo) | `src/three/desk/life/pokemon/` |
+| Piezas de Pikachu y Charizard (clasificador de triángulos, va en el arranque) | `src/three/desk/life/pokemon/parts.ts` |
+| Vida de Pikachu y Charizard (orejas, cola, chispas, alas, llama) y la batalla al hacer clic; llega con `deferred` | `src/three/desk/life/pokemon/index.ts`; entra por `createPokemonLife` en `desk/deferred/index.ts` y `DeskLife.attachPokemon` |
+| Tiempos de la batalla (beat sheet) | `src/three/desk/life/pokemon/timeline/beats.ts`; un archivo por golpe: `face-off`, `flight`, `flamethrower`, `quick-attack`, `thunderbolt`, `impact`, `finale`; versión tranquila en `calm.ts`; sonidos en `cues.ts` |
+| Poses de Pikachu (cuerpo, orejas, cola, mejillas) y Charizard (cuerpo, aleteo con pliegue de membrana, cola, llama) | `src/three/desk/life/pokemon/pose/{pikachu,charizard,body,idle}.ts` |
+| Efectos de la batalla: lanzallamas (shader), rayo ramificado, partículas (brasas, chispas, humo), estela de Ataque Rápido, destello de luz | `src/three/desk/life/pokemon/effects/` (`fire.ts`+`fire.glsl.ts`, `bolt.ts`, `particles.ts`+`particles.glsl.ts`, `bursts.ts`, `trail.ts`, `flash-light.ts`, ensamblador `battle-visuals.ts`) |
 | Haz de luz visible de la lámpara | `src/three/desk/beam.ts` |
 | Etiquetas de los lomos | `src/three/desk/spines.ts` |
 | Ensamblar primitivas en una malla (`PartBuilder`, ids de objeto) | `src/three/desk/builder.ts` |

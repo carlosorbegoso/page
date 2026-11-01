@@ -4,10 +4,11 @@ import { stackedLayout } from '../../../scenes/common';
 import { PRODUCT_FIGURES } from '../../layout';
 import { readProduct } from '../content';
 import { drawBoard } from '../corkboard/print';
-import { PRODUCT_CARD, type ProductId } from '../layout';
+import { PRODUCT_CARD, stageCards, type ProductId } from '../layout';
 import { PRINT_DENSITY, type PrintSurface } from '../paper';
 import { drawStackedBoard } from './board';
 import { drawStackedCard } from './card';
+import { STACKED_CARDS } from './places';
 
 const CARD_DENSITY = 8000;
 
@@ -36,6 +37,11 @@ function cardSurface(): PrintSurface {
   return { canvas, context: canvas.getContext('2d')!, texture, scale: CARD_DENSITY };
 }
 
+function printOn(mesh: PrintMesh, texture: Texture | null): void {
+  mesh.material.map = texture;
+  mesh.material.emissiveMap = texture;
+}
+
 function shortDescription(id: ProductId): string {
   const locale = document.documentElement.lang.startsWith('en') ? 'en' : 'es';
   return (shorts[locale] as Partial<Record<ProductId, string>>)[id] ?? readProduct(id).description;
@@ -60,7 +66,7 @@ export class StackedPrints {
       const mesh = room.getObjectByName(`product-card-face-${id}`) as PrintMesh | undefined;
       return mesh ? [{ id, mesh, wide: null, print: cardSurface() }] : [];
     });
-    this.apply();
+    if (this.apply()) invalidate();
     window.addEventListener('resize', this.onResize);
     void document.fonts?.ready.then(() => this.redraw());
   }
@@ -81,7 +87,7 @@ export class StackedPrints {
     if (this.stacked && !this.cardsDrawn) this.drawCards();
     for (const card of this.cards) {
       card.wide ??= card.mesh.material.map;
-      card.mesh.material.map = this.stacked ? card.print.texture : card.wide;
+      printOn(card.mesh, this.stacked ? card.print.texture : card.wide);
     }
   }
 
@@ -89,6 +95,7 @@ export class StackedPrints {
     const stacked = stackedLayout({ width: innerWidth, height: innerHeight });
     if (stacked === this.stacked) return false;
     this.stacked = stacked;
+    stageCards(stacked ? STACKED_CARDS : null);
     if (this.board) (stacked ? drawStackedBoard : drawBoard)(this.board);
     this.swapCards();
     return true;
@@ -96,8 +103,9 @@ export class StackedPrints {
 
   dispose(): void {
     window.removeEventListener('resize', this.onResize);
+    stageCards(null);
     for (const card of this.cards) {
-      if (card.wide) card.mesh.material.map = card.wide;
+      if (card.wide) printOn(card.mesh, card.wide);
       card.print.texture.dispose();
     }
   }

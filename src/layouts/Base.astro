@@ -139,6 +139,20 @@ const jsonLd = {
       type="font/woff2"
       crossorigin
     />
+    <link
+      rel="preload"
+      href={withBase('fonts/bricolage-grotesque-latin-opsz-wght.woff2')}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href={withBase('fonts/geist-mono-latin-wght.woff2')}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <script is:inline>
       (() => {
         let stored = null;
@@ -151,16 +165,15 @@ const jsonLd = {
         document.documentElement.dataset.motion = reduce || stored === 'paused' ? 'paused' : 'running';
         let time = null;
         try {
-          time = localStorage.getItem('time');
+          time = sessionStorage.getItem('time');
         } catch {
           time = null;
         }
-        const minutes = new Date().getHours() * 60 + new Date().getMinutes();
-        const daylight = minutes >= 390 && minutes < 1080;
-        document.documentElement.dataset.time = time === 'day' || time === 'night' ? time : daylight ? 'day' : 'night';
+        document.documentElement.dataset.time = time === 'night' ? 'night' : 'day';
       })();
     </script>
     <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
+    <link rel="apple-touch-icon" href={withBase('icons/apple-touch-icon.png')} />
     <link rel="manifest" href={withBase('manifest.json')} />
     <link rel="sitemap" type="application/xml" href={withBase('sitemap-index.xml')} />
     {indexable ? (
@@ -199,5 +212,10 @@ const jsonLd = {
   <body>
     <SkipLink label={t('skipLink')} />
     <slot />
+    <script>
+      import { registerOfflineCache } from '../scripts/offline/register';
+
+      registerOfflineCache();
+    </script>
   </body>
 </html>

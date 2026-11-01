@@ -122,10 +122,17 @@ html.booting .boot {
   color: var(--boot-ink);
 }
 
+.boot__track {
+  position: absolute;
+  inset: 0;
+  transform: translateX(calc(var(--boot-p) * 100%));
+  transition: transform var(--boot-travel) var(--boot-ease);
+}
+
 .boot__packet {
   position: absolute;
   top: 0.375rem;
-  left: calc(var(--boot-p) * 100%);
+  left: 0;
   width: 0.375rem;
   height: 0.375rem;
   margin: -0.1875rem 0 0 -0.1875rem;
@@ -134,7 +141,6 @@ html.booting .boot {
   box-shadow:
     0 0 0.5rem var(--color-accent),
     0 0 1.5rem color-mix(in oklab, var(--color-accent) 50%, transparent);
-  transition: left var(--boot-travel) var(--boot-ease);
 }
 
 .boot__tag {
@@ -162,16 +168,17 @@ html.booting .boot {
 
 .boot__mark {
   position: fixed;
-  top: 50%;
-  left: 50%;
+  top: var(--boot-my, 50%);
+  left: var(--boot-mx, 50%);
   width: 4.5rem;
   height: 4.5rem;
-  transform: translate(-50%, -50%);
+  transform-origin: 73.44% 50%;
+  transform: translate(-50%, -50%) scale(1);
   opacity: 0;
   overflow: visible;
   transition:
     transform 420ms var(--boot-ease),
-    opacity 300ms var(--ease-standard);
+    opacity 200ms var(--ease-standard);
 }
 
 .boot__arc {
@@ -181,7 +188,7 @@ html.booting .boot {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
   transition:
-    stroke-dashoffset 420ms var(--boot-ease),
+    stroke-dashoffset 460ms var(--boot-ease) 120ms,
     opacity 240ms var(--ease-standard);
 }
 
@@ -190,7 +197,25 @@ html.booting .boot {
   transform-box: fill-box;
   transform-origin: center;
   transform: scale(0);
-  transition: transform 300ms var(--boot-ease) 200ms;
+  transition: transform 260ms var(--boot-ease) 460ms;
+}
+
+.boot__beacon {
+  position: fixed;
+  top: var(--boot-y);
+  left: var(--boot-x);
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow:
+    0 0 0.375rem var(--color-accent),
+    0 0 1.25rem color-mix(in oklab, var(--color-accent) 60%, transparent);
+  transform: translate(-50%, -50%) scale(0.5);
+  opacity: 0;
+  transition:
+    opacity 200ms var(--ease-standard),
+    transform 320ms var(--boot-ease);
 }
 
 .boot__signature {
@@ -201,224 +226,4 @@ html.booting .boot {
   transition:
     opacity 360ms var(--ease-standard),
     color 360ms var(--ease-standard);
-}
-
-.boot[data-phase='ok'] .boot__response,
-.boot[data-phase='fail'] .boot__response {
-  opacity: 1;
-  animation: boot-flash 520ms var(--ease-standard);
-}
-
-.boot[data-phase='fail'] .boot__response {
-  color: var(--color-text-muted);
-}
-
-.boot[data-phase='mark'] .boot__response {
-  opacity: 0;
-  transform: scaleX(0.1);
-  letter-spacing: -0.4em;
-}
-
-.boot[data-phase='mark'] .boot__route,
-.boot[data-phase='led'] .boot__stage,
-.boot[data-phase='open'] .boot__stage,
-.boot[data-phase='done'] .boot__stage {
-  opacity: 0;
-}
-
-.boot[data-phase='mark'] .boot__route {
-  transition: opacity 300ms var(--ease-standard);
-}
-
-.boot[data-phase='mark'] .boot__mark,
-.boot[data-phase='led'] .boot__mark,
-.boot[data-phase='open'] .boot__mark {
-  opacity: 1;
-}
-
-.boot[data-phase='mark'] .boot__arc,
-.boot[data-phase='led'] .boot__arc,
-.boot[data-phase='open'] .boot__arc {
-  stroke-dashoffset: 0;
-}
-
-.boot[data-phase='mark'] .boot__led,
-.boot[data-phase='led'] .boot__led,
-.boot[data-phase='open'] .boot__led {
-  transform: scale(1);
-}
-
-.boot[data-phase='mark'] .boot__signature {
-  color: var(--boot-ink);
-}
-
-.boot[data-phase='led'] .boot__mark,
-.boot[data-phase='open'] .boot__mark {
-  transform: translate(calc(-50% + var(--boot-dx)), calc(-50% + var(--boot-dy))) scale(0.14);
-}
-
-.boot[data-phase='led'] .boot__arc,
-.boot[data-phase='open'] .boot__arc {
-  opacity: 0;
-}
-
-.boot[data-phase='led'] .boot__signature,
-.boot[data-phase='open'] .boot__signature,
-.boot[data-phase='done'] .boot__signature {
-  opacity: 0;
-}
-
-.boot[data-phase='open'],
-.boot[data-phase='done'] {
-  --boot-reveal: 150vmax;
-  mask-image: radial-gradient(
-    circle at var(--boot-x) var(--boot-y),
-    transparent var(--boot-reveal),
-    #000 calc(var(--boot-reveal) + 6rem)
-  );
-  pointer-events: none;
-  transition: --boot-reveal 700ms cubic-bezier(0.5, 0, 0.75, 0);
-}
-
-.boot[data-phase='open'] .boot__mark {
-  opacity: 0;
-  transition-delay: 0ms, 250ms;
-}
-
-.boot[data-phase='done'] {
-  opacity: 0;
-  transition: opacity 200ms var(--ease-standard);
-}
-
-html.booting [data-hud] {
-  opacity: 0;
-  pointer-events: none;
-}
-
-[data-hud] {
-  transition: opacity 600ms var(--ease-standard);
-}
-
-@media (orientation: portrait) and (max-width: 767.98px) {
-  .boot__stage {
-    gap: 2rem;
-  }
-
-  .boot__route {
-    width: 3.25rem;
-    height: min(22rem, 52vh);
-  }
-
-  .boot__wire {
-    inset: 0 auto 0 0.375rem;
-    width: 1px;
-    height: auto;
-  }
-
-  .boot__wire--lit {
-    transform-origin: center top;
-    transform: scaleY(var(--boot-p));
-  }
-
-  .boot__nodes {
-    flex-direction: column;
-  }
-
-  .boot__node {
-    width: auto;
-    height: 0;
-  }
-
-  .boot__dot {
-    top: -0.375rem;
-    left: 0;
-  }
-
-  .boot__label {
-    top: -0.55em;
-    left: 1.5rem;
-    transform: none;
-  }
-
-  .boot__packet {
-    top: calc(var(--boot-p) * 100%);
-    left: 0.375rem;
-    transition: top var(--boot-travel) var(--boot-ease);
-  }
-
-  .boot__tag {
-    bottom: auto;
-    left: auto;
-    right: 0.875rem;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .boot,
-  .boot * {
-    animation: none !important;
-    transition-duration: 300ms !important;
-    transition-delay: 0ms !important;
-  }
-
-  .boot__packet,
-  .boot__wire--lit {
-    transition: none !important;
-  }
-
-  .boot[data-phase='mark'] .boot__response {
-    transform: none;
-    letter-spacing: 0.08em;
-  }
-
-  .boot[data-phase='led'] .boot__mark,
-  .boot[data-phase='open'] .boot__mark {
-    transform: translate(-50%, -50%);
-  }
-
-  .boot[data-phase='open'] {
-    --boot-reveal: 0px;
-    opacity: 0;
-  }
-}
-
-:root[data-motion='paused'] .boot__grain {
-  animation: none;
-}
-
-@media (forced-colors: active) {
-  .boot {
-    display: none !important;
-  }
-}
-
-@keyframes boot-grain {
-  0% {
-    transform: translate(0, 0);
-  }
-  25% {
-    transform: translate(-4%, 3%);
-  }
-  50% {
-    transform: translate(3%, -5%);
-  }
-  75% {
-    transform: translate(-2%, -3%);
-  }
-}
-
-@keyframes boot-flash {
-  0% {
-    opacity: 0;
-    text-shadow: 0 0 1.5rem var(--color-accent);
-  }
-  30% {
-    opacity: 1;
-    text-shadow: 0 0 1rem var(--color-accent);
-  }
-  100% {
-    text-shadow: none;
-  }
 }

@@ -10,7 +10,7 @@ Qué archivo editar en la web: `<head>`, tokens, HUD, secciones, modo lectura, t
 | Páginas (home ES/EN, modo lectura ES/EN, 404) | `src/pages/index.astro`, `pages/en/index.astro`, `pages/lectura/index.astro`, `pages/en/reading/index.astro`, `pages/404.astro` |
 | Datos fijos: correo, redes, ruta del CV, ids de sección | `src/config/site.ts` |
 | Componentes base (botón, enlace externo, CV, etiqueta, cabecera de sección, texto cinético, monograma «C») | `src/components/ui/` |
-| Botones de sonido, movimiento y hora; idioma; skip link; tooltip de la escena; barra del modo lectura; pie | `src/components/{AudioToggle,MotionToggle,TimeToggle,LangSwitch,SkipLink,SceneTooltip,ReadingBar,Footer}.astro` |
+| Botones de sonido, movimiento y hora (la hora arranca de día y se recuerda solo en la sesión: `sessionStorage`); idioma; skip link; tooltip de la escena; barra del modo lectura; pie | `src/components/{AudioToggle,MotionToggle,TimeToggle,LangSwitch,SkipLink,SceneTooltip,ReadingBar,Footer}.astro` |
 | Estilos globales, reset | `src/styles/global.css` |
 | Animaciones CSS, `prefers-reduced-motion` | `src/styles/motion/{keyframes,reveal,kinetic}.css` |
 | Estilos de las placas (base, ancladas, sueltas, superficies, desbordes, acabado) | `src/styles/plates/` |
@@ -20,7 +20,7 @@ Qué archivo editar en la web: `<head>`, tokens, HUD, secciones, modo lectura, t
 ## Tokens de diseño
 | Para cambiar… | Edita |
 | --- | --- |
-| Fuentes (`@font-face`, familias, pesos) | `src/styles/tokens/fonts.css` |
+| Fuentes (`@font-face`, familias, pesos, fallbacks métricos, `--font-hand`) | `src/styles/tokens/fonts.css` · archivos y licencias en `public/fonts/` |
 | Colores (UI, escena, marcas, día) | `src/styles/tokens/colors.css` (Base.astro lee `--color-bg` de aquí para theme-color) |
 | Tipografía fluida, espaciado, radios, sombras, easing | `src/styles/tokens/scale.css` |
 | Duraciones, z-index, materiales, placas, luces y fx del Stage | `src/styles/tokens/stage.css` |
@@ -33,7 +33,7 @@ Qué archivo editar en la web: `<head>`, tokens, HUD, secciones, modo lectura, t
 | --- | --- |
 | Cabecera: compone barra, menú e índice | `src/components/Header.astro` |
 | Barra del HUD: logo, reloj de la historia, progreso, recorrido rápido | `src/components/hud/HudBar.astro` (frases por capítulo en su frontmatter) |
-| Hora de la historia por plano y día/noche (única fuente: HUD, teléfono, laptop, monitor, reloj despertador) | `src/lib/story-time.ts`; el HUD la publica en `--story-clock` y `story:clock` con `src/scripts/story-clock.ts`; el teléfono la lee en `src/scripts/phone/clock.ts`, el monitor en el `::before` de `plates/monitor-chrome.css` |
+| Hora de la historia por plano y día/noche (única fuente: HUD, teléfono, laptop, monitor, reloj despertador) | `src/lib/story-time.ts`; el HUD la publica en `--story-clock` y `story:clock` con `src/scripts/story-clock.ts`; el teléfono la lee en `src/scripts/phone/clock.ts`, el monitor en el `::before` de `plates/monitor-chrome.css`. Las etiquetas del HUD por plano (también los años de Experiencia, con su hora) están en `src/components/hud/HudBar.astro` para día y noche |
 | Menú del HUD: idioma, sonido, movimiento, hora, enlaces | `src/components/hud/HudMenu.astro` |
 | Hoja de índice de secciones | `src/components/hud/IndexSheet.astro` |
 | Abrir y cerrar el menú (hover, clic, Escape) | `src/components/hud/menu.ts` |
@@ -54,7 +54,7 @@ Qué archivo editar en la web: `<head>`, tokens, HUD, secciones, modo lectura, t
 | Sobre mí: estudios y stack | `src/components/sections/about/AboutStack.astro` |
 | Sobre mí: pantalla `carlos.yml` | `src/components/sections/about/AboutCode.astro` |
 | Sobre mí en el monitor (vertical / horizontal) | `src/styles/sections/about/monitor.css`, `monitor-landscape.css`, `code.css` |
-| Hero, Stack y Final en el monitor en teléfono vertical | `src/styles/sections/hero/monitor-portrait.css`, `src/styles/sections/outro/monitor-portrait.css`, `src/styles/sections/about/code-portrait.css` |
+| Hero, Sobre mí, Stack y Final cuando el monitor se ve chico en pantalla (menos de 760 px: teléfono y escritorio con encuadre de habitación); diseño compacto legible por ancho de contenedor | `src/styles/sections/hero/monitor-compact.css`, `sections/outro/monitor-compact.css`, `sections/about/code-compact.css`, `sections/about/bio-compact.css` |
 | Sobre mí en teléfonos apilados | `src/styles/sections/about/anchored.css` |
 | Experiencia | `src/components/sections/Experience.astro`, `src/components/experience/` |
 | Empresa | `src/components/sections/Company.astro`; ficha en 3D y tarjeta de papel en teléfonos en `src/styles/sections/company/` |
@@ -66,3 +66,4 @@ Qué archivo editar en la web: `<head>`, tokens, HUD, secciones, modo lectura, t
 | Lectura: estilos de pantalla y de impresión A4 | `src/styles/sections/reading/{masthead,sections,print}.css`; botón de imprimir en `src/scripts/reading/print.ts` |
 | Textos de la UI | `src/i18n/<es|en>/meta.ts` (meta, 404, idioma, CV, pie, sonido, hora), `nav.ts` (navegación, HUD, recorrido, historia), `sections.ts` (secciones y lectura), `contact.ts` (contacto y teléfono); `ui.<locale>.ts` los une y define `UiKey` |
 | Contenido (perfil, experiencia, productos) en `es.json` / `en.json` | `src/content/{profile,experience,products}/`, esquemas en `src/content.config.ts`, lectura en `src/lib/content.ts` |
+| Caché del navegador (service worker) y su registro | `public/sw.js`, `src/scripts/offline/register.ts` (lo carga `src/layouts/Base.astro`); estrategias en `docs/3d/budget.md` |

@@ -47,24 +47,23 @@ export function contactShot(ctx: ShotContext): Framing {
 
 export function outroShot(ctx: ShotContext, hero: Framing, heroDistance: number): Framing {
   const screen = ctx.monitor.centre;
-  const { portrait } = ctx;
   const back = hero.eye.clone().sub(screen).normalize();
   return {
     eye: screen.clone().addScaledVector(back, Math.min(heroDistance + 0.08, 1.75)),
     focus: screen,
     sx: hero.sx,
     sy: hero.sy,
-    panel: {
-      name: 'outro',
-      sx: portrait ? 0.08 : 0.07,
-      sy: portrait ? 0.12 : 0.26,
-      plane: new Plane(new Vector3(0, 0, 1), -(ROOM.back + 0.005))
-    }
+    panel: outroPanel(ctx)
   };
 }
 
-const SCREEN_FILL = 0.97;
-const OUTRO = { turn: 8 * DEG, fill: 0.95 };
+export function outroPanel(ctx: ShotContext): NonNullable<Framing['panel']> {
+  const { portrait } = ctx;
+  return { name: 'outro', sx: portrait ? 0.08 : 0.07, sy: portrait ? 0.12 : 0.26, plane: new Plane(new Vector3(0, 0, 1), -(ROOM.back + 0.005)) };
+}
+
+const SCREEN_FILL = 0.93;
+const OUTRO = { turn: 8 * DEG, fill: 0.91 };
 const UP = new Vector3(0, 1, 0);
 
 function monitorFill(ctx: ShotContext, name: string, turn = 0, fill = SCREEN_FILL): Framing {

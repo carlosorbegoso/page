@@ -3,13 +3,15 @@
     padding-inline: 4cqw;
     padding-bottom: 3.5cqw;
   }
+}
 
+@container surface (width < 760px) {
   .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-screen h1 {
     gap: 1cqw;
   }
 
   .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-name {
-    font-size: 3.9cqw;
+    font-size: 4.8cqw;
     font-weight: 600;
     color: var(--color-text);
   }
@@ -21,8 +23,8 @@
   .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-headline {
     max-width: none;
     margin-top: 2cqw;
-    font-size: 6.8cqw;
-    line-height: 1.05;
+    font-size: 8cqw;
+    line-height: 1.04;
   }
 
   .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-metrics {
@@ -37,12 +39,12 @@
   }
 
   .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-ctas > * {
-    min-height: 11.5cqw;
-    padding: 0 2.6cqw;
+    min-height: 13.5cqw;
+    padding: 0 2cqw;
     border: 1px solid rgb(255 255 255 / 0.25);
     border-radius: 2cqw;
     background: rgb(255 255 255 / 0.06);
-    font-size: 3.9cqw;
+    font-size: 4.6cqw;
     white-space: nowrap;
   }
 

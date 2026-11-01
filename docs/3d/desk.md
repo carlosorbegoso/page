@@ -16,15 +16,15 @@ Qué entrega el escritorio al director (planos, superficies, anclas, foco, picks
 | `company` | 1 (Alfa) |
 | `products` | 3: SkyMek, Parati, Ventixs (`PRODUCT_FIGURES`) |
 | `contact` | 1 (teléfono) |
-| `outro` | 1: detrás del `hero`, a `heroDistance + 0.08` m (máx. 1.75); apilado, el monitor al 95 % del ancho girado 8° hacia el teléfono (si no, contacto → cierre pasa de 1.4 m) |
+| `outro` | 1: en horizontal, la misma caja que el hero con 9 % de margen y rumbo −16° (hacia el teléfono, si no contacto → cierre pasa de 1.4 m); apilado, el monitor con marco al 91 % del ancho girado 8° hacia el teléfono |
 
 - Encuadres por viewport con caché (`framings`). El FOV es el del director (`context.fov()`).
-- Horizontal: texto a la izquierda (columna del 56 %, `TEXT_LEFT`), sujeto al 70 % del ancho. En escritorio, estante, TCS y productos se acercan hasta llenar la franja libre junto al panel (`beside-text.ts`); Parati y Ventixs llevan el texto a la derecha. El hero se aleja lo justo para que el cuadro y su lámpara entren enteros. Apilado: panel acoplado abajo, sujeto en la mitad superior bajo el HUD; hero, stack y cierre con el monitor casi a todo el ancho.
+- Horizontal (`box-fit.ts`): en ≥ 768 px los paneles HTML de productos, empresa y experiencia están ocultos (el texto va impreso en el cuarto), así que cada plano centra una caja de encuadre (protagonista + objeto con texto) con 7 % de margen y la parte de arriba bajo el HUD (72 px); la distancia sale del aspecto actual y se recalcula al redimensionar (`framings` cachea por viewport; en escritorio también un cambio solo de alto). Hero, about y cierre: cuadro y lámpara, monitor, corcho y la línea de la mesa en z = 0 (`roomShot`, `about-shots.ts`); productos: figura + su tarjeta (Ventixs sin Alfa, con el teléfono fuera de cuadro); estante: carpetas + portada; carpetas sueltas: no más cerca de 1.18 m. Vertical no apilado (tablet) sigue con `storyShot`/`heroDistance`. Apilado: panel acoplado abajo, sujeto en la mitad superior bajo el HUD; hero y stack con el monitor y su marco al 93 % del ancho.
 
 ## Límites entre planos (`checkShots`, `SHOT_LIMITS`)
 
 - Planos consecutivos en orden de historia: ≤ 28° entre direcciones de vista y ≤ 1.4 m entre posiciones. Así ninguna transición pasa de 1.4 s en el director.
-- Comprobar: `mountDeskPreview(container).checks()` (`src/three/desk/preview.ts`, la app no lo importa) en 1440 × 900, 390 × 844, 1024 × 1366 y 1920 × 1080.
+- Comprobar: `mountDeskPreview(container).checks()` (`src/three/desk/preview.ts`, la app no lo importa) en 1280 × 720, 1362 × 663, 1440 × 900, 1920 × 1080, 1024 × 768, 844 × 390, 390 × 844, 375 × 667 y 360 × 780.
 
 ## `getSurface('monitor' | 'phone')`
 
@@ -60,13 +60,23 @@ Qué entrega el escritorio al director (planos, superficies, anclas, foco, picks
 2. **Lámpara atrás a la derecha**: el doc pide "atrás a la izquierda" y a la vez la peana "a la derecha, bajo su cono". Manda el cono.
 3. **Teléfono en un soporte inclinado** (`PHONE.lean`) en vez de tumbado con plano cenital: la superficie se ve de frente a 1:1 y el giro desde el plano anterior cabe en 28°.
 4. **Calibración de luces y albedo**: `LIGHT_CALIBRATION` en `src/three/desk/set/lighting.ts` y `PERCEIVED_TO_ALBEDO` en `src/three/desk/props/palette.ts`. El monitor ilumina con una `PointLight`: `RectAreaLight` pesaba unos 100 KB.
-5. **Lo nuevo va después del primer frame**: el margen del presupuesto es ~0.6 KB (`docs/3d/budget.md`).
+5. **Lo nuevo va después del primer frame**: el margen del presupuesto es ~2 KB (`docs/3d/budget.md`).
 
 ## Trampas de las figuras animadas (`src/three/desk/life/classify.ts`)
 
 - **Alfa**: todo lo que está por encima de `ALFA_NECK_Y` (6.7 cm sobre la base) gira con la cabeza, y lo emisivo a la altura de `ALFA_HEAD_Y` se trata como ojos. Base, cintura, pecho y brazos de `props/figures/alfa.ts` tienen que quedar debajo de 6.7 cm, y solo debe brillar la luz del pecho.
 - **Regalo (Parati)**: todo lo que está por encima de `GIFT_SEAM_BAND` (4.28 cm) sube con la tapa. En `props/figures/gift.ts`, la caja y su cinta van debajo y cada pieza del moño y de la tapa va encima.
 - **Pikachu y Charizard** comparten el negro y el blanco: `life/pokemon/parts.ts` los distingue por la distancia a cada base (`REACH`, `HEIGHT`), no por el color.
+
+## Batalla Pokémon (`life/pokemon/`)
+
+- Solo `parts.ts` va en el arranque (parte las mallas). `PokemonLife` llega con `deferred`: hasta entonces las figuras están en reposo y un clic queda en cola hasta que llega.
+- Golpes (s, `timeline/beats.ts`, 8.8 s): cara a cara 0–1.1 (se giran, Pikachu se agacha con chispas, Charizard se encabrita y abre las alas) · despegue 1.0–2.05 (amago, aleteo de 0.34 s con la membrana plegada en la subida y vaivén del cuerpo, 3.2 cm de altura) · Lanzallamas 2.05–3.4 (inspira y lanza) · Ataque Rápido 2.48–3.02 (salto lateral de 2.8 cm con estela, sin salirse de la base del monitor; el fuego da donde estaba) · Impactrueno 3.35–4.55 (carga 0.45 s, tres descargas a 3.8/4.05/4.28) · impacto 3.83–4.9 (destello, retroceso 1.2 cm, temblor, chispas, humo) · aterrizaje 4.6–6 · victoria 5.85–7.4 (Pikachu salta dos veces, orejas arriba, cola) y rugido con humo 6.2–7.3 · vuelta al reposo 7.5–8.8.
+- Cada golpe suma contribuciones que valen exactamente 0 fuera de su ventana: al terminar, la pose es la de reposo. `still` apaga la vida en reposo (orejas, alas) durante la batalla para que no pelee con el aleteo.
+- Doble clic bloqueado mientras dura; otro clic al terminar la repite. El inicio se fija en el siguiente cuadro (el reloj del escritorio puede estar viejo con el bucle dormido).
+- **Luz**: no se agrega una luz (cambiar el número de luces recompila todos los materiales). Se toma prestada la `PointLight` del monitor (`LightRig.monitorLight`): durante el fuego o el rayo se mueve sobre la pelea, se tiñe de naranja o azul y suma `FIRE_INTENSITY`/`BOLT_INTENSITY` (`effects/flash-light.ts`); al terminar vuelve a su sitio y color. `lights.apply` reescribe la intensidad en cada cuadro antes de `life.pose`.
+- **Movimiento reducido o pausa** (`motionAllowed(readMotion())`, no `context.motion()`, que es la ventana de vida en reposo): versión tranquila de 3.4 s, se miran a medias, la llama de la cola y la boca brillan suave y las mejillas se encienden sin parpadeo. Sin destellos, temblor, partículas ni luz.
+- Los efectos son aditivos con `depthWrite: false` y quedan por debajo del borde del monitor (y ≈ 0.93). `poseKey` solo incluye lo que da sombra.
 - **Papel impreso**: la lámpara lava el papel iluminado, así que las caras impresas se oscurecen con `PAPER_LEVEL` (`notes/paper.ts`) para que la tinta conserve el contraste. Además cada cara tiene una luz propia baja (`PAPER_SELF_LIGHT`, el mapa impreso como emisivo): una tarjeta a contraluz de la lámpara, como la de Parati de noche, no se vuelve negra y la tinta sigue oscura.
 
 ## Ids de objeto (`OBJECT_ID`, `src/three/desk/builder.ts`)

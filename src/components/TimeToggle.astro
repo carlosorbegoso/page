@@ -46,7 +46,7 @@ const t = useTranslations(locale);
       const next = root.dataset.time === 'day' ? 'night' : 'day';
       root.dataset.time = next;
       try {
-        localStorage.setItem(STORAGE_KEY, next);
+        sessionStorage.setItem(STORAGE_KEY, next);
       } catch {
       }
       render();

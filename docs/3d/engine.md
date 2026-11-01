@@ -6,7 +6,7 @@ Qué hace el Stage desde que carga la página hasta el primer frame, cómo degra
 
 - `[data-stage]` es fijo y `aria-hidden`; encima va la pantalla de arranque (`docs/3d/boot.md`). Ya no hay póster: si el 3D degrada queda el degradado del cielo de `[data-stage]`.
 - Script inline: pone `html.booting` (ver `docs/3d/boot.md`) y, si hay WebGL2, `html.stage-pending` (se quita a los 12 s, al degradar o al terminar el arranque).
-- Script del módulo: espera `load` y luego la primera interacción (`pointerdown`, `keydown`, `wheel`, `touchstart`, `scroll`) o 3 s (salvo en una visita en caliente, `stage:warm`); después `onIdle` → `detectTier()` → import dinámico de `src/three/index.ts` → `boot()`. Con `?capture` no espera y fuerza `high`.
+- Script del módulo: espera `load` y luego la primera interacción (`pointerdown`, `keydown`, `wheel`, `touchstart`, `scroll`) o 3 s (salvo en una visita en caliente, `stage:warm` (localStorage)); después `onIdle` → `detectTier()` → import dinámico de `src/three/index.ts` → `boot()`. Con `?capture` no espera y fuerza `high`.
 - Mientras tanto la pantalla de arranque escucha `stage:progress {value}` y `stage:assets {loaded, total}`.
 - `chapter:enter` pone `[data-stage][data-moving]`; `chapter:settled` lo quita.
 

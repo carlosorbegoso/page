@@ -66,7 +66,7 @@ export const SUCCULENT = new Vector3(-0.335, DESK.top, -0.02);
 export const OPEN_FOLDER = { centre: new Vector3(-0.46, DESK.top, 0.17), width: 0.42, depth: 0.29, yaw: 0.12 } as const;
 
 export const PHONE = {
-  base: new Vector3(0.52, DESK.top, 0.24),
+  base: new Vector3(0.55, DESK.top, 0.28),
   yaw: 0.26,
   lean: 0.28,
   size: { width: 0.071, height: 0.147, depth: 0.008 },

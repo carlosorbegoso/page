@@ -8,10 +8,9 @@ const INK = '#1c2230';
 const MUTED = '#4a5060';
 const FIRST_YEAR = '2020';
 
-function coverText(): { act: string; span: string; title: string; subtitle: string } {
+function coverText(): { span: string; title: string; subtitle: string } {
   const ui = document.documentElement.lang.startsWith('en') ? en : es;
   return {
-    act: ui['story.day'],
     span: `${FIRST_YEAR} – ${ui['experience.present']}`,
     title: ui['experience.title'],
     subtitle: ui['experience.subtitle']
@@ -37,7 +36,7 @@ export function drawArchiveCover(canvas: HTMLCanvasElement, rows: readonly (read
   context.textAlign = 'left';
   context.fillStyle = INK;
   context.font = `500 30px ${mono}`;
-  context.fillText(`${text.act} · ${text.span}`.toUpperCase(), MARGIN, 80, measure);
+  context.fillText(text.span.toUpperCase(), MARGIN, 80, measure);
   context.fillRect(MARGIN, 102, measure, 3);
   context.font = `600 84px ${display}`;
   context.fillText(text.title, MARGIN, 196, measure);

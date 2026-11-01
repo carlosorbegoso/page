@@ -13,19 +13,21 @@ const t = useTranslations(locale);
 const years = (await getExperience(locale)).map(entry => entry.start.slice(0, 4)).toSorted();
 const label = (id: ChapterId, count: number, day: boolean, word: string) =>
   Array.from({ length: count }, (_, sub) => `${storyClock(id, sub, day)} · ${word}`);
+const yearLabels = (day: boolean) =>
+  [`${years[0]} →`, ...years].map((year, sub) => `${storyClock('experience', sub, day)} · ${year}`);
 const storyBeats: Record<string, string[]> = {
   hero: label('hero', 1, false, t('story.tonight')),
   about: label('about', 2, false, t('story.tonight')),
-  experience: [`${t('story.day')} · ${years[0]} →`, ...years.map(year => `${t('story.day')} · ${year}`)],
+  experience: yearLabels(false),
   company: label('company', 1, false, t('story.night')),
   products: label('products', 3, false, t('story.night')),
   contact: label('contact', 1, false, t('story.night')),
   outro: label('outro', 1, false, t('story.dawn'))
 };
 const storyBeatsDay: Record<string, string[]> = {
-  ...storyBeats,
   hero: label('hero', 1, true, t('story.today')),
   about: label('about', 2, true, t('story.today')),
+  experience: yearLabels(true),
   company: label('company', 1, true, t('story.afterWork')),
   products: label('products', 3, true, t('story.afterWork')),
   contact: label('contact', 1, true, t('story.dusk')),

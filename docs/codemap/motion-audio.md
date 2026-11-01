@@ -40,3 +40,4 @@ Qué archivo editar en la navegación por planos (story-nav), el texto cinético
 | Tecla, tock y campanilla | `src/audio/voices.ts`; envolventes y síntesis en `synth.ts`, ruido e impulsos en `buffers.ts` |
 | Sonidos de la UI (botones, menú) | `src/audio/ui-sounds.ts` |
 | Sonidos de lo que aparece (invitación, Yape, ticket, mensaje) | `src/audio/beat-voices.ts`, evento `desk:beat` en `src/audio/desk-sounds.ts` |
+| Sonidos de la batalla Pokémon (gruñido, aleteo, lanzallamas, Ataque Rápido, chispas, trueno, impacto, aterrizaje, «pika», rugido) | `src/audio/battle-voices.ts`, evento `desk:battle` en `src/audio/desk-sounds.ts`; tiempos en `src/three/desk/life/pokemon/timeline/cues.ts` |

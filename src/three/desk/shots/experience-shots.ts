@@ -1,6 +1,5 @@
 import { Vector3 } from 'three';
 import { FOLDERS, OPEN_FOLDER, folderSpine, type FolderId } from '../layout';
-import { clearOfText, placeBeside } from './beside-text';
 import { TEXT_LEFT, type ShotContext } from './context';
 import { storyShot } from './portrait-fit';
 import { printedSheetShot } from './printed-shots';
@@ -12,6 +11,7 @@ const SHELF_LANDSCAPE: Setup = { heading: -6, pitch: -4, distance: 1.1 };
 const SHELF_PORTRAIT: Setup = { heading: -20, pitch: -4, distance: 0.9 };
 const OPEN_LANDSCAPE: Setup = { heading: -8, pitch: -18, distance: 0.7 };
 const OPEN_PORTRAIT: Setup = { heading: -14, pitch: -18, distance: 0.7 };
+const FOLDER_LANDSCAPE: Setup = { heading: -26, pitch: 0, distance: 1.18 };
 const OVERVIEW_STAGE_BOTTOM = 0.7;
 
 function withStageBottom(ctx: ShotContext, bottom: number): ShotContext {
@@ -23,10 +23,8 @@ function shelfShot(ctx: ShotContext, place: Place, panel: Place): Framing {
   const shelfFocus = folderSpine('baufest').lerp(folderSpine('intercorp'), 0.5);
   const points = [...coverPoints(0), ...FOLDERS.flatMap(id => folderPoints(id, 0))];
   const aim = ctx.portrait ? shelfFocus : centreOf(points);
-  const landscape = clearOfText(ctx, 'left', aim, SHELF_LANDSCAPE, points);
   const fitCtx = ctx.portrait ? withStageBottom(ctx, OVERVIEW_STAGE_BOTTOM) : ctx;
-  const where = ctx.portrait ? place : placeBeside(ctx, 'left', place);
-  const frame = storyShot(fitCtx, aim, landscape, SHELF_PORTRAIT, where, points);
+  const frame = storyShot(fitCtx, aim, SHELF_LANDSCAPE, SHELF_PORTRAIT, place, points);
   return {
     ...frame,
     aim: frame.aim ?? aim,
@@ -41,9 +39,8 @@ function openFolderShot(ctx: ShotContext, sx: number, panel: Place): Framing {
   const sheet = takenSheetPoints();
   const points = sheet;
   const aim = centreOf(points);
-  const place = ctx.portrait ? { sx, sy: ctx.stacked ? ctx.subjectY : 0.32 } : placeBeside(ctx, 'left', { sx, sy: 0.56 });
-  const landscape = clearOfText(ctx, 'left', aim, OPEN_LANDSCAPE, points);
-  const frame = storyShot(ctx, aim, landscape, OPEN_PORTRAIT, place, points);
+  const place = { sx, sy: 0.32 };
+  const frame = storyShot(ctx, aim, OPEN_LANDSCAPE, OPEN_PORTRAIT, place, points);
   return {
     ...frame,
     aim: frame.aim ?? aim,
@@ -58,10 +55,12 @@ function shelfFolderShot(ctx: ShotContext, id: Exclude<FolderId, 'tcs'>, place: 
     ...storyShot(
       ctx,
       focus,
-      { heading: -26, pitch: 0, distance: 1.18 },
+      FOLDER_LANDSCAPE,
       { heading: -22, pitch: -2, distance: 1.24 },
       place,
-      [...coverPoints(id === 'sysarp' ? FOLDER_PULL : 0), ...folderPoints(id, FOLDER_PULL)]
+      [...coverPoints(id === 'sysarp' ? FOLDER_PULL : 0), ...folderPoints(id, FOLDER_PULL)],
+      [],
+      FOLDER_LANDSCAPE.distance
     ),
     focus,
     panel: { name: EXPERIENCE_ANCHOR[id], ...panel }

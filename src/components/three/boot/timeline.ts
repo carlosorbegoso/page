@@ -16,26 +16,27 @@ export const NORMAL_EXIT: readonly Cue[] = [
   { phase: 'return', at: 0, travel: 380, position: 0 },
   { phase: 'ok', at: 380 },
   { phase: 'mark', at: 950 },
-  { phase: 'led', at: 1450 },
-  { phase: 'open', at: 1750 },
-  { phase: 'done', at: 2450 }
+  { phase: 'led', at: 1550 },
+  { phase: 'open', at: 2150 },
+  { phase: 'done', at: 2900 }
 ];
 
 export const FAST_EXIT: readonly Cue[] = [
   { phase: 'dash', at: 0, travel: 220, position: 1 },
   { phase: 'return', at: 220, travel: 180, position: 0 },
   { phase: 'ok', at: 400 },
-  { phase: 'mark', at: 750 },
-  { phase: 'led', at: 1100 },
-  { phase: 'open', at: 1350 },
-  { phase: 'done', at: 2050 }
+  { phase: 'mark', at: 700 },
+  { phase: 'led', at: 1200 },
+  { phase: 'open', at: 1700 },
+  { phase: 'done', at: 2400 }
 ];
 
 export const STILL_EXIT: readonly Cue[] = [
   { phase: 'ok', at: 0, position: 1 },
-  { phase: 'mark', at: 500 },
-  { phase: 'open', at: 900 },
-  { phase: 'done', at: 1200 }
+  { phase: 'mark', at: 550 },
+  { phase: 'led', at: 1100 },
+  { phase: 'open', at: 1650 },
+  { phase: 'done', at: 2050 }
 ];
 
 export const FAIL_EXIT: readonly Cue[] = [{ phase: 'fail', at: 0, travel: 520, position: 0 }];

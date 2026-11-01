@@ -17,7 +17,7 @@ const CLOTH_TINT = 0.45;
 
 export class LightRig {
   readonly lamp: SpotLight;
-  private readonly monitorLight: PointLight;
+  readonly monitorLight: PointLight;
   private readonly moon: DirectionalLight;
   private readonly fill: HemisphereLight;
   private readonly shelfLight: SpotLight;

@@ -11,10 +11,11 @@ import { BubbleLife, splitDots } from './bubble';
 import { figureParts, mugPart } from './classify';
 import { GiftLife } from './gift';
 import { MugLife } from './mug';
-import { PokemonLife, pokemonPart } from './pokemon';
+import type { PokemonLife } from './pokemon';
+import { pokemonPart } from './pokemon/parts';
 import { STILL, type FigureOffset } from './motion';
 import { PressPulse } from './press';
-import { figureFrame, splitFigures, splitPart } from './rig';
+import { figureFrame, splitFigures, splitPart, type RigPart } from './rig';
 import { WrenchLife } from './wrench';
 
 export type LifeToy = FigureId | 'mug';
@@ -53,7 +54,9 @@ export class DeskLife {
   private readonly bubble: BubbleLife;
   private readonly wrench: WrenchLife;
   private readonly mug: MugLife;
-  private readonly pokemon: PokemonLife;
+  private pokemon: PokemonLife | null = null;
+  private readonly pokemonParts: ReadonlyMap<string, RigPart>;
+  private battleQueued = false;
   private readonly cards = new ProductCards();
   private readonly frames = new Map<FigureId, Matrix4>((Object.keys(SLOT) as FigureId[]).map(id => [id, new Matrix4()]));
   private readonly disposables: Array<{ dispose(): void }> = [];
@@ -88,9 +91,7 @@ export class DeskLife {
     this.bubble = new BubbleLife(dotParts);
     this.wrench = new WrenchLife(parts.get('wrench'));
     this.mug = new MugLife(workstation.parts.get('mug'), MUG);
-    this.pokemon = new PokemonLife(workstation.parts);
-    this.object3D.add(this.pokemon.overlays);
-    this.disposables.push(this.pokemon);
+    this.pokemonParts = workstation.parts;
     this.object3D.add(this.gift.sparks.points);
     this.disposables.push(this.gift);
     this.object3D.add(this.cards.object3D);
@@ -121,8 +122,17 @@ export class DeskLife {
     else this.mug.play(time, motion);
   }
 
-  battle(time: number, motion: boolean): void {
-    this.pokemon.battle(time, motion);
+  attachPokemon(create: (parts: ReadonlyMap<string, RigPart>) => PokemonLife): void {
+    const pokemon = (this.pokemon = create(this.pokemonParts));
+    this.object3D.add(pokemon.overlays);
+    this.disposables.push(pokemon);
+    if (this.battleQueued) pokemon.battle();
+    this.battleQueued = false;
+  }
+
+  battle(): void {
+    if (this.pokemon) this.pokemon.battle();
+    else this.battleQueued = true;
   }
 
   setHover(id: string | null): void {
@@ -141,7 +151,7 @@ export class DeskLife {
     const bubble = this.bubble.update(time);
     const wrench = this.wrench.update(time);
     const mug = this.mug.update(dt, time, motion);
-    const pokemon = this.pokemon.update(time, motion);
+    const pokemon = this.pokemon?.update(time, motion, frame.pixelScale) ?? false;
     const press = this.press.update(time);
     const cards = this.cards.update(dt, productFocus(frame.focused), motion);
     return alfa || gift || bubble || wrench || mug || pokemon || press || cards || lifting || beats;
@@ -198,12 +208,12 @@ export class DeskLife {
     this.bubble.pose(this.time, this.frames.get('ventixs')!);
     this.wrench.pose(this.time, this.frames.get('skymek')!);
     this.mug.pose(this.time);
-    this.pokemon.pose(this.time);
+    this.pokemon?.pose(this.time);
     this.cards.pose();
   }
 
   poseKey(): string {
-    return `${this.alfa?.poseKey() ?? ''}|${this.gift.poseKey(this.time)}|${this.bubble.poseKey(this.time)}|${this.wrench.poseKey(this.time)}|${this.mug.poseKey()}|${this.pokemon.poseKey()}|${this.cards.poseKey()}`;
+    return `${this.alfa?.poseKey() ?? ''}|${this.gift.poseKey(this.time)}|${this.bubble.poseKey(this.time)}|${this.wrench.poseKey(this.time)}|${this.mug.poseKey()}|${this.pokemon?.poseKey() ?? ''}|${this.cards.poseKey()}`;
   }
 
   dispose(): void {

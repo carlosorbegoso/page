@@ -1,0 +1,46 @@
+@container surface (orientation: landscape) and (width < 760px) {
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='about-bio'] .about-bio {
+    grid-template-rows: 0.6fr auto auto 1fr;
+    padding-inline: 0;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='about-bio'] .about-bio header {
+    max-width: none;
+    gap: 1.4cqw;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='about-bio'] .about-bio h2 {
+    font-size: 3.9cqw;
+  }
+
+  .is-3d
+    .plate[data-plate-mode='surface-monitor'][data-plate-id='about-bio']
+    .about-bio
+    header
+    > p:last-of-type {
+    font-size: 6cqw;
+    line-height: 1.08;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='about-bio'] .about-facts {
+    gap: 0 3cqw;
+    margin-top: 4cqw;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='about-bio'] .about-facts > div {
+    padding-top: 1.6cqw;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='about-bio'] .about-facts dt {
+    font-size: 3.9cqw;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='about-bio'] .about-facts__value {
+    font-size: 4.2cqw;
+    line-height: 1.2;
+  }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='about-bio'] .about-facts__detail {
+    display: none;
+  }
+}

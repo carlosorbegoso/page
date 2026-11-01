@@ -34,7 +34,6 @@ const firstYear = entries.map(entry => entry.start).toSorted()[0]?.slice(0, 4);
     <SectionHeader
       id="experience-title"
       eyebrow={firstYear ? `${firstYear} – ${t('experience.present')}` : undefined}
-      act={t('story.day')}
       title={t('experience.title')}
       subtitle={t('experience.subtitle')}
       class="experience-header"

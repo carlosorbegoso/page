@@ -31,7 +31,7 @@ export function printFonts(): PrintFonts {
     display: read('--font-display', 'system-ui, sans-serif'),
     body: read('--font-sans', 'system-ui, sans-serif'),
     mono: read('--font-mono', 'ui-monospace, monospace'),
-    hand: "'Bradley Hand', 'Segoe Print', 'Marker Felt', 'Comic Sans MS', cursive"
+    hand: read('--font-hand', "'Caveat', cursive")
   };
 }
 

@@ -117,8 +117,11 @@ export const es = {
   'notFound.description':
     'Esta página no existe o cambió de lugar. Vuelve al inicio para ver mi experiencia, mis productos y cómo escribirme.',
   'notFound.title': 'Página no encontrada',
-  'notFound.body': 'Esta página no existe o cambió de lugar.',
-  'notFound.home': 'Volver al inicio'
+  'notFound.kicker': 'Error 404 · Lima, de noche',
+  'notFound.body':
+    'Busqué en el archivo del escritorio y esta hoja no está. Puede que nunca haya existido o que cambiara de lugar.',
+  'notFound.home': 'Volver al inicio',
+  'notFound.paper': 'No encontrado'
 } as const;
 
 export type UiKey = keyof typeof es;

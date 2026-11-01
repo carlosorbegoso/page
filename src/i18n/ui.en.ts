@@ -118,6 +118,9 @@ export const en = {
   'notFound.description':
     "This page doesn't exist or has moved. Head back home to see my work, my products and how to reach me.",
   'notFound.title': 'Page not found',
-  'notFound.body': "This page doesn't exist or has moved.",
-  'notFound.home': 'Back to home'
+  'notFound.kicker': 'Error 404 · Lima, at night',
+  'notFound.body':
+    "I searched the archive on my desk and this sheet isn't there. It may never have existed, or it has moved.",
+  'notFound.home': 'Back to home',
+  'notFound.paper': 'Not found'
 } as const satisfies Record<UiKey, string>;

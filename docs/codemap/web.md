@@ -54,7 +54,7 @@ Qué archivo editar en la web: `<head>`, tokens, HUD, secciones, modo lectura, t
 | Sobre mí: estudios y stack | `src/components/sections/about/AboutStack.astro` |
 | Sobre mí: pantalla `carlos.yml` | `src/components/sections/about/AboutCode.astro` |
 | Sobre mí en el monitor (vertical / horizontal) | `src/styles/sections/about/monitor.css`, `monitor-landscape.css`, `code.css` |
-| Hero, Stack y Final en el monitor en teléfono vertical | `src/styles/sections/hero/monitor-portrait.css`, `src/styles/sections/outro/monitor-portrait.css`, `src/styles/sections/about/code-portrait.css` |
+| Hero, Sobre mí, Stack y Final cuando el monitor se ve chico en pantalla (menos de 760 px: teléfono y escritorio con encuadre de habitación); diseño compacto legible por ancho de contenedor | `src/styles/sections/hero/monitor-compact.css`, `sections/outro/monitor-compact.css`, `sections/about/code-compact.css`, `sections/about/bio-compact.css` |
 | Sobre mí en teléfonos apilados | `src/styles/sections/about/anchored.css` |
 | Experiencia | `src/components/sections/Experience.astro`, `src/components/experience/` |
 | Empresa | `src/components/sections/Company.astro`; ficha en 3D y tarjeta de papel en teléfonos en `src/styles/sections/company/` |

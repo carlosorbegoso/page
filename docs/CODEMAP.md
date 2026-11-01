@@ -63,7 +63,15 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 ## Navegación y movimiento
 | Para cambiar… | Edita |
 | --- | --- |
-| Scroll por capítulos, tour, snap *(pendiente: `story-nav/`)* | `src/motion/story-nav.ts` |
+| Navegación por planos: montaje y listeners | `src/motion/story-nav/setup.ts` (`motion/story-nav.ts` solo reexporta) |
+| Tween de scroll entre planos (duración, easing, autoKill) | `src/motion/story-nav/scroll.ts` |
+| Plano siguiente, anterior, más cercano | `src/motion/story-nav/shot-index.ts`; `story:goto` en `goto.ts` |
+| Asentar en el plano más cercano al parar | `src/motion/story-nav/snap.ts` |
+| Teclado (flechas, Re Pág, espacio, Inicio, Fin) | `src/motion/story-nav/keys.ts` |
+| Rueda (un plano por gesto) | `src/motion/story-nav/wheel.ts` |
+| Toque y arrastre con el mouse | `src/motion/story-nav/gestures.ts` |
+| Enlaces a capítulos (`#products`) | `src/motion/story-nav/anchors.ts` |
+| Tour automático (pausa de lectura, espera de `chapter:settled`) | `src/motion/story-nav/tour.ts` |
 | Texto cinético: arranque, eventos de capítulo | `src/motion/kinetic/boot.ts` (`motion/kinetic.ts` es el punto de entrada) |
 | Texto cinético: marcado por letra o palabra, líneas, cascadas | `src/motion/kinetic/split-markup.ts` |
 | Texto cinético: cuándo entra cada placa (3D por capítulo, plano por intersección) | `src/motion/kinetic/modes.ts`, `groups.ts` |
@@ -91,6 +99,8 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Renderer WebGL y tokens de exposición | `src/three/stage/renderer.ts` |
 | Contexto que reciben las estaciones | `src/three/stage/station-context.ts` |
 | Contratos entre Stage, escritorio, fx | `src/three/contracts.ts` |
+| Hover y clic sobre objetos 3D (raycast, cursor, `desk:interact`) | `src/three/interaction/index.ts`, `interaction/picker.ts`, `interaction/events.ts` |
+| Enter sobre el panel de experiencia saca la carpeta | `src/three/interaction/folder-keys.ts` |
 | Tier de calidad por dispositivo | `src/three/tier.ts` |
 | Posición de cámara por capítulo | `src/three/desk/shots.ts` |
 | Montaje del escritorio y orden de `update` (ensamblador) | `src/three/desk/DeskSet.ts` |

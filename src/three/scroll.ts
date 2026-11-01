@@ -19,10 +19,9 @@ export interface ChapterScroll {
 
 /**
  * Chapters on scroll (GSAP ScrollTrigger, loaded only inside the 3D chunk). Every sub-shot owns
- * exactly one viewport of scroll and nothing else scrolls: the page is `shots × 100vh` plus the
- * last viewport. Desktop: each section is pinned for `subs × 100vh` and the camera changes shot only
- * at chapter / sub-shot boundaries. Touch: no pin and no scrub; a chapter fires when its section
- * reaches 50 % of the viewport and its spacer is `subs × 100svh` tall. No `normalizeScroll`.
+ * exactly one viewport of scroll and nothing else scrolls: every section is a `subs × 100svh` spacer,
+ * with no pin and no scrub, on every device. A chapter fires when its section reaches 50 % of the
+ * viewport and the camera changes shot only at sub-shot boundaries. No `normalizeScroll`.
  * Also emits `story:progress` (overall 0..1 across every sub-shot) and mounts the shot-by-shot
  * navigation (`src/motion/story-nav.ts`: settle, keyboard, `story:goto`, auto tour).
  */
@@ -36,7 +35,6 @@ export async function setupChapterScroll(host: ChapterScrollHost): Promise<Chapt
   ScrollTrigger.config({ ignoreMobileResize: true });
   /* A restored mid-page scroll lands before the pins exist and shows the wrong shot; the story starts at the top. */
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-  const touch = matchMedia('(pointer: coarse)').matches || innerWidth < 1024;
   const triggers = new Map<ChapterId, InstanceType<typeof ScrollTrigger>>();
   let current: ChapterId | null = null;
   let currentSub = -1;
@@ -91,17 +89,12 @@ export async function setupChapterScroll(host: ChapterScrollHost): Promise<Chapt
   /** The last trigger runs 2 px past the maximum scroll: ScrollTrigger is inactive at progress 1. */
   const edgeOf = (chapter: ChapterId) => (chapter === lastChapter ? 2 : 0);
 
-  /**
-   * Sections are bare spacers once the plates live in their layers, so their own box is the only
-   * source of unpinned scroll. Desktop: every box collapses to zero and only the pins add scroll
-   * (subs × innerHeight each), except the last one, which keeps one viewport so its pin ends exactly
-   * at the maximum scroll. Touch: each box is exactly subs × 100svh.
-   */
+  /** Sections are bare spacers once the plates live in their layers: each box is exactly subs × 100svh. */
   const sizeSpacers = () => {
     for (const chapter of SECTION_CHAPTERS) {
       const section = chapterElement(chapter);
       if (!section) continue;
-      const height = touch ? `${subsOf(chapter) * 100}svh` : chapter === lastChapter ? `${innerHeight}px` : '0px';
+      const height = `${subsOf(chapter) * 100}svh`;
       Object.assign(section.style, { height, minHeight: height, paddingBlock: '0px', boxSizing: 'border-box' });
     }
   };
@@ -110,38 +103,35 @@ export async function setupChapterScroll(host: ChapterScrollHost): Promise<Chapt
   for (const chapter of SECTION_CHAPTERS) {
     const section = chapterElement(chapter);
     if (!section) continue;
-    const subs = () => subsOf(chapter);
     const edge = edgeOf(chapter);
-    if (!touch) {
-      triggers.set(
-        chapter,
-        ScrollTrigger.create({
-          trigger: section,
-          start: 'top top+=2',
-          end: () => `+=${subs() * innerHeight + edge}`,
-          pin: true,
-          pinSpacing: true,
-          invalidateOnRefresh: true,
-          onToggle: self => toggle(chapter, self.isActive, self.progress),
-          onUpdate: self => report(chapter, self.progress)
-        })
-      );
-    } else {
-      triggers.set(
-        chapter,
-        ScrollTrigger.create({
-          trigger: section,
-          start: 'top 50%',
-          end: () => `bottom 50%-=${edge}`,
-          onToggle: self => toggle(chapter, self.isActive, self.progress),
-          onUpdate: self => report(chapter, self.progress)
-        })
-      );
-    }
+    triggers.set(
+      chapter,
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 50%',
+        end: () => `bottom 50%-=${edge}`,
+        invalidateOnRefresh: true,
+        onToggle: self => toggle(chapter, self.isActive, self.progress),
+        onUpdate: self => report(chapter, self.progress)
+      })
+    );
   }
-  ScrollTrigger.refresh();
-  const active = [...triggers].filter(([, trigger]) => trigger.isActive).pop();
-  if (active) toggle(active[0], true, active[1].progress);
+
+  /** Re-measures every spacer and hands the camera to the shot the real scrollY shows. */
+  const sync = () => {
+    sizeSpacers();
+    ScrollTrigger.refresh();
+    const active = [...triggers].filter(([, trigger]) => trigger.isActive).pop();
+    const [chapter, trigger] = active ?? [...triggers][0] ?? [];
+    if (!chapter || !trigger) return;
+    const progress = active ? trigger.progress : 0;
+    if (chapter === current) report(chapter, progress);
+    else toggle(chapter, true, progress);
+  };
+  sync();
+  const onLoaded = () => sync();
+  if (document.readyState !== 'complete') window.addEventListener('load', onLoaded, { once: true });
+  void document.fonts?.ready.then(() => sync());
 
   const positionOf = (chapter: ChapterId, sub: number): number | null => {
     const trigger = triggers.get(chapter);
@@ -150,7 +140,7 @@ export async function setupChapterScroll(host: ChapterScrollHost): Promise<Chapt
     const span = trigger.end - trigger.start - edgeOf(chapter);
     const index = Math.min(sub, subs - 1);
     /* The final shot rests at the very bottom so nothing scrolls past the credits. */
-    if (chapter === lastChapter && index === subs - 1) return trigger.start + span - 1;
+    if (chapter === lastChapter && index === subs - 1) return Math.min(trigger.start + span - 1, ScrollTrigger.maxScroll(window));
     return trigger.start + ((index + 0.5) / subs) * span;
   };
 
@@ -186,11 +176,9 @@ export async function setupChapterScroll(host: ChapterScrollHost): Promise<Chapt
 
   return {
     positionOf,
-    refresh() {
-      sizeSpacers();
-      ScrollTrigger.refresh();
-    },
+    refresh: sync,
     dispose() {
+      window.removeEventListener('load', onLoaded);
       window.removeEventListener('chapter:settled', onSettled);
       disposeNav();
       for (const trigger of triggers.values()) trigger.kill(true);

@@ -53,4 +53,7 @@ GitHub Pages sirve todo con `max-age=600` y no deja cambiar cabeceras, así que 
 
 - Se registra 4 s después de `load` (`src/scripts/offline/register.ts`), solo en producción y nunca con `?capture`: la primera visita y Lighthouse no lo notan. A partir de la segunda visita el 3D sale de la caché.
 - No cachea peticiones con `Range` (streaming de audio) ni de otros orígenes.
-- Los `_astro/*` viejos se acumulan entre deploys: cambia `VERSION` en `public/sw.js` para vaciar las dos cachés cuando haga falta.
+- `immutable-v1` guarda como mucho 160 archivos (`IMMUTABLE_MAX_ENTRIES`): al pasarse, borra los más antiguos, así los `_astro/*` de deploys viejos no se acumulan. Cambia `VERSION` solo para vaciar las dos cachés a la fuerza.
+- El HTML se guarda por ruta sin query: `?tier=`, `?debug` o un utm no crean copias, y sin red cualquier variante abre la copia guardada.
+- Un deploy nuevo no necesita tocar `public/sw.js`: los `_astro/*` cambian de nombre, el HTML es network-first y lo demás se revalida en segundo plano (llega en la visita siguiente). El navegador revisa `sw.js` sin la caché HTTP, así que un cambio en él se nota en la próxima navegación.
+- Preloads del `<head>`: solo las dos fuentes (Geist y Geist Mono: la pantalla de arranque y el HUD usan la mono). Nada del 3D: lo frena a propósito la puerta de 3 s (`docs/3d/boot.md`).

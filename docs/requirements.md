@@ -62,6 +62,8 @@ Decisiones de Carlos, presupuestos de rendimiento, tiers, i18n/SEO y accesibilid
 - URLs con `withBase()` / `localeUrl()` (`src/i18n/utils.ts`) para respetar `base: '/page'` y la barra final; canonical, hreflang (es, en, `x-default`) y `og:url` absolutos.
 - OG por idioma en JPEG/PNG (LinkedIn y WhatsApp no leen AVIF).
 - JSON-LD `Person` + `Organization` (TUSOCIO IA S.A.C.) con los tres productos.
+- Sitemap (`@astrojs/sitemap` en `astro.config.mjs`): la home ES/EN se enlaza sola por i18n; el modo lectura (`/lectura/` ↔ `/en/reading/`) tiene slugs distintos y se enlaza en `linkReadingPages`.
+- `public/robots.txt` vive en `/page/robots.txt`, que los buscadores no leen (solo leen la raíz del dominio): el sitemap se envía en Search Console con la propiedad de prefijo `https://carlosorbegoso.github.io/page/`.
 - Todo el contenido existe como HTML semántico sin 3D: crawlers y lectores de pantalla no dependen del canvas.
 
 ## Accesibilidad

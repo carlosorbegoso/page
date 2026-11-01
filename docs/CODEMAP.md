@@ -1,0 +1,68 @@
+# Mapa del código
+
+Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máximo y un solo tema (ver `docs/PLAN-arquitectura.md`). Las secciones marcadas con *(pendiente)* todavía no se han partido.
+
+## Página y layout
+| Para cambiar… | Edita |
+| --- | --- |
+| `<head>`, meta, theme-color, carga de fuentes | `src/layouts/Base.astro` |
+| Orden de las secciones de la home | `src/components/HomePage.astro` |
+| Estilos globales, reset | `src/styles/global.css` |
+| Animaciones CSS, `prefers-reduced-motion` | `src/styles/motion.css` |
+| Placas HTML sobre la escena 3D | `src/styles/plates.css`, `src/three/plates.ts` |
+
+## Tokens de diseño *(pendiente: `src/styles/tokens/`)*
+| Para cambiar… | Edita |
+| --- | --- |
+| Colores, tipografía, escala, tokens del Stage | `src/styles/tokens.css` |
+| Cómo lee three los tokens (`tokenColor`, `tokenNumber`) | `src/three/tokens.ts` |
+
+## HUD y cabecera *(pendiente: `src/components/hud/`)*
+| Para cambiar… | Edita |
+| --- | --- |
+| Marcado y estilos de la cabecera, menú, índice | `src/components/Header.astro` |
+
+## Secciones
+| Para cambiar… | Edita |
+| --- | --- |
+| Hero | `src/components/sections/Hero.astro` |
+| Sobre mí *(pendiente: `about/`)* | `src/components/sections/About.astro` |
+| Experiencia | `src/components/sections/Experience.astro`, `src/components/experience/` |
+| Empresa | `src/components/sections/Company.astro` |
+| Productos | `src/components/sections/Products.astro`, `src/components/products/` |
+| Contacto y teléfono | `src/components/sections/Contact.astro`, `src/components/contact/`, `src/scripts/phone/` |
+| Cierre | `src/components/sections/Outro.astro` |
+| Página de lectura (sin 3D) | `src/components/sections/reading/ReadingPage.astro` |
+| Textos de la UI | `src/i18n/ui.es.ts`, `src/i18n/ui.en.ts` |
+| Contenido (perfil, experiencia) | `src/content/` |
+
+## Navegación y movimiento
+| Para cambiar… | Edita |
+| --- | --- |
+| Scroll por capítulos, tour, snap *(pendiente: `story-nav/`)* | `src/motion/story-nav.ts` |
+| Texto cinético | `src/motion/kinetic.ts` |
+| Botones magnéticos | `src/motion/magnetic.ts` |
+
+## Escena 3D
+| Para cambiar… | Edita |
+| --- | --- |
+| Arranque del Stage, bucle de frames | `src/three/Stage.ts` |
+| Contratos entre Stage, escritorio, fx | `src/three/contracts.ts` |
+| Tier de calidad por dispositivo | `src/three/tier.ts` |
+| Posición de cámara por capítulo | `src/three/desk/shots.ts` |
+| Montaje del escritorio, luces por capítulo | `src/three/desk/DeskSet.ts` |
+| Mobiliario y objetos | `src/three/desk/props.ts` |
+| Materiales y atlas | `src/three/desk/materials.ts` |
+| Ventana, ciudad, lluvia en el vidrio, vapor *(pendiente: `atmosphere/`)* | `src/three/desk/atmosphere.ts` |
+| Reloj despertador | `src/three/desk/clock.ts`, `src/three/desk/clock/` |
+| Figuras animadas | `src/three/desk/life/` |
+| Página 404 | `src/three/notfound/scene.ts` |
+
+## Postproceso (fx) *(pendiente: `shaders/`, `passes/`, `fluid/`)*
+| Para cambiar… | Edita |
+| --- | --- |
+| Orden de pasadas, rack focus, presupuesto GPU | `src/three/fx/pipeline.ts` |
+| GLSL de bloom, streak, DoF, composite | `src/three/fx/shaders.ts` |
+| Simulación de fluido y su parche en materiales | `src/three/fx/fluid.ts` |
+| Grading por capítulo | `src/three/fx/grading.ts` |
+| Tokens y perfiles por tier | `src/three/fx/settings.ts` |

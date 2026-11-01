@@ -12,6 +12,9 @@ export default defineConfig(
   {
     languageOptions: {
       globals: { ...globals.browser, ...globals.node }
+    },
+    rules: {
+      'max-lines': ['warn', { max: 300, skipBlankLines: true, skipComments: true }]
     }
   }
 );

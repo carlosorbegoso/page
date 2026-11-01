@@ -1,52 +1,81 @@
-# Director de cámara y capítulos — "Una noche en el escritorio"
+# Director, capítulos, placas y navegación por planos
 
-Código: `src/three/director.ts`, `src/three/scroll.ts`, `src/three/plates.ts`, `src/three/world.ts`, `src/three/Stage.ts`. Contratos: `src/three/contracts.ts`.
+Contratos entre el Stage y el resto (capítulos, eventos, `ShotProvider`, placas), límites de cámara y cómo el scroll elige el plano; léelo antes de tocar `src/three/director.ts`, `src/three/scroll.ts`, `src/three/stage/chapters.ts`, `src/three/plates/` o `src/motion/story-nav/`. Archivos: `docs/codemap/stage.md`.
 
-## Contratos (para escritorio, FX, UI, motion y sonido)
+## `CHAPTERS`
 
-- **Capítulos**: `CHAPTERS = intro, hero, about, company, products, experience, contact, outro`. `intro` es el encendido (sin sección); el resto son `section[data-station="<id>"]`.
-- **Eventos en `window`**:
-  - `chapter:enter {id, subIndex}`: se pide un plano y la cámara empieza a moverse.
-  - `chapter:settled {id, subIndex}`: la cámara se asentó; el texto entra ahora.
-  - `chapter:progress {id, progress}`: progreso del scroll dentro del capítulo, de 0 a 1.
-  - `scene:hover {label}`: objeto bajo el puntero.
-- **`ShotProvider`** (lo registra el escritorio con `registerShotProvider`): `object3D`, `load(context)`, `update(dt, t, state)`, `getShot(chapter, sub)`, `subShotCount(chapter)`, `getSurface('monitor'|'phone')` (ancla CSS3D frontal con `scale` y `size` en metros), `getAnchor(name)` (punto 3D de un panel 2D), `getFocus(chapter, sub)` (rack focus) y `picks`, `resolvePick` y `setHover`.
-  - Mientras el escritorio siga registrado como `StationModule` de `hero` (legado), `world.ts` lo adapta: su pose de lectura es el plano de `hero`, `about` hace un push-in de 0.4 m y el resto mantiene el plano de `hero`.
-- **Placas** (`[data-plate]` dentro de cada sección):
-  - `data-plate-mode="surface-monitor" | "surface-phone"`: CSS3D sobre la superficie, frontal y 1:1, sin animación del motor. El motor fija `--surface-width` y `--surface-height` (px CSS) cuando el escritorio da `size`.
-  - `data-plate-mode="anchored"` (es el valor por defecto): panel HTML en la capa 2D fija `.stage-panels`, colocado solo por traslación en la proyección de `getAnchor(data-plate-anchor)`; nunca rota ni escala. `data-plate-side="left|right"` elige el lado en desktop. En móvil el panel va centrado bajo el objeto, desde el 42 % del alto, y se desplaza con `chapter:progress` si no cabe.
-  - `data-plate-sub="<n>"` asigna una placa a un sub-plano; una placa sin ese atributo se muestra en todos los sub-planos de su capítulo. Si ninguna placa del capítulo lo usa, la k-ésima placa corresponde al sub-plano k.
-  - Estados: `data-active` cuando el capítulo y el sub-plano son los actuales y la cámara ya se asentó; `data-dormant` en los capítulos a más de 1 de distancia. Las placas de los capítulos vecinos quedan transparentes pero enfocables: un `focusin` hace scroll a su capítulo.
-  - Atributos que añade el motor: `[data-plate-wrapper]`, `[data-plate-chapter]`, `.stage-surfaces`, `.stage-panels`, `section[data-station-spacer]` y `html.is-3d`.
+`intro, hero, about, experience, company, products, contact, outro` (`src/three/contracts.ts`). Debe coincidir con el orden DOM de las secciones. `intro` es el encendido y no tiene sección; el resto son `section[data-station="<id>"]` (`SECTION_CHAPTERS`, `chapterElement`).
 
-## Director (`CameraDirector`)
+## Eventos en `window`
 
-- **Un plano fijo por capítulo o sub-plano.** La cámara solo se mueve entre planos.
-- **Límites aplicados por código:**
-  - Roll 0: `lookAt` con +Y del mundo.
-  - FOV 30 en ≥ 1024 px y 40 por debajo, sin respiración.
-  - Duración de la transición = `clamp(max(distancia / 1 m/s, ángulo / 20°/s), 0.9, 1.4)` s, con `power2.inOut`. `lastRequiredSeconds` > 1.4 indica que esos dos planos están demasiado lejos y hay que acercarlos en el escritorio.
-  - Interpolación lineal de posición y objetivo, sin arcos ni órbitas.
-  - Parallax del cursor (≤ 1.5° de yaw, ≤ 0.8° de pitch) solo con la cámara asentada, `pointer: fine` y movimiento permitido. `PointerField.enabled` es `false` durante las transiciones.
-- **Reduced-motion o pausa:** corte con disolvencia de 300 ms (150 ms de salida y 150 de entrada) hecha con WAAPI, para que el kill-switch global de transiciones no la anule.
-- **Intro:** si la página carga arriba y el movimiento está permitido, se queda en `intro` durante 2.4 s (el escritorio enciende la lámpara y el monitor según `state.id`) y luego pasa al capítulo que marque el scroll.
+| Evento | `detail` | Cuándo |
+|---|---|---|
+| `chapter:enter` | `{id, subIndex, duration}` | Se pide un plano; la cámara empieza a moverse |
+| `chapter:settled` | `{id, subIndex}` | La cámara se asentó; el texto entra ahora |
+| `chapter:progress` | `{id, progress}` | Scroll dentro del capítulo, 0..1 |
+| `story:progress` | `{value, index, total}` | Progreso global: 0 en el centro del primer sub-plano, 1 en el del último |
+| `story:ready` / `story:disposed` | `{total}` / — | Navegación por planos montada / desmontada |
+| `story:goto` | `{chapter, sub?}` · `{step: ±1}` · `{edge: 'start'\|'end'}` | Petición de ir a un plano |
+| `story:tour` | `{action?: 'toggle'\|'start'\|'stop'}` | Petición de recorrido automático |
+| `story:tour-state` | `{state: 'playing'\|'paused'\|'finished'}` | Estado del recorrido |
+| `scene:hover` | `{label}` | Objeto bajo el puntero, o `null` |
+| `desk:focus` | `{point}` | El DoF enfoca un punto (carpeta en mano) o vuelve al sujeto |
+| `desk:detour` | `{shot}` | Desvío de cámara hacia un plano y vuelta con `null` (1.2 s, `src/three/stage/detour.ts`) |
+| `stage:progress` / `stage:reveal` | `{value}` / `{intro, lamp}` | Carga y primer frame (`docs/3d/engine.md`) |
+
+Clic en un objeto (`src/three/stage/navigate.ts`): `desk:action` para juguetes y acciones; si no, espera 550 ms (figura) o 300 ms y hace scroll al plano, con `product:focus` / `experience:focus` (`source: 'scene'`). Con reduced-motion viaja sin espera.
+
+## `ShotProvider`
+
+Lo registra el escritorio con `registerShotProvider` (`src/three/desk/index.ts`). Miembros: `object3D`, `load(context)`, `update(dt, t, state)` (true mientras se mueve), `getShot(chapter, sub)`, `subShotCount`, `getSurface('monitor'|'phone')`, `getAnchor(name)`, `getFocus(chapter, sub)`, `picks`, `resolvePick`, `setHover`, `dispose`. Detalle del escritorio: `docs/3d/desk.md`.
+
+- Sub-planos de un capítulo: `ShotProvider.subShotCount`; si no hay, el número de placas; mínimo `products` = 3.
+- `StationModule`, `registerStation` y `StationContext.readingPose` son `@deprecated`. `World` todavía adapta un `StationModule` registrado en `hero` cuando no hay `ShotProvider`, pero nada llama a `registerStation`.
+
+## `CameraDirector` (`CAMERA_LIMITS`)
+
+- Un plano fijo por capítulo o sub-plano; la cámara solo se mueve entre planos. Roll 0 (`lookAt` con +Y del mundo).
+- Duración = `clamp(max(distancia / 1 m/s, ángulo / 20°/s), 0.9, 1.4)` s, easing quíntico (`cinematicEase`), interpolación lineal de posición y objetivo, sin arcos. `lastRequiredSeconds` > 1.4 indica que dos planos están demasiado lejos: hay que acercarlos en el escritorio (`checkShots`).
+- FOV: lo decide el Stage por layout (30 / 40 / 52 apilado); el FOV del `Shot` se ignora.
+- Parallax del cursor ≤ 1.5° yaw y ≤ 0.8° pitch, solo asentado, `pointer: fine` y en la ventana de reposo. `PointerField.enabled` es `false` durante las transiciones.
+- Respiración (asentado y en reposo): 6 mm, 0.12°, periodo 11 s, entra en 2.5 s. Solo en `company`, `products`, `experience` y `outro`; en apilado también `hero` y `about` (`breathes`).
+- Reduced-motion o pausa: corte con fundido a negro de 150 + 150 ms sobre el canvas, la capa CSS3D y los paneles, hecho con WAAPI (`filter: brightness`) para que el kill-switch global de transiciones de `src/styles/tokens/modes.css` no lo anule.
+- Intro: si la página carga arriba y hay movimiento, se queda en `intro` 2.4 s desde el primer frame; los planos pedidos mientras tanto quedan en `pending` y se aplican al terminar.
 
 ## Scroll (`setupChapterScroll`)
 
-- **Desktop:** `ScrollTrigger` con `pin: true` por sección durante `subs × 100vh` (inicio en `top top+=2`). El sub-plano es `floor(progress × subs)`.
-- **Táctil o < 1024 px:** sin pin y sin scrub. Cada capítulo se dispara cuando su sección cruza el 50 % del viewport, y el espaciador mide `subs × 100svh`.
-- Sin `normalizeScroll`. A cada momento un solo capítulo manda: el último que entró.
-- El número de sub-planos sale de `ShotProvider.subShotCount`; si no, del número de placas; y como último recurso, `products` = 3.
+- GSAP + ScrollTrigger + ScrollToPlugin, importados después del primer frame. `ignoreMobileResize`; sin `pin`, sin `scrub`, sin `normalizeScroll`, igual en todos los dispositivos.
+- Cada sección es un espaciador de `subs × 100svh` (alto, `min-height`, sin padding). Cada sub-plano posee exactamente un viewport de scroll.
+- Un trigger por sección, `top 50%` → `bottom 50%`. Manda el último que entró; al salir, otro activo. Sub-plano = `floor(progress × subs)`; la cámara solo cambia en los límites.
+- El último trigger termina 2 px más allá del scroll máximo: ScrollTrigger está inactivo con `progress` 1.
+- `positionOf(chapter, sub)` = centro del tramo del sub-plano; el último plano descansa al fondo de la página.
+- `history.scrollRestoration = 'manual'`: un scroll restaurado a mitad de página llegaba antes que los triggers y mostraba otro plano. La historia empieza arriba.
+- Se re-mide en `load`, `document.fonts.ready` y resize. Si un `chapter:settled` llega con un plano viejo (pedido durante la intro), se vuelve a pedir el que muestra el scroll.
 
-## Mediciones (build de HEAD, gzip -9)
+## Navegación por planos (`setupStoryNav`)
 
-| Chunk | KB |
+| Entrada | Efecto |
 |---|---|
-| three (motor + director + CSS3D) | 95.8 |
-| núcleo de three (chunk `tokens`) | 60.5 |
-| gsap + ScrollTrigger | 44.5 |
-| desk | 14.8 |
-| fx | 10.6 |
-| **Total del 3D al arrancar** | **≈ 226** (presupuesto 260) |
+| Rueda | Un gesto = un plano: acumula 40 px; un gesto termina tras 160 ms sin eventos; el resto del gesto y la rueda durante un tween se anulan |
+| ↓ / PageDown / Espacio · ↑ / PageUp / Shift+Espacio | ±1 plano; Home / End: inicio / último |
+| Enlace `#<capítulo>` de la misma página | Va al primer plano de ese capítulo |
+| `story:goto`, `story:tour` | Ver eventos |
+| Táctil, arrastre, scroll libre | Al soltar, tras 150 ms quieto, ajusta (snap) al plano más cercano |
 
-JS inicial del 3D: unos 3 KB. Draw calls: 11–18 por capítulo sin el escritorio nuevo.
+- Tween: `gsap.to(window, {scrollTo})`, `power2.inOut`, 0.35–1.2 s según distancia, `autoKill` si el usuario hace scroll. Sin movimiento: salto instantáneo y sin snap.
+- No intercepta: con modificadores, scroll horizontal, `dialog[open]`, `[data-hud-menu]`, `[role="menu"|"listbox"|"slider"]`, campos de formulario, contenedores con scroll propio, ni Espacio sobre botones/enlaces. Tras una tecla nativa no ajusta durante 1 s.
+- Recorrido automático: espera `chapter:settled` (o 2.5 s), lee `clamp(1.5 s + 45 ms × caracteres de las placas activas, 4, 10)` s y avanza; cualquier entrada lo pausa (salvo `[data-story-tour]` / `[data-story-tour-quick]`) y ocultar la pestaña también. Si empieza al final, vuelve al principio.
+
+## Placas (`[data-plate]` dentro de cada sección)
+
+| Atributo | Efecto |
+|---|---|
+| `data-plate-mode="surface-monitor"\|"surface-phone"` | CSS3D sobre el vidrio, frontal y 1:1, sin animación del motor. Con `size` el motor fija `--surface-width` / `--surface-height` (px CSS) |
+| `data-plate-mode="anchored"` (por defecto) | Panel HTML en la capa 2D fija `.stage-panels`, solo trasladado a la proyección de `getAnchor(data-plate-anchor)`; nunca rota ni escala |
+| `data-plate-side="left\|right"` | Lado del panel en desktop; por defecto, el contrario al ancla |
+| `data-plate-stacked` | En apilado la placa de superficie pasa a `anchored` (necesita `data-plate-anchor`) |
+| `data-plate-sub="<n>"` | Sub-plano de la placa; sin él se ve en todos. Si ninguna placa del capítulo lo usa, la k-ésima va al sub-plano k |
+
+- Desktop: panel junto al ancla, a 32 px, dentro de los márgenes del HUD. Táctil: centrado, desde `max(ancla + 10 % alto, 42 % alto)`; si no cabe, se recorta y hace scroll interno (`data-plate-overflow="start|middle|end"`). Ya no se mueve con `chapter:progress`.
+- Estados: `data-active` = capítulo y sub-plano actuales y cámara asentada; `data-dormant` = capítulos a más de 1 de distancia. Las placas que no son del plano actual quedan con opacidad 0 y sin puntero, pero enfocables: `focusin` lleva el scroll a su plano, y Tab sigue el orden de la historia.
+- Lo que añade el motor: `[data-plate-wrapper]`, `[data-plate-chapter]`, `.stage-surfaces`, `.stage-panels`, `html.is-3d`. Al desmontar (degradar) cada placa vuelve a su sitio del DOM.

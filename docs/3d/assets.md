@@ -5,7 +5,7 @@ Cómo se cargan los modelos y texturas externas del 3D y qué hay que anotar al 
 ## Caché (`src/three/assets.ts`)
 
 - `acquire(key, create, dispose)` / `release(key)`: refcount por clave; al llegar a 0 espera 5 s (`GRACE_MS`) antes de liberar, para que un ir y volver de capítulo no recargue.
-- `acquireGltf(url)`: `GLTFLoader` + `KTX2Loader` + Meshopt se importan solo con el primer glTF. El transcoder Basis se busca en `public/decoders/basis/` (hoy vacío: ningún modelo usa KTX2).
+- `acquireGltf(url)`: `GLTFLoader` + `KTX2Loader` + Meshopt se importan solo con el primer glTF. El transcoder Basis se busca en `decoders/basis/` bajo la base del sitio; `bun run assets` lo copia allí (hoy `public/decoders/` está vacío: ningún modelo usa KTX2).
 - `bindRenderer()` lo llama el Stage al crear el renderer (lo necesita `KTX2Loader.detectSupport`).
 - `cacheSnapshot()` sale en el overlay de `?debug`.
 

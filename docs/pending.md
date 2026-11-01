@@ -1,12 +1,26 @@
 # Pendiente
 
-Lo que falta. Cuando algo se termina, se borra de aquí en el mismo commit.
+Lo que falta hacer y las preguntas abiertas para Carlos; cuando algo se termina, se borra de aquí en el mismo commit.
 
 ## Escritorio
 - Badge «TCS · BCP» con lanyard.
 - Carné de la UPC y post-its de los cofundadores.
 - Texturas PBR de Poly Haven para el escritorio y la pared.
 - GLB de Tripo para las figuras y los props (prompts en `docs/design/mascots.md`).
+
+- Reflejo falso en la ventana desde los ángulos oblicuos.
+- Decidir el look de las figuras antes de generarlas en Tripo: el Alfa de hoy es un robot de cerámica blanca con ojos, no el monolito de obsidiana del prompt (`docs/design/mascots.md`).
+
+## Contenido y SEO
+- Las imágenes OG muestran todavía la red de nodos de la versión anterior.
+- `hero.fallbackAlt` (ES y EN) no se usa y describe esa misma escena vieja.
+
+## Código muerto (sin borrar)
+- `src/three/mascots/**` y `src/three/models.generated.ts`: nadie los importa; la parte `MASCOTS` de `scripts/optimize-assets.ts` solo los alimenta a ellos.
+- Ruta heredada de estaciones: `registerStation`, `StationModule`, `LegacyDeskShots` y `World.setLegacy` (`src/three/world.ts`, `src/three/stage/modules.ts`).
+- `scripts/capture-fallbacks.ts` manda `&progress=1&w=`, que `src/three/index.ts` ignora.
+- Tokens que nadie lee: `--lamp-intensity`, `--monitor-intensity`, `--moonlight-intensity`, `--fx-chromatic-offset`, `--color-{burbu,gift,tool}-body` y los `--*-roughness` / `--*-metalness` de las figuras.
+- Prop `shine` de `KineticText`: no la usa nadie.
 
 ## Medición
 - FPS en el Android y el iPhone de Carlos con `?debug` (métricas en `localStorage['stage:metrics']`).

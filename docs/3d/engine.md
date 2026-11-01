@@ -6,7 +6,7 @@ Qué hace el Stage desde que carga la página hasta el primer frame, cómo degra
 
 - `[data-stage]` es fijo, `aria-hidden`, con un `<picture data-stage-fallback="hero">` (AVIF/WebP a 375, 768 y 1440, `fetchpriority="high"`): es el LCP y lo que queda si no hay 3D.
 - Script inline: si hay WebGL2 y no hay `?tier=none`, `?capture` ni `saveData`, pone `html.stage-pending` (se quita a los 12 s o al degradar).
-- Script del módulo: espera `load` y luego la primera interacción (`pointerdown`, `keydown`, `wheel`, `touchstart`, `scroll`) o 3 s; después `onIdle` → `detectTier()` → `import('src/three/index.ts')` → `boot()`. Con `?capture` no espera y fuerza `high`.
+- Script del módulo: espera `load` y luego la primera interacción (`pointerdown`, `keydown`, `wheel`, `touchstart`, `scroll`) o 3 s; después `onIdle` → `detectTier()` → import dinámico de `src/three/index.ts` → `boot()`. Con `?capture` no espera y fuerza `high`.
 - Mientras tanto corre el cargador 2D (`src/components/three/stage-loader/`), que emite y escucha `stage:progress {value}`.
 - `chapter:enter` pone `[data-stage][data-moving]`; `chapter:settled` lo quita.
 

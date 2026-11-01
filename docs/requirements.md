@@ -1,6 +1,6 @@
 # Requisitos vigentes
 
-Decisiones de Carlos y criterios que cualquier cambio tiene que seguir cumpliendo. Lo que ya se construyó se describe en `docs/3d/`, `docs/design/` y el [mapa del código](CODEMAP.md).
+Decisiones de Carlos, presupuestos de rendimiento, tiers, i18n/SEO y accesibilidad que todo cambio debe seguir cumpliendo; léelo antes de añadir peso, cambiar la cámara o tocar SEO.
 
 ## Decisiones de Carlos
 | Tema | Decisión |

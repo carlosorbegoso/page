@@ -1,5 +1,7 @@
 # Mapa del código · Motor 3D
 
+Qué archivo editar en el motor 3D: arranque, Stage, director, scroll, placas, interacción, tier, assets, debug.
+
 | Para cambiar… | Edita |
 | --- | --- |
 | Cargador previo a three (progreso, filamento, haz de sol, línea de arranque) | `src/components/three/stage-loader/loader.ts` (`stage-loader.ts` solo reexporta) |
@@ -7,7 +9,7 @@
 | Cargador: marcas del póster, ritmo del progreso, texto de estado | `src/components/three/stage-loader/frame.ts`, `progress.ts`, `status.ts` |
 | Arranque del Stage y cableado de piezas (ensamblador) | `src/three/Stage.ts` |
 | Bucle de render a demanda, ventana de inactividad, DPR adaptativo | `src/three/stage/frame-loop.ts` |
-| Placas, scroll ↔ capítulo, intro que retiene el capítulo | `src/three/stage/chapters.ts`, `stage/plates-mount.ts` |
+| Placas, scroll ↔ capítulo, intro que retiene el capítulo; `data-plate-stacked="printed"` deja la placa solo para lectores de pantalla en teléfono vertical (`data-plate-printed`) | `src/three/stage/chapters.ts`, `stage/plates-mount.ts` |
 | Clic en un objeto: reacción y viaje de cámara | `src/three/stage/navigate.ts` |
 | Escritorio y FX registrados, precompilado | `src/three/stage/modules.ts`, `stage/extensions.ts` |
 | Tamaño, layout apilado, FOV y plano por layout | `src/three/stage/shots.ts` |

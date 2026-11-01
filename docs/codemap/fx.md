@@ -1,5 +1,7 @@
 # Mapa del código · Postproceso (fx)
 
+Qué archivo editar en el postproceso (bloom, DoF, streak, grading) y el fluido.
+
 ## Postproceso (fx)
 | Para cambiar… | Edita |
 | --- | --- |

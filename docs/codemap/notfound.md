@@ -1,5 +1,7 @@
 # Mapa del código · Página 404
 
+Qué archivo editar en la página 404 en 3D (`src/three/notfound/`).
+
 | Para cambiar… | Edita |
 | --- | --- |
 | Página 404: montaje, orden de arranque, disposer | `src/three/notfound/scene.ts` |

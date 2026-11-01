@@ -1,5 +1,7 @@
 # Mapa del código · Navegación, movimiento y sonido
 
+Qué archivo editar en la navegación por planos (story-nav), el texto cinético y el sonido.
+
 ## Navegación y movimiento
 | Para cambiar… | Edita |
 | --- | --- |

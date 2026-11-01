@@ -1,9 +1,9 @@
 # Convenciones del código
 
-Reglas de organización: skill `arquitectura-modular` (`.claude/skills/arquitectura-modular/SKILL.md`). Qué archivo editar: [mapa del código](CODEMAP.md).
+Reglas de organización, trampas conocidas y verificación de cada cambio; léelo antes de crear o mover un archivo. Detalle en la skill `arquitectura-modular` (`.claude/skills/arquitectura-modular/SKILL.md`).
 
 ## Reglas
-- ESLint `max-lines` en 300 (error) y `max-lines-per-function` en 40 (aviso).
+- ESLint `max-lines` en 300 (error) y `max-lines-per-function` en 40 (error).
 - Un tema por archivo. El GLSL va en `*.glsl.ts`, con la etiqueta `/* glsl */` delante del template.
 - Barrels con exports con nombre, sin `export *`. Un submódulo nunca importa a su ensamblador.
 - Sin comentarios en el código: lo que no se entiende por los nombres va en estos docs.

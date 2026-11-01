@@ -56,7 +56,7 @@ Todo en Re mayor: cualquier crossfade es consonante. Dos osciladores por nota (t
 | `dawn` | `outro` | — | `music-dawn.m4a` |
 
 - Crossfade lineal 3 s (5 s hacia `dawn`); bucle infinito.
-- `loopStart` = 0.046 s: el AAC trae relleno del codificador al inicio y sin saltarlo el bucle hace clic.
+- `loopStart` = 0.046 s (`ENCODER_PRIMING_SECONDS`): salta el relleno de silencio que el codificador AAC pone al inicio, para que el bucle no tenga hueco.
 - Muestras (playbackRate 0.96–1.04): `switchOn`/`switchOff` en `desk:switch {on}`; `pageFlip` en cada subplano de `experience` > 0 (no en pausa).
 - URL con `import.meta.env.BASE_URL` (el sitio vive bajo `/page/`).
 

@@ -1,5 +1,7 @@
 # Mapa del código · Escritorio 3D
 
+Qué archivo editar en el escritorio 3D: encuadres (shots), luz, props, figuras, carpetas, pantallas, retrato, corcho, reloj.
+
 | Para cambiar… | Edita |
 | --- | --- |
 | Encuadres por capítulo (ensamblado, caché por viewport) | `src/three/desk/shots/framings.ts` (`desk/shots.ts` solo reexporta) |
@@ -81,3 +83,4 @@
 | Medidas y posiciones del cuarto (1 u = 1 m) | `src/three/desk/layout.ts` |
 | Papel impreso: densidad, nivel de tinta frente a la lámpara (`PAPER_LEVEL`), fuentes | `src/three/desk/notes/paper.ts`; textos en `notes/content.ts`, posiciones en `notes/layout.ts` |
 | Vista aislada del escritorio para depurar (la app no la importa) | `src/three/desk/preview.ts` |
+| Ficha impresa bajo el cuadro (solo teléfono vertical; titular y Hoy/Antes/De noche leídos del HTML de about-bio), llega después del primer frame | `src/three/desk/portrait/bio-card.ts`, dibujo en `bio-print.ts`, posición `BIO_CARD` en `portrait/layout.ts` |

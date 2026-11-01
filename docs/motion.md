@@ -96,7 +96,7 @@ Regla: una sola fuente de movimiento a la vez y el texto quieto para leer.
 | Señal del borde | 7 s alterno | `--ease-in-out` |
 | Brillo (`shine`) | ciclo 14 s, 35 ms entre letras, arranque 1.2 s | `linear` |
 
-`identity.md` §5 pide «desplazamiento máximo 12–16 px»: las palabras suben su propia altura pero dentro de una máscara, así que se ve una emergencia, no un desplazamiento de bloque. Bloques (12 px) y cascadas (8 px) sí lo respetan.
+`docs/design/spacing-motion.md` («Reglas de movimiento») pide «desplazamiento máximo 12–16 px»: las palabras suben su propia altura pero dentro de una máscara, así que se ve una emergencia, no un desplazamiento de bloque. Bloques (12 px) y cascadas (8 px) sí lo respetan.
 
 ## Navegación por planos (`src/motion/story-nav/`)
 

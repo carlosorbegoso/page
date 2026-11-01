@@ -598,7 +598,7 @@ export class DeskSet implements ShotProvider {
       } else if (this.settledAt >= 0 && time - this.settledAt >= switchDelay) {
         if (!this.storySwitched) {
           this.storySwitched = true;
-          if (Math.abs(level.lamp - light.lamp) > 2) window.dispatchEvent(new CustomEvent('desk:switch', { detail: { on: light.lamp > level.lamp } }));
+          if (light.lamp > level.lamp ? level.lamp < light.lamp * 0.4 : light.lamp === 0 && level.lamp > 2) window.dispatchEvent(new CustomEvent('desk:switch', { detail: { on: light.lamp > level.lamp } }));
         }
         level.lamp = filamentSwitch(level.lamp, light.lamp, time - this.settledAt - switchDelay, step);
       }

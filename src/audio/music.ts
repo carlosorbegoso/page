@@ -46,7 +46,8 @@ export class MusicBed {
 
   constructor(
     private readonly context: AudioContext,
-    private readonly samplesOut: AudioNode
+    private readonly samplesOut: AudioNode,
+    private readonly onFirstTrack: () => void = () => undefined
   ) {
     this.output = context.createGain();
   }
@@ -98,6 +99,7 @@ export class MusicBed {
       previous.gain.gain.linearRampToValueAtTime(0, now + fade);
       previous.source.stop(now + fade + 0.1);
     }
+    if (!this.current) this.onFirstTrack();
     this.current = { act, source, gain };
   }
 

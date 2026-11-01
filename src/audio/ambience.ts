@@ -8,8 +8,9 @@ import { playChime, playKey, playTock } from './voices';
 export const MASTER_LEVEL = 0.11;
 
 const LEVELS = {
-  /** The pad steps back to a colour under the music. */
-  pad: 0.12,
+  pad: 0.32,
+  /** The pad steps back to a colour once a music track is actually playing. */
+  padUnderMusic: 0.12,
   music: 2.2,
   sample: 0.5,
   room: 1,
@@ -162,7 +163,9 @@ export class Ambience {
     this.chimeBus = context.createGain();
     this.connectWithSends(this.chimeBus, 0.6, 0.6, 0.5);
 
-    this.music = new MusicBed(context, this.fxBus);
+    this.music = new MusicBed(context, this.fxBus, () =>
+      this.padBus.gain.setTargetAtTime(LEVELS.padUnderMusic, context.currentTime, 1)
+    );
     this.music.output.gain.value = LEVELS.music;
     this.connectWithSends(this.music.output, 1, 0.12, 0);
 

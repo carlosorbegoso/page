@@ -18,6 +18,7 @@ import {
   type WebGLRenderer
 } from 'three';
 import { tokenColor } from '../tokens';
+import { WALL_SPILL_ALBEDO, WALL_SPILL_DECLARATIONS, WALL_SPILL_LIGHT } from './screens/wallSpill';
 
 /** Number of object ids the per-object arrays cover (ids 0 … OBJECT_SLOTS − 1). */
 export const OBJECT_SLOTS = 12;
@@ -116,7 +117,8 @@ float roomOcclusion(vec3 p, vec3 n) {
   ao *= 1.0 - 0.35 * underDesk;
   return ao;
 }
-`;
+
+${WALL_SPILL_DECLARATIONS}`;
 
 /**
  * The room's single "atlas" material: albedo from vertex colours, and per-vertex
@@ -186,8 +188,13 @@ export function createAtlasMaterial(
         `#include <color_fragment>
         if (vPbr.w > 0.0) diffuseColor.rgb *= mix(1.0, woodGrain(vRoomPosition), vPbr.w);
         diffuseColor.rgb *= roomOcclusion(vRoomPosition, normalize(vRoomNormal));
+        ${WALL_SPILL_ALBEDO}
         float presence = uPresence[clamp(int(vOid + 0.5), 0, ${OBJECT_SLOTS - 1})];
         diffuseColor.rgb = mix(vec3(dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722))), diffuseColor.rgb, presence) * (0.3 + 0.7 * presence);`
+      )
+      .replace(
+        '#include <lights_fragment_end>',
+        `#include <lights_fragment_end>\n${WALL_SPILL_LIGHT}`
       )
       .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = vPbr.x;')
       .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\nmetalnessFactor = vPbr.y;')
@@ -201,7 +208,7 @@ export function createAtlasMaterial(
         totalEmissiveRadiance += uHoverColor * hovered * uHoverMix * (0.05 + 0.6 * rim);`
       );
   };
-  material.customProgramCacheKey = () => 'desk-atlas-v5';
+  material.customProgramCacheKey = () => 'desk-atlas-v6';
   return { material, uniforms };
 }
 

@@ -172,6 +172,7 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Objetos que viajan con la carpeta (`follow`) | `src/three/desk/folder-detail/follow.ts` |
 | Reloj despertador | `src/three/desk/clock.ts`, `src/three/desk/clock/` |
 | Figuras animadas | `src/three/desk/life/` |
+| Tarjetas impresas de los productos (se acuestan en el escritorio y se paran en su plano) | `src/three/desk/notes/cards/` |
 | Página 404: montaje, orden de arranque, disposer | `src/three/notfound/scene.ts` |
 | 404: hoja impresa (texto, sello, renglones) | `src/three/notfound/paper-texture.ts` |
 | 404: escritorio, pared, ventana con lluvia, taza | `src/three/notfound/room.ts`, GLSL en `rain.glsl.ts` |

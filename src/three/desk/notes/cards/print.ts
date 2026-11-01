@@ -26,7 +26,7 @@ const MM = {
   role: 5,
   visit: 5.5
 } as const;
-const LEADING = 1.38;
+const LEADING = 1.32;
 
 interface Pen {
   context: CanvasRenderingContext2D;
@@ -90,9 +90,10 @@ function drawFooter(pen: Pen, product: ProductPrint, bottom: number): number {
   context.fillStyle = MUTED;
   const label = `${product.roleLabel}: `;
   context.fillText(label, pen.left, roleBaseline);
+  const labelWidth = context.measureText(label).width;
   context.font = `400 ${roleSize}px ${pen.fonts.body}`;
   context.fillStyle = INK;
-  context.fillText(product.role, pen.left + context.measureText(label).width, roleBaseline, pen.text);
+  context.fillText(product.role, pen.left + labelWidth, roleBaseline, pen.text - labelWidth);
   const rule = roleBaseline - roleSize * 1.9;
   context.fillStyle = `${MUTED}55`;
   context.fillRect(pen.left, rule, pen.text, Math.max(1, px * 0.25));

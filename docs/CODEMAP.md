@@ -88,7 +88,7 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Laptop (carcasa, teclas, tapa, cable USB-C) | `src/three/desk/props/laptop.ts` |
 | Carpeta abierta de TCS (tapas, bolsillo, hojas, clip, ligas) | `src/three/desk/props/openFolder.ts` |
 | Planta y telescopio | `src/three/desk/props/decor.ts` |
-| Coleccionables (Alfa, Burbu, regalo, llave) | `src/three/desk/props/figures.ts` |
+| Peana y coleccionables: Alfa, Burbu (Ventixs), regalo (Parati), llave (SkyMek), un archivo cada uno | `src/three/desk/props/figures/` |
 | Sombras de contacto | `src/three/desk/props/shadows.ts` |
 | Ayudas de geometría (`seg`, `shade`, `rod`) | `src/three/desk/props/geometry.ts` |
 | Material atlas de la habitación | `src/three/desk/materials/atlas.ts`, GLSL en `atlas.glsl.ts`, ranuras en `slots.ts` |

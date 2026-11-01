@@ -64,6 +64,12 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Texto cinético | `src/motion/kinetic.ts` |
 | Botones magnéticos | `src/motion/magnetic.ts` |
 
+## Sonido
+| Para cambiar… | Edita |
+| --- | --- |
+| Lecho de ambiente por capítulo, swell, campanilla | `src/audio/ambience.ts` |
+| Bus maestro, limitador, reverbs y filtro del pad | `src/audio/mix-graph.ts` |
+
 ## Escena 3D
 | Para cambiar… | Edita |
 | --- | --- |

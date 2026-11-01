@@ -41,13 +41,11 @@ export function coverPoints(pull: number): Vector3[] {
   return boxCorners(new Vector3(first.x - halfWidth, first.y + 0.005 - halfHeight, z), new Vector3(first.x + halfWidth + pull, first.y + 0.005 + halfHeight, z));
 }
 
-export function openFolderPoints(): Vector3[] {
-  const { centre, width, depth, yaw } = OPEN_FOLDER;
-  const across = new Vector3(Math.cos(yaw), 0, -Math.sin(yaw)).multiplyScalar(width / 2);
-  const along = new Vector3(Math.sin(yaw), 0, Math.cos(yaw)).multiplyScalar(depth / 2);
-  const corners: Vector3[] = [];
-  for (const a of [-1, 1]) for (const b of [-1, 1]) for (const y of [0, 0.02]) corners.push(centre.clone().addScaledVector(across, a).addScaledVector(along, b).setY(centre.y + y));
-  return corners;
+const UP = new Vector3(0, 1, 0);
+
+export function takenSheetPoints(): Vector3[] {
+  const { centre, yaw } = OPEN_FOLDER;
+  return boxCorners(new Vector3(0.01, 0, 0), new Vector3(0.2, 0.19, 0.11)).map(point => point.applyAxisAngle(UP, yaw).add(centre));
 }
 
 export function centreOf(points: Vector3[]): Vector3 {

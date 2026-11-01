@@ -46,7 +46,7 @@ export class DeskFraming {
   surface(name: SurfaceName, chapter: ChapterId): PlateAnchor | null {
     const frame = name === 'monitor' ? monitorFrame() : this.phoneSurface();
     const reader: ChapterId = name === 'phone' ? 'contact' : chapter === 'about' ? 'about' : 'hero';
-    const shot = this.shot(reader, 0);
+    const shot = this.shot(reader, reader === 'about' ? 1 : 0);
     const view = this.viewport();
     if (!shot || view.height <= 0) return null;
     const distance = shot.position.distanceTo(frame.centre);

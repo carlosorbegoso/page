@@ -5,9 +5,11 @@ Qué archivo editar en el escritorio 3D: encuadres (shots), luz, props, figuras,
 | Para cambiar… | Edita |
 | --- | --- |
 | Encuadres por capítulo (ensamblado, caché por viewport) | `src/three/desk/shots/framings.ts` (`desk/shots.ts` solo reexporta) |
-| Cámara de hero, about, contacto y cierre; planos de teléfono vertical | `src/three/desk/shots/monitor-shots.ts` |
-| Cámara de about: el cuadro de la pared y el monitor juntos (en teléfono vertical, el cuadro y medio monitor) | `src/three/desk/shots/about-shots.ts` |
-| Cámara de empresa y productos (rumbo, inclinación, distancia) | `src/three/desk/shots/figure-shots.ts` |
+| Cámara de hero, about, contacto y cierre; en teléfono vertical, el monitor a ~97 % del ancho (hero, stack, cierre) | `src/three/desk/shots/monitor-shots.ts` |
+| Cámara de about: el cuadro de la pared y el monitor juntos (en teléfono vertical, el cuadro y la tarjeta impresa); distancia del hero para que entre el cuadro | `src/three/desk/shots/about-shots.ts` |
+| Cámara de empresa | `src/three/desk/shots/figure-shots.ts` |
+| Cámara de productos (rumbo, inclinación, lado del texto) | `src/three/desk/shots/product-shots.ts` |
+| Encuadre de escritorio al lado del panel de texto (zona libre, distancia mínima) | `src/three/desk/shots/beside-text.ts` |
 | Cámara del estante y las carpetas | `src/three/desk/shots/experience-shots.ts` |
 | Encuadre vertical: protagonistas enteros, vecinos fuera, retoques | `src/three/desk/shots/portrait-fit.ts`, puntos en `protagonists.ts` |
 | Mezcla por aspecto, ajuste por ancho o alto | `src/three/desk/shots/math.ts`; zona libre bajo el HUD en `context.ts` |
@@ -65,10 +67,11 @@ Qué archivo editar en el escritorio 3D: encuadres (shots), luz, props, figuras,
 | Vapor del café | `src/three/desk/atmosphere/steam.ts`, GLSL en `steam.glsl.ts` |
 | Sacar la carpeta del estante: estado, toggle, update | `src/three/desk/folder-detail/FolderDetail.ts` (`desk/folderDetail.ts` solo reexporta) |
 | Dónde se sostiene la carpeta, giro hacia la cámara | `src/three/desk/folder-detail/aim.ts`, tiempos en `constants.ts` |
+| Hoja de TCS apoyada en la carpeta abierta del escritorio, de cara a la cámara | `src/three/desk/folder-detail/open-sheet-pose.ts` |
 | Hoja impresa de la carpeta (dibujo, ajuste de líneas) | `src/three/desk/folder-detail/sheet-canvas.ts`, `wrap.ts` |
 | Qué texto lleva la hoja (se lee de `src/content/experience/<idioma>.json`) | `src/three/desk/folder-detail/sheet-content.ts` |
 | Tapa que se abre al sacar la caja; clic fuera la devuelve | `src/three/desk/folder-detail/flap.ts`, `outside-click.ts` |
-| Cara interior de la tapa (cartón, bolsillo, etiqueta) | `src/three/desk/folder-detail/flap-inside.ts` |
+| Cara interior de la tapa (cartón, bolsillo, etiqueta, tecnologías) | `src/three/desk/folder-detail/flap-inside.ts` |
 | La carpeta del sub-plano se abre sola al aterrizar la cámara | `src/three/desk/set/folder-auto-open.ts` |
 | Hoja de portada del archivo (título del capítulo experiencia en 3D) | `src/three/desk/archive-cover.ts` |
 | El enfoque (DOF) sigue a la carpeta en mano (`desk:focus`) | `src/three/desk/set/folders.ts`, `src/three/stage/listen.ts` |

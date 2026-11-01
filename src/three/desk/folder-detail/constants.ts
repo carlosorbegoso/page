@@ -9,8 +9,6 @@ export const CLEAR_X = SHELF.x + SHELF.depth + FOLDER.depth / 2 + 0.012;
 
 export const SHEET = { width: FOLDER.depth * 0.84, height: FOLDER.height * 0.86 } as const;
 export const OPEN_SHEET = { width: SHEET.width * 0.78, height: SHEET.height * 0.78 } as const;
-export const OPEN_SHEET_LIFT = 0.012;
-export const OPEN_SHEET_FORWARD = 0.02;
 export const SHEET_LEVEL = 0.42;
 
 export type ShelfFolder = Exclude<FolderId, 'tcs'>;

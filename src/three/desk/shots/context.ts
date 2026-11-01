@@ -29,7 +29,6 @@ export interface ShotContext {
   stageY: number;
   whole: Region;
   layoutFor(side: SideLayout): { panel: Place; sx: number };
-  topHalf(span: number): number;
 }
 
 export function shotContext(view: Viewport, phone: SurfaceFrame): ShotContext {
@@ -54,7 +53,6 @@ export function shotContext(view: Viewport, phone: SurfaceFrame): ShotContext {
     stage,
     stageY: (stage.top + stage.bottom) / 2,
     whole: { left: 0.02, right: 0.98, top: stage.top, bottom: 1 },
-    layoutFor: side => ({ panel: portrait ? panelBelow : side.panel, sx: portrait ? 0.5 : side.subject }),
-    topHalf: span => span / Math.tan((view.fov * DEG) / 2)
+    layoutFor: side => ({ panel: portrait ? panelBelow : side.panel, sx: portrait ? 0.5 : side.subject })
   };
 }

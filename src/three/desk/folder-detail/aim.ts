@@ -106,9 +106,3 @@ export function shelfHoldPose(id: FolderId, progress: number, pull: number, targ
   scratchQuaternion.copy(IDENTITY).slerp(targetTurn, turn);
   return out.compose(scratchPosition, scratchQuaternion, ONE).multiply(scratch.makeTranslation(-centre.x, -centre.y, -centre.z));
 }
-
-export function aimOpenSheet(eye: Vector3, openFrame: Matrix4, takenEdge: Vector3, flat: Quaternion, out: Quaternion): void {
-  const local = eye.clone().applyMatrix4(scratch.copy(openFrame).invert()).sub(takenEdge).normalize();
-  const facing = new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), local);
-  out.copy(IDENTITY).slerp(facing, 0.85).multiply(flat);
-}

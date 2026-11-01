@@ -73,7 +73,7 @@ export const PHONE = {
   screen: { width: 0.065, height: 0.14 }
 } as const;
 
-export const MUG = new Vector3(0.64, DESK.top, 0.17);
+export const MUG = new Vector3(0.65, DESK.top, 0.27);
 
 export const LAPTOP = {
   centre: new Vector3(-0.57, DESK.top, -0.1),

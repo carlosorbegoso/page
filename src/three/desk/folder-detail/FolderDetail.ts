@@ -11,23 +11,16 @@ import {
   type PerspectiveCamera,
   type WebGLRenderer
 } from 'three';
-import { FOLDER, FOLDERS, OPEN_FOLDER, folderCentre, type FolderId } from '../layout';
+import { FOLDER, FOLDERS, folderCentre, type FolderId } from '../layout';
 import type { Palette } from '../props';
-import {
-  DURATION,
-  FOLDER_PARK,
-  OPEN_SHEET,
-  OPEN_SHEET_FORWARD,
-  OPEN_SHEET_LIFT,
-  SHEET,
-  type ShelfFolder
-} from './constants';
-import { aimOpenSheet, aimShelfFolder, shelfHoldPose } from './aim';
+import { DURATION, FOLDER_PARK, OPEN_SHEET, SHEET, type ShelfFolder } from './constants';
+import { aimShelfFolder, shelfHoldPose } from './aim';
 import { ease } from './ease';
 import { createFlapMesh, FLAP_THICKNESS, flapPose, placeFlap } from './flap';
 import { createFlapInside } from './flap-inside';
 import { createSheetMesh, createSheetTexture, createTwinMesh, type SheetMesh } from './mesh';
 import { listenOutsideClick } from './outside-click';
+import { OPEN_SHEET_EDGE, OPEN_SHEET_FLAT, OPEN_SHEET_TAKEN_EDGE, sheetMatrix, takenSheetTurn } from './open-sheet-pose';
 import { drawSheet } from './sheet-canvas';
 import { readExperience, type SheetContent } from './sheet-content';
 
@@ -44,7 +37,6 @@ export interface FolderDetailOptions {
 const scratch = new Matrix4();
 const scratchQuaternion = new Quaternion();
 const scratchPosition = new Vector3();
-const ONE = new Vector3(1, 1, 1);
 
 function disposeInside(flap: Mesh): void {
   for (const child of flap.children as Mesh<PlaneGeometry, MeshBasicMaterial>[]) {
@@ -65,11 +57,7 @@ export class FolderDetail {
   private readonly texture: CanvasTexture;
   private readonly shelfSheet: SheetMesh;
   private readonly openSheet: SheetMesh;
-  private readonly openFrame: Matrix4;
-  private readonly openEdge = new Vector3(OPEN_FOLDER.width / 4, 0.0095, OPEN_SHEET.height / 2);
-  private readonly openFlat = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -Math.PI / 2);
   private readonly openTaken = new Quaternion();
-  private readonly openTakenEdge = new Vector3();
   private readonly targetAt = new Vector3();
   private readonly targetTurn = new Quaternion();
   private readonly pose = new Matrix4();
@@ -93,7 +81,6 @@ export class FolderDetail {
     this.shelfSheet = createSheetMesh('desk-folder-sheet', this.texture, SHEET, false);
     this.openSheet = createSheetMesh('desk-open-folder-sheet', this.texture, OPEN_SHEET, true);
     this.object3D.add(this.shelfSheet, this.openSheet);
-    this.openFrame = new Matrix4().compose(OPEN_FOLDER.centre, new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), OPEN_FOLDER.yaw), ONE);
     void document.fonts?.ready.then(() => this.redrawWithLoadedFonts());
     this.stopOutsideClick = listenOutsideClick({
       isOut: () => this.shown !== null && this.goal === 1,
@@ -133,7 +120,7 @@ export class FolderDetail {
     drawSheet(this.canvas, this.content);
     this.texture.needsUpdate = true;
     this.options.renderer.initTexture(this.texture);
-    if (id === 'tcs') this.aimOpenSheet(eye);
+    if (id === 'tcs') takenSheetTurn(eye, this.openTaken);
     else aimShelfFolder(id, this.options.camera, this.targetAt, this.targetTurn);
   }
 
@@ -188,18 +175,10 @@ export class FolderDetail {
     this.shelfSheet.visible = true;
   }
 
-  private aimOpenSheet(eye: Vector3): void {
-    this.openTakenEdge.copy(this.openEdge).add(new Vector3(0, OPEN_SHEET_LIFT, OPEN_SHEET_FORWARD));
-    aimOpenSheet(eye, this.openFrame, this.openTakenEdge, this.openFlat, this.openTaken);
-  }
-
   private placeOpenSheet(): void {
     const t = ease(this.progress);
-    const edge = scratchPosition.copy(this.openEdge).lerp(this.openTakenEdge, t);
-    scratchQuaternion.copy(this.openFlat).slerp(this.openTaken, t);
-    this.openSheet.matrix
-      .multiplyMatrices(this.openFrame, scratch.compose(edge, scratchQuaternion, ONE))
-      .multiply(scratch.makeTranslation(0, OPEN_SHEET.height / 2, 0));
+    const edge = scratchPosition.copy(OPEN_SHEET_EDGE).lerp(OPEN_SHEET_TAKEN_EDGE, t);
+    sheetMatrix(edge, scratchQuaternion.copy(OPEN_SHEET_FLAT).slerp(this.openTaken, t), this.openSheet.matrix);
     this.openSheet.matrixWorldNeedsUpdate = true;
     this.openSheet.material.opacity = Math.min(this.progress / 0.15, 1);
     this.openSheet.visible = true;

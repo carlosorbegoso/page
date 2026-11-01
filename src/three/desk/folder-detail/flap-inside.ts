@@ -4,6 +4,8 @@ import type { Palette } from '../props';
 import { SPINE_TEXT } from '../spines';
 import { sheetFonts } from './sheet-canvas';
 import { FOLDER_PARK, SHEET_LEVEL, type ShelfFolder } from './constants';
+import { readExperience } from './sheet-content';
+import { wrap } from './wrap';
 
 const WIDTH = 512;
 const HEIGHT = Math.round((WIDTH * FOLDER.height) / FOLDER.depth);
@@ -53,6 +55,24 @@ function drawIndexLabel(context: CanvasRenderingContext2D, id: ShelfFolder): voi
   context.fillText(years, x + 24, y + 138);
 }
 
+function drawStackLabel(context: CanvasRenderingContext2D, id: ShelfFolder): void {
+  const { stackTitle, stack } = readExperience(id);
+  if (!stack.length) return;
+  const fonts = sheetFonts();
+  const x = 56;
+  const width = WIDTH - x * 2 - 48;
+  context.font = `500 21px ${fonts.mono}`;
+  const lines = wrap(context, stack.join(' · '), width).slice(0, 3);
+  const top = 244;
+  context.fillStyle = LABEL;
+  context.fillRect(x, top, WIDTH - x * 2, 58 + lines.length * 30);
+  context.fillStyle = INK;
+  context.font = `600 18px ${fonts.mono}`;
+  context.fillText(stackTitle.toUpperCase(), x + 24, top + 34);
+  context.font = `500 21px ${fonts.mono}`;
+  lines.forEach((line, index) => context.fillText(line, x + 24, top + 66 + index * 30));
+}
+
 function drawInside(canvas: HTMLCanvasElement, palette: Palette, id: ShelfFolder): void {
   const context = canvas.getContext('2d')!;
   context.textBaseline = 'alphabetic';
@@ -61,6 +81,7 @@ function drawInside(canvas: HTMLCanvasElement, palette: Palette, id: ShelfFolder
   context.fillRect(0, 0, WIDTH, HEIGHT);
   drawPocket(context, palette, id);
   drawIndexLabel(context, id);
+  drawStackLabel(context, id);
 }
 
 export function createFlapInside(id: ShelfFolder, palette: Palette): Mesh<PlaneGeometry, MeshBasicMaterial> {

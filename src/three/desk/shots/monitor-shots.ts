@@ -1,14 +1,14 @@
 import { Plane, Vector3 } from 'three';
-import { HERO_EYE, LAPTOP, MONITOR, ROOM } from '../layout';
-import { aboutPairShot, stackedAboutFocus } from './about-shots';
+import { HERO_EYE, ROOM } from '../layout';
+import { aboutPairShot, HERO_PLACE, heroFitDistance, stackedBioShot } from './about-shots';
 import type { ShotContext } from './context';
-import { clamp, eyeFor, heightFit, lerp, widthFit } from './math';
+import { clamp, DEG, heightFit, lerp, widthFit } from './math';
 import type { Framing } from './types';
 
 export function heroDistance(ctx: ShotContext): number {
   const { view, screenSpan, screenRise, t } = ctx;
   return lerp(
-    clamp(widthFit(screenSpan, 0.5, view), 1.05, HERO_EYE.distanceTo(ctx.monitor.centre)),
+    heroFitDistance(ctx, clamp(widthFit(screenSpan, 0.5, view), 1.05, HERO_EYE.distanceTo(ctx.monitor.centre))),
     clamp(Math.max(widthFit(screenSpan, 0.8, view), heightFit(screenRise, 0.78, view)), 1.0, 2.3),
     t
   );
@@ -19,8 +19,8 @@ export function heroShot(ctx: ShotContext, distance: number): Framing {
   return {
     eye: screen.clone().addScaledVector(ctx.monitor.normal, distance),
     focus: screen,
-    sx: lerp(0.42, 0.5, ctx.t),
-    sy: lerp(0.47, 0.5, ctx.t)
+    sx: lerp(HERO_PLACE.sx, 0.5, ctx.t),
+    sy: lerp(HERO_PLACE.sy, 0.5, ctx.t)
   };
 }
 
@@ -63,17 +63,17 @@ export function outroShot(ctx: ShotContext, hero: Framing, heroDistance: number)
   };
 }
 
-function stackedShot(ctx: ShotContext, focus: Vector3, heading: number, pitch: number, span: number, name: string, sy = ctx.subjectY): Framing {
-  return { eye: eyeFor(focus, heading, pitch, ctx.topHalf(span)), focus, sx: 0.5, sy, panel: { name, ...ctx.panelDocked } };
+const SCREEN_FILL = 0.97;
+const OUTRO = { turn: 8 * DEG, fill: 0.95 };
+const UP = new Vector3(0, 1, 0);
+
+function monitorFill(ctx: ShotContext, name: string, turn = 0, fill = SCREEN_FILL): Framing {
+  const screen = ctx.monitor.centre;
+  const distance = widthFit(ctx.screenSpan * Math.cos(turn), fill, ctx.view);
+  const facing = ctx.monitor.normal.clone().applyAxisAngle(UP, turn);
+  return { eye: screen.clone().addScaledVector(facing, distance), focus: screen, sx: 0.5, sy: 0.5, panel: { name, ...ctx.panelDocked } };
 }
 
 export function stackedMonitorShots(ctx: ShotContext): { hero: Framing; about: Framing[]; outro: Framing } {
-  const room = MONITOR.centre.clone().add(new Vector3(0.12, 0.06, -0.04));
-  const hero = stackedShot(ctx, room, 4, -7, 1.45, 'hero', ctx.subjectY + 0.04);
-  const bio = stackedShot(ctx, stackedAboutFocus(), 4, -8, 0.92, 'about-bio');
-  const laptop = LAPTOP.centre.clone().add(new Vector3(0.02, 0.1, 0));
-  const stack = stackedShot(ctx, laptop, -14, -14, 0.5, 'about-stack');
-  const sky = MONITOR.centre.clone().add(new Vector3(0.3, 0.22, -0.1));
-  const outro = stackedShot(ctx, sky, 6, 2, 0.88, 'outro');
-  return { hero, about: [bio, stack], outro };
+  return { hero: monitorFill(ctx, 'hero'), about: [stackedBioShot(ctx), monitorFill(ctx, 'about-stack')], outro: monitorFill(ctx, 'outro', OUTRO.turn, OUTRO.fill) };
 }

@@ -1,7 +1,8 @@
 import type { ChapterId } from '../../contracts';
 import { shotContext } from './context';
 import { experienceShots } from './experience-shots';
-import { companyShot, productShots } from './figure-shots';
+import { companyShot } from './figure-shots';
+import { productShots } from './product-shots';
 import { aboutShot, contactShot, heroDistance, heroShot, outroShot, stackedMonitorShots } from './monitor-shots';
 import type { Framing, SurfaceFrame, Viewport } from './types';
 

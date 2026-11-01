@@ -11,15 +11,15 @@ Qué entrega el escritorio al director (planos, superficies, anclas, foco, picks
 | Capítulo | Sub-planos |
 |---|---|
 | `intro`, `hero` | 1, el mismo plano frente al monitor |
-| `about` | 2: en horizontal, el mismo plano (cuadro de la pared + monitor; cambia el slide); apilado, bio y stack por separado |
+| `about` | 2: en horizontal, el mismo plano (cuadro de la pared + monitor; cambia el slide); apilado, 0 = cuadro + tarjeta impresa de frente, 1 = monitor al ~97 % del ancho |
 | `experience` | 5: 0 = estante (`exp-intro`), luego `EXPERIENCE_ORDER` = SYSARP, Baufest, Intercorp, TCS (carpeta abierta de la mesa) |
 | `company` | 1 (Alfa) |
 | `products` | 3: SkyMek, Parati, Ventixs (`PRODUCT_FIGURES`) |
 | `contact` | 1 (teléfono) |
-| `outro` | 1: detrás del `hero`, a `heroDistance + 0.08` m (máx. 1.75) |
+| `outro` | 1: detrás del `hero`, a `heroDistance + 0.08` m (máx. 1.75); apilado, el monitor al 95 % del ancho girado 8° hacia el teléfono (si no, contacto → cierre pasa de 1.4 m) |
 
 - Encuadres por viewport con caché (`framings`). El FOV es el del director (`context.fov()`).
-- Horizontal: texto a la izquierda (columna del 56 %, `TEXT_LEFT`), sujeto al 70 % del ancho. Apilado: panel acoplado abajo, sujeto en la mitad superior bajo el HUD.
+- Horizontal: texto a la izquierda (columna del 56 %, `TEXT_LEFT`), sujeto al 70 % del ancho. En escritorio, estante, TCS y productos se acercan hasta llenar la franja libre junto al panel (`beside-text.ts`); Parati y Ventixs llevan el texto a la derecha. El hero se aleja lo justo para que el cuadro y su lámpara entren enteros. Apilado: panel acoplado abajo, sujeto en la mitad superior bajo el HUD; hero, stack y cierre con el monitor casi a todo el ancho.
 
 ## Límites entre planos (`checkShots`, `SHOT_LIMITS`)
 
@@ -28,7 +28,7 @@ Qué entrega el escritorio al director (planos, superficies, anclas, foco, picks
 
 ## `getSurface('monitor' | 'phone')`
 
-- Plano exacto del vidrio (+1.5 mm), con `scale` a 1:1 desde el plano que lo lee: el monitor desde `hero` (o `about` en `about`), el teléfono desde `contact`.
+- Plano exacto del vidrio (+1.5 mm), con `scale` a 1:1 desde el plano que lo lee: el monitor desde `hero` (o `about` sub 1 en `about`), el teléfono desde `contact`.
 - `size` en metros: monitor 0.598 × 0.336, teléfono 0.065 × 0.14 (`MONITOR.screen`, `PHONE.screen`).
 
 ## `getAnchor(name)` (`ANCHOR_NAMES`)

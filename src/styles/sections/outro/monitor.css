@@ -12,7 +12,7 @@
   color: var(--color-accent);
 }
 
-.is-3d [data-plate-mode='surface-monitor'] .outro h2 {
+.is-3d [data-plate-mode='surface-monitor'] .outro-screen h2 {
   max-width: 80%;
   margin-top: 2.4cqh;
   font-size: 9.4cqh;

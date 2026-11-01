@@ -14,7 +14,7 @@ Qué archivo editar en la web: `<head>`, tokens, HUD, secciones, modo lectura, t
 | Estilos globales, reset | `src/styles/global.css` |
 | Animaciones CSS, `prefers-reduced-motion` | `src/styles/motion/{keyframes,reveal,kinetic}.css` |
 | Estilos de las placas (base, ancladas, sueltas, superficies, desbordes, acabado) | `src/styles/plates/` |
-| Barra de menús Mac del monitor (`::before`, con la hora de la historia); en hero, stack y final solo cuando la pantalla mide ≥ 760 px | `src/styles/plates/monitor-chrome.css` |
+| Barra de menús Mac del monitor (`::before`, con la hora de la historia); solo cuando la pantalla mide ≥ 760 px | `src/styles/plates/monitor-chrome.css` |
 | Navegador en el monitor (hero y final): ventana, barra con semáforo, pestaña y dirección real del sitio, página con rejilla; una sola barra de 26 px en compacto, pestaña + barra de dirección en ≥ 760 px | `src/components/screen/BrowserWindow.astro`, `SiteNav.astro`; estilos en `src/styles/plates/browser.css`, `browser-wide.css` |
 | Brillo, viñeta y borde interior de la pantalla LCD en todas las placas del monitor (`::after`, por encima del contenido) | `src/styles/plates/finish.css` |
 

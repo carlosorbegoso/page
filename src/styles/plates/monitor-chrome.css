@@ -39,12 +39,7 @@
 }
 
 @container surface (width < 760px) {
-  .is-3d
-    .plate[data-plate-mode='surface-monitor']:is(
-      [data-plate-id='hero'],
-      [data-plate-id='outro'],
-      [data-plate-id='about-stack']
-    )::before {
+  .is-3d .plate[data-plate-mode='surface-monitor']::before {
     display: none;
   }
 }

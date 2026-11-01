@@ -60,6 +60,10 @@
   .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-ctas {
     gap: 6px;
   }
+
+  .is-3d .plate[data-plate-mode='surface-monitor'][data-plate-id='hero'] .hero-ctas > * {
+    padding: 0 10px;
+  }
 }
 
 @container surface (width < 340px) {

@@ -46,6 +46,7 @@ import {
   folderCentre,
   type FolderId
 } from './layout';
+import { SPINE_LABEL } from './spines';
 
 /** Segment multiplier: 1 on `high`, lower on `mid`. */
 export type Quality = number;
@@ -442,9 +443,7 @@ export function buildShelves(b: PartBuilder, p: Palette, q: Quality): void {
     const objectId = OBJECT_ID[id];
     b.add(new RoundedBoxGeometry(FOLDER.depth, FOLDER.height, FOLDER.spine, 2, 0.004), finish, { position: centre.toArray() }, objectId);
     const spine = centre.x + FOLDER.depth / 2;
-    b.add(new BoxGeometry(0.003, 0.09, FOLDER.spine * 0.62), p.label, { position: [spine + 0.0015, centre.y + 0.06, centre.z] }, objectId);
-    b.add(new BoxGeometry(0.0035, 0.002, FOLDER.spine * 0.5), shade(p.bookDark, 0.6), { position: [spine + 0.002, centre.y + 0.07, centre.z] }, objectId);
-    b.add(new BoxGeometry(0.0035, 0.0015, FOLDER.spine * 0.36), shade(p.bookDark, 0.7), { position: [spine + 0.002, centre.y + 0.052, centre.z] }, objectId);
+    b.add(new BoxGeometry(0.003, SPINE_LABEL.length + 0.01, SPINE_LABEL.width), p.label, { position: [spine + 0.0015, centre.y + SPINE_LABEL.lift, centre.z] }, objectId);
     b.add(new TorusGeometry(0.012, 0.0025, 6, seg(16, q, 8)), p.metal, { position: [spine + 0.002, centre.y - 0.07, centre.z], rotation: [0, Math.PI / 2, 0] }, objectId);
   }
   const random = seeded(23);

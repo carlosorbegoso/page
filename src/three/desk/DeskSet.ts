@@ -21,6 +21,7 @@ import { CHAPTERS, type ChapterId, type ChapterState, type PlateAnchor, type Sho
 import { tokenColor, tokenNumber } from '../tokens';
 import { createBackdrop, createRainGlass, createSteam, type Backdrop, type RainGlass, type Steam } from './atmosphere';
 import { createLampBeam, type LampBeam } from './beam';
+import { createSpineLabels } from './spines';
 import { OBJECT_ID, PartBuilder } from './builder';
 import { DESK, FIGURE_HEIGHT, FIGURES, FOLDER, FOLDERS, GLASS_Z, LAMP, MONITOR, PHONE, PRODUCT_FIGURES, ROOM, WINDOW, folderCentre, type FigureId } from './layout';
 import {
@@ -290,6 +291,9 @@ export class DeskSet implements ShotProvider {
     this.glass = createRainGlass();
     this.room.add(this.backdrop.mesh, this.glass.mesh);
     this.disposables.push(this.backdrop, this.glass);
+    const spines = createSpineLabels();
+    this.room.add(spines.mesh);
+    this.disposables.push(spines);
     if (high) {
       this.steam = createSteam();
       this.room.add(this.steam.mesh);

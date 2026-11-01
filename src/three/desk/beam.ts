@@ -12,6 +12,7 @@ import {
   ShaderMaterial,
   Vector3
 } from 'three';
+import { seeded } from './math';
 
 const CONE_VERTEX = /* glsl */ `
 varying float vAlong;
@@ -112,16 +113,6 @@ export interface LampBeamOptions {
   motes: number;
 }
 
-function seeded(seed: number): () => number {
-  let s = seed >>> 0;
-  return () => {
-    s = (s + 0x6d2b79f5) >>> 0;
-    let t = s;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
 
 /**
  * The lamp's visible shaft of light: an open additive cone from the bulb to the desk with slow

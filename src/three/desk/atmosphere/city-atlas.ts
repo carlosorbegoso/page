@@ -1,4 +1,5 @@
 import { CanvasTexture, NoColorSpace, Vector3 } from 'three';
+import { seeded } from '../math';
 
 export const SKY_Z = -55;
 /** City layers: depth, half width, top of the tallest building (y), haze. Kept inside the camera far plane (60 m). */
@@ -11,16 +12,6 @@ export const SKY = { halfWidth: 95, bottom: -40, top: 48 } as const;
 const ROW = 256;
 export const AVIATION_LIGHTS = 6;
 
-function seeded(seed: number): () => number {
-  let s = seed >>> 0;
-  return () => {
-    s = (s + 0x6d2b79f5) >>> 0;
-    let t = s;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
 
 export interface CityAtlas {
   texture: CanvasTexture;

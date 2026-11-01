@@ -1,6 +1,7 @@
 import { CylinderGeometry, Matrix4, Quaternion, Vector3 } from 'three';
 import { PartBuilder, type Finish } from '../builder';
 import type { Quality } from './palette';
+export { seeded } from '../math';
 
 export const UP = new Vector3(0, 1, 0);
 
@@ -31,13 +32,3 @@ export function rod(builder: PartBuilder, from: Vector3, to: Vector3, radius: nu
   builder.add(new CylinderGeometry(radius, radius, from.distanceTo(to), seg(10, q)), finish, between(from, to), id);
 }
 
-export function seeded(seed: number): () => number {
-  let s = seed >>> 0;
-  return () => {
-    s = (s + 0x6d2b79f5) >>> 0;
-    let t = s;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}

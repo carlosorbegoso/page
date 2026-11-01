@@ -56,6 +56,8 @@ export type SurfaceName = 'monitor' | 'phone';
  * - `data-plate-mode="anchored"` + `data-plate-anchor="<anchor name>"` — HTML panel in a fixed 2D
  *   layer, translated to the screen projection of `getAnchor(name)`; it never rotates or scales.
  * Optional `data-plate-side="left|right"` places an anchored panel beside its anchor point.
+ * `data-plate-stacked` makes a surface plate an anchored panel on upright phones (`stackedLayout`),
+ * docked under the room; it then needs a `data-plate-anchor` too.
  * Plates without a mode stay in the normal page flow.
  */
 export type PlateMode = 'surface-monitor' | 'surface-phone' | 'anchored';

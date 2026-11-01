@@ -24,6 +24,14 @@ export function layoutKind(width: number): LayoutKind {
   return 'phone';
 }
 
+/**
+ * A phone held upright: the room fills the top of the frame like a film shot and every chapter's
+ * text sits under it as a 2D panel, the monitor chapters included (the phone surface stays).
+ */
+export function stackedLayout(view: { width: number; height: number }): boolean {
+  return layoutKind(view.width) === 'phone' && view.width < view.height;
+}
+
 export function mulberry32(seed: number): () => number {
   let a = seed;
   return () => {

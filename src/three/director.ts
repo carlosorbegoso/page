@@ -12,6 +12,8 @@ export const CAMERA_LIMITS = {
   parallaxPitchDeg: 0.8,
   fovDesktop: 30,
   fovTouch: 40,
+  /** Upright phones: a taller lens so the room fits the top half of the frame above the panels. */
+  fovStacked: 52,
   breathMetres: 0.006,
   breathDegrees: 0.12,
   breathPeriodSeconds: 11

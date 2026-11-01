@@ -1,9 +1,11 @@
 import { Euler, Matrix4, PerspectiveCamera, Plane, Quaternion, Ray, Vector3 } from 'three';
 import { CHAPTERS, type ChapterId, type Shot } from '../contracts';
+import { stackedLayout } from '../scenes/common';
 import {
   FIGURE_HEIGHT,
   FIGURES,
   HERO_EYE,
+  LAPTOP,
   MONITOR,
   OPEN_FOLDER,
   PRODUCT_FIGURES,
@@ -46,13 +48,16 @@ export const ANCHOR_NAMES = [
   'exp-intercorp-retail',
   'exp-baufest',
   'exp-sysarp',
-  'outro'
+  'outro',
+  'hero',
+  'about-bio',
+  'about-stack'
 ] as const;
 
 export interface Viewport {
   width: number;
   height: number;
-  /** Device FOV from the director (30 desktop, 40 below 1024 px). */
+  /** Device FOV from the director (30 desktop, 40 below 1024 px, wider on stacked phones). */
   fov: number;
 }
 
@@ -83,20 +88,13 @@ function eyeFor(focus: Vector3, heading: number, pitch: number, distance: number
   return focus.clone().addScaledVector(direction(heading, pitch), -distance);
 }
 
-/** Below this viewport width the monitor head pivots to portrait so the screen content reads 1:1. */
-export const PORTRAIT_MONITOR_BELOW = 768;
-
-export function portraitMonitor(view: { width: number }): boolean {
-  return view.width < PORTRAIT_MONITOR_BELOW;
-}
-
-/** World frame of the monitor glass (width/height as displayed; the plate stays upright). */
-export function monitorFrame(portrait = false): SurfaceFrame {
+/** World frame of the monitor glass. */
+export function monitorFrame(): SurfaceFrame {
   const quaternion = new Quaternion().setFromEuler(new Euler(MONITOR.tilt, MONITOR.yaw, 0, 'YXZ'));
   const normal = new Vector3(0, 0, 1).applyQuaternion(quaternion);
   const centre = MONITOR.centre.clone().addScaledVector(normal, MONITOR.depth / 2 + 0.0006);
   const { width, height } = MONITOR.screen;
-  return { centre, normal, quaternion, width: portrait ? height : width, height: portrait ? width : height };
+  return { centre, normal, quaternion, width, height };
 }
 
 /** World frame of the phone glass (from the prop's matrix). */
@@ -125,11 +123,15 @@ function clamp(value: number, min: number, max: number): number {
 /**
  * Every chapter's framing for a viewport. Landscape follows desk.md §5 (subject on one half,
  * panel column on the other); portrait puts the subject in the top third and panels below.
- * Consecutive shots stay within the director's limits (`SHOT_LIMITS`): see `checkShots`.
+ * Stacked phones (`stackedLayout`) frame the room in the top half and dock every panel at the
+ * bottom, like subtitles. Consecutive shots stay within `SHOT_LIMITS`: see `checkShots`.
  */
 export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId, Framing[]> {
   const portrait = view.width < view.height;
-  const monitor = monitorFrame(portraitMonitor(view));
+  const stacked = stackedLayout(view);
+  /** Stacked phones use a wider lens; the close-ups dolly in by this factor so subjects keep their 40° size. */
+  const lens = stacked ? Math.tan(20 * DEG) / Math.tan((view.fov * DEG) / 2) : 1;
+  const monitor = monitorFrame();
   const screen = monitor.centre;
   const screenSpan = monitor.width + MONITOR.bezel * 2;
   const screenRise = monitor.height + MONITOR.bezel * 2;
@@ -138,9 +140,13 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
    * an anchor right of centre gets the panel on its left. Subjects sit on the opposite side.
    */
   const textLeft = { panel: { sx: 0.56, sy: 0.3 }, subject: 0.7 };
-  const panelBelow = { sx: 0.06, sy: 0.6 };
+  /** Below the bottom edge minus the panel height, so the director docks the panel at the bottom. */
+  const panelDocked = { sx: 0.5, sy: 0.95 };
+  const panelBelow = stacked ? panelDocked : { sx: 0.06, sy: 0.6 };
   const layoutFor = (side: typeof textLeft) => ({ panel: portrait ? panelBelow : side.panel, sx: portrait ? 0.5 : side.subject });
-  const subjectY = portrait ? 0.3 : 0.5;
+  const subjectY = stacked ? 0.27 : portrait ? 0.3 : 0.5;
+  /** Distance at which `span` metres fill the half of the frame above the docked panel. */
+  const topHalf = (span: number) => span / Math.tan((view.fov * DEG) / 2);
 
   const heroDistance = portrait
     ? clamp(Math.max(widthFit(screenSpan, 0.8, view), heightFit(screenRise, 0.78, view)), 1.0, 2.3)
@@ -163,7 +169,7 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
   const alfaFocus = FIGURES.alfa.clone().add(new Vector3(0, FIGURE_HEIGHT.alfa * 0.5, 0));
   const companyLayout = layoutFor(textLeft);
   const company: Framing = {
-    eye: eyeFor(alfaFocus, -4, -12, portrait ? 0.78 : 0.6),
+    eye: eyeFor(alfaFocus, -4, -12, portrait ? 0.78 * lens : 0.6),
     focus: alfaFocus,
     sx: companyLayout.sx,
     sy: subjectY,
@@ -185,7 +191,7 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
     const setup = productSetup[id];
     const layout = layoutFor(setup.side);
     return {
-      eye: eyeFor(focus, portrait ? setup.heading * 0.5 : setup.heading, portrait ? -18 : setup.pitch, portrait ? 0.4 : setup.distance),
+      eye: eyeFor(focus, portrait ? setup.heading * 0.5 : setup.heading, portrait ? -18 : setup.pitch, portrait ? 0.4 * lens : setup.distance),
       focus,
       sx: layout.sx,
       sy: portrait ? subjectY : 0.56,
@@ -200,10 +206,10 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
    */
   const shelfFocus = folderSpine('baufest').lerp(folderSpine('intercorp'), 0.5);
   const shelf: Framing = {
-    eye: eyeFor(shelfFocus, portrait ? -20 : -14, -4, 1.6),
+    eye: eyeFor(shelfFocus, portrait ? -20 : -14, -4, 1.6 * lens),
     focus: shelfFocus,
     sx: experienceLayout.sx,
-    sy: portrait ? 0.3 : 0.5,
+    sy: portrait ? subjectY : 0.5,
     panel: { name: 'exp-intro', ...experienceLayout.panel }
   };
 
@@ -211,25 +217,25 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
     if (id === 'tcs') {
       const focus = OPEN_FOLDER.centre.clone().add(new Vector3(0, 0.01, 0));
       return {
-        eye: eyeFor(focus, portrait ? -20 : -8, -18, portrait ? 1.05 : 0.85),
+        eye: eyeFor(focus, portrait ? -20 : -8, -18, portrait ? 1.05 * lens : 0.85),
         focus,
         sx: experienceLayout.sx,
-        sy: portrait ? 0.32 : 0.56,
+        sy: stacked ? subjectY : portrait ? 0.32 : 0.56,
         panel: { name: EXPERIENCE_ANCHOR.tcs, ...experienceLayout.panel }
       };
     }
     const focus = folderSpine(id);
     return {
-      eye: eyeFor(focus, portrait ? -34 : -26, 0, portrait ? 1.24 : 1.18),
+      eye: eyeFor(focus, portrait ? -34 : -26, 0, portrait ? 1.24 * lens : 1.18),
       focus,
       sx: experienceLayout.sx,
-      sy: portrait ? 0.3 : 0.5,
+      sy: portrait ? subjectY : 0.5,
       panel: { name: EXPERIENCE_ANCHOR[id], ...experienceLayout.panel }
     };
   });
   const experience = [shelf, ...folders];
 
-  const phoneDistance = portrait ? clamp(widthFit(0.075, 0.82, view), 0.28, 0.5) : 0.42;
+  const phoneDistance = portrait ? clamp(widthFit(0.075, 0.82, view), 0.28 * lens, 0.5 * lens) : 0.42;
   const contact: Framing = {
     eye: phone.centre.clone().addScaledVector(phone.normal, phoneDistance),
     focus: phone.centre,
@@ -251,7 +257,58 @@ export function framings(view: Viewport, phone: SurfaceFrame): Record<ChapterId,
     }
   };
 
-  return { intro: [hero], hero: [hero], about: [about, about], company: [company], products, experience, contact: [contact], outro: [outro] };
+  const story = { company: [company], products, experience, contact: [contact] };
+  if (stacked) {
+    const shots = stackedMonitorShots(topHalf, panelDocked, subjectY);
+    return { intro: [shots.hero], hero: [shots.hero], about: shots.about, outro: [shots.outro], ...story };
+  }
+  return { intro: [hero], hero: [hero], about: [about, about], outro: [outro], ...story };
+}
+
+/**
+ * Monitor chapters on a stacked phone are establishing shots, not screen reads: the hero holds the
+ * whole night desk (laptop, monitor, lamp, window), about pushes onto the monitor and then turns to
+ * the laptop on the way to the shelf, and the outro pulls back up to the window.
+ */
+function stackedMonitorShots(
+  topHalf: (span: number) => number,
+  panel: { sx: number; sy: number },
+  subjectY: number
+): { hero: Framing; about: Framing[]; outro: Framing } {
+  const room = MONITOR.centre.clone().add(new Vector3(0.12, 0.06, -0.04));
+  const hero: Framing = {
+    eye: eyeFor(room, 4, -7, topHalf(1.45)),
+    focus: room,
+    sx: 0.5,
+    /** The opening caption is short, so the desk can sit lower and meet it. */
+    sy: subjectY + 0.04,
+    panel: { name: 'hero', ...panel }
+  };
+  const monitor = MONITOR.centre.clone().add(new Vector3(0.12, -0.02, 0));
+  const bio: Framing = {
+    eye: eyeFor(monitor, 8, -10, topHalf(0.85)),
+    focus: monitor,
+    sx: 0.5,
+    sy: subjectY,
+    panel: { name: 'about-bio', ...panel }
+  };
+  const laptop = LAPTOP.centre.clone().add(new Vector3(0.02, 0.1, 0));
+  const stack: Framing = {
+    eye: eyeFor(laptop, -14, -14, topHalf(0.5)),
+    focus: laptop,
+    sx: 0.5,
+    sy: subjectY,
+    panel: { name: 'about-stack', ...panel }
+  };
+  const sky = MONITOR.centre.clone().add(new Vector3(0.3, 0.22, -0.1));
+  const outro: Framing = {
+    eye: eyeFor(sky, 6, 2, topHalf(0.88)),
+    focus: sky,
+    sx: 0.5,
+    sy: subjectY,
+    panel: { name: 'outro', ...panel }
+  };
+  return { hero, about: [bio, stack], outro };
 }
 
 /** Camera target that puts `framing.focus` at (sx, sy) on screen, with roll 0. */

@@ -20,7 +20,7 @@ import { setupInteraction } from './interaction';
 import { motionAllowed, readMotion, watchMotion, type MotionState } from './motion';
 import { Plates } from './plates';
 import { StagePointer } from './pointer';
-import { layoutKind, type LayoutKind } from './scenes/common';
+import { layoutKind, stackedLayout, type LayoutKind } from './scenes/common';
 import { setupChapterScroll, type ChapterScroll } from './scroll';
 import { chapterElement, SECTION_CHAPTERS } from './sections';
 import { calibrateRefreshInterval, dprPolicy, DprController, FrameSampler, type Tier, type TierResult } from './tier';
@@ -57,6 +57,10 @@ const DEFAULT_SUBS: Partial<Record<ChapterId, number>> = { products: 3 };
  * (monitor, phone) stay still, because their 1:1 text would shimmer or slide on the glass.
  */
 const BREATHING_CHAPTERS: ReadonlySet<ChapterId> = new Set(['company', 'products', 'experience', 'outro']);
+/** Stacked phones read the monitor chapters from 2D panels too, so those shots breathe as well. */
+const BREATHING_STACKED: ReadonlySet<ChapterId> = new Set([...BREATHING_CHAPTERS, 'hero', 'about']);
+/** `data-plate-stacked` plates switch to this mode on stacked phones; `data-plate-wide` keeps the authored one. */
+const STACKED_MODE = 'anchored';
 
 /** Boot milestones for the pre-three loader in StageCanvas (0…1). */
 function progress(value: number): void {
@@ -96,6 +100,7 @@ export class Stage {
   private readonly finePointer = matchMedia('(pointer: fine)').matches;
   private size = { width: 0, height: 0 };
   private layout: LayoutKind = 'desktop';
+  private stacked = false;
   private refreshMs = 1000 / 60;
   private readonly sampler = new FrameSampler(60);
   private readonly workSampler = new FrameSampler(60);
@@ -219,18 +224,20 @@ export class Stage {
   }
 
   /**
-   * Chapter shot for the current layout. Below 768 px the hero (and intro) push in 10 % towards
+   * Chapter shot for the current layout. Landscape phones push the hero (and intro) in 10 % towards
    * the target so the screen text is not tiny (a straight dolly: roll and FOV are unchanged).
    */
   private shotFor(id: ChapterId, sub: number): Shot {
     const shot = this.world.shot(id, sub);
-    const push = (this.layout === 'phone' && (id === 'hero' || id === 'intro') ? PHONE_MONITOR_PUSH : 0) - (id === 'intro' ? INTRO_PULLBACK : 0);
+    const readsMonitor = this.layout === 'phone' && !this.stacked && (id === 'hero' || id === 'intro');
+    const push = (readsMonitor ? PHONE_MONITOR_PUSH : 0) - (id === 'intro' ? INTRO_PULLBACK : 0);
     if (!push) return shot;
     const position = shot.position.clone().lerp(shot.target, push);
     return { ...shot, position };
   }
 
   private fov(): number {
+    if (this.stacked) return CAMERA_LIMITS.fovStacked;
     return this.layout === 'desktop' ? CAMERA_LIMITS.fovDesktop : CAMERA_LIMITS.fovTouch;
   }
 
@@ -263,7 +270,24 @@ export class Stage {
     });
   }
 
+  /** Sets each switchable plate's `data-plate-mode` for the current layout, before the plates mount. */
+  private applyPlateModes(): void {
+    for (const plate of document.querySelectorAll<HTMLElement>('[data-plate-stacked]')) {
+      plate.dataset.plateWide ??= plate.dataset.plateMode ?? '';
+      plate.dataset.plateMode = this.stacked ? STACKED_MODE : plate.dataset.plateWide;
+    }
+  }
+
+  /** Plates choose their layer at mount, so crossing the stacked breakpoint remounts them. */
+  private remountPlates(): void {
+    if (!this.plates) return;
+    this.plates.unmount();
+    this.plates = undefined;
+    this.mountPlates();
+  }
+
   private mountPlates(): void {
+    this.applyPlateModes();
     const plates = new Plates({
       surface: name => this.world.surface(name),
       anchor: name => this.world.anchor(name),
@@ -473,7 +497,7 @@ export class Stage {
     const state = this.director.state();
     if (this.world.update(dt, (now - this.clockStart) / 1000, state, this.idleMotion(), this.camera.position, this.renderer.getPixelRatio())) settling = true;
     this.plates?.update(this.camera, state, this.progress.get(state.id) ?? 0);
-    const steady = this.director.breathe(this.camera, dt, this.idleMotion() && BREATHING_CHAPTERS.has(state.id));
+    const steady = this.director.breathe(this.camera, dt, this.idleMotion() && (this.stacked ? BREATHING_STACKED : BREATHING_CHAPTERS).has(state.id));
     settling ||= this.director.breathing;
     if (this.fx) {
       this.fx.render(this.renderer, this.world.scene, this.camera, dt);
@@ -564,9 +588,13 @@ export class Stage {
     if (!changed) return;
     this.size = { width, height };
     this.layout = layoutKind(width);
+    const stacked = stackedLayout(this.size);
+    const restack = stacked !== this.stacked;
+    this.stacked = stacked;
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height, false);
+    if (restack) this.remountPlates();
     this.plates?.setSize(width, height);
     this.fx?.resize(width, height, this.renderer.getPixelRatio());
     if (this.ready) {

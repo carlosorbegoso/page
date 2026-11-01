@@ -22,6 +22,8 @@ const year = new Date().getFullYear();
     class="plate p-(--plate-padding)"
     data-plate
     data-plate-id="outro"
+    data-plate-anchor="outro"
+    data-plate-stacked
     data-plate-mode="surface-monitor"
   >
     <div class="outro-screen flex max-w-measure flex-col gap-4">
@@ -62,19 +64,19 @@ const year = new Date().getFullYear();
   }
 
   /* The closing credits roll on the monitor, like the opening titles: sizes are shares of the screen. */
-  :global(.is-3d) .outro-screen {
+  :global(.is-3d [data-plate-mode='surface-monitor']) .outro-screen {
     height: 100%;
     max-width: none;
     justify-content: center;
     gap: 0;
   }
 
-  :global(.is-3d) .outro-label {
+  :global(.is-3d [data-plate-mode='surface-monitor']) .outro-label {
     font-size: 3cqh;
     color: var(--color-text-muted);
   }
 
-  :global(.is-3d) .outro h2 {
+  :global(.is-3d [data-plate-mode='surface-monitor']) .outro h2 {
     max-width: 80%;
     margin-top: 3cqh;
     font-size: 11cqh;
@@ -82,38 +84,45 @@ const year = new Date().getFullYear();
     text-wrap: balance;
   }
 
-  :global(.is-3d) .outro-body {
+  :global(.is-3d [data-plate-mode='surface-monitor']) .outro-body {
     max-width: 70%;
     margin-top: 4cqh;
     font-size: 3.9cqh;
     line-height: 1.45;
   }
 
-  :global(.is-3d) .outro-credits {
+  :global(.is-3d [data-plate-mode='surface-monitor']) .outro-credits {
     margin-top: 6cqh;
     padding-top: 4cqh;
     font-size: 3.4cqh;
     gap: 1.6cqh 2.4cqw;
   }
 
-  @container surface (orientation: portrait) {
-    :global(.is-3d) .outro h2 {
-      max-width: none;
-      font-size: 6.2cqh;
-    }
+  /* Upright phones: the credits dock under the dawn window instead of rolling on the monitor. */
+  :global(.is-3d [data-plate-mode='anchored']) .outro-screen {
+    gap: 0.75rem;
+  }
 
-    :global(.is-3d) .outro-label {
-      font-size: 2.1cqh;
-    }
+  :global(.is-3d [data-plate-mode='anchored']) .outro-screen h2 {
+    font-size: clamp(1.75rem, 7.6vw, 2.125rem);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+  }
 
-    :global(.is-3d) .outro-body {
-      max-width: none;
-      font-size: 2.6cqh;
-    }
+  :global(.is-3d [data-plate-mode='anchored']) .outro-body {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
 
-    :global(.is-3d) .outro-credits {
-      font-size: 2.3cqh;
-    }
+  :global(.is-3d [data-plate-mode='anchored']) .outro-credits {
+    margin-top: 0.25rem;
+    padding-top: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  :global(.is-3d [data-plate-mode='anchored']) .outro-credits :global(a) {
+    padding-block: 0.75rem;
   }
 
   /* Without 3D the HTML footer already closes the page; the credits only make sense as the closing shot. */

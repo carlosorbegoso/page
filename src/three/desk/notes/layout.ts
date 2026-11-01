@@ -16,7 +16,7 @@ const UP = new Vector3(0, 1, 0);
 const ONE = new Vector3(1, 1, 1);
 
 export const CORKBOARD = {
-  base: new Vector3(0.33, DESK.top, -0.332),
+  base: new Vector3(0.33, DESK.top, -0.296),
   width: 0.34,
   height: 0.3,
   lean: 0.008,

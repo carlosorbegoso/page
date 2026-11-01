@@ -56,7 +56,9 @@ Qué archivo editar para cada cambio. Cada archivo tiene 300 líneas como máxim
 | Productos | `src/components/sections/Products.astro`, `src/components/products/` |
 | Contacto y teléfono | `src/components/sections/Contact.astro`, `src/components/contact/`, `src/scripts/phone/` |
 | Cierre | `src/components/sections/Outro.astro` |
-| Página de lectura (sin 3D) | `src/components/sections/reading/ReadingPage.astro` |
+| Página de lectura (sin 3D): datos y orden de secciones | `src/components/sections/reading/ReadingPage.astro` |
+| Lectura: cabecera, experiencia, empresa, formación y stack, contacto | `src/components/sections/reading/Reading{Masthead,Experience,Company,Background,Contact}.astro` |
+| Lectura: estilos de pantalla y de impresión A4 | `src/styles/sections/reading/{masthead,sections,print}.css` |
 | Textos de la UI | `src/i18n/<es|en>/meta.ts` (meta, 404, idioma, CV, pie, sonido, hora), `nav.ts` (navegación, HUD, recorrido, historia), `sections.ts` (secciones y lectura), `contact.ts` (contacto y teléfono); `ui.<locale>.ts` los une y define `UiKey` |
 | Contenido (perfil, experiencia) | `src/content/` |
 

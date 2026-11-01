@@ -1,0 +1,35 @@
+---
+import CvLink from '../../ui/CvLink.astro';
+import ExternalLink from '../../ui/ExternalLink.astro';
+import { SITE } from '../../../config/site';
+import { useTranslations, type Locale } from '../../../i18n/utils';
+import type { getProfile } from '../../../lib/content';
+import { displayUrl, SOCIAL } from './links';
+
+interface Props {
+  locale: Locale;
+  profile: Awaited<ReturnType<typeof getProfile>>;
+}
+
+const { locale, profile } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<header class="cv-masthead">
+  <p class="cv-intro no-print">{t('reading.intro')}</p>
+  <h1 class="cv-name">{profile.name}</h1>
+  <p class="cv-role">{profile.role}</p>
+  <p class="cv-meta">{profile.location} · {profile.tagline}</p>
+  <ul class="cv-contact-line" role="list">
+    <li><a href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
+    {SOCIAL.map(item => (
+      <li>
+        <ExternalLink href={item.href} locale={locale}>{displayUrl(item.href)}</ExternalLink>
+      </li>
+    ))}
+  </ul>
+  <div class="cv-actions no-print">
+    <CvLink locale={locale} variant="primary" />
+    <button type="button" class="cv-print" data-print>{t('reading.print')}</button>
+  </div>
+</header>

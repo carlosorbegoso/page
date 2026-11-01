@@ -1,0 +1,103 @@
+/* Reading page (CV): page column, links and masthead. */
+.cv {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2.5rem, 2rem + 2vw, 4rem);
+  max-width: calc(56rem + 2 * var(--spacing-gutter));
+  padding-block: clamp(2rem, 1.5rem + 2vw, 3.5rem) var(--spacing-section);
+  color: var(--color-text);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+}
+
+.cv a:not([data-variant]) {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  border-radius: var(--radius-xs);
+}
+
+.cv a:not([data-variant]):hover {
+  color: var(--color-accent-hover);
+}
+
+.cv a:not([data-variant]):focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.cv-masthead {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-bottom: clamp(2rem, 1.5rem + 2vw, 3rem);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.cv-intro {
+  margin-bottom: 1rem;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.cv-name {
+  font-size: var(--text-5xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--text-5xl--line-height);
+  letter-spacing: var(--tracking-display);
+}
+
+.cv-role {
+  margin-top: 0.5rem;
+  font-size: var(--text-xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--text-xl--line-height);
+}
+
+.cv-meta {
+  color: var(--color-text-muted);
+}
+
+.cv-contact-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  margin-top: 0.5rem;
+  font-size: var(--text-sm);
+}
+
+.cv-contact-line a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--spacing-tap);
+}
+
+.cv-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin-top: 1rem;
+}
+
+.cv-print {
+  min-height: var(--spacing-tap);
+  padding-inline: 0.75rem;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+  cursor: pointer;
+}
+
+.cv-print:hover {
+  color: var(--color-text);
+}
+
+.cv-print:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}

@@ -4,7 +4,6 @@ import {
   BoxGeometry,
   BufferAttribute,
   BufferGeometry,
-  CanvasTexture,
   Color,
   ConeGeometry,
   CylinderGeometry,
@@ -23,13 +22,19 @@ import {
   ShaderMaterial,
   SphereGeometry,
   SpotLight,
-  SRGBColorSpace,
   Texture,
   Vector3,
   WebGLRenderer
 } from 'three';
 import { tokenColor } from '../tokens';
 import { motionAllowed, readMotion, watchMotion } from '../motion';
+import { beamShader } from './beam.glsl';
+import { DEG, LAMP_HEAD, PAPER_H, PAPER_W, TARGET } from './constants';
+import { dustShader } from './dust.glsl';
+import { fontsReady } from './fonts';
+import { ghostTexture, paperTexture } from './paper-texture';
+import { rainShader } from './rain.glsl';
+import { rod } from './rod';
 
 export interface NotFoundOptions {
   container: HTMLElement;
@@ -37,220 +42,6 @@ export interface NotFoundOptions {
   paperLabel: string;
   quality: 'mid' | 'high';
 }
-
-const DEG = Math.PI / 180;
-const TARGET = new Vector3(0.35, 0.05, -0.05);
-const LAMP_HEAD = new Vector3(-0.55, 1.55, -0.55);
-const PAPER_W = 0.86;
-const PAPER_H = 1.16;
-
-function css(name: string, fallback: string): string {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
-}
-
-async function fontsReady(): Promise<void> {
-  const loads = Promise.all([
-    document.fonts.load('700 320px Geist'),
-    document.fonts.load('500 40px "Geist Mono"')
-  ]).then(() => undefined);
-  await Promise.race([loads, new Promise(resolve => setTimeout(resolve, 1500))]).catch(() => undefined);
-}
-
-function limaTime(): string {
-  try {
-    return new Intl.DateTimeFormat('es-PE', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-      timeZone: 'America/Lima'
-    }).format(new Date());
-  } catch {
-    return '02:14';
-  }
-}
-
-function paperTexture(label: string): CanvasTexture {
-  const w = 860;
-  const h = 1160;
-  const canvas = document.createElement('canvas');
-  canvas.width = w;
-  canvas.height = h;
-  const g = canvas.getContext('2d')!;
-  const ink = '#1c2331';
-  const mono = '"Geist Mono", "Geist Mono Fallback", monospace';
-  const sans = 'Geist, "Geist Fallback", sans-serif';
-
-  g.fillStyle = css('--color-desk-paper', '#d8d2c4');
-  g.fillRect(0, 0, w, h);
-  const grain = g.createRadialGradient(w * 0.55, h * 0.4, 50, w * 0.5, h * 0.5, h * 0.75);
-  grain.addColorStop(0, 'rgba(255,250,240,0.35)');
-  grain.addColorStop(1, 'rgba(90,70,40,0.18)');
-  g.fillStyle = grain;
-  g.fillRect(0, 0, w, h);
-
-  g.strokeStyle = 'rgba(60,80,110,0.16)';
-  g.lineWidth = 2;
-  for (let y = 560; y < h - 60; y += 46) {
-    g.beginPath();
-    g.moveTo(70, y);
-    g.lineTo(w - 70, y);
-    g.stroke();
-  }
-
-  g.fillStyle = ink;
-  g.globalAlpha = 0.7;
-  g.font = `500 26px ${mono}`;
-  g.fillText('EXP. 404', 70, 96);
-  g.textAlign = 'right';
-  g.fillText(`LIMA · ${limaTime()}`, w - 70, 96);
-  g.textAlign = 'left';
-  g.globalAlpha = 1;
-
-  g.font = `700 300px ${sans}`;
-  g.fillText('404', 58, 400);
-
-  g.font = `500 30px ${mono}`;
-  g.fillText(label.toUpperCase(), 70, 478);
-
-  const path = decodeURIComponent(location.pathname).slice(0, 34);
-  g.globalAlpha = 0.55;
-  g.font = `400 26px ${mono}`;
-  g.fillText(path, 70, 640);
-  g.fillRect(70, 631, Math.min(g.measureText(path).width, w - 140), 3);
-  g.globalAlpha = 1;
-
-  g.save();
-  g.translate(w - 200, h - 210);
-  g.rotate(-14 * DEG);
-  g.strokeStyle = css('--color-accent', '#5aa9ff');
-  g.fillStyle = g.strokeStyle;
-  g.globalAlpha = 0.6;
-  g.lineWidth = 6;
-  g.beginPath();
-  g.arc(0, 0, 112, 0, Math.PI * 2);
-  g.stroke();
-  g.lineWidth = 2;
-  g.beginPath();
-  g.arc(0, 0, 96, 0, Math.PI * 2);
-  g.stroke();
-  g.textAlign = 'center';
-  g.font = `600 64px ${mono}`;
-  g.fillText('?', 0, 22);
-  g.restore();
-
-  const texture = new CanvasTexture(canvas);
-  texture.colorSpace = SRGBColorSpace;
-  texture.anisotropy = 4;
-  return texture;
-}
-
-function ghostTexture(): CanvasTexture {
-  const canvas = document.createElement('canvas');
-  canvas.width = 256;
-  canvas.height = 344;
-  const g = canvas.getContext('2d')!;
-  g.strokeStyle = 'rgba(255,236,210,0.5)';
-  g.lineWidth = 3;
-  g.setLineDash([14, 10]);
-  g.strokeRect(6, 6, 244, 332);
-  const texture = new CanvasTexture(canvas);
-  texture.colorSpace = SRGBColorSpace;
-  return texture;
-}
-
-function rod(from: Vector3, to: Vector3, radius: number, material: MeshStandardMaterial): Mesh {
-  const length = from.distanceTo(to);
-  const mesh = new Mesh(new CylinderGeometry(radius, radius, length, 12), material);
-  mesh.position.copy(from).lerp(to, 0.5);
-  mesh.quaternion.setFromUnitVectors(new Vector3(0, 1, 0), to.clone().sub(from).normalize());
-  mesh.castShadow = true;
-  return mesh;
-}
-
-const beamShader = {
-  vertexShader: /* glsl */ `
-    varying vec2 vUv;
-    varying vec3 vNormal;
-    varying vec3 vView;
-    void main() {
-      vUv = uv;
-      vec4 world = modelMatrix * vec4(position, 1.0);
-      vNormal = normalize(mat3(modelMatrix) * normal);
-      vView = cameraPosition - world.xyz;
-      gl_Position = projectionMatrix * viewMatrix * world;
-    }`,
-  fragmentShader: /* glsl */ `
-    uniform vec3 uColor;
-    varying vec2 vUv;
-    varying vec3 vNormal;
-    varying vec3 vView;
-    void main() {
-      float facing = abs(dot(normalize(vNormal), normalize(vView)));
-      float along = smoothstep(0.0, 0.85, vUv.y);
-      gl_FragColor = vec4(uColor * pow(facing, 2.2) * along * 0.04, 1.0);
-      #include <colorspace_fragment>
-    }`
-};
-
-const dustShader = {
-  vertexShader: /* glsl */ `
-    uniform float uTime;
-    uniform float uPixel;
-    attribute float aSeed;
-    varying float vAlpha;
-    void main() {
-      vec3 p = position;
-      float s = aSeed * 6.2831;
-      p += vec3(sin(uTime * 0.11 + s) * 0.05, sin(uTime * 0.07 + s * 1.7) * 0.06, cos(uTime * 0.09 + s * 1.3) * 0.05);
-      vec4 view = modelViewMatrix * vec4(p, 1.0);
-      gl_Position = projectionMatrix * view;
-      gl_PointSize = uPixel * (0.6 + aSeed) * 12.0 / -view.z;
-      vAlpha = 0.35 + 0.65 * (0.5 + 0.5 * sin(uTime * 0.6 + s * 3.0));
-    }`,
-  fragmentShader: /* glsl */ `
-    uniform vec3 uColor;
-    varying float vAlpha;
-    void main() {
-      float d = length(gl_PointCoord - 0.5);
-      float a = smoothstep(0.5, 0.0, d) * vAlpha * 0.55;
-      gl_FragColor = vec4(uColor * a, 1.0);
-      #include <colorspace_fragment>
-    }`
-};
-
-const rainShader = {
-  vertexShader: /* glsl */ `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }`,
-  fragmentShader: /* glsl */ `
-    uniform float uTime;
-    uniform vec3 uGlass;
-    uniform vec3 uSodium;
-    uniform vec3 uLed;
-    uniform vec3 uRain;
-    varying vec2 vUv;
-    float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-    void main() {
-      vec3 color = uGlass * (0.7 + 0.6 * vUv.y);
-      vec2 grid = vUv * vec2(24.0, 10.0);
-      vec2 cell = floor(grid);
-      float h = hash(cell);
-      vec2 center = vec2(hash(cell + 3.1), hash(cell + 7.7)) * 0.6 + 0.2;
-      float bokeh = smoothstep(0.24, 0.0, length(fract(grid) - center)) * step(0.55, h) * (1.0 - vUv.y);
-      color += mix(uSodium, uLed, step(0.8, h)) * bokeh * 0.09;
-      float column = floor(vUv.x * 90.0);
-      float ch = hash(vec2(column, 1.0));
-      float y = fract(vUv.y * 1.4 + uTime * (0.18 + ch * 0.22) + ch * 10.0);
-      float streak = smoothstep(0.5, 0.0, abs(fract(vUv.x * 90.0) - 0.5) * 2.0 - 0.1);
-      streak *= smoothstep(0.0, 0.1, y) * smoothstep(0.35, 0.1, y) * step(0.62, ch);
-      color += uRain * streak * 0.1;
-      gl_FragColor = vec4(color, 1.0);
-      #include <colorspace_fragment>
-    }`
-};
 
 /** Mounts the decorative 404 scene into `container` and returns a disposer. */
 export async function mountNotFound({ container, paperLabel, quality }: NotFoundOptions): Promise<() => void> {

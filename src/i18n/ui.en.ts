@@ -62,6 +62,7 @@ export const en = {
   'story.day': 'By day',
   'story.night': 'By night',
   'story.dawn': 'Dawn',
+  'about.code.extra': 'CIBERTEC 2023, Alura Java Bootcamp 2023',
   'about.education': 'Education',
   'about.stack': 'Main stack',
   'company.title': 'TUSOCIO IA',

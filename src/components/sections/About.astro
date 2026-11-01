@@ -19,6 +19,18 @@ const profile = await getProfile(locale);
 const body = profile.summary.slice(0, -1);
 const credentials = profile.summary.slice(-1);
 const { degree, institution, status } = profile.education;
+/** The stack screen as the file Carlos would have open: one YAML document, built from the same content. */
+type CodeLine = { indent: number; key?: string; value?: string; list?: string[]; comment?: string };
+const codeLines: CodeLine[] = [
+  { indent: 0, comment: '# carlos.yml' },
+  { indent: 0, key: 'education' },
+  { indent: 1, key: 'degree', value: degree },
+  { indent: 1, key: 'school', value: institution },
+  { indent: 1, key: 'status', value: status },
+  { indent: 1, key: 'extra', list: t('about.code.extra').split(', ') },
+  { indent: 0, key: 'stack' },
+  ...profile.stack.map(group => ({ indent: 1, key: group.category.toLowerCase(), list: group.items }))
+];
 const facts = (['now', 'before', 'night'] as const).map(key => ({
   label: t(`about.facts.${key}.label`),
   value: t(`about.facts.${key}.value`),
@@ -87,6 +99,37 @@ const facts = (['now', 'before', 'night'] as const).map(key => ({
     data-plate-order="1"
   >
     <div class="about-stack @container flex flex-col gap-6">
+      <div class="about-code" aria-hidden="true">
+        <div class="about-code__bar">
+          <span class="about-code__dots"><i></i><i></i><i></i></span>
+          <span class="about-code__tab">carlos.yml</span>
+        </div>
+        <ol class="about-code__lines">
+          {
+            codeLines.map(line => (
+              <li style={`--indent: ${line.indent}`}>
+                {line.comment && <span class="c-comment">{line.comment}</span>}
+                {line.key && <span class="c-key">{line.key}</span>}
+                {line.key && <span class="c-punct">:</span>}
+                {line.value && <span class="c-string"> {line.value}</span>}
+                {line.list && (
+                  <span class="c-list">
+                    {' '}
+                    <span class="c-punct">[</span>
+                    {line.list.map((item, index) => (
+                      <>
+                        <span class="c-string">{item}</span>
+                        {index < line.list!.length - 1 && <span class="c-punct">, </span>}
+                      </>
+                    ))}
+                    <span class="c-punct">]</span>
+                  </span>
+                )}
+              </li>
+            ))
+          }
+        </ol>
+      </div>
       <section aria-labelledby="about-education">
         <h3
           id="about-education"
@@ -464,6 +507,115 @@ const facts = (['now', 'before', 'night'] as const).map(key => ({
 
     :global(.is-3d) .about-stack :global([data-tone] > span[aria-hidden]) {
       display: none;
+    }
+  }
+
+  .about-code {
+    display: none;
+  }
+
+  /* Landscape monitor: the stack is the file Carlos has open tonight, not a web table. The semantic list stays for assistive tech. */
+  @container surface (orientation: landscape) {
+    :global(.is-3d) .about-stack {
+      display: block;
+      padding: 0;
+    }
+
+    :global(.is-3d) .about-stack > section {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    :global(.is-3d) .about-code {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      margin: calc(var(--plate-padding) * -1);
+      height: calc(100% + var(--plate-padding) * 2);
+      font-family: var(--font-mono);
+      background: rgb(6 9 15 / 0.55);
+    }
+
+    :global(.is-3d) .about-code__bar {
+      display: flex;
+      align-items: center;
+      gap: 3cqw;
+      height: 8cqh;
+      padding-inline: 3cqw;
+      border-bottom: 1px solid rgb(255 255 255 / 0.07);
+      background: rgb(255 255 255 / 0.03);
+    }
+
+    :global(.is-3d) .about-code__dots {
+      display: flex;
+      gap: 1.2cqh;
+    }
+
+    :global(.is-3d) .about-code__dots i {
+      width: 1.8cqh;
+      height: 1.8cqh;
+      border-radius: 50%;
+      background: rgb(255 255 255 / 0.16);
+    }
+
+    :global(.is-3d) .about-code__tab {
+      padding: 1.2cqh 2.4cqw;
+      border-radius: 1cqh 1cqh 0 0;
+      background: rgb(255 255 255 / 0.06);
+      font-size: 2.6cqh;
+      color: var(--color-text);
+    }
+
+    :global(.is-3d) .about-code__lines {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1.3cqh;
+      margin: 0;
+      padding: 0 5cqw 0 0;
+      list-style: none;
+      counter-reset: line;
+      font-size: 3.4cqh;
+      line-height: 1.4;
+      color: var(--color-text);
+    }
+
+    :global(.is-3d) .about-code__lines li {
+      counter-increment: line;
+      position: relative;
+      padding-left: calc(9cqw + var(--indent) * 3.4cqw);
+      text-indent: 0;
+    }
+
+    :global(.is-3d) .about-code__lines li::before {
+      content: counter(line);
+      position: absolute;
+      left: 0;
+      width: 5.5cqw;
+      text-align: right;
+      color: rgb(255 255 255 / 0.22);
+    }
+
+    :global(.is-3d) .about-code .c-comment {
+      color: var(--color-text-subtle);
+      font-style: italic;
+    }
+
+    :global(.is-3d) .about-code .c-key {
+      color: var(--color-accent);
+    }
+
+    :global(.is-3d) .about-code .c-punct {
+      color: rgb(255 255 255 / 0.4);
+    }
+
+    :global(.is-3d) .about-code .c-string {
+      color: #e8d8b0;
     }
   }
 

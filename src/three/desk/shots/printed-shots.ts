@@ -11,6 +11,7 @@ export const PRINT_FILL = 0.9;
 const HUD_CLEAR_PX = 124;
 const PRINT_Y = 0.52;
 const SHEET_FACING = { heading: -10, pitch: -24 } as const;
+const BOARD_PITCH = -20;
 const SHEET_PASSES = 3;
 
 type Facing = Omit<Setup, 'distance'>;
@@ -32,7 +33,7 @@ function frontOn(ctx: ShotContext, corners: Vector3[], facing: Facing, panel: st
 }
 
 export function printedCompanyShot(ctx: ShotContext): Framing {
-  return frontOn(ctx, boardCorners(), facingOf(boardFaceMatrix()), 'company');
+  return frontOn(ctx, boardCorners(), { ...facingOf(boardFaceMatrix()), pitch: BOARD_PITCH }, 'company');
 }
 
 export function printedProductShot(ctx: ShotContext, id: ProductId): Framing {

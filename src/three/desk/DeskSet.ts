@@ -162,6 +162,8 @@ const FIGURE_ORDER: readonly FigureId[] = ['alfa', 'ventixs', 'parati', 'skymek'
 const ALFA_TURN = 20 * (Math.PI / 180);
 const MAX_TURN_SPEED = 0.05;
 const FIGURE_LIFT = 0.012;
+const PLAY_SECONDS = 0.9;
+const PLAY_HOP = 0.02;
 /** Warm bounce on the focused figure (desk.md §5: +10 %), as self-illumination of its albedo. */
 const FOCUS_BOUNCE = 0.03;
 
@@ -278,8 +280,15 @@ export class DeskSet implements ShotProvider {
   private folderOpen = 0;
   private readonly hingeMatrix = new Matrix4();
   private clock = 0;
+  private readonly playStart = new Map<FigureId, number>();
   private readonly onAction = (event: Event) => {
-    if ((event as CustomEvent<{ action?: string }>).detail?.action !== 'lamp') return;
+    const detail = (event as CustomEvent<{ action?: string; id?: string }>).detail;
+    if (detail?.action === 'play' && detail.id && (FIGURE_ORDER as readonly string[]).includes(detail.id)) {
+      if (this.context?.motion()) this.playStart.set(detail.id as FigureId, this.clock);
+      this.context?.invalidate();
+      return;
+    }
+    if (detail?.action !== 'lamp') return;
     this.lampOff = !this.lampOff;
     this.lampToggledAt = this.clock;
     window.dispatchEvent(new CustomEvent('desk:switch', { detail: { on: !this.lampOff } }));
@@ -705,6 +714,7 @@ export class DeskSet implements ShotProvider {
     }
 
     const focused = this.chapter === 'products' ? PRODUCT_FIGURES[Math.min(this.subIndex, PRODUCT_FIGURES.length - 1)] : null;
+    if (this.playStart.size) settling = true;
     for (const id of PRODUCT_FIGURES) {
       const goal = id === focused || OBJECT_ID[id] === this.hoverId ? FIGURE_LIFT : 0;
       const lift = damp(this.figureLift.get(id)!, goal, 5, step);
@@ -754,6 +764,19 @@ export class DeskSet implements ShotProvider {
   }
 
   /** Rounded lift and turn of the figures: the lamp shadow is re-rendered only when it changes. */
+  /** A clicked figure hops and turns once around, like picking up a desk toy. */
+  private playOffset(id: FigureId): { lift: number; yaw: number } {
+    const started = this.playStart.get(id);
+    if (started === undefined) return { lift: 0, yaw: 0 };
+    const t = (this.clock - started) / PLAY_SECONDS;
+    if (t >= 1) {
+      this.playStart.delete(id);
+      return { lift: 0, yaw: 0 };
+    }
+    const eased = 1 - Math.pow(1 - t, 3);
+    return { lift: Math.sin(Math.PI * t) * PLAY_HOP, yaw: eased * Math.PI * 2 };
+  }
+
   private figurePose(): string {
     const parts = [Math.round(this.level.alfaYaw * 200)];
     for (const id of PRODUCT_FIGURES) parts.push(Math.round((this.figureLift.get(id) ?? 0) * 2000), Math.round((this.figureYaw.get(id) ?? 0) * 200));
@@ -800,8 +823,9 @@ export class DeskSet implements ShotProvider {
     this.steam?.setStrength((this.chapter === 'hero' || this.chapter === 'about' || this.chapter === 'intro' ? 0.22 : 0.1) * (1 - this.level.day));
     const uniforms = this.uniforms;
     FIGURE_ORDER.forEach((id, index) => {
-      uniforms.uFigLift.value[index] = this.figureLift.get(id) ?? 0;
-      uniforms.uFigYaw.value[index] = id === 'alfa' ? level.alfaYaw : (this.figureYaw.get(id) ?? 0);
+      const play = this.playOffset(id);
+      uniforms.uFigLift.value[index] = (this.figureLift.get(id) ?? 0) + play.lift;
+      uniforms.uFigYaw.value[index] = (id === 'alfa' ? level.alfaYaw : (this.figureYaw.get(id) ?? 0)) + play.yaw;
     });
     uniforms.uSignal.value[OBJECT_ID.alfa] = level.alfaSignal;
     for (const id of FOLDERS) uniforms.uGlow.value[OBJECT_ID[id]] = (this.folderGlow.get(id) ?? 0) * 0.32;

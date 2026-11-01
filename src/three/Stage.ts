@@ -284,6 +284,8 @@ export class Stage {
   }
 
   private navigate(pick: StationPick): void {
+    const figure = pick.key.startsWith('desk:') ? pick.key.slice(5) : '';
+    if (pick.product || figure === 'alfa') window.dispatchEvent(new CustomEvent('desk:action', { detail: { action: 'play', id: figure } }));
     if (pick.action) {
       window.dispatchEvent(new CustomEvent('desk:action', { detail: { action: pick.action } }));
       return;

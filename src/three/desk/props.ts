@@ -145,7 +145,7 @@ export function readPalette(): Palette {
     giftBody: { color: ceramic(c('--color-gift-body', '#2a3142'), 0.3, 1.25), roughness: COLLECTIBLE.matte, metalness: 0 },
     giftRibbon: { color: ceramic(c('--color-gift-ribbon', '#f28ba0'), 0.55, 0.85), roughness: COLLECTIBLE.satin, metalness: 0 },
     giftSeam: brass,
-    toolBody: { color: c('--color-desk-ceramic', '#e6e0d4').multiplyScalar(0.62), roughness: COLLECTIBLE.matte, metalness: 0 },
+    toolBody: { color: new Color('#c9ccd1'), roughness: 0.24, metalness: 1 },
     toolBand: brass,
     toolStand: { color: c('--color-alfa-body', '#10131a').multiplyScalar(1.6), roughness: COLLECTIBLE.satin, metalness: 0 },
     toolSignal: { color: c('--color-tool-band', '#f0a43c'), roughness: 0.4, metalness: 0, emissive: 0.6 },
@@ -549,30 +549,34 @@ export function buildTelescope(b: PartBuilder, p: Palette, q: Quality): void {
   b.add(new CylinderGeometry(0.012, 0.012, 0.17, seg(12, q)), p.telescope, along(finder, dir, 0));
 }
 
-/** Wrench profile for SkyMek, 11 cm long, ring at x = 0 (procedural `body` node). */
+/**
+ * Combination wrench for SkyMek as one continuous outline (11 cm): ring end, a tapered handle and an
+ * open jaw. A single shape keeps the faces from overlapping, which read as a flat cut-out before.
+ */
 function wrenchShapes(): Shape[] {
-  const k = 0.11 / 0.55;
-  const head = new Shape();
-  const open = (35 * Math.PI) / 180;
-  const headX = 0.485 * k;
-  head.absarc(headX, 0, 0.09 * k, open, Math.PI * 2 - open, false);
-  for (const deg of [300, 240, 180, 120, 60]) {
+  const ringR = 0.0135;
+  const headR = 0.0175;
+  const headX = 0.096;
+  const ringW = 0.0058;
+  const headW = 0.0074;
+  const open = (36 * Math.PI) / 180;
+  const ringA = Math.asin(ringW / ringR);
+  const headA = Math.asin(headW / headR);
+  const shape = new Shape();
+  shape.moveTo(Math.cos(ringA) * ringR, ringW);
+  shape.quadraticCurveTo(headX * 0.5, ringW * 0.92, headX - Math.cos(headA) * headR, headW);
+  shape.absarc(headX, 0, headR, Math.PI - headA, open, true);
+  for (const deg of [60, 120, 180, 240, 300]) {
     const a = (deg * Math.PI) / 180;
-    head.lineTo(headX + Math.cos(a) * 0.05 * k, Math.sin(a) * 0.05 * k);
+    shape.lineTo(headX + Math.cos(a) * 0.0098, Math.sin(a) * 0.0098);
   }
-  head.closePath();
-  const ring = new Shape();
-  ring.absarc(0, 0, 0.065 * k, 0, Math.PI * 2, false);
+  shape.absarc(headX, 0, headR, -open, -(Math.PI - headA), true);
+  shape.quadraticCurveTo(headX * 0.5, -ringW * 0.92, Math.cos(ringA) * ringR, -ringW);
+  shape.absarc(0, 0, ringR, -ringA, ringA - Math.PI * 2, true);
   const hole = new Path();
-  hole.absarc(0, 0, 0.035 * k, 0, Math.PI * 2, true);
-  ring.holes.push(hole);
-  const handle = new Shape();
-  handle.moveTo(0.05 * k, -0.03 * k);
-  handle.lineTo(headX - 0.07 * k, -0.036 * k);
-  handle.lineTo(headX - 0.07 * k, 0.036 * k);
-  handle.lineTo(0.05 * k, 0.03 * k);
-  handle.closePath();
-  return [head, ring, handle];
+  hole.absarc(0, 0, 0.0072, 0, Math.PI * 2, true);
+  shape.holes.push(hole);
+  return [shape];
 }
 
 /** The walnut plinth and the four executive desk pieces (mascots.md §2–3). */
@@ -636,23 +640,25 @@ export function buildFigures(b: PartBuilder, p: Palette, q: Quality): void {
 
   const tool = FIGURES.skymek;
   const base = new Matrix4().compose(tool, new Quaternion().setFromAxisAngle(UP, -0.35), new Vector3(1, 1, 1));
-  b.add(new RoundedBoxGeometry(0.1, 0.012, 0.02, 2, 0.004), p.toolStand, new Matrix4().multiplyMatrices(base, new Matrix4().makeTranslation(-0.004, 0.006, -0.002)), OBJECT_ID.skymek);
+  b.add(new RoundedBoxGeometry(0.1, 0.01, 0.024, 3, 0.0045), p.toolStand, new Matrix4().multiplyMatrices(base, new Matrix4().makeTranslation(-0.004, 0.005, -0.002)), OBJECT_ID.skymek);
+  for (const x of [-0.034, 0.026]) {
+    b.add(new RoundedBoxGeometry(0.008, 0.012, 0.016, 2, 0.002), p.toolStand, new Matrix4().multiplyMatrices(base, new Matrix4().makeTranslation(x, 0.014, -0.002)), OBJECT_ID.skymek);
+  }
   const wrench = new ExtrudeGeometry(wrenchShapes(), {
-    depth: 0.005,
+    depth: 0.0042,
     bevelEnabled: true,
-    bevelSize: 0.0008,
-    bevelThickness: 0.0008,
-    bevelSegments: 2,
-    curveSegments: seg(16, q, 8)
-  }).translate(-0.055, 0, -0.0025);
+    bevelSize: 0.0012,
+    bevelThickness: 0.0012,
+    bevelSegments: seg(4, q, 2),
+    curveSegments: seg(24, q, 10)
+  }).translate(-0.048, 0, -0.0021);
   /** Stands on edge in the cradle, leaning back a little, so the camera reads its silhouette instead of a flat bar. */
   const lean = new Matrix4().multiplyMatrices(
     base,
-    new Matrix4().compose(new Vector3(0, 0.03, 0), new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), -0.05).multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -0.28)), new Vector3(1, 1, 1))
+    new Matrix4().compose(new Vector3(0, 0.026, 0), new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), -0.05).multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -0.28)), new Vector3(1, 1, 1))
   );
   b.add(wrench, p.toolBody, lean, OBJECT_ID.skymek);
-  b.add(new BoxGeometry(0.014, 0.0158, 0.0072), p.toolBand, new Matrix4().multiplyMatrices(lean, new Matrix4().makeTranslation(-0.004, 0, 0)), OBJECT_ID.skymek);
-  b.add(new BoxGeometry(0.05, 0.0012, 0.0068), p.toolSignal, new Matrix4().multiplyMatrices(lean, new Matrix4().makeTranslation(0.0, 0.0042, 0)), OBJECT_ID.skymek);
+  b.add(new BoxGeometry(0.038, 0.0016, 0.0004), p.toolSignal, new Matrix4().multiplyMatrices(lean, new Matrix4().makeTranslation(-0.004, 0, 0.0034)), OBJECT_ID.skymek);
 }
 
 /** Rectangles (centre x/z and size) that receive a soft contact shadow, in room space. */

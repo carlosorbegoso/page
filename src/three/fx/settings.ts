@@ -31,7 +31,7 @@ export function readFxTokens(): FxTokens {
     pointerDamping: tokenNumber('--fx-pointer-damping', 0.06),
     streakStrength: 0.3,
     streakThreshold: 1.8,
-    aberration: 0.01
+    aberration: 0.005
   };
 }
 

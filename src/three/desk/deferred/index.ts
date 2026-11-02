@@ -1,6 +1,7 @@
 import { Mesh, type Group, type PointLight } from 'three';
 import type { StationContext } from '../../contracts';
 import { FolderDetail } from '../folderDetail';
+import { Hotspots, type HotspotPick } from '../hotspots';
 import { StoryBeats } from '../life/beats';
 import { PokemonLife } from '../life/pokemon';
 import type { RigPart } from '../life/rig';
@@ -63,4 +64,8 @@ export function createRoomFar(context: StationContext, meshes: RoomMeshes, palet
   mesh.raycast = () => undefined;
   void context.precompile?.(mesh);
   return { object3D: mesh, dispose: () => geometry.dispose() };
+}
+
+export function createHotspots(picks: readonly HotspotPick[]): Hotspots {
+  return new Hotspots(picks);
 }

@@ -4,6 +4,7 @@ import { FOLDER, GLASS_Z, LAMP, ROOM, WINDOW, folderCentre } from '../layout';
 import { monitorFrame } from '../shots';
 import type { LightLevels } from './levels';
 
+const EXPLORE_NIGHT_FILL = 2.2;
 const LIGHT_CALIBRATION = { lamp: 0.4, monitor: 0.16, moon: 3, fill: 2.5, shelf: 9 } as const;
 const SUN_COLOR = '#fff1dc';
 const SKY_FILL = '#dfe8f2';
@@ -20,6 +21,7 @@ export class LightRig {
   readonly monitorLight: PointLight;
   private readonly moon: DirectionalLight;
   private readonly fill: HemisphereLight;
+  exploreFill = 0;
   private readonly shelfLight: SpotLight;
   private readonly ambientIntensity: number;
   private readonly moonNight: Color;
@@ -76,6 +78,7 @@ export class LightRig {
     this.fill.color.copy(this.nightSky).lerp(this.daySky, level.day).lerp(this.clothGlow, CLOTH_TINT * level.blind * level.day);
     this.fill.groundColor.copy(this.nightGround).lerp(this.dayGround, level.day);
     const daylight = level.day * DAY_FILL_GAIN * (1 - BLIND_FILL_SHADE * level.blind);
-    this.fill.intensity = this.ambientIntensity * LIGHT_CALIBRATION.fill * (1 + level.dawn * 1.5 * opening + daylight);
+    const exploring = this.exploreFill * EXPLORE_NIGHT_FILL * (1 - level.day);
+    this.fill.intensity = this.ambientIntensity * LIGHT_CALIBRATION.fill * (1 + level.dawn * 1.5 * opening + daylight + exploring);
   }
 }

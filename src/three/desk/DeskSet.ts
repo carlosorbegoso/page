@@ -53,6 +53,11 @@ export class DeskSet implements ShotProvider {
   private shadowPose = '';
   private clock = 0;
   private readonly coarsePointer = matchMedia('(pointer: coarse)');
+  private readonly onExplore = (event: Event) => {
+    this.lights.exploreFill = (event as CustomEvent<{ active?: boolean }>).detail?.active ? 1 : 0;
+    this.applyLevels();
+    this.context.invalidate();
+  };
   private readonly onAction = createActionListener({
     clock: () => this.clock,
     context: () => this.context,
@@ -103,6 +108,7 @@ export class DeskSet implements ShotProvider {
     this.weather.addWindow(this.room, this.disposables);
     addSpines(this.room, this.folders, this.disposables);
     window.addEventListener('desk:action', this.onAction);
+    window.addEventListener('explore:change', this.onExplore);
     window.addEventListener('desk:interact', this.onInteract);
     this.clockWiring = new ClockWiring(context);
     this.room.add(this.clockWiring.group);
@@ -275,6 +281,7 @@ export class DeskSet implements ShotProvider {
 
   dispose(): void {
     window.removeEventListener('desk:action', this.onAction);
+    window.removeEventListener('explore:change', this.onExplore);
     window.removeEventListener('desk:interact', this.onInteract);
     window.removeEventListener('keydown', this.onFolderKey);
     this.framing?.dispose();

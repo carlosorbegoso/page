@@ -51,6 +51,7 @@ class CinematicPipeline implements CinematicFx {
   private readonly capture = new URLSearchParams(location.search).has('capture');
   private chapterEvents = false;
   private chapter = '';
+  private exploring = false;
   private readonly grading = new ChapterGrading();
   private time = 0;
   private readonly cleanups: Array<() => void> = [];
@@ -73,10 +74,13 @@ class CinematicPipeline implements CinematicFx {
       this.cleanups.push(() => window.removeEventListener(type, listener));
     };
     const onTime = () => {
-      if (this.chapter) this.grading.enter(this.chapter, this.frozen, true);
+      if (this.chapter) this.grading.enter(this.exploring ? 'explore' : this.chapter, this.frozen, true);
     };
     window.addEventListener('time:toggle', onTime);
     this.cleanups.push(() => window.removeEventListener('time:toggle', onTime));
+    const onExplore = (event: Event) => this.explore(Boolean((event as CustomEvent<{ active?: boolean }>).detail?.active));
+    window.addEventListener('explore:change', onExplore);
+    this.cleanups.push(() => window.removeEventListener('explore:change', onExplore));
     listen('chapter:enter', (id, detail) => {
       this.chapterEvents = true;
       this.enterChapter(id);
@@ -94,7 +98,12 @@ class CinematicPipeline implements CinematicFx {
 
   private enterChapter(id: string): void {
     this.chapter = id;
-    this.grading.enter(id, this.frozen);
+    if (!this.exploring) this.grading.enter(id, this.frozen);
+  }
+
+  private explore(active: boolean): void {
+    this.exploring = active;
+    this.grading.enter(active ? 'explore' : this.chapter, this.frozen);
   }
 
   get settling(): boolean {
@@ -113,7 +122,7 @@ class CinematicPipeline implements CinematicFx {
   }
 
   private get dofEnabled(): boolean {
-    return this.profile.dof !== 'off' && !this.budget.has('dof');
+    return this.profile.dof !== 'off' && !this.budget.has('dof') && !this.exploring;
   }
 
   attachPointer(pointer: PointerField): void {

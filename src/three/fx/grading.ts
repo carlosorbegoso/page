@@ -20,7 +20,8 @@ const GRADES: Record<string, Grade & { seconds?: number; delay?: number }> = {
   products: { exposure: 1, temperature: 0.14, split: 0.48, contrast: 0.3, vignette: 0.6, focusRange: 0.3, bokeh: 1.2 },
   experience: { exposure: 0.96, temperature: -0.22, split: 0.2, contrast: 0.2, vignette: 0.6, focusRange: 0.25, bokeh: 1.4 },
   contact: { exposure: 1, temperature: -0.06, split: 0.32, contrast: 0.2, vignette: 0.55, focusRange: 0.2, bokeh: 1.2 },
-  outro: { exposure: 1.3, temperature: 0.35, split: 0.2, contrast: 0.15, vignette: 0.35, focusRange: 0.8, bokeh: 1, seconds: 2.5 }
+  outro: { exposure: 1.3, temperature: 0.35, split: 0.2, contrast: 0.15, vignette: 0.35, focusRange: 0.8, bokeh: 1, seconds: 2.5 },
+  explore: { exposure: 2.1, temperature: -0.05, split: 0.2, contrast: 0.12, vignette: 0.25, focusRange: 1, bokeh: 0, seconds: 1.2 }
 };
 
 const GRADES_DAY: Record<string, Partial<Grade>> = {
@@ -31,7 +32,8 @@ const GRADES_DAY: Record<string, Partial<Grade>> = {
   company: { exposure: 1, temperature: 0.3, split: 0.3, contrast: 0.2, vignette: 0.35 },
   products: { exposure: 1, temperature: 0.28, split: 0.3, contrast: 0.22, vignette: 0.4 },
   contact: { exposure: 0.95, temperature: 0.2, split: 0.25, contrast: 0.16, vignette: 0.35 },
-  outro: { exposure: 0.85, temperature: 0.15, split: 0.4, contrast: 0.2, vignette: 0.5 }
+  outro: { exposure: 0.85, temperature: 0.15, split: 0.4, contrast: 0.2, vignette: 0.5 },
+  explore: { exposure: 1, temperature: 0.05, split: 0.12, contrast: 0.12, vignette: 0.2 }
 };
 
 const isDay = () => typeof document !== 'undefined' && document.documentElement.dataset.time === 'day';

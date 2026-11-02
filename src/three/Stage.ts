@@ -15,6 +15,7 @@ import { holdIntroForBoot } from './stage/intro-gate';
 import { announceReveal, screenPoint, surfaceFoot } from './stage/reveal';
 import { applyStageTokens, createStageRenderer } from './stage/renderer';
 import { breathes, fixedChapter, StageLayout } from './stage/shots';
+import { attachLookInput } from './stage/look-input';
 import { stationContext } from './stage/station-context';
 import { reportProgress, type StageOptions } from './stage/types';
 import { calibrateRefreshInterval, dprPolicy, type Tier } from './tier';
@@ -149,6 +150,7 @@ export class Stage {
     await this.modules.sync();
     reportProgress(0.88);
     this.cleanups.push(onRegistryChange(() => void this.modules.sync()));
+    this.cleanups.push(attachLookInput({ look: this.director.look, wake: () => this.invalidate(), enabled: () => this.director.isSettled && !this.options.capture }));
     await yieldToMain();
   }
 

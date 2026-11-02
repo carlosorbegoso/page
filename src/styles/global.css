@@ -189,3 +189,9 @@ html.is-3d [data-site-footer] {
 html.stage-pending:not(.is-3d) main {
   visibility: hidden;
 }
+
+:root[data-looking],
+:root[data-looking] * {
+  cursor: grabbing !important;
+  user-select: none;
+}

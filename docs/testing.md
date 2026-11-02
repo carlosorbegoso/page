@@ -15,6 +15,7 @@ Qué cubre la suite `tests/smoke/` y cómo correrla; léelo antes de tocar `play
 | `tests/smoke/pages.spec.ts` | Inicio ES y EN y las páginas de lectura cargan con 200, `lang` correcto y sin errores de consola ni excepciones; una ruta desconocida da la página 404 con estado 404 |
 | `tests/smoke/boot.spec.ts` | En el inicio, `html.is-3d` y `.boot[data-phase="done"]` en 25 s como máximo |
 | `tests/smoke/chapters.spec.ts` | `?chapter=<id>` para hero, about, experience, company, products, contact y outro en vertical 390 × 740: una sola placa activa del capítulo, visible o sustituida por un objeto del 3D (impresa o recortada a 1 px), toda placa con `data-plate-printed` mide ~1 px y ninguna placa HTML visible se solapa con otra |
+| `tests/smoke/explore.spec.ts` | El botón 360° del HUD abre el modo Explorar (`html[data-exploring]`, `aria-pressed`, aviso visible), la rueda y las flechas no mueven la historia, y Esc lo cierra sin errores de consola |
 
 `tests/smoke/support.ts` junta los errores y espera el arranque; `tests/smoke/plates.ts` lee las cajas de las placas.
 

@@ -105,11 +105,11 @@ export function attachExploreInput(host: ExploreInputHost): () => void {
     ['pointercancel', drag.up]
   ] as const;
   for (const [type, handler] of pointer) window.addEventListener(type, handler, { passive: true });
-  window.addEventListener('keydown', onKey);
+  window.addEventListener('keydown', onKey, { capture: true });
   window.addEventListener('deviceorientation', onTilt);
   return () => {
     for (const [type, handler] of pointer) window.removeEventListener(type, handler);
-    window.removeEventListener('keydown', onKey);
+    window.removeEventListener('keydown', onKey, { capture: true });
     window.removeEventListener('deviceorientation', onTilt);
   };
 }

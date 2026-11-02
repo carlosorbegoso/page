@@ -1,11 +1,10 @@
 import { Matrix4, Vector3, type Mesh } from 'three';
 import type { ChapterId } from '../../contracts';
 import { OBJECT_ID } from '../builder';
-import { FOLDER_PARK } from '../folder-detail/constants';
+import { FLAP_THICKNESS, FOLDER_PARK } from '../folder-detail/constants';
 import { follow } from '../folder-detail/follow';
 import type { FolderDetail } from '../folderDetail';
-import { FLAP_THICKNESS } from '../folder-detail/flap';
-import { OpenFolderPrint } from '../folders/open-folder-print';
+import type { OpenFolderPrint } from '../folders/open-folder-print';
 import { FOLDERS, OPEN_FOLDER, type FolderId } from '../layout';
 import type { DeskLife } from '../life';
 import type { AtlasUniforms } from '../materials';
@@ -36,7 +35,7 @@ function requestedFolder(interactId: string): FolderId | null {
 
 export class DeskFolders {
   detail: FolderDetail | null = null;
-  readonly print = new OpenFolderPrint();
+  private print: OpenFolderPrint | null = null;
   private request: FolderRequest | null = null;
   private readonly autoOpen = new FolderAutoOpen();
   private focusKey = '';
@@ -49,6 +48,10 @@ export class DeskFolders {
   private archiveCover: Mesh | null = null;
   private readonly origin = new Vector3();
   private readonly coverRest = new Vector3();
+
+  attachPrint(print: OpenFolderPrint): void {
+    this.print = print;
+  }
 
   attachSpines(labels: Map<FolderId, Mesh>, cover: Mesh): void {
     this.spineLabels = labels;
@@ -144,7 +147,7 @@ export class DeskFolders {
     const closed = 1 - this.open;
     uniforms.uHinge.value.setFromMatrix4(this.hingeMatrix.makeRotationAxis(FOLDER_HINGE_AXIS, -Math.PI * 0.985 * (closed * closed * (3 - 2 * closed))));
     uniforms.uHingeOrigin.value.copy(FOLDER_HINGE_ORIGIN);
-    this.print.applyHinge(this.hingeMatrix, FOLDER_HINGE_ORIGIN);
+    this.print?.applyHinge(this.hingeMatrix, FOLDER_HINGE_ORIGIN);
     for (const id of FOLDERS) {
       const pull = this.pull.get(id) ?? 0;
       const held = this.detail?.shelfPose(id, pull) ?? null;

@@ -13,10 +13,10 @@ import {
 } from 'three';
 import { FOLDER, FOLDERS, folderCentre, type FolderId } from '../layout';
 import type { Palette } from '../props';
-import { DURATION, FOLDER_PARK, OPEN_SHEET, SHEET, type ShelfFolder } from './constants';
+import { DURATION, FLAP_THICKNESS, FOLDER_PARK, OPEN_SHEET, SHEET, type ShelfFolder } from './constants';
 import { aimShelfFolder, shelfHoldPose } from './aim';
 import { ease } from './ease';
-import { createFlapMesh, FLAP_THICKNESS, flapPose, placeFlap } from './flap';
+import { createFlapMesh, flapPose, placeFlap } from './flap';
 import { createFlapInside } from './flap-inside';
 import { createSheetMesh, createSheetTexture, createTwinMesh, type SheetMesh } from './mesh';
 import { listenOutsideClick } from './outside-click';

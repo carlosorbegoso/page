@@ -22,7 +22,7 @@ Qué archivo editar en el escritorio 3D: encuadres (shots), luz, props, figuras,
 | Montaje del escritorio y orden de `update` (ensamblador) | `src/three/desk/DeskSet.ts` |
 | Cuadro con la foto en la pared: posición, tamaño y ruta de la foto (`PORTRAIT_PHOTO`) | `src/three/desk/portrait/layout.ts` |
 | Cuadro: marco y sombra en la pared, paspartú y foto en B/N cálido, vidrio (reflejos, brillo al hover), luz de latón que se enciende de noche | `src/three/desk/portrait/{frame,photo,glass,light}.ts`, GLSL en `glass.glsl.ts`, ensamblado en `portrait.ts` |
-| Clic en el cuadro: la cámara se acerca y vuelve con Esc, rueda o cambio de plano | `src/three/desk/portrait/inspect.ts`, desvío de cámara en `src/three/stage/detour.ts` |
+| Clic en el cuadro: la cámara se acerca y vuelve con Esc, rueda o cambio de plano (llega con `deferred`, `WallPortrait.attachInspect`) | `src/three/desk/portrait/inspect.ts`, desvío de cámara en `src/three/stage/detour.ts` |
 | Luz por capítulo, día y noche, encendido de la intro, clic en la lámpara | `src/three/desk/set/levels.ts` |
 | Persiana: subida y bajada con easing por reloj (no se corta al acabar la ventana de movimiento), estado guardado en `sessionStorage` | `src/three/desk/set/blind-travel.ts` |
 | Bombilla de la lámpara (difusor, halo, luz cálida cercana) e interruptor de la base | `src/three/desk/lamp/bulb.ts`, `src/three/desk/lamp/switch.ts` |
@@ -35,12 +35,12 @@ Qué archivo editar en el escritorio 3D: encuadres (shots), luz, props, figuras,
 | Pantallas de monitor, teléfono y laptop | `src/three/desk/set/screens.ts` |
 | Laptop viva: tapa con bisagra, imagen (bloqueo o escritorio), fps y frustum | `src/three/desk/screens/laptop.ts`, `laptopLid.ts`, `laptopDisplay.ts` |
 | Escritorio de la laptop (IntelliJ + terminal, Grafana, barra de menús; llega después del primer frame) | `src/three/desk/screens/desktop.ts` |
-| Lo que se carga después del primer frame (carpeta para leer, escritorio de la laptop, persiana): cuándo y cómo se monta | `src/three/desk/set/deferred.ts`; el chunk en `src/three/desk/deferred/index.ts` |
+| Lo que se carga después del primer frame (reloj, impreso de la carpeta abierta, zoom del cuadro, carpeta para leer, escritorio y teclas de la laptop, persiana): cuándo y cómo se monta | `src/three/desk/set/deferred.ts`; el chunk en `src/three/desk/deferred/index.ts` |
 | Contenido de la laptop (código Java, log de Quarkus, git log) | `src/three/desk/screens/laptopScript.ts`, `editor.ts`, `terminal.ts`, `dashboard.ts`, `lockScreen.ts` |
-| Teclas de la laptop que se hunden al escribir con el teclado real | `src/three/desk/screens/keycaps.ts`, `typing.ts`, distribución en `props/laptopKeys.ts` |
+| Teclas de la laptop que se hunden al escribir con el teclado real (la escucha de `typing.ts` llega con `deferred` junto al escritorio) | `src/three/desk/screens/keycaps.ts`, `typing.ts`, distribución en `props/laptopKeys.ts` |
 | Vidrio del monitor (reflejo del entorno, respiración del brillo) | `src/three/desk/screens/monitorGlass.ts` |
 | Zonas de clic, etiquetas y hover | `src/three/desk/set/picks.ts` |
-| Reloj (hora de la historia, timbre) | `src/three/desk/set/clock-wiring.ts`; minutos por plano en `src/lib/story-time.ts` |
+| Reloj (hora de la historia, timbre; llega con `deferred`, `onClock` de `mountLateDesk`) | `src/three/desk/set/clock-wiring.ts`; minutos por plano en `src/lib/story-time.ts` |
 | Qué hace cada `desk:action` (juguetes, carpeta, laptop, lámpara) | `src/three/desk/set/actions.ts` |
 | Figuras animadas, carpeta en mano y lomos al cargar | `src/three/desk/set/extras.ts` |
 | Ciudad, lluvia, vapor y haz de la lámpara cada frame | `src/three/desk/set/weather.ts` |
@@ -81,10 +81,10 @@ Qué archivo editar en el escritorio 3D: encuadres (shots), luz, props, figuras,
 | La carpeta del sub-plano se abre sola al aterrizar la cámara | `src/three/desk/set/folder-auto-open.ts` |
 | Hoja de portada del archivo (título del capítulo experiencia en 3D) | `src/three/desk/archive-cover.ts` |
 | El enfoque (DOF) sigue a la carpeta en mano (`desk:focus`) | `src/three/desk/set/folders.ts`, `src/three/stage/listen.ts` |
-| Texto real de TCS impreso sobre las hojas de la carpeta abierta | `src/three/desk/folders/open-folder-print.ts` |
+| Texto real de TCS impreso sobre las hojas de la carpeta abierta (llega con `deferred`, `DeskFolders.attachPrint`; antes, papel liso) | `src/three/desk/folders/open-folder-print.ts` |
 | Gemela de la caja y mallas de la hoja | `src/three/desk/folder-detail/twin.ts`, `mesh.ts` |
 | Objetos que viajan con la carpeta (`follow`) | `src/three/desk/folder-detail/follow.ts` |
-| Reloj despertador | `src/three/desk/clock.ts`, `src/three/desk/clock/` |
+| Reloj despertador: posición y evento de timbre (arranque) | `src/three/desk/clock.ts`; modelo, agujas y timbre en `src/three/desk/clock/story-clock.ts` y `clock/parts.ts` (llegan con `deferred`) |
 | Figuras animadas | `src/three/desk/life/` |
 | Tarjetas impresas de los productos (se acuestan en el escritorio y se paran en su plano) | `src/three/desk/notes/cards/` |
 | Piezas de Pikachu y Charizard (clasificador de triángulos, va en el arranque) | `src/three/desk/life/pokemon/parts.ts` |

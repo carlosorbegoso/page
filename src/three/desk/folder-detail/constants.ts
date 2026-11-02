@@ -2,6 +2,8 @@ import { FOLDER, SHELF, type FolderId } from '../layout';
 
 export const FOLDER_PARK = -(FOLDER.depth + 0.04);
 
+export const FLAP_THICKNESS = 0.003;
+
 export const DURATION = 0.6;
 export const SLIDE_END = 0.55;
 export const TURN_START = 0.4;

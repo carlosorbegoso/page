@@ -20,6 +20,4 @@ export function addSpines(room: Group, folders: DeskFolders, disposables: Dispos
   room.add(...spines.meshes.values(), spines.cover);
   folders.attachSpines(spines.meshes, spines.cover);
   disposables.push(spines);
-  room.add(folders.print.object3D);
-  disposables.push(folders.print);
 }

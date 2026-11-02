@@ -40,3 +40,5 @@ Qué archivo editar en el motor 3D: arranque, Stage, director, scroll, placas, i
 | Caché de GLB y texturas (refcount), loaders | `src/three/assets.ts`; GLB optimizados con `bun run assets` (`scripts/optimize-assets.ts`) |
 | Overlay `?debug` (FPS p75, DPR, draw calls, memoria) | `src/three/debug.ts` |
 | Tokens CSS leídos desde three (`tokenColor`, `tokenNumber`) | `src/three/tokens.ts` |
+| Mirar alrededor arrastrando con el mouse (±40° / ±16°, vuelve solo al plano) | `src/three/stage/look.ts`, entrada en `stage/look-input.ts`, aplicado en `director.ts` |
+| Modo Explorar 360° (botón del HUD, arrastre, flechas/WASD, giroscopio, Esc), carga diferida al primer uso | `src/three/stage/explore/` (`camera.ts` punto de vista y mezcla, `input.ts` entrada, `mode.ts` entrar/salir), `stage/explore-entry.ts`; botón en `src/components/hud/HudBar.astro` y `hud/explore-toggle.ts` |

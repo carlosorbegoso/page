@@ -68,11 +68,11 @@ type DeskKey = Exclude<keyof Palette, CollectibleKey | 'folders' | 'label' | 'ph
 
 function readDeskFinishes(): Pick<Palette, DeskKey> {
   return {
-    wall: { color: c('--color-desk-wall', '#121722').multiplyScalar(PERCEIVED_TO_ALBEDO.wall), roughness: 0.95, metalness: 0 },
+    wall: { color: c('--color-desk-wall', '#121722').multiplyScalar(PERCEIVED_TO_ALBEDO.wall), roughness: 0.95, metalness: 0, surface: 'plaster' },
     floor: { color: c('--color-desk-floor', '#17140f').multiplyScalar(PERCEIVED_TO_ALBEDO.floor), roughness: 0.7, metalness: 0, grain: 0.7 },
     wood: { color: c('--color-desk-wood', '#5a3e2b'), roughness: 0.72, metalness: 0, grain: 1 },
-    metal: { color: c('--color-desk-metal', '#2b313c'), roughness: 0.35, metalness: 0.8 },
-    fabric: { color: c('--color-desk-fabric', '#232a3a'), roughness: 0.9, metalness: 0 },
+    metal: { color: c('--color-desk-metal', '#2b313c'), roughness: 0.35, metalness: 0.8, surface: 'brushed' },
+    fabric: { color: c('--color-desk-fabric', '#232a3a'), roughness: 0.9, metalness: 0, surface: 'weave' },
     ceramic: { color: c('--color-desk-ceramic', '#e6e0d4'), roughness: 0.7, metalness: 0 },
     coffee: { color: new Color('#3a2214'), roughness: 0.62, metalness: 0 },
     crema: { color: new Color('#a8703d'), roughness: 0.7, metalness: 0 },
@@ -82,12 +82,12 @@ function readDeskFinishes(): Pick<Palette, DeskKey> {
     paper: { color: c('--color-desk-paper', '#d8d2c4'), roughness: 0.9, metalness: 0 },
     bookDark: { color: c('--color-desk-fabric', '#232a3a'), roughness: 0.8, metalness: 0 },
     bookBlue: { color: c('--color-desk-metal', '#2b313c'), roughness: 0.8, metalness: 0 },
-    brass: { color: c('--color-desk-brass', '#b08a4a'), roughness: 0.35, metalness: 1 },
-    frame: { color: c('--color-window-frame', '#1a1f29'), roughness: 0.5, metalness: 0.6 },
-    bezel: { color: c('--color-monitor-bezel', '#0c0f14'), roughness: 0.4, metalness: 0.3 },
-    keys: { color: c('--color-monitor-bezel', '#0c0f14').multiplyScalar(1.6), roughness: 0.5, metalness: 0.2 },
-    trackpad: { color: c('--color-desk-metal', '#2b313c'), roughness: 0.3, metalness: 0.6 },
-    shade: { color: c('--color-lamp-shade', '#1d222b'), roughness: 0.6, metalness: 0.3 },
+    brass: { color: c('--color-desk-brass', '#b08a4a'), roughness: 0.35, metalness: 1, surface: 'brushed', detail: 0.6 },
+    frame: { color: c('--color-window-frame', '#1a1f29'), roughness: 0.5, metalness: 0.6, surface: 'brushed', detail: 0.7 },
+    bezel: { color: c('--color-monitor-bezel', '#0c0f14'), roughness: 0.4, metalness: 0.3, surface: 'brushed', detail: 0.6 },
+    keys: { color: c('--color-monitor-bezel', '#0c0f14').multiplyScalar(1.6), roughness: 0.5, metalness: 0.2, surface: 'brushed', detail: 0.4 },
+    trackpad: { color: c('--color-desk-metal', '#2b313c'), roughness: 0.3, metalness: 0.6, surface: 'brushed', detail: 0.5 },
+    shade: { color: c('--color-lamp-shade', '#1d222b'), roughness: 0.6, metalness: 0.3, surface: 'brushed', detail: 0.8 },
     diffuser: { color: c('--color-lamp', '#ffb566'), roughness: 0.5, metalness: 0, emissive: 2 },
     telescope: { color: c('--color-telescope', '#c9ced6'), roughness: 0.3, metalness: 0.1 },
     telescopeBrass: { color: c('--color-telescope-brass', '#b08a4a'), roughness: 0.35, metalness: 1 },
@@ -128,6 +128,6 @@ export function readPalette(): Palette {
       tcs: { color: c('--color-folder-tcs', '#33405a'), roughness: 0.85, metalness: 0 }
     },
     label: { color: c('--color-desk-paper', '#d8d2c4'), roughness: 0.9, metalness: 0 },
-    phone: { color: c('--color-phone-body', '#15181e'), roughness: 0.45, metalness: 0.6 }
+    phone: { color: c('--color-phone-body', '#15181e'), roughness: 0.45, metalness: 0.6, surface: 'brushed', detail: 0.5 }
   };
 }

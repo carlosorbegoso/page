@@ -7,7 +7,7 @@ import type { LaptopDesktop } from './desktop';
 import { LaptopDisplay, type LaptopPicture } from './laptopDisplay';
 import { LaptopKeycaps } from './keycaps';
 import { LaptopLid } from './laptopLid';
-import { listenForTyping, type TypedKey } from './typing';
+import type { listenForTyping, TypedKey } from './typing';
 
 const WAKE_SECONDS = 1.3;
 
@@ -29,7 +29,7 @@ export class DeskLaptop {
   private readonly frustum = new Frustum();
   private readonly viewProjection = new Matrix4();
   private readonly frameInterval: number;
-  private readonly stopTyping: () => void;
+  private stopTyping: (() => void) | null = null;
   swinging = false;
   private picture: LaptopPicture | null = null;
   private drawnAt = -Infinity;
@@ -52,7 +52,6 @@ export class DeskLaptop {
     this.lid.panel.add(this.glass);
     this.keycaps = new LaptopKeycaps(options.material, options.shadows);
     options.room.add(this.lid.pivot, this.keycaps.mesh);
-    this.stopTyping = listenForTyping(typed => this.onType(typed));
   }
 
   toggleLid(time: number): void {
@@ -64,8 +63,9 @@ export class DeskLaptop {
     this.lid.setHover(hovered);
   }
 
-  attachDesktop(desktop: LaptopDesktop): void {
+  attachDesktop(desktop: LaptopDesktop, listen: typeof listenForTyping): void {
     this.display.attachDesktop(desktop);
+    this.stopTyping = listen(typed => this.onType(typed));
     this.dirty = true;
     this.options.invalidate();
   }
@@ -125,7 +125,7 @@ export class DeskLaptop {
   }
 
   dispose(): void {
-    this.stopTyping();
+    this.stopTyping?.();
     this.lid.dispose();
     this.keycaps.dispose();
     this.display.dispose();

@@ -1,18 +1,25 @@
-import type { Group, PointLight } from 'three';
+import { Mesh, type Group, type PerspectiveCamera, type PointLight } from 'three';
 import type { StationContext } from '../../contracts';
 import { FolderDetail } from '../folderDetail';
+import { OpenFolderPrint } from '../folders/open-folder-print';
+import { Hotspots, type HotspotPick } from '../hotspots';
 import { StoryBeats } from '../life/beats';
 import { PokemonLife } from '../life/pokemon';
 import type { RigPart } from '../life/rig';
 import { StackedPrints } from '../notes/stacked';
 import { BioCard } from '../portrait/bio-card';
+import { PortraitInspect } from '../portrait/inspect';
 import type { Palette } from '../props';
+import { buildRoomFar } from '../room-far';
 import { RollerBlind } from '../room-life/blind';
 import { LaptopDesktop } from '../screens/desktop';
 import { DESKTOP_SIZE } from '../screens/laptopDisplay';
 import { useStackedProductShot } from '../shots/printed-shots';
 import { stackedProductShot } from '../shots/stacked-product-shot';
+import { ClockWiring } from '../set/clock-wiring';
 import type { RoomMeshes } from '../set/room';
+
+export { listenForTyping } from '../screens/typing';
 
 export function createFolderDetail(context: StationContext, meshes: RoomMeshes, palette: Palette): FolderDetail {
   const detail = new FolderDetail({
@@ -51,4 +58,33 @@ export function createPokemonLife(parts: ReadonlyMap<string, RigPart>, flashLigh
 export function createStackedPrints(room: Group, invalidate: () => void): StackedPrints {
   useStackedProductShot(stackedProductShot);
   return new StackedPrints(room, invalidate);
+}
+
+export function createRoomFar(context: StationContext, meshes: RoomMeshes, palette: Palette): { object3D: Mesh; dispose(): void } {
+  const high = context.tier === 'high';
+  const geometry = buildRoomFar(palette, high ? 1 : 0.6);
+  const mesh = new Mesh(geometry, meshes.material);
+  mesh.name = 'desk-room-far';
+  mesh.receiveShadow = high;
+  mesh.raycast = () => undefined;
+  void context.precompile?.(mesh);
+  return { object3D: mesh, dispose: () => geometry.dispose() };
+}
+
+export function createHotspots(picks: readonly HotspotPick[]): Hotspots {
+  return new Hotspots(picks);
+}
+
+export function createClockWiring(context: StationContext): ClockWiring {
+  return new ClockWiring(context);
+}
+
+export function createOpenFolderPrint(context: StationContext): OpenFolderPrint {
+  const print = new OpenFolderPrint();
+  void context.precompile?.(print.object3D);
+  return print;
+}
+
+export function createPortraitInspect(camera: PerspectiveCamera): PortraitInspect {
+  return new PortraitInspect(camera);
 }

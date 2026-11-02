@@ -5,7 +5,7 @@ Cuánto pesa el 3D, qué se descarga antes del primer frame y qué llega despué
 ## Regla de los 260 KB
 
 - 260 KB gzip cubren lo que se descarga **antes del primer frame del 3D**. Lo demás llega después y no lo retrasa.
-- Margen medido: ~2 KB tras pasar la vida de Pikachu y Charizard a `deferred` (−1.7 KB al arranque, 2026-11-01). Lo próximo que se añada al escritorio debe llegar después del primer frame (patrón de `src/three/desk/set/deferred.ts`).
+- Margen medido: ~6.7 KB (253.3 KB, 2026-11-01, tras pasar a `deferred` el reloj, el impreso de la carpeta abierta, el zoom del cuadro y la escucha del teclado de la laptop, −6.3 KB, y sumar el detalle de superficies del atlas, +1.1 KB). Lo próximo que se añada al escritorio debe llegar después del primer frame (patrón de `src/three/desk/set/deferred.ts`).
 - JS de arranque sin three (script de `StageCanvas` + `sections` + `preload-helper`): unos 3.5 KB.
 
 ## Chunks (`bun run build`, gzip -9 de `dist/_astro/*.js`, 2026-11-01)
@@ -13,24 +13,27 @@ Cuánto pesa el 3D, qué se descarga antes del primer frame y qué llega despué
 | Chunk | KB | Cuándo se pide |
 |---|---|---|
 | `motion` (three.module + three.core; Rollup puede nombrarlo por otro módulo que lleve dentro, p. ej. `tokens`) | 148.8 | arranque |
-| `three` (Stage, director, placas, CSS3D) | 25.9 | arranque |
-| `desk` | 70.3 | arranque |
-| `fx` | 10.3 | arranque |
+| `three` (Stage, director, placas, CSS3D) | 27.0 | arranque |
+| `desk` | 65.3 | arranque |
+| `fx` | 10.4 | arranque |
 | `BufferGeometryUtils` + `contracts` (la capa tardía ya va dentro de `fx`) | 1.8 | arranque |
-| **Antes del primer frame** | **257.0** | |
+| **Antes del primer frame** | **253.3** | |
 | `gsap` 26.5 + `ScrollTrigger` 17.0 + `ScrollToPlugin` 1.6 | 45.1 | después del primer frame (`Stage.start` dibuja antes de `startScroll`) |
-| `deferred` (carpeta para leer, escritorio de la laptop, persiana, impresos del teléfono vertical: corcho, tarjetas de producto con `product-shorts.json`, hoja de TCS, vida y batalla de Pikachu y Charizard) | 26.7 | evento `stage:reveal` |
+| `deferred` (reloj con su glTF, impreso de TCS de la carpeta abierta, zoom del cuadro, teclas que escriben en la laptop, carpeta para leer, escritorio de la laptop, persiana, impresos del teléfono vertical: corcho, tarjetas de producto con `product-shorts.json`, hoja de TCS, vida y batalla de Pikachu y Charizard, cuarto lejano de `room-far/` con 1 draw call, puntos del modo Explorar) | 36.3 | evento `stage:reveal` |
+| `explore` (modo Explorar 360°: cámara, entrada, entrar/salir) | 1.6 | primer clic en el botón 360° del HUD |
 | `field` (simulación del fluido) | 1.9 | primer movimiento del puntero con el fluido activo |
 | `GLTFLoader` + `KTX2Loader` + `meshopt_decoder` | sin medir | primer glTF (`acquireGltf`; hoy, el reloj) |
 
 ## Gotchas
 
+- Hasta que llega `deferred` (≈1 s tras el primer frame): no hay reloj (ya aparecía tarde, cuando cargaba su glTF), las hojas de la carpeta abierta son papel liso, un clic en el cuadro no acerca la cámara y teclear no hunde las teclas de la laptop. `src/three/desk/clock.ts` solo guarda `CLOCK_POSITION` y el evento, para que `set/picks.ts` no arrastre `StoryClock` al arranque.
 - Hasta que llega `deferred`, la laptop muestra la pantalla de bloqueo y las carpetas no se pueden sacar: un clic queda en cola 5 s, y la apertura automática de experiencia funciona igual cuando llega. En `?capture` todo se carga antes del primer frame.
 - En teléfono vertical, el corcho y las tarjetas de producto se reimprimen con letra grande cuando llega `deferred` (antes muestran el impreso de escritorio; nadie está en esos planos todavía).
 - La persiana (tela, barra, cadena) llega con `deferred`; el cajón es geometría del cuarto y la luz ya sale con la persiana guardada desde el primer frame. Con la persiana bajada en `sessionStorage`, la tela aparece al llegar el chunk.
 - En `deferred` no uses `IcosahedronGeometry` u otras clases de three que el primer frame no usa: Rollup las mete en el chunk `motion` (+0.9 KB al arranque). `SphereGeometry`, `InstancedMesh` y `DataTexture` ya están.
 - `gsap/gsap-core` sin CSSPlugin no sirve: ScrollTrigger llama a `gsap.utils.checkPrefix`, que viene de CSSPlugin.
 - Lo que más pesa en `desk` y se ve en el hero (no se puede diferir sin cambiar el primer frame): props (figuras, Pikachu, Charizard, cuarto) ≈ 66 KB sin comprimir, `life/**` ≈ 34 (de `life/pokemon` solo queda `parts.ts`; la vida y la batalla llegan con `deferred`), `notes/**` ≈ 24 (corcho y tarjetas), `portrait/**` ≈ 15.
+- El detalle de superficies (`materials/surface.glsl.ts`) cuesta ~1.1 KB en `desk`, 0 draw calls y 0 bytes de textura: va en el shader del atlas desde el primer frame, así que no hay recompilación tardía.
 - `RectAreaLight` pesaba unos 100 KB: por eso el monitor ilumina con una `PointLight`.
 
 ## Pantalla de arranque

@@ -7,6 +7,16 @@ export interface Finish {
   metalness: number;
   emissive?: number;
   grain?: number;
+  surface?: SurfaceKind;
+  detail?: number;
+}
+
+export type SurfaceKind = 'plaster' | 'weave' | 'brushed';
+
+const SURFACE_CODE: Record<SurfaceKind, number> = { plaster: 2, weave: 4, brushed: 6 };
+
+function surfaceCode(finish: Finish): number {
+  return finish.surface ? SURFACE_CODE[finish.surface] + Math.min(finish.detail ?? 1, 0.999) : (finish.grain ?? 0);
 }
 
 export interface Placement {
@@ -57,9 +67,10 @@ export class PartBuilder {
     const colors = new Float32Array(count * 3);
     const pbr = new Float32Array(count * 4);
     const ids = new Float32Array(count);
+    const code = surfaceCode(finish);
     for (let i = 0; i < count; i++) {
       colors.set([finish.color.r, finish.color.g, finish.color.b], i * 3);
-      pbr.set([finish.roughness, finish.metalness, finish.emissive ?? 0, finish.grain ?? 0], i * 4);
+      pbr.set([finish.roughness, finish.metalness, finish.emissive ?? 0, code], i * 4);
       ids[i] = objectId;
     }
     part.setAttribute('color', new BufferAttribute(colors, 3));

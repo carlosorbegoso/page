@@ -6,6 +6,7 @@ import { createPhoneTexture, createScreenTexture, drawPhone, drawScreen } from '
 import type { LaptopDesktop } from '../screens/desktop';
 import { DeskLaptop } from '../screens/laptop';
 import { MonitorGlass } from '../screens/monitorGlass';
+import type { listenForTyping } from '../screens/typing';
 import type { SurfaceFrame } from '../shots';
 import type { DeskFrame } from './frame';
 import type { LightLevels } from './levels';
@@ -66,8 +67,8 @@ export class DeskScreens {
     this.laptop.toggleLid(time);
   }
 
-  attachDesktop(desktop: LaptopDesktop): void {
-    this.laptop.attachDesktop(desktop);
+  attachDesktop(desktop: LaptopDesktop, listen: typeof listenForTyping): void {
+    this.laptop.attachDesktop(desktop, listen);
   }
 
   setHover(id: string | null): void {

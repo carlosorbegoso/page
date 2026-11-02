@@ -11,7 +11,7 @@ Qué archivo editar en la navegación por planos (story-nav), el texto cinético
 | Asentar en el plano más cercano al parar | `src/motion/story-nav/snap.ts` |
 | Teclado (flechas, Re Pág, espacio, Inicio, Fin) | `src/motion/story-nav/keys.ts` |
 | Rueda (un plano por gesto) | `src/motion/story-nav/wheel.ts` |
-| Toque y arrastre con el mouse | `src/motion/story-nav/gestures.ts` |
+| Toque, deslizar a izquierda o derecha (cambia de plano), arrastre con el mouse | `src/motion/story-nav/gestures.ts` |
 | Enlaces a capítulos (`#products`) | `src/motion/story-nav/anchors.ts` |
 | Tour automático (pausa de lectura, espera de `chapter:settled`) | `src/motion/story-nav/tour.ts` |
 | Texto cinético: arranque, eventos de capítulo | `src/motion/kinetic/boot.ts` (`motion/kinetic.ts` es el punto de entrada) |

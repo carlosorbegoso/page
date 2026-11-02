@@ -2,6 +2,8 @@ import { Quaternion, Vector3, type PerspectiveCamera } from 'three';
 import type { ChapterId, ChapterState, Shot } from './contracts';
 import { damp } from './scenes/common';
 import { CameraDetour } from './stage/detour';
+import type { CameraOverride } from './stage/explore';
+import { LookAround } from './stage/look';
 
 export const CAMERA_LIMITS = {
   minDuration: 0.9,
@@ -68,6 +70,9 @@ export class CameraDirector {
   private readonly breathForward = new Vector3();
   lastRequiredSeconds = 0;
   readonly detour = new CameraDetour();
+  readonly look = new LookAround();
+  private readonly viewTarget = new Vector3();
+  override: CameraOverride | null = null;
 
   constructor(private readonly events: DirectorEvents) {}
 
@@ -114,6 +119,7 @@ export class CameraDirector {
     }
     this.previous = this.current?.id ?? null;
     this.current = next;
+    this.look.reset();
     const start: Shot = { position: this.position.clone(), target: this.target.clone() };
     if (mode === 'instant' || !this.to) {
       this.events.onEnter(next.id, next.subIndex, 0);
@@ -185,19 +191,13 @@ export class CameraDirector {
       this.target.copy(this.to.target);
     }
     const detouring = this.detour.apply(this.position, this.target, dt, reduced);
-    moving ||= detouring;
+    const overriding = this.override?.apply(this.position, this.target, dt, reduced) ?? false;
+    moving ||= detouring || overriding;
 
-    const allowParallax = this.settled && !reduced;
-    const goalX = allowParallax ? pointer.x : 0;
-    const goalY = allowParallax ? pointer.y : 0;
-    this.parallax.x = damp(this.parallax.x, goalX, 4, dt);
-    this.parallax.y = damp(this.parallax.y, goalY, 4, dt);
-    moving ||= Math.abs(this.parallax.x - goalX) > 0.001 || Math.abs(this.parallax.y - goalY) > 0.001;
-
-    const offset = this.position.clone().sub(this.target);
-    offset.applyAxisAngle(UP, -this.parallax.x * CAMERA_LIMITS.parallaxYawDeg * DEG);
-    const right = new Vector3().crossVectors(UP, offset).normalize();
-    offset.applyAxisAngle(right, this.parallax.y * CAMERA_LIMITS.parallaxPitchDeg * DEG);
+    moving ||= this.followPointer(dt, pointer, this.settled && !reduced && !this.look.active && !this.override);
+    const looking = this.look.update(dt);
+    moving ||= looking;
+    const offset = this.parallaxOffset();
 
     if (camera.fov !== fov) {
       camera.fov = fov;
@@ -205,13 +205,28 @@ export class CameraDirector {
     }
     camera.up.copy(UP);
     camera.position.copy(this.target).add(offset);
-    camera.lookAt(this.target);
+    camera.lookAt(this.look.aim(camera.position, this.target, this.viewTarget));
     camera.updateMatrixWorld();
     return moving;
   }
 
+  private followPointer(dt: number, pointer: { x: number; y: number }, allowed: boolean): boolean {
+    const goalX = allowed ? pointer.x : 0;
+    const goalY = allowed ? pointer.y : 0;
+    this.parallax.x = damp(this.parallax.x, goalX, 4, dt);
+    this.parallax.y = damp(this.parallax.y, goalY, 4, dt);
+    return Math.abs(this.parallax.x - goalX) > 0.001 || Math.abs(this.parallax.y - goalY) > 0.001;
+  }
+
+  private parallaxOffset(): Vector3 {
+    const offset = this.position.clone().sub(this.target);
+    offset.applyAxisAngle(UP, -this.parallax.x * CAMERA_LIMITS.parallaxYawDeg * DEG);
+    const right = new Vector3().crossVectors(UP, offset).normalize();
+    return offset.applyAxisAngle(right, this.parallax.y * CAMERA_LIMITS.parallaxPitchDeg * DEG);
+  }
+
   breathe(camera: PerspectiveCamera, dt: number, enabled: boolean): () => void {
-    const goal = enabled && this.settled ? 1 : 0;
+    const goal = enabled && this.settled && !this.override ? 1 : 0;
     const rate = goal > this.breathLevel || this.settled ? 1 / BREATH_FADE_SECONDS : 4;
     this.breathLevel = Math.min(Math.max(this.breathLevel + Math.sign(goal - this.breathLevel) * rate * dt, 0), 1);
     if (Math.abs(goal - this.breathLevel) < 0.01) this.breathLevel = goal;
@@ -227,14 +242,14 @@ export class CameraDirector {
     camera.getWorldDirection(this.breathForward);
     this.breathRight.crossVectors(this.breathForward, UP).normalize();
     this.breathUp.crossVectors(this.breathRight, this.breathForward).normalize();
-    const distance = Math.max(camera.position.distanceTo(this.target), 0.05);
+    const distance = Math.max(camera.position.distanceTo(this.viewTarget), 0.05);
     this.breathShift
       .copy(this.breathRight)
       .multiplyScalar(Math.sin(phase) * metres)
       .addScaledVector(this.breathUp, Math.sin(phase * 0.77 + 1.3) * metres * 0.5)
       .addScaledVector(this.breathForward, Math.sin(phase * 0.61 + 2.1) * metres * 0.6);
     this.breathLook
-      .copy(this.target)
+      .copy(this.viewTarget)
       .add(this.breathShift)
       .addScaledVector(this.breathRight, Math.sin(phase * 0.83 + 0.4) * look * distance)
       .addScaledVector(this.breathUp, Math.sin(phase * 0.69 + 2.7) * look * distance * 0.6);

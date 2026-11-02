@@ -13,7 +13,7 @@ Cómo se cargan los modelos y texturas externas del 3D y qué hay que anotar al 
 
 | Modelo | Archivo | Origen | Licencia | Notas |
 |---|---|---|---|---|
-| Reloj despertador | `public/models/alarm-clock/alarm-clock.gltf` | Poly Haven "Alarm Clock 01" | CC0 1.0 | Texturas reducidas a 512 px; lo carga `src/three/desk/clock.ts` |
+| Reloj despertador | `public/models/alarm-clock/alarm-clock.gltf` | Poly Haven "Alarm Clock 01" | CC0 1.0 | Texturas reducidas a 512 px; lo carga `src/three/desk/clock/story-clock.ts` |
 
 El resto del escritorio (figuras, cuarto, laptop, Pokémon) es geometría procedural en `src/three/desk/props/`.
 

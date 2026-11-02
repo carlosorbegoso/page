@@ -109,11 +109,55 @@ const clocks = { night: storyClocks(false), day: storyClocks(true) };
     title={t('tour.start')}
     class="group/quick hud-control hud-icon"
   >
-    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" class="shrink-0 fill-current">
+    <svg
+      viewBox="0 0 24 24"
+      width="14"
+      height="14"
+      aria-hidden="true"
+      class="shrink-0 fill-current"
+    >
       <path d="M8 5.5v13l10.5-6.5z" class="group-aria-pressed/quick:hidden"></path>
-      <path d="M7 6h3.5v12H7zM13.5 6H17v12h-3.5z" class="hidden group-aria-pressed/quick:block"></path>
+      <path
+        d="M7 6h3.5v12H7zM13.5 6H17v12h-3.5z"
+        class="hidden group-aria-pressed/quick:block"
+      ></path>
     </svg>
   </button>
+  <button
+    type="button"
+    data-explore-toggle
+    hidden
+    aria-pressed="false"
+    aria-label={t('explore.enter')}
+    title={t('explore.enter')}
+    data-label-enter={t('explore.enter')}
+    data-label-exit={t('explore.exit')}
+    class="group/explore hud-control hud-icon"
+  >
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      stroke-linecap="round"
+    >
+      <ellipse cx="12" cy="12" rx="9" ry="3.6"></ellipse>
+      <path d="M12 3v18" class="group-aria-pressed/explore:hidden"></path>
+      <path d="M16.5 15.3l2.4.5-.9 2.2" class="group-aria-pressed/explore:hidden"></path>
+      <path d="M8 8l8 8M16 8l-8 8" class="hidden group-aria-pressed/explore:block"></path>
+    </svg>
+  </button>
+  <span
+    data-explore-hint
+    hidden
+    aria-live="polite"
+    class="hud-beat font-mono text-xs tracking-caps text-text-muted"
+  >
+    {t('explore.hint')}
+  </span>
   <span
     data-hud-tour-badge
     data-label-playing={t('tour.badgePlaying')}

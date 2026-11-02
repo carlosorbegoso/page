@@ -26,6 +26,9 @@ export const nav = {
   'story.progressValue': 'Plano {current} de {total}',
   'story.openIndex': 'abrir índice',
   'tour.start': 'Recorrido automático',
+  'explore.enter': 'Explorar la habitación en 360°',
+  'explore.exit': 'Salir de la exploración',
+  'explore.hint': 'Arrastra o mueve el teléfono para mirar · Esc para salir',
   'tour.badgePlaying': 'Recorrido',
   'tour.badgePaused': 'En pausa',
   'tour.playing':

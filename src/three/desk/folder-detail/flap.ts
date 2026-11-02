@@ -1,11 +1,10 @@
 import { BoxGeometry, Matrix4, Mesh } from 'three';
 import { OBJECT_ID, PartBuilder } from '../builder';
 import { FOLDER, folderCentre } from '../layout';
-import { FOLDER_PARK, type ShelfFolder } from './constants';
+import { FLAP_THICKNESS, FOLDER_PARK, type ShelfFolder } from './constants';
 import { ease } from './ease';
 import type { TwinLook } from './mesh';
 
-export const FLAP_THICKNESS = 0.003;
 export const FLAP_OPEN = 2.8;
 const FLAP_START = 0.62;
 

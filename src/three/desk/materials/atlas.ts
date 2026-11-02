@@ -56,7 +56,10 @@ function patchAtlasFragment(fragmentShader: string): string {
     .replace(
       '#include <color_fragment>',
       `#include <color_fragment>
-      if (vPbr.w > 0.0) diffuseColor.rgb *= mix(1.0, woodGrain(vRoomPosition), vPbr.w);
+      vec3 roomFootprint = fwidth(vRoomPosition);
+      vec3 surface = vPbr.w > 0.0 ? surfaceDetail(vRoomPosition, normalize(vRoomNormal), vPbr.w, max(roomFootprint.x, max(roomFootprint.y, roomFootprint.z))) : vec3(1.0, 0.0, 0.0);
+      if (vPbr.w > 0.0 && vPbr.w <= 1.0) diffuseColor.rgb *= mix(1.0, woodGrain(vRoomPosition), vPbr.w);
+      diffuseColor.rgb *= surface.x;
       diffuseColor.rgb *= roomOcclusion(vRoomPosition, normalize(vRoomNormal));
       ${WALL_SPILL_ALBEDO}
       float presence = uPresence[clamp(int(vOid + 0.5), 0, ${OBJECT_SLOTS - 1})];
@@ -66,7 +69,8 @@ function patchAtlasFragment(fragmentShader: string): string {
       '#include <lights_fragment_end>',
       `#include <lights_fragment_end>\n${WALL_SPILL_LIGHT}`
     )
-    .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = vPbr.x;')
+    .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = clamp(vPbr.x + surface.y, 0.04, 1.0);')
+    .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\nnormal = surfaceBump(normal, surface.z);')
     .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\nmetalnessFactor = vPbr.y;')
     .replace(
       '#include <emissivemap_fragment>',
@@ -110,7 +114,7 @@ export function createAtlasMaterial(
     shader.vertexShader = patchAtlasVertex(shader.vertexShader);
     shader.fragmentShader = patchAtlasFragment(shader.fragmentShader);
   };
-  material.customProgramCacheKey = () => 'desk-atlas-v6';
+  material.customProgramCacheKey = () => 'desk-atlas-v7';
   return { material, uniforms };
 }
 

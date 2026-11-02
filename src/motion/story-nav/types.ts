@@ -47,4 +47,4 @@ export function createNavState(): NavState {
   };
 }
 
-export const dialogOpen = () => document.documentElement.matches(':has(dialog[open])');
+export const dialogOpen = () => document.documentElement.matches(':has(dialog[open]), [data-exploring]');

@@ -6,11 +6,12 @@ import type { AtlasUniforms } from './materials';
 import { readPalette } from './props';
 import { SUB_SHOTS, phoneFrame, type SurfaceFrame } from './shots';
 import { createActionListener } from './set/actions';
-import { ClockWiring } from './set/clock-wiring';
+import type { ClockWiring } from './set/clock-wiring';
 import { addDeskLife, addSpines } from './set/extras';
 import { DeskFigures } from './set/figures';
 import { DeskFolders } from './set/folders';
 import type { DeskFrame } from './set/frame';
+import { ExploreHints } from './set/explore-hints';
 import { DeskFraming } from './set/framing';
 import { mountLateDesk } from './set/deferred';
 import { DeskLevels } from './set/levels';
@@ -53,6 +54,7 @@ export class DeskSet implements ShotProvider {
   private shadowPose = '';
   private clock = 0;
   private readonly coarsePointer = matchMedia('(pointer: coarse)');
+  private readonly hints = new ExploreHints({ lights: () => this.lights, applyLevels: () => this.applyLevels(), invalidate: () => this.context.invalidate() });
   private readonly onAction = createActionListener({
     clock: () => this.clock,
     context: () => this.context,
@@ -94,18 +96,16 @@ export class DeskSet implements ShotProvider {
     this.roomLife = new RoomLife(context, this.levels);
     this.roomLife.build(this.room, { material: meshes.material, depthMaterial: meshes.depthMaterial, palette });
     this.disposables.push(this.roomLife);
-    this.portrait = new WallPortrait(context.camera, meshes.material.envMap, () => context.invalidate());
+    this.portrait = new WallPortrait(meshes.material.envMap, () => context.invalidate());
     this.room.add(this.portrait.group);
     this.disposables.push(this.portrait);
     window.addEventListener('keydown', this.onFolderKey);
     this.screens = new DeskScreens(context, { room: this.room, phone: this.phoneSurface(), material: meshes.material, depthMaterial: meshes.depthMaterial, disposables: this.disposables });
-    const late = mountLateDesk({ context, room: this.room, meshes, palette, folders: this.folders, screens: this.screens, portrait: this.portrait, life: this.life, disposables: this.disposables, flashLight: () => this.lights.monitorLight });
+    const late = mountLateDesk({ context, room: this.room, meshes, palette, folders: this.folders, screens: this.screens, portrait: this.portrait, life: this.life, hints: this.hints, picks: this.picks, disposables: this.disposables, flashLight: () => this.lights.monitorLight, onClock: wiring => (this.clockWiring = wiring) });
     this.weather.addWindow(this.room, this.disposables);
     addSpines(this.room, this.folders, this.disposables);
     window.addEventListener('desk:action', this.onAction);
     window.addEventListener('desk:interact', this.onInteract);
-    this.clockWiring = new ClockWiring(context);
-    this.room.add(this.clockWiring.group);
     this.weather.addSteam(this.room, context.tier, this.disposables);
     addContactShadows(this.room, this.disposables);
     this.pickSet.build(this.room, this.phoneSurface(), this.disposables, this.life?.cardTargets());
@@ -173,6 +173,8 @@ export class DeskSet implements ShotProvider {
     let settling = false;
     const lighting = this.levels.update(frame);
     settling ||= lighting;
+    const hinting = this.hints.update(frame);
+    settling ||= hinting;
     const hinge = this.folders.updateHinge(frame);
     settling ||= hinge;
     const hands = this.clockWiring?.update(frame) ?? false;
@@ -275,6 +277,7 @@ export class DeskSet implements ShotProvider {
 
   dispose(): void {
     window.removeEventListener('desk:action', this.onAction);
+    this.hints.dispose();
     window.removeEventListener('desk:interact', this.onInteract);
     window.removeEventListener('keydown', this.onFolderKey);
     this.framing?.dispose();

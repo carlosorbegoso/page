@@ -21,6 +21,7 @@ export class PickNavigator {
   constructor(private readonly host: NavigateHost) {}
 
   navigate(pick: StationPick): void {
+    if (document.documentElement.hasAttribute('data-exploring')) emit('explore:exit');
     const id = pick.key.startsWith('desk:') ? pick.key.slice(5) : '';
     if (id === 'clock') {
       window.dispatchEvent(new CustomEvent('desk:clock'));

@@ -4,6 +4,7 @@ import { queryHud, type IndexOpener } from './elements';
 import { initIndexSheet } from './index-sheet';
 import { initMenu } from './menu';
 import { initProgress } from './progress';
+import { initExploreToggle } from './explore-toggle';
 import { initQuickTour, initTourBadge } from './tour-badge';
 
 const elements = queryHud();
@@ -16,3 +17,4 @@ initTourBadge(elements);
 initAudioHint(elements);
 initIndexSheet(elements, opener);
 initChapterBeat(elements);
+initExploreToggle();

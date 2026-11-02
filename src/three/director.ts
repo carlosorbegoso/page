@@ -2,6 +2,7 @@ import { Quaternion, Vector3, type PerspectiveCamera } from 'three';
 import type { ChapterId, ChapterState, Shot } from './contracts';
 import { damp } from './scenes/common';
 import { CameraDetour } from './stage/detour';
+import type { CameraOverride } from './stage/explore';
 import { LookAround } from './stage/look';
 
 export const CAMERA_LIMITS = {
@@ -71,6 +72,7 @@ export class CameraDirector {
   readonly detour = new CameraDetour();
   readonly look = new LookAround();
   private readonly viewTarget = new Vector3();
+  override: CameraOverride | null = null;
 
   constructor(private readonly events: DirectorEvents) {}
 
@@ -189,9 +191,10 @@ export class CameraDirector {
       this.target.copy(this.to.target);
     }
     const detouring = this.detour.apply(this.position, this.target, dt, reduced);
-    moving ||= detouring;
+    const overriding = this.override?.apply(this.position, this.target, dt, reduced) ?? false;
+    moving ||= detouring || overriding;
 
-    moving ||= this.followPointer(dt, pointer, this.settled && !reduced && !this.look.active);
+    moving ||= this.followPointer(dt, pointer, this.settled && !reduced && !this.look.active && !this.override);
     const looking = this.look.update(dt);
     moving ||= looking;
     const offset = this.parallaxOffset();
@@ -223,7 +226,7 @@ export class CameraDirector {
   }
 
   breathe(camera: PerspectiveCamera, dt: number, enabled: boolean): () => void {
-    const goal = enabled && this.settled ? 1 : 0;
+    const goal = enabled && this.settled && !this.override ? 1 : 0;
     const rate = goal > this.breathLevel || this.settled ? 1 / BREATH_FADE_SECONDS : 4;
     this.breathLevel = Math.min(Math.max(this.breathLevel + Math.sign(goal - this.breathLevel) * rate * dt, 0), 1);
     if (Math.abs(goal - this.breathLevel) < 0.01) this.breathLevel = goal;

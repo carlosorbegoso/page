@@ -195,3 +195,15 @@ html.stage-pending:not(.is-3d) main {
   cursor: grabbing !important;
   user-select: none;
 }
+
+:root[data-exploring] {
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+:root[data-exploring] .stage-panels {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-base) var(--ease-standard);
+}

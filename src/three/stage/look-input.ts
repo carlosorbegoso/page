@@ -1,7 +1,7 @@
 import type { LookAround } from './look';
 
 const DRAG_THRESHOLD_PX = 5;
-const OWNS_POINTER =
+export const OWNS_POINTER =
   'a, button, input, textarea, select, label, summary, dialog, header, [role="button"], [contenteditable], [data-plate], [data-plate-wrapper]';
 
 interface LookInput {
@@ -10,7 +10,7 @@ interface LookInput {
   enabled(): boolean;
 }
 
-function swallowNextClick(): void {
+export function swallowNextClick(): void {
   const swallow = (event: Event) => {
     event.stopImmediatePropagation();
     event.preventDefault();

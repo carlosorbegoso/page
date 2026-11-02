@@ -39,6 +39,9 @@ export async function mountLateDesk(options: LateDeskOptions): Promise<void> {
     portrait?.attachBioCard(late.createBioCard());
     life?.attachBeats(late.createStoryBeats());
     disposables.push(late.createStackedPrints(room, () => context.invalidate()));
+    const far = late.createRoomFar(context, meshes, palette);
+    room.add(far.object3D);
+    disposables.push(far);
     context.invalidate();
   } catch (error) {
     console.error('[desk] late features failed', error);

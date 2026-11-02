@@ -50,6 +50,7 @@ Qué archivo editar en el escritorio 3D: encuadres (shots), luz, props, figuras,
 | `damp`, `towards`, `seeded` | `src/three/desk/math.ts` |
 | Colores y acabados de la habitación (`readPalette`) | `src/three/desk/props/palette.ts` |
 | Paredes, suelo, ventana, escritorio, estantes, silla | `src/three/desk/props/room.ts` |
+| Cuarto lejano para mirar en 360° desde el centro (llega con `deferred`, una malla y un draw call con el material atlas; ningún plano de la historia lo ve): pared del frente con puerta cerrada, manija, luz del pasillo bajo la puerta, interruptor y zócalo; cielo raso de yeso, plafón apagado y cornisa en las cuatro paredes; mueble bajo con libros y patito de goma en la pared derecha; lámina de la Costa Verde en la izquierda; alfombra bajo la silla; perchero con polera junto a la puerta. Medidas en `layout.ts` | `src/three/desk/room-far/` (`front-wall.ts`, `ceiling.ts`, `cabinet.ts`, `wall-art.ts`, `textiles.ts`; montaje en `createRoomFar` de `deferred/index.ts`) |
 | Monitor, teclado, taza, teléfono, lámpara | `src/three/desk/props/workstation.ts` |
 | Laptop (carcasa, teclas, tapa, cable USB-C) | `src/three/desk/props/laptop.ts` |
 | Carpeta abierta de TCS (tapas, bolsillo, hojas, clip, ligas) | `src/three/desk/props/openFolder.ts` |

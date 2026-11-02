@@ -5,7 +5,7 @@ Cuánto pesa el 3D, qué se descarga antes del primer frame y qué llega despué
 ## Regla de los 260 KB
 
 - 260 KB gzip cubren lo que se descarga **antes del primer frame del 3D**. Lo demás llega después y no lo retrasa.
-- Margen medido: ~2 KB tras pasar la vida de Pikachu y Charizard a `deferred` (−1.7 KB al arranque, 2026-11-01). Lo próximo que se añada al escritorio debe llegar después del primer frame (patrón de `src/three/desk/set/deferred.ts`).
+- Margen medido: ~1.8 KB (258.2 KB, 2026-11-01, tras el cuarto lejano en `deferred` y el look around y swipe de la cámara, que suben `three` 1.1 KB). Lo próximo que se añada al escritorio debe llegar después del primer frame (patrón de `src/three/desk/set/deferred.ts`).
 - JS de arranque sin three (script de `StageCanvas` + `sections` + `preload-helper`): unos 3.5 KB.
 
 ## Chunks (`bun run build`, gzip -9 de `dist/_astro/*.js`, 2026-11-01)
@@ -13,13 +13,13 @@ Cuánto pesa el 3D, qué se descarga antes del primer frame y qué llega despué
 | Chunk | KB | Cuándo se pide |
 |---|---|---|
 | `motion` (three.module + three.core; Rollup puede nombrarlo por otro módulo que lleve dentro, p. ej. `tokens`) | 148.8 | arranque |
-| `three` (Stage, director, placas, CSS3D) | 25.9 | arranque |
-| `desk` | 70.3 | arranque |
+| `three` (Stage, director, placas, CSS3D) | 27.0 | arranque |
+| `desk` | 70.4 | arranque |
 | `fx` | 10.3 | arranque |
 | `BufferGeometryUtils` + `contracts` (la capa tardía ya va dentro de `fx`) | 1.8 | arranque |
-| **Antes del primer frame** | **257.0** | |
+| **Antes del primer frame** | **258.2** | |
 | `gsap` 26.5 + `ScrollTrigger` 17.0 + `ScrollToPlugin` 1.6 | 45.1 | después del primer frame (`Stage.start` dibuja antes de `startScroll`) |
-| `deferred` (carpeta para leer, escritorio de la laptop, persiana, impresos del teléfono vertical: corcho, tarjetas de producto con `product-shorts.json`, hoja de TCS, vida y batalla de Pikachu y Charizard) | 26.7 | evento `stage:reveal` |
+| `deferred` (carpeta para leer, escritorio de la laptop, persiana, impresos del teléfono vertical: corcho, tarjetas de producto con `product-shorts.json`, hoja de TCS, vida y batalla de Pikachu y Charizard, cuarto lejano de `room-far/` con 1 draw call) | 29.3 | evento `stage:reveal` |
 | `field` (simulación del fluido) | 1.9 | primer movimiento del puntero con el fluido activo |
 | `GLTFLoader` + `KTX2Loader` + `meshopt_decoder` | sin medir | primer glTF (`acquireGltf`; hoy, el reloj) |
 

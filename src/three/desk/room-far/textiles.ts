@@ -6,9 +6,9 @@ import { seg, shade } from '../props/geometry';
 import { COAT_RAIL, FRONT_FACE, RUG } from './layout';
 
 export function buildRug(b: PartBuilder, p: Palette): void {
-  const wool: Finish = { color: shade(p.fabric, 1.5, 0.12).color, roughness: 1, metalness: 0 };
-  const border: Finish = { color: shade(p.pot, 0.55).color, roughness: 1, metalness: 0 };
-  const stripe: Finish = { color: shade(p.pot, 0.4).color, roughness: 1, metalness: 0 };
+  const wool: Finish = { color: shade(p.fabric, 1.5, 0.12).color, roughness: 1, metalness: 0, surface: 'weave', detail: 0.3 };
+  const border: Finish = { color: shade(p.pot, 0.55).color, roughness: 1, metalness: 0, surface: 'weave', detail: 0.3 };
+  const stripe: Finish = { color: shade(p.pot, 0.4).color, roughness: 1, metalness: 0, surface: 'weave', detail: 0.3 };
   const base = 0.003;
   b.add(new BoxGeometry(RUG.width, RUG.height, RUG.length), border, { position: [RUG.x, base + RUG.height / 2, RUG.z] });
   b.add(new BoxGeometry(RUG.width - 0.16, 0.002, RUG.length - 0.16), wool, { position: [RUG.x, base + RUG.height + 0.001, RUG.z] });
@@ -31,7 +31,7 @@ function buildRail(b: PartBuilder, p: Palette, q: Quality): number[] {
 }
 
 function buildHoodie(b: PartBuilder, x: number, q: Quality): void {
-  const cotton: Finish = { color: new Color('#3a4150'), roughness: 0.95, metalness: 0 };
+  const cotton: Finish = { color: new Color('#3a4150'), roughness: 0.95, metalness: 0, surface: 'weave', detail: 0.85 };
   const seam = shade(cotton, 0.8);
   const z = FRONT_FACE - 0.07;
   const top = COAT_RAIL.y - 0.03;

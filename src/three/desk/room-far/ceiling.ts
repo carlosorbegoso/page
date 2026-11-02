@@ -30,7 +30,7 @@ function buildCornice(b: PartBuilder, trim: Finish): void {
 }
 
 function buildPlaster(b: PartBuilder, p: Palette): void {
-  const plaster: Finish = { color: shade(p.ceramic, 0.16, -0.25).color, roughness: 0.95, metalness: 0 };
+  const plaster: Finish = { color: shade(p.ceramic, 0.16, -0.25).color, roughness: 0.95, metalness: 0, surface: 'plaster' };
   const width = ROOM.right - ROOM.left;
   const depth = ROOM.front - ROOM.back;
   b.add(new BoxGeometry(width, 0.004, depth), plaster, {

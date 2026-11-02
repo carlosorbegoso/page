@@ -1,5 +1,6 @@
 import { WALL_SPILL_DECLARATIONS } from '../screens/wallSpill';
 import { FIGURE_SLOTS, OBJECT_SLOTS } from './slots';
+import { SURFACE_DECLARATIONS } from './surface.glsl';
 
 export const VERTEX_DECLARATIONS = /* glsl */ `
 uniform vec3 uFigPivot[${FIGURE_SLOTS}];
@@ -72,4 +73,5 @@ float roomOcclusion(vec3 p, vec3 n) {
   return ao;
 }
 
-${WALL_SPILL_DECLARATIONS}`;
+${WALL_SPILL_DECLARATIONS}
+${SURFACE_DECLARATIONS}`;

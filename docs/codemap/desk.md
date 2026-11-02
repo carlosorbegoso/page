@@ -64,6 +64,7 @@ Qué archivo editar en el escritorio 3D: encuadres (shots), luz, props, figuras,
 | Sombras de contacto | `src/three/desk/props/shadows.ts` |
 | Ayudas de geometría (`seg`, `shade`, `rod`) | `src/three/desk/props/geometry.ts` |
 | Material atlas de la habitación | `src/three/desk/materials/atlas.ts`, GLSL en `atlas.glsl.ts`, ranuras en `slots.ts` |
+| Detalle procedural de superficies sin texturas (fibra de la madera, yeso de rodillo en paredes y cielo raso, trama de la tela de la silla, la alfombra y la polera, rayas finas de rugosidad en metal y plástico): ruido en el shader del atlas, elegido por `surface`/`detail` del `Finish` (`builder.ts` lo guarda en `pbr.w`: madera 0–1, yeso 2+, trama 4+, cepillado 6+); se apaga con `fwidth` cuando el detalle es menor que un píxel | `src/three/desk/materials/surface.glsl.ts`; qué acabado lleva cada uno en `props/palette.ts`, `room-far/ceiling.ts` y `room-far/textiles.ts` |
 | Texturas de canvas (pantallas, teléfono, sombra) | `src/three/desk/materials/canvas.ts` |
 | Mapa de entorno nocturno | `src/three/desk/materials/environment.ts` |
 | Cielo, acantilados y ciudad tras la ventana | `src/three/desk/atmosphere/backdrop.ts`, GLSL en `backdrop.glsl.ts` |

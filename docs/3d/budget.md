@@ -33,6 +33,7 @@ Cuánto pesa el 3D, qué se descarga antes del primer frame y qué llega despué
 - En `deferred` no uses `IcosahedronGeometry` u otras clases de three que el primer frame no usa: Rollup las mete en el chunk `motion` (+0.9 KB al arranque). `SphereGeometry`, `InstancedMesh` y `DataTexture` ya están.
 - `gsap/gsap-core` sin CSSPlugin no sirve: ScrollTrigger llama a `gsap.utils.checkPrefix`, que viene de CSSPlugin.
 - Lo que más pesa en `desk` y se ve en el hero (no se puede diferir sin cambiar el primer frame): props (figuras, Pikachu, Charizard, cuarto) ≈ 66 KB sin comprimir, `life/**` ≈ 34 (de `life/pokemon` solo queda `parts.ts`; la vida y la batalla llegan con `deferred`), `notes/**` ≈ 24 (corcho y tarjetas), `portrait/**` ≈ 15.
+- El detalle de superficies (`materials/surface.glsl.ts`) cuesta ~1.1 KB en `desk`, 0 draw calls y 0 bytes de textura: va en el shader del atlas desde el primer frame, así que no hay recompilación tardía.
 - `RectAreaLight` pesaba unos 100 KB: por eso el monitor ilumina con una `PointLight`.
 
 ## Pantalla de arranque
